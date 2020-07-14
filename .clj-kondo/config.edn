@@ -1,0 +1,43 @@
+{:lint-as {slingshot.slingshot/try+                                 clojure.core/try
+           compojure.core/defroutes                                 clojure.core/def
+           clojure.test.check.clojure-test/defspec                  clojure.core/def
+           clojure.test.check.properties/for-all                    clojure.core/let
+           clojure.java.jdbc/with-db-transaction                    clojure.core/let
+           com.fulcrologic.fulcro.components/defsc                  clojure.core/defn
+           com.fulcrologic.fulcro.mutations/defmutation             clojure.core/defn
+           com.fulcrologic.rad.form/defsc-form                      clojure.core/defn
+           com.fulcrologic.rad.report/defsc-report                  clojure.core/defn
+           com.fulcrologic.fulcro.routing.dynamic-routing/defrouter clojure.core/defn
+           com.fulcrologic.rad.authorization/defauthenticator       clojure.core/defn
+           mount.core/defstate                                      clojure.core/def
+           com.fulcrologic.guardrails.core/>defn                    clojure.core/defn
+           com.fulcrologic.guardrails.core/>defn-                   clojure.core/defn-
+           ghostwheel.core/>defn                                    clojure.core/defn
+           ghostwheel.core/>defn-                                   clojure.core/defn-
+           nubank.workspaces.core/defcard                           clojure.core/def
+           com.wsscode.pathom.connect/defresolver                   clojure.core/defn
+           com.wsscode.pathom.connect/defmutation                   clojure.core/defn
+           com.fulcrologic.fulcro.ui-state-machines/defstatemachine clojure.core/def}
+ :linters {:misplaced-docstring {:level :error}
+           :not-empty?          {:level :off}
+           :unresolved-symbol   {:exclude
+                                 [(com.fulcrologic.fulcro.mutations/defmutation)
+                                  (fulcro-spec.core/provided!)]}
+           :unused-binding      {:level :off}
+           :unused-referred-var {:level :off}
+           :single-key-in       {:level :warning}
+           :consistent-alias    {;; warn when alias for clojure.string is
+                                 ;; different from str
+                                 :aliases {clojure.string                                 str
+                                           com.fulcrologic.fulcro.components              comp
+                                           com.fulcrologic.fulcro.mutations               m
+                                           clojure.spec.alpha                             s
+                                           taoensso.timbre                                log
+                                           com.fulcrologic.fulcro.routing.dynamic-routing dr
+                                           com.fulcrologic.fulcro.algorithms.tempid       tempid
+                                           com.fulcrologic.fulcro.algorithms.merge        mrg
+                                           com.fulcrologic.fulcro.dom                     dom
+                                           com.fulcrologic.fulcro-css.css                 css
+                                           com.fulcrologic.fulcro.dom.events              evt
+                                           com.fulcrologic.fulcro.algorithms.form-state   fs
+                                           datahike.api                                   d}}}}

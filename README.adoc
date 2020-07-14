@@ -1,0 +1,221 @@
+:imagesdir: .github/ressources
+
+= decide
+
+// image::decide-Demo.png[align="center"]
+
+
+== How to get started
+
+You can start as many components of the project you like. When you just want to play with components in CLJS without the backend I recommend to only start the workspaces compiler.
+
+```Shell
+yarn install
+
+
+#### To use frontend + backend ####
+# Start cljs compiler
+npm run client/main
+# You can find the UI of the compile server here:
+# http://localhost:9630
+# There you can kick of the compilation of the other targets.
+
+# Start the backend:
+clojure -A:dev -Dtrace -Dghostwheel.enabled=true
+Clojure 1.10.1
+# The ns is defined in src/dev/user
+user=> (start)
+# after modifications of the backend code:
+user=> (restart)
+# visit http://localhost:3000
+
+#### To only use the frontend ####
+# Workspaces
+npm run client/workspaces
+# visit http://localhost:8023/workspaces
+
+# CLJS Tests:
+npm run client/tests
+# visit http://localhost:8022
+```
+
+You can find the `npm run` scripts in `package.json`.
+To understand what is called, please refer to the docs of shadow-cljs: http://shadow-cljs.org/
+
+When you import this project into Cursive/IntelliJ the jobs above are already available as:
+`client/main`, `server` and `workspaces`.
+
+###### To connect to the CLJS nREPL:
+1. Connect to localhost:9000
+2. Execute `(shadow/repl :main)`. (you can select another target of course)
+
+
+
+== Development Mode
+
+Shadow-cljs handles the client-side development build. The file
+`src/main/app/client.cljs` contains the code to start and refresh
+the client for hot code reload.
+
+In general it is easiest just to run the compiler in server mode:
+
+```
+$ npx shadow-cljs server
+INFO: XNIO version 3.3.8.Final
+Nov 10, 2018 8:08:23 PM org.xnio.nio.NioXnio <clinit>
+INFO: XNIO NIO Implementation Version 3.3.8.Final
+shadow-cljs - HTTP server for :test available at http://localhost:8022
+shadow-cljs - HTTP server for :workspaces available at http://localhost:8023
+shadow-cljs - server version: 2.7.2
+shadow-cljs - server running at http://localhost:9630
+shadow-cljs - socket REPL running on port 51936
+shadow-cljs - nREPL server started on port 9000
+...
+```
+
+then *navigate to the server URL* (shown in this example as http://localhost:9630) and
+use the *Builds* menu to enable/disable whichever builds you want watched/running.
+
+Shadow-cljs will also start a web server for any builds that configure one. This
+template configures one for workspaces, and one for tests:
+
+- Workspaces (MUST RUN SERVER): http://localhost:3000/wslive.html
+- Tests: http://localhost:8022
+
+See the server section below for working on the full-stack app itself.
+
+=== Client REPL
+
+The shadow-cljs compiler starts an nREPL. It is configured to start on
+port 9000 (in `shadow-cljs.edn`).
+
+In IntelliJ: add a *remote* Clojure REPL configuration with
+host `localhost` and port `9000`.
+
+then:
+
+```
+(shadow/repl :main)
+```
+
+will connect you to the REPL for a specific build (NOTE: Make sure you have
+a browser running the result, or your REPL won't have anything to talk to!)
+
+If you're using CIDER
+see https://shadow-cljs.github.io/docs/UsersGuide.html#_cider[the Shadow-cljs User's Guide]
+and the comments in `deps.edn` for more information.
+
+=== The API Server
+
+In order to work with your main application you'll want to
+start your own server that can also serve your application's API.
+
+Start a LOCAL clj nREPL in IntelliJ (using IntelliJ's classpath with
+the `dev` alias selected in the Clojure Deps tab), or from the command line:
+
+```bash
+$ clj -A:dev -J-Dtrace -J-Dghostwheel.enabled=true
+user=> (start)
+user=> (stop)
+...
+user=> (restart) ; stop, reload server code, and go again
+user=> (tools-ns/refresh) ; retry code reload if hot server reload fails
+```
+
+The `-J-Dtrace` adds a JVM argument that will enable performance tracing for Fulcro Inspect's network tab so you can
+see how your resolvers and mutations are performing.
+
+The `-J-Dghostwheel.enabled=true` turns on ghostwheel instrumentation of ghostwheel spec'd functions, which is a wrapper
+of Clojure spec that makes instrumentation and production-time elision (for performance and size) much easier.
+
+NOTE: For real development, please use an editor that has REPL integration, like Cursive (recommended) or
+Spacemacs.
+
+The URL to work on your application is then
+http://localhost:3000.
+
+Hot code reload, preloads, and such are all coded into the javascript.
+
+=== Preloads
+
+There is a preload file that is used on the development build of the
+application `app.development-preload`. You can add code here that
+you want to execute before the application initializes in development
+mode.
+
+=== Fulcro Inspect
+
+Fulcro inspect will preload on the development build of the main
+application and workspaces.  You must install the plugin in Chrome from the
+Chrome store (free) to access it.  It will add a Fulcro Inspect tab to the
+developer tools pane.
+
+== Tests
+
+Tests are in `src/test`. Any test namespace ending in `-test` will be auto-detected.
+
+```
+src/test
+└── app
+    └── sample_test.cljc          spec runnable by client and server.
+```
+
+You can write plain `deftest` in here, and it is preconfigured to support the helper macros in `fulcro-spec` as well.
+
+=== Running tests:
+
+
+==== Clojure Tests
+
+Typically you'll just run your tests using the editor of choice (e.g. Run tests in namspace in IntelliJ).
+
+The tests are also set up to run with Kaocha at the command line for your convenience and CI tools:
+
+```
+$ clj -A:dev:clj-tests --watch
+```
+
+See the https://github.com/lambdaisland/kaocha[Kaocha project] for more details.
+
+==== Clojurescript tests
+
+The tests can be run in any number of browsers simply by navigating to the test URL that shadow-cljs outputs.
+
+CI support is done through the `ci-test` build in shadow, and via Karma.
+
+If you start the `ci-tests` build in Shadow-cljs, then you can also run cljs tests in a terminal "watch mode"
+with:
+
+```
+npx karma start
+```
+
+Of course, this make CLJS CI easy:
+
+```
+npx shadow-cljs compile ci-tests
+npx karma start --single-run
+```
+
+==== Running all Tests Once
+
+There is a UNIX Makefile that includes all of the CI commands as the default target. Just run:
+
+```
+make
+```
+
+== Workspaces
+
+Workspaces is a project by Nubank that is written in Fulcro, and has great support for developing in
+Fulcro. It is similar to devcards but has a more powerful user interface, integration with Fulcro Inspect,
+and much more.
+
+The source directory for making additions to your workspace is `src/workspaces`.
+
+IMPORTANT: Any namespace ending in `-ws` will be auto-detected and added to your workspace!
+
+== Standalone Runnable Jar (Production, with advanced optimized client js)
+
+See tools deps projects like Depstar. You'll need to make a release js build, optionally
+pre-compile your CLJ, and package it.  We will likely add a demo of this process soon.

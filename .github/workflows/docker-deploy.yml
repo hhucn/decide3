@@ -1,0 +1,35 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Docker deploy
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches: [ master ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  deploy-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v1.1.0
+        with:
+          # Username used to log in to a Docker registry. If not set then no login will occur
+          username: MrEbbinghaus
+          # Password or personal access token used to log in to a Docker registry. If not set then no login will occur
+          password: ${{ secrets.ACCESS_TOKEN }}
+          # Server address of Docker registry. If not set then will default to Docker Hub
+          registry: docker.pkg.github.com
+          # Docker repository to tag the image with
+          repository: mrebbinghaus/decide/decide
+          # Comma-delimited list of tags. These will be added to the registry/repository to form the image's tags
+          # tags: master
+          # Automatically tags the built image with the git reference as per the readme
+          tag_with_ref: true
+          # Automatically tags the built image with the git short SHA as per the readme
+          tag_with_sha: true
+          add_git_labels: true

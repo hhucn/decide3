@@ -1,0 +1,9 @@
+.git/
+node_modules/
+.shadow-cljs/
+.cpcache/
+.idea/
+target/
+resources/public/js
+resources/public/workspaces/js
+.clj-kondo/
