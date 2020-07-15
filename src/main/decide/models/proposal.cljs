@@ -150,12 +150,6 @@
 
               (layout/grid {:item true :xs 12} (vote-scale props))
 
-              (layout/grid {:item true}
-                (input/button
-                  {:color "primary"
-                   :variant "outlined"}
-                  "Modifizieren"))
-
               #_(when-not (empty? parents)
                   (layout/grid {:item true :xs 12}
                     (dd/list {}
