@@ -11,6 +11,7 @@
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [com.fulcrologic.fulcro-css.css :as css]
     [decide.routing :as routing]
+    [decide.ui.components.breadcrumbs :as breadcrumbs]
     [decide.ui.themes :as themes]
     [material-ui.data-display :as dd]
     [material-ui.feedback :as feedback]
@@ -132,10 +133,10 @@
           "Vorschläge")
         (navigation/link {:color "textPrimary" :href ""} (str "#" id))))
   (log/info "Proposal Page" props)
-  (layout/container {:maxWidth :lg
-                     :style {:marginTop ((get-in themes/shared [:spacing]) 1 "")
-                             :paddingRight ((get-in themes/shared [:spacing]) 1 "")
-                             :paddingLeft ((get-in themes/shared [:spacing]) 1 "")}}
+  (layout/container {:maxWidth :lg}
+    (breadcrumbs/breadcrumb-nav
+      [["Vorschläge" (href-to-proposal-list)]
+       [(str "#" id) ""]])
     (layout/grid {:container true :spacing 2}
       (layout/grid {:item true}
         (surfaces/card {}

@@ -25,7 +25,8 @@
             ["react" :as React]
             [material-ui.feedback :as feedback]
             [com.fulcrologic.fulcro.mutations :as m]
-            [material-ui.navigation :as navigation]))
+            [material-ui.navigation :as navigation]
+            [decide.ui.components.breadcrumbs :as breadcrumbs]))
 
 (defn add-proposal-fab [props]
   (input/fab
@@ -55,12 +56,9 @@
                      :new-proposal-form (comp/get-initial-state new-proposal/NewProposalForm)})
    :route-segment ["home"]
    :use-hooks? true}
-  (layout/container {:maxWidth :lg
-                     :style {:marginTop ((get-in themes/shared [:spacing]) 2 "")}}
-    (layout/box {:my 1.5}
-      (navigation/breadcrumbs {:aria-label "breadcrumb"}
-        (navigation/link {:color "textPrimary" :href  ""}
-          "Vorschläge")))
+  (layout/container {:maxWidth :lg}
+    (breadcrumbs/breadcrumb-nav
+      [["Vorschläge" ""]])
     (if (empty? all-proposals)
       (empty-proposal-list-message)
       (dd/list {:disablePadding true}
