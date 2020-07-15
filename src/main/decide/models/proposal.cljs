@@ -98,57 +98,48 @@
 
 (defn parents-list [{:proposal/keys [parents] :or {parents []}}]
   (layout/grid {:container true}
-    (layout/grid {:item true :xs 12} (dd/typography {:variant "subtitle1" :component "h3" :gutterBottom true} "Eltern"))
+    (layout/grid {:item true :xs 12} (dd/typography {:variant "subtitle1" :component "h3" :gutterBottom true} "Vorgänger"))
     (layout/grid {:item true :xs 12}
       (dd/list {}
-        (for [{:proposal/keys [id] :as props} parents]
-          (ui-parent props))))))
+        (mapv ui-parent parents)))))
 
 (defn vote-scale [{:proposal/keys [pro-votes con-votes] :or {pro-votes 0 con-votes 0}}]
-  (layout/grid {:container true
+  (layout/grid {:container  true
                 :alignItems :center
-                :justify :space-between}
+                :justify    :space-between}
     (layout/grid {:item true :xs 12} (dd/typography {:variant "subtitle1" :component "h3" :gutterBottom true} "Meinungen"))
     (layout/grid {:item true :xs 1 :align :center} pro-votes)
     (layout/grid {:item true :xs 9}
       (vote-linear-progress
-       {:variant "determinate"
-        :value (percent-of-pro-votes pro-votes con-votes)}))
+        {:variant "determinate"
+         :value   (percent-of-pro-votes pro-votes con-votes)}))
     (layout/grid {:item true :xs 1 :align :center} con-votes)))
 
 (defsc ProposalPage [this {:proposal/keys [id title body parents pro-votes con-votes] :as props}]
-  {:query [:proposal/id :proposal/title :proposal/body
-           {:proposal/parents (comp/get-query Parent)}
-           :proposal/pro-votes :proposal/con-votes]
-   :ident :proposal/id
+  {:query         [:proposal/id :proposal/title :proposal/body
+                   {:proposal/parents (comp/get-query Parent)}
+                   :proposal/pro-votes :proposal/con-votes]
+   :ident         :proposal/id
    :route-segment ["proposal" :proposal-id]
-   :will-enter (fn [app {:keys [proposal-id]}]
-                 ;; TODO Load proposal details here.
-                 (dr/route-immediate (comp/get-ident ProposalPage {:proposal/id (int proposal-id)})))}
-  #_(layout/box {:mb 1.5}
-      (navigation/breadcrumbs {:aria-label "breadcrumb"
-                               :style {:marginBottom "12px"}}
-        (navigation/link {:color "inherit"
-                          :href (href-to-proposal-list)}
-          "Vorschläge")
-        (navigation/link {:color "textPrimary" :href ""} (str "#" id))))
-  (log/info "Proposal Page" props)
+   :will-enter    (fn [app {:keys [proposal-id]}]
+                    ;; TODO Load proposal details here.
+                    (dr/route-immediate (comp/get-ident ProposalPage {:proposal/id (int proposal-id)})))}
   (layout/container {:maxWidth :lg}
     (breadcrumbs/breadcrumb-nav
       [["Vorschläge" (href-to-proposal-list)]
        [(str "#" id) ""]])
     (layout/grid {:container true :spacing 2}
-      (layout/grid {:item true}
+      (layout/grid {:item true :xs 12}
         (surfaces/card {}
           (surfaces/card-content {}
             (layout/grid {:container true :spacing 2}
               (layout/grid {:item true :xs 12}
                 (dd/typography {:variant "h5" :component "h2"}
                   (dd/typography
-                    {:variant "subtitle1"
+                    {:variant   "subtitle1"
                      :component "span"
-                     :color "textSecondary"
-                     :style {:marginRight ".3em"}}
+                     :color     "textSecondary"
+                     :style     {:marginRight ".3em"}}
                     "#" id)
                   (str title)))
 
