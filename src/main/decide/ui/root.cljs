@@ -45,11 +45,7 @@
    :initial-state
           (fn [_] {:ui/root-router (comp/get-initial-state RootRouter)
                    :ui/theme       (if (dark-mode?) :dark :light)
-                   :all-proposals  (vec (for [id (range 20)] ; TODO Remove this later on
-                                          (comp/get-initial-state proposal/Proposal
-                                            {:id    id
-                                             :title "Mein Vorschlag"
-                                             :body  (str/join " " (repeat (rand-int 10) "Irgendwas, was ich zu sagen habe."))})))})}
+                   :all-proposals  []})}
   (styles/theme-provider {:theme (themes/get-mui-theme theme)}
     (mutils/css-baseline {})
     (inj/style-element {:component Root})

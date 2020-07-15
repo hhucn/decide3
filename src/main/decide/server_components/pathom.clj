@@ -1,5 +1,6 @@
 (ns decide.server-components.pathom
   (:require
+    [clojure.string :as str]
     [mount.core :refer [defstate]]
     [taoensso.timbre :as log]
     [com.wsscode.pathom.connect :as pc]
@@ -8,6 +9,7 @@
     [clojure.core.async :as async]
     [decide.api.todo :as todo]
     [decide.api.user :as user]
+    [decide.api.proposal :as proposal.api]
     [decide.server-components.config :refer [config]]
     [decide.server-components.database :refer [conn]]
     [datahike.api :as d]))
@@ -21,10 +23,10 @@
      (update ::pc/index-resolvers #(into {} (map (fn [[k v]] [k (dissoc v ::pc/resolve)])) %))
      (update ::pc/index-mutations #(into {} (map (fn [[k v]] [k (dissoc v ::pc/mutate)])) %))
      ; to minimize clutter in the Index Explorer
-     (update ::pc/index-resolvers (fn [rs] (apply dissoc rs (filter #(clojure.string/starts-with? (namespace %) "com.wsscode.pathom") (keys rs)))))
-     (update ::pc/index-mutations (fn [rs] (apply dissoc rs (filter #(clojure.string/starts-with? (namespace %) "com.wsscode.pathom") (keys rs))))))})
+     (update ::pc/index-resolvers (fn [rs] (apply dissoc rs (filter #(str/starts-with? (namespace %) "com.wsscode.pathom") (keys rs)))))
+     (update ::pc/index-mutations (fn [rs] (apply dissoc rs (filter #(str/starts-with? (namespace %) "com.wsscode.pathom") (keys rs))))))})
 
-(def all-resolvers [todo/resolvers index-explorer user/resolvers])
+(def all-resolvers [todo/resolvers index-explorer user/resolvers proposal.api/resolvers])
 
 (defn preprocess-parser-plugin
   "Helper to create a plugin that can view/modify the env/tx of a top-level request.

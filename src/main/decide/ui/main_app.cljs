@@ -123,7 +123,7 @@
    :route-segment ["app"]
    :will-enter    (fn will-enter [app _]
                     (dr/route-deferred (comp/get-ident MainApp nil)
-                      #(df/load! app :all-todos proposal/Proposal
+                      #(df/load! app :all-proposals proposal/Proposal
                          {:post-mutation        `dr/target-ready
                           :post-mutation-params {:target (comp/get-ident MainApp nil)}})))
    :css           [[:.with-appbar {:color      :black

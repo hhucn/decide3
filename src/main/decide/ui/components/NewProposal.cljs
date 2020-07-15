@@ -36,8 +36,9 @@
 (defmutation add-new-proposal [{:proposal/keys [id title body parents] :as params}]
   (action [{:keys [app state]}]
     (log/info params)
-    (mrg/merge-component! app proposal/Proposal params :append [:all-proposals])
-    #_(swap! state assoc-in [:proposal/id id] params)))
+    (mrg/merge-component! app proposal/Proposal params :append [:all-proposals]))
+  (remote [env]
+    (m/with-server-side-mutation env 'decide.api.proposal/add-proposal)))
 
 (defmutation remove-parent [{:keys [parent/ident]}]
   (action [{:keys [state ref]}]

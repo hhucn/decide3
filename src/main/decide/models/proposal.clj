@@ -11,6 +11,7 @@
     :db/cardinality :db.cardinality/one
     :db/unique      :db.unique/identity
     :db/valueType   :db.type/string}
+
    {:db/ident       ::title
     :db/doc         "The short catchy title of a proposal."
     :db/cardinality :db.cardinality/one
@@ -27,7 +28,7 @@
     :db/valueType   :db.type/instant}
 
    {:db/ident       ::original-author
-    :db/doc         "When the proposal was created."
+    :db/doc         "The user who proposed the proposal."
     :db/cardinality :db.cardinality/one
     :db/valueType   :db.type/ref}
 

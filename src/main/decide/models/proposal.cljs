@@ -26,7 +26,8 @@
     ["@material-ui/core/styles" :refer (withStyles)]
     ["react" :as React]
     [taoensso.timbre :as log]
-    [com.fulcrologic.fulcro.algorithms.tempid :as tempid]))
+    [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
+    [com.fulcrologic.fulcro.data-fetch :as df]))
 
 
 (defsc Proposal [this {:proposal/keys [id title body] :ui/keys [expanded?]}]
@@ -122,8 +123,11 @@
    :ident         :proposal/id
    :route-segment ["proposal" :proposal-id]
    :will-enter    (fn [app {:keys [proposal-id]}]
-                    ;; TODO Load proposal details here.
-                    (dr/route-immediate (comp/get-ident ProposalPage {:proposal/id (int proposal-id)})))}
+                    (dr/route-deferred [:proposal/id proposal-id]
+                      #(df/load! app [:proposal/id proposal-id] ProposalPage
+                         {:post-mutation        `dr/target-ready
+                          :post-mutation-params {:target [:proposal/id proposal-id]}})))}
+  (log/info "Proposal Page" props)
   (layout/container {:maxWidth :lg}
     (breadcrumbs/breadcrumb-nav
       [["Vorschläge" (href-to-proposal-list)]

@@ -4,10 +4,10 @@
     [decide.server-components.config :refer [config]]
     [taoensso.timbre :as log]
     [datahike.api :as d]
-    [decide.models.todo :as todo]
-    [decide.models.user :as user]))
+    [decide.models.user :as user]
+    [decide.models.proposal :as proposal]))
 
-(def schema (into [] cat [todo/schema user/schema]))
+(def schema (into [] cat [user/schema proposal/schema]))
 
 (defn test-database [config]
   (d/delete-database config)
