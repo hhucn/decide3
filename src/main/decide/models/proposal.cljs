@@ -30,31 +30,30 @@
     [com.fulcrologic.fulcro.data-fetch :as df]))
 
 
-(defsc Proposal [this {:proposal/keys [id title body] :ui/keys [expanded?]}]
-  {:query     (fn []
-                [:proposal/id :proposal/title :proposal/body
-                 :proposal/pro-votes :proposal/con-votes :ui/expanded?
-                 {:proposal/parents '...}])
-   :ident     :proposal/id
+(defsc Proposal [this {:proposal/keys [id title body]}]
+  {:query         (fn []
+                    [:proposal/id :proposal/title :proposal/body
+                     :proposal/pro-votes :proposal/con-votes
+                     {:proposal/parents '...}])
+   :ident         :proposal/id
    :initial-state (fn [{:keys [id title body]}]
-                    #:proposal{:id id
-                               :title title
-                               :body body
+                    #:proposal{:id        id
+                               :title     title
+                               :body      body
                                :pro-votes 534
-                               :con-votes 340
-                               :ui/expanded? false})}
+                               :con-votes 340})}
   (surfaces/card {:style {:width "100%"}}
-    (surfaces/card-action-area {:onClick #(m/toggle! this :ui/expanded?)
-                                :href    (routing/path->url
-                                           (dr/path-to
-                                             (comp/registry-key->class 'decide.ui.main-app/MainApp)
-                                             (comp/registry-key->class `ProposalPage)
-                                             id))}
+    (surfaces/card-action-area
+      {:href (routing/path->url
+               (dr/path-to
+                 (comp/registry-key->class 'decide.ui.main-app/MainApp)
+                 (comp/registry-key->class `ProposalPage)
+                 id))}
       (surfaces/card-content {}
         (dd/typography {:gutterBottom true :variant "h6" :component "h2"}
           (dd/typography
             {:variant "subtitle1" :component "span" :color "textSecondary"
-             :style {:marginRight ".25em"}}
+             :style   {:marginRight ".25em"}}
             (str "#" (if (tempid/tempid? id) "?" id)))
           title)
         (dd/typography {:variant "body2" :color "textSecondary" :component "p"} body)))
