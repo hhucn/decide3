@@ -90,8 +90,16 @@
      LinearProgress)))
 
 (defsc Parent [this {:proposal/keys [id title]}]
-  {:query [:proposal/id :proposal/title]}
-  (dd/list-item {}
+  {:query [:proposal/id :proposal/title]
+   :ident :proposal/id}
+  (dd/list-item
+    {:button    true
+     :component "a"
+     :href      (routing/path->url
+                  (dr/path-to
+                    (comp/registry-key->class 'decide.ui.main-app/MainApp)
+                    (comp/registry-key->class `ProposalPage)
+                    id))}
     (dd/list-item-avatar {} (str "#" id))
     (dd/list-item-text {} (str title))))
 
