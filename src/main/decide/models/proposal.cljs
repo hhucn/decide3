@@ -70,14 +70,6 @@
       (comp/registry-key->class 'decide.ui.main-app/MainApp)
       (comp/registry-key->class 'decide.ui.main-app/MainProposalList))))
 
-(defn proposal-card-title [{:proposal/keys [id title]}]
-  (dd/typography {:gutterBottom true :variant "h5" :component "h2"}
-    (dd/typography
-      {:variant "subtitle1" :component "span" :color "textSecondary"
-       :style {:marginRight ".3em"}}
-      "#" id)
-    title))
-
 (defn percent-of-pro-votes [pro-votes con-votes]
   (* 100 (/ pro-votes (+ pro-votes con-votes))))
 
@@ -105,24 +97,23 @@
 
 (def ui-parent (comp/computed-factory Parent {:keyfn :proposal/id}))
 
-(defn parents-list [{:proposal/keys [parents] :or {parents []}}]
-  (layout/grid {:container true}
-    (layout/grid {:item true :xs 12} (dd/typography {:variant "subtitle1" :component "h3" :gutterBottom true} "Vorgänger"))
-    (layout/grid {:item true :xs 12}
-      (dd/list {}
-        (mapv ui-parent parents)))))
-
 (defn vote-scale [{:proposal/keys [pro-votes con-votes] :or {pro-votes 0 con-votes 0}}]
   (layout/grid {:container  true
                 :alignItems :center
                 :justify    :space-between}
-    (layout/grid {:item true :xs 12} (dd/typography {:variant "subtitle1" :component "h3" :gutterBottom true} "Meinungen"))
     (layout/grid {:item true :xs 1 :align :center} pro-votes)
     (layout/grid {:item true :xs 9}
       (vote-linear-progress
         {:variant "determinate"
          :value   (percent-of-pro-votes pro-votes con-votes)}))
     (layout/grid {:item true :xs 1 :align :center} con-votes)))
+
+(defn proposal-section [title & children]
+  (comp/fragment
+    (dd/divider {:light true})
+    (apply layout/box {:mt 1 :mb 2}
+      (dd/typography {:variant "h6" :color "textSecondary" :component "h3"} title)
+      children)))
 
 (defsc ProposalPage [this {:proposal/keys [id title body parents pro-votes con-votes] :as props}]
   {:query         [:proposal/id :proposal/title :proposal/body
@@ -134,39 +125,34 @@
                     (dr/route-deferred [:proposal/id proposal-id]
                       #(df/load! app [:proposal/id proposal-id] ProposalPage
                          {:post-mutation        `dr/target-ready
-                          :post-mutation-params {:target [:proposal/id proposal-id]}})))}
+                          :post-mutation-params {:target (comp/get-ident ProposalPage {:proposal/id proposal-id})}})))}
   (log/info "Proposal Page" props)
   (layout/container {:maxWidth :lg}
     (breadcrumbs/breadcrumb-nav
       [["Vorschläge" (href-to-proposal-list)]
        [(str "#" id) ""]])
-    (layout/grid {:container true :spacing 2}
-      (layout/grid {:item true :xs 12}
-        (surfaces/card {}
-          (surfaces/card-content {}
-            (layout/grid {:container true :spacing 2}
-              (layout/grid {:item true :xs 12}
-                (dd/typography {:variant "h5" :component "h2"}
-                  (dd/typography
-                    {:variant   "subtitle1"
-                     :component "span"
-                     :color     "textSecondary"
-                     :style     {:marginRight ".3em"}}
-                    "#" id)
-                  (str title)))
+    (surfaces/card {}
+      (surfaces/card-content {}
+        (dd/typography {:variant "h5" :component "h2" :gutterBottom true}
+          title
+          (dd/typography {:variant   "subtitle1"
+                          :component "span"
+                          :color     "textSecondary"
+                          :style     {:marginLeft ".3em"}}
+            (str "#" id)))
 
-              (layout/grid {:item true :xs 12}
-                (dd/typography {:variant "body2" :color "textSecondary" :component "p"} body))
+        (dd/typography {:variant   "body2"
+                        :paragraph true
+                        :color     "textSecondary"
+                        :component "p"}
+          body)
 
-              (layout/grid {:item true :xs 12} (parents-list props))
+        (when-not (empty? parents)
+          (proposal-section "Dieser Vorschlag basiert auf"
+            (dd/list {:dense true}
+              (map ui-parent parents))))
 
-              (layout/grid {:item true :xs 12} (vote-scale props))
+        (proposal-section "Meinungen"
+          (vote-scale props))
 
-              #_(when-not (empty? parents)
-                  (layout/grid {:item true :xs 12}
-                    (dd/list {}
-                      (for [parent parents]
-                        (dd/list-item {} parent)))))
-
-              (layout/grid {:item true :xs 12 :align :center}
-                "Argumentation here"))))))))
+        (proposal-section "Argumente")))))
