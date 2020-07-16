@@ -13,6 +13,7 @@
     [com.fulcrologic.fulcro.algorithms.react-interop :as interop]
     ["@material-ui/icons/ThumbUpAlt" :default ThumbUpAlt]
     ["@material-ui/icons/ThumbDownAlt" :default ThumbDownAlt]
+    ["@material-ui/icons/MoreVert" :default MoreVertIcon]
     ["@material-ui/core/LinearProgress" :default LinearProgress]
     ["@material-ui/core/styles" :refer (withStyles)]
     ["react" :as React]
@@ -123,15 +124,12 @@
       [["Vorschläge" (href-to-proposal-list)]
        [(str "#" id) ""]])
     (surfaces/card {}
-      (surfaces/card-content {}
-        (dd/typography {:variant "h5" :component "h2" :gutterBottom true}
-          title
-          (dd/typography {:variant   "subtitle1"
-                          :component "span"
-                          :color     "textSecondary"
-                          :style     {:marginLeft ".3em"}}
-            (str "#" id)))
-
+      (surfaces/card-header {:title                    title
+                             :subheader                (str "#" id)
+                             :subheaderTypographyProps {:style {:display    "inline"
+                                                                :marginLeft ".3rem"}}
+                             :action                   (input/icon-button {} (React/createElement MoreVertIcon))})
+      (surfaces/card-content {:style {:paddingTop 0}}
         (dd/typography {:variant   "body2"
                         :paragraph true
                         :color     "textSecondary"
