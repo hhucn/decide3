@@ -1,23 +1,14 @@
 (ns decide.models.proposal
   (:require
-    [clojure.string :as str]
-    [com.fulcrologic.fulcro.algorithms.merge :as mrg]
-    [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
-    [com.fulcrologic.fulcro.algorithms.normalized-state :as norm-state]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.dom :as dom :refer [div ul li p h1 h3 form button input span]]
-    [com.fulcrologic.fulcro.dom.events :as evt]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
-    [com.fulcrologic.fulcro-css.css :as css]
     [decide.routing :as routing]
     [decide.ui.components.breadcrumbs :as breadcrumbs]
-    [decide.ui.themes :as themes]
     [material-ui.data-display :as dd]
-    [material-ui.feedback :as feedback]
     [material-ui.surfaces :as surfaces]
     [material-ui.inputs :as input]
-    [material-ui.navigation :as navigation]
     [material-ui.layout :as layout]
     [com.fulcrologic.fulcro.algorithms.react-interop :as interop]
     ["@material-ui/icons/ThumbUpAlt" :default ThumbUpAlt]
@@ -28,7 +19,6 @@
     [taoensso.timbre :as log]
     [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
     [com.fulcrologic.fulcro.data-fetch :as df]))
-
 
 (defsc Proposal [this {:proposal/keys [id title body]}]
   {:query         (fn []
@@ -69,17 +59,6 @@
       (comp/registry-key->class 'decide.ui.main-app/MainApp)
       (comp/registry-key->class 'decide.ui.main-app/MainProposalList))))
 
-(defn percent-of-pro-votes [pro-votes con-votes]
-  (* 100 (/ pro-votes (+ pro-votes con-votes))))
-
-(def vote-linear-progress
-  (interop/react-factory
-    ((withStyles
-       (fn [theme]
-         (clj->js {:barColorPrimary {:backgroundColor (-> theme .-palette .-success .-main)}
-                   :colorPrimary {:backgroundColor (-> theme .-palette .-error .-main)}})))
-     LinearProgress)))
-
 (defsc Parent [this {:proposal/keys [id title]}]
   {:query [:proposal/id :proposal/title]
    :ident :proposal/id}
@@ -96,6 +75,18 @@
 
 (def ui-parent (comp/computed-factory Parent {:keyfn :proposal/id}))
 
+;; region Vote scale
+(defn percent-of-pro-votes [pro-votes con-votes]
+  (* 100 (/ pro-votes (+ pro-votes con-votes))))
+
+(def vote-linear-progress
+  (interop/react-factory
+    ((withStyles
+       (fn [theme]
+         (clj->js {:barColorPrimary {:backgroundColor (.. theme -palette -success -main)}
+                   :colorPrimary    {:backgroundColor (.. theme -palette -error -main)}})))
+     LinearProgress)))
+
 (defn vote-scale [{:proposal/keys [pro-votes con-votes] :or {pro-votes 0 con-votes 0}}]
   (layout/grid {:container  true
                 :alignItems :center
@@ -106,6 +97,7 @@
         {:variant "determinate"
          :value   (percent-of-pro-votes pro-votes con-votes)}))
     (layout/grid {:item true :xs 1 :align :center} con-votes)))
+;; endregion
 
 (defn proposal-section [title & children]
   (comp/fragment
@@ -126,7 +118,7 @@
                          {:post-mutation        `dr/target-ready
                           :post-mutation-params {:target (comp/get-ident ProposalPage {:proposal/id proposal-id})}})))}
   (log/info "Proposal Page" props)
-  (layout/container {:maxWidth :lg}
+  (layout/container {:maxWidth :md}
     (breadcrumbs/breadcrumb-nav
       [["Vorschläge" (href-to-proposal-list)]
        [(str "#" id) ""]])
