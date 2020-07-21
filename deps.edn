@@ -15,7 +15,7 @@
            org.clojure/core.async                             {:mvn/version "1.2.603"}
            clj-commons/pushy                                  {:mvn/version "0.3.10"}
            io.replikativ/datahike                             {:mvn/version "0.3.1"}
-           com.github.mrebbinghaus/fulcro-material-ui-wrapper {:mvn/version "0.5.0"}
+           com.github.mrebbinghaus/fulcro-material-ui-wrapper {:mvn/version "4.11.0-alpha"}
 
            buddy                                              {:mvn/version "2.0.0"}
 

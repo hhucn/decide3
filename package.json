@@ -4,13 +4,13 @@
     "description": "",
     "private": true,
     "dependencies": {
-        "@material-ui/core": "^4.10.2",
+        "@material-ui/core": "^4.11.0",
         "@material-ui/icons": "^4.9.1",
         "@material-ui/lab": "^4.0.0-alpha.56",
         "highlight.js": "10.1.1",
         "react-grid-layout": "^0.18.3",
         "react-transition-group": "^4.3.0",
-        "reakit": "^1.1.1"
+        "reakit": "^1.1.2"
     },
     "scripts": {
         "client/main": "npx shadow-cljs watch :main",
@@ -25,7 +25,7 @@
         "start": "npx run-p client/server server"
     },
     "devDependencies": {
-        "intl-messageformat": "^9.0.2",
+        "intl-messageformat": "^9.1.5",
         "karma": "^5.1.0",
         "karma-chrome-launcher": "^3.1.0",
         "karma-cljs-test": "^0.1.0",

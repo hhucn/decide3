@@ -107,14 +107,14 @@
             (navigation/menu-item {:key id :value (str [:proposal/id id])}
               (str "#" id " " title))))))
     (input/textfield
-      {:label "Details"
-       :variant "filled"
-       :margin "normal"
-       :fullWidth true
+      {:label        "Details"
+       :variant      "filled"
+       :margin       "normal"
+       :fullWidth    true
        :autoComplete "off"
-       :multiline true
-       :rows 7
-       :value body
+       :multiline    true
+       :rows         7
+       :value        body
        :onChange     #(m/set-string! this :ui/body :event %)})))
 
 (def ui-new-proposal-form (comp/computed-factory NewProposalForm))

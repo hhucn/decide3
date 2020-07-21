@@ -12,19 +12,27 @@
     [material-ui.layout :as layout]
     [com.fulcrologic.fulcro.algorithms.react-interop :as interop]
     ["@material-ui/icons/ThumbUpAlt" :default ThumbUpAlt]
-    ["@material-ui/icons/ThumbDownAlt" :default ThumbDownAlt]
+    ["@material-ui/icons/ThumbUpAltTwoTone" :default ThumbUpAltTwoTone]
+    ["@material-ui/icons/ThumbDownAltTwoTone" :default ThumbDownAltTwoTone]
     ["@material-ui/icons/MoreVert" :default MoreVertIcon]
     ["@material-ui/core/LinearProgress" :default LinearProgress]
-    ["@material-ui/core/styles" :refer (withStyles)]
+    ["@material-ui/core/styles" :refer (withStyles useTheme)]
     ["react" :as React]
     [taoensso.timbre :as log]
     [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
     [com.fulcrologic.fulcro.data-fetch :as df]))
 
-(defsc Proposal [this {:proposal/keys [id title body]}]
+(defmutation add-opinion [{:keys [proposal/id opinion]}]
+  (action [{:keys [state]}]
+    (swap! state update-in [:proposal/id id] assoc :proposal/opinion opinion))
+  (remote [env]
+    (m/with-server-side-mutation env 'decide.api.proposal/add-opinion)))
+
+(defsc Proposal [this {:proposal/keys [id title body opinion]}]
   {:query         (fn []
                     [:proposal/id :proposal/title :proposal/body
                      :proposal/pro-votes :proposal/con-votes
+                     :proposal/opinion
                      {:proposal/parents '...}])
    :ident         :proposal/id
    :initial-state (fn [{:keys [id title body]}]
@@ -49,8 +57,20 @@
           title)
         (dd/typography {:variant "body2" :color "textSecondary" :component "p"} body)))
     (surfaces/card-actions {}
-      (input/button {:size "small" :color "primary" :startIcon (React/createElement ThumbUpAlt)} "Zustimmen")
-      (input/button {:size "small" :color "primary" :startIcon (React/createElement ThumbDownAlt)} "Ablehnen"))))
+      (input/button {:size      :small
+                     :color     (if (pos? opinion) "primary" "default")
+                     :variant   :text
+                     :onClick   #(comp/transact! this [(add-opinion {:proposal/id id
+                                                                     :opinion     (if (pos? opinion) 0 +1)})])
+                     :startIcon (React/createElement ThumbUpAltTwoTone #js {:color "default"})}
+        "Zustimmen")
+      (input/button {:size      :small
+                     :color     (if (neg? opinion) "primary" "default")
+                     :variant   :text
+                     :onClick   #(comp/transact! this [(add-opinion {:proposal/id id
+                                                                     :opinion     (if (neg? opinion) 0 -1)})])
+                     :startIcon (React/createElement ThumbDownAltTwoTone)}
+        "Ablehnen"))))
 
 (def ui-proposal (comp/computed-factory Proposal {:keyfn :proposal/id}))
 
@@ -78,7 +98,9 @@
 
 ;; region Vote scale
 (defn percent-of-pro-votes [pro-votes con-votes]
-  (* 100 (/ pro-votes (+ pro-votes con-votes))))
+  (if (zero? pro-votes)
+    0
+    (* 100 (/ pro-votes (+ pro-votes con-votes)))))
 
 (def vote-linear-progress
   (interop/react-factory
@@ -89,15 +111,16 @@
      LinearProgress)))
 
 (defn vote-scale [{:proposal/keys [pro-votes con-votes] :or {pro-votes 0 con-votes 0}}]
+  (log/info pro-votes con-votes)
   (layout/grid {:container  true
                 :alignItems :center
                 :justify    :space-between}
-    (layout/grid {:item true :xs 1 :align :center} pro-votes)
+    (layout/grid {:item true :xs 1 :align :center} (str pro-votes))
     (layout/grid {:item true :xs 9}
       (vote-linear-progress
         {:variant "determinate"
          :value   (percent-of-pro-votes pro-votes con-votes)}))
-    (layout/grid {:item true :xs 1 :align :center} con-votes)))
+    (layout/grid {:item true :xs 1 :align :center} (str con-votes))))
 ;; endregion
 
 (defn proposal-section [title & children]
@@ -113,13 +136,13 @@
                    :proposal/pro-votes :proposal/con-votes]
    :ident         :proposal/id
    :route-segment ["proposal" :proposal-id]
-   :will-enter    (fn [app {:keys [proposal-id]}]
+   :will-enter    (fn will-enter-proposal-page
+                    [app {:keys [proposal-id]}]
                     (dr/route-deferred [:proposal/id proposal-id]
                       #(df/load! app [:proposal/id proposal-id] ProposalPage
                          {:post-mutation        `dr/target-ready
                           :post-mutation-params {:target (comp/get-ident ProposalPage {:proposal/id proposal-id})}})))}
-  (log/info "Proposal Page" props)
-  (layout/container {:maxWidth :md}
+  (layout/container {:maxWidth :lg}
     (breadcrumbs/breadcrumb-nav
       [["Vorschläge" (href-to-proposal-list)]
        [(str "#" id) ""]])
@@ -127,18 +150,19 @@
       (surfaces/card-header {:title                    title
                              :subheader                (str "#" id)
                              :subheaderTypographyProps {:style {:display    "inline"
-                                                                :marginLeft ".3rem"}}
-                             :action                   (input/icon-button {} (React/createElement MoreVertIcon))})
+                                                                :marginLeft ".3rem"}}})
+      ;; :action                   (input/icon-button {} (React/createElement MoreVertIcon))})
+
       (surfaces/card-content {:style {:paddingTop 0}}
         (dd/typography {:variant   "body2"
-                        :paragraph true
                         :color     "textSecondary"
-                        :component "p"}
+                        :paragraph true}
           body)
 
         (when-not (empty? parents)
-          (proposal-section "Dieser Vorschlag basiert auf"
-            (dd/list {:dense true}
+          (proposal-section
+            (str "Dieser Vorschlag basiert auf " (count parents) " weiteren Vorschlägen")
+            (dd/list {:dense false}
               (map ui-parent parents))))
 
         (proposal-section "Meinungen"

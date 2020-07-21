@@ -5,9 +5,10 @@
     [taoensso.timbre :as log]
     [datahike.api :as d]
     [decide.models.user :as user]
-    [decide.models.proposal :as proposal]))
+    [decide.models.proposal :as proposal]
+    [decide.models.opinion :as opinion]))
 
-(def schema (into [] cat [user/schema proposal/schema]))
+(def schema (into [] cat [user/schema proposal/schema opinion/schema]))
 
 (defn test-database [config]
   (d/delete-database config)
@@ -31,7 +32,9 @@
     (log/info "Database exists. Connecting...")
     (let [conn (d/connect db-config)]
       (log/info "Transacting schema...")
-      (d/transact conn schema)
+      (try
+        (d/transact conn schema)
+        (catch Exception e (println e)))
 
       conn))
   :stop

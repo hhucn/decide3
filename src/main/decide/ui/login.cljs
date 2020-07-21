@@ -31,10 +31,10 @@
       props)))
 
 (defsc Session [_ _]
-  {:query         [:session/valid? :decide.models.user/id]
+  {:query         [:session/valid? :user/id]
    :ident         (fn [] [:component/id :session])
    :initial-state {:session/valid?         false
-                   :decide.models.user/id nil}})
+                   :user/id nil}})
 
 (defmutation sign-up [{:user/keys [_email _password]}]
   (action [_] true)
