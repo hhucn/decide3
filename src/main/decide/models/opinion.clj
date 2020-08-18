@@ -16,7 +16,7 @@
 
 (s/def :opinion/value #{-1 0 +1})
 
-(>defn set-opinion [conn user-id proposal-id opinion-value]
+(>defn set-opinion! [conn user-id proposal-id opinion-value]
   [d.core/conn? :user/id :proposal/id :opinion/value => map?]
   (d/transact conn
     [[:db/add [:proposal/id proposal-id] :proposal/opinions "temp"]

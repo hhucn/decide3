@@ -4,7 +4,7 @@
     [com.wsscode.pathom.core :as p]
     [taoensso.timbre :as log]
     [datahike.api :as d]
-    [datahike.core :as d.core])
+    [decide.models.opinion :as opinion])
   (:import (java.util Date)))
 
 
@@ -29,11 +29,7 @@
 (defmutation add-opinion [{:keys [conn AUTH/user-id] :as env} {:keys [proposal/id opinion]}]
   {::pc/params [:proposal/id :opinion]}
   (if user-id
-    (let [tx-report (d/transact conn
-                      [[:db/add [:proposal/id id] :proposal/opinions "temp"]
-                       {:db/id          "temp"
-                        :opinion/user  [:user/id user-id]
-                        :opinion/value opinion}])]
+    (let [tx-report (opinion/set-opinion! conn user-id id opinion)]
       {::p/env (assoc env :db (:db-after tx-report))})
     (throw (ex-info "User is not logged in!" {}))))
 
