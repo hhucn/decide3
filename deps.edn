@@ -24,15 +24,15 @@
 
  :aliases {:clj-tests {:extra-paths ["src/test"]
                        :main-opts   ["-m" "kaocha.runner"]
-                       :extra-deps  {lambdaisland/kaocha {:mvn/version "1.0.641"}}}
+                       :extra-deps  {lambdaisland/kaocha {:mvn/version "1.0.663"}}}
 
            ;; See https://github.com/clojure-emacs/cider-nrepl/blob/master/deps.edn for Emacs support
            :dev       {:extra-paths ["src/test" "src/dev" "src/workspaces"]
                        :jvm-opts    ["-XX:-OmitStackTraceInFastThrow"]
                        :extra-deps  {org.clojure/clojurescript   {:mvn/version "1.10.773"}
-                                     thheller/shadow-cljs        {:mvn/version "2.10.19"}
+                                     thheller/shadow-cljs        {:mvn/version "2.10.21"}
                                      expound/expound             {:mvn/version "0.8.5"}
-                                     fulcrologic/fulcro-spec     {:mvn/version "3.1.5"}
+                                     fulcrologic/fulcro-spec     {:mvn/version "3.1.6"}
                                      binaryage/devtools          {:mvn/version "1.0.2"}
                                      com.github.awkay/workspaces {:mvn/version "1.0.1"},
                                      org.clojure/tools.namespace {:mvn/version "1.0.0"}}}}}
