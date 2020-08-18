@@ -48,51 +48,50 @@
                        :new-password-error nil
                        :ui/success-open? false}}
   (surfaces/paper {}
-    (layout/box
-      {:component "form"
-       :p         3
-       :onSubmit  (fn submit-change-password [e]
-                    (evt/prevent-default! e)
-                    (comp/transact!! this
-                      [(m/set-props {:ui/old-password ""
-                                     :ui/new-password ""})
-                       (change-password {:old-password old-password :new-password new-password})]))}
+    (layout/box {:p 3 :mt 2 :clone true}
+      (dom/form
+        {:onSubmit (fn submit-change-password [e]
+                     (evt/prevent-default! e)
+                     (comp/transact!! this
+                       [(m/set-props {:ui/old-password ""
+                                      :ui/new-password ""})
+                        (change-password {:old-password old-password :new-password new-password})]))}
 
-      (dd/typography
-        {:component :h1
-         :variant   :h6}
-        "Change Password")
-      (wide-textfield {:label      "Old Password"
-                       :type       :password
-                       :error      (boolean old-password-error)
-                       :helperText old-password-error
-                       :required   true
-                       :inputProps {:aria-label   "Old Password"
-                                    :autoComplete :current-password}
-                       :value      old-password
-                       :onChange   (fn [e]
-                                     (m/set-value!! this :ui/old-password-error nil)
-                                     (m/set-string!! this :ui/old-password :event e))})
-      (wide-textfield {:label      "New Password"
-                       :type       :password
-                       :error      (boolean new-password-error)
-                       :helperText new-password-error
-                       :required   true
-                       :value      new-password
-                       :inputProps {:minLength    10
-                                    :aria-label   "New Password"
-                                    :autoComplete :new-password}
+        (dd/typography
+          {:component :h1
+           :variant   :h6}
+          "Change Password")
+        (wide-textfield {:label      "Old Password"
+                         :type       :password
+                         :error      (boolean old-password-error)
+                         :helperText old-password-error
+                         :required   true
+                         :inputProps {:aria-label   "Old Password"
+                                      :autoComplete :current-password}
+                         :value      old-password
+                         :onChange   (fn [e]
+                                       (m/set-value!! this :ui/old-password-error nil)
+                                       (m/set-string!! this :ui/old-password :event e))})
+        (wide-textfield {:label      "New Password"
+                         :type       :password
+                         :error      (boolean new-password-error)
+                         :helperText new-password-error
+                         :required   true
+                         :value      new-password
+                         :inputProps {:minLength    10
+                                      :aria-label   "New Password"
+                                      :autoComplete :new-password}
 
-                       :onChange   (fn [e]
-                                     (m/set-value!! this :ui/new-password-error nil)
-                                     (m/set-string!! this :ui/new-password :event e))})
-      (layout/box {:mt 2}
-        (inputs/button
-          {:color   :primary
-           :variant :contained
-           :margin  "normal"
-           :type    :submit}
-          "Save")))
+                         :onChange   (fn [e]
+                                       (m/set-value!! this :ui/new-password-error nil)
+                                       (m/set-string!! this :ui/new-password :event e))})
+        (layout/box {:mt 2 :clone true}
+          (inputs/button
+            {:color   :primary
+             :variant :contained
+             :margin  "normal"
+             :type    :submit}
+            "Save"))))
     (feedback/snackbar
       {:autoHideDuration 6000
        :open             success-open?

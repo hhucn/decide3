@@ -13,9 +13,7 @@
             [material-ui.inputs :as inputs]
             [taoensso.timbre :as log]
             [decide.routing :as routing]
-            [material-ui.navigation :as navigation]
-            [decide.ui.themes :as themes]
-            [com.fulcrologic.fulcro.algorithms.merge :as mrg]))
+            [material-ui.navigation :as navigation]))
 
 (declare LoginPage)
 
@@ -26,8 +24,7 @@
   (inputs/textfield
     (merge
       {:variant   :outlined
-       :fullWidth true
-       :margin    :normal}
+       :fullWidth true}
       props)))
 
 (defsc Session [_ _]
@@ -53,10 +50,16 @@
       (m/with-server-side-mutation 'decide.api.user/sign-up-user)
       (m/returning Session))))
 
+(defn paper-base [& children]
+  (layout/container {:maxWidth "sm"}
+    (mutils/css-baseline {})
+    (layout/box {:mt 8 :p 3 :clone true}
+      (surfaces/paper {}
+        children))))
+
+
 (defsc SignUpPage [this {:user/keys [email password]
-                         :ui/keys   [email-error password-error]}
-                   _
-                   {:keys [submit-button]}]
+                         :ui/keys   [email-error password-error]}]
   {:query         [:user/email
                    :ui/email-error
 
@@ -71,60 +74,57 @@
                    :ui/email-error    nil
 
                    :user/password     ""
-                   :ui/password-error nil}
-   :css           [[:.submit-button {:margin-top ((:spacing themes/shared) 2 "")}]]}
-  (layout/container {:maxWidth "sm"}
-    (mutils/css-baseline {})
-    (layout/box {:mt 8}
-      (surfaces/paper {}
-        (layout/box {:p 3}
-          (dom/form
-            {:noValidate true
-             :onSubmit   (fn submit-sign-up [e]
-                           (evt/prevent-default! e)
-                           (comp/transact! this [(sign-up #:user{:email email :password password})]))}
-            (dd/typography
-              {:align   "center"
-               :variant "h5"}
-              "Sign up")
-            (wide-textfield {:label      "E-Mail"
-                             :type       :email
-                             :value      email
-                             :error      (boolean email-error)
-                             :helperText email-error
-                             :inputProps {:aria-label   "E-Mail"
-                                          :autoComplete :email}
-                             :onChange   (fn [e]
-                                           (m/set-value!! this :ui/email-error nil)
-                                           (m/set-string!! this :user/email :event e))})
-
-            (wide-textfield {:label      "Password"
-                             :type       :password
-                             :value      password
-                             :error      (boolean password-error)
-                             :helperText password-error
-                             :inputProps {:aria-label   "Password"
-                                          :autoComplete :new-password}
-                             :onChange   (fn [e]
-                                           (m/set-value!! this :ui/password-error nil)
-                                           (m/set-string!! this :user/password :event e))})
-
-            (inputs/button {:variant   :contained
-                            :color     :primary
-                            :type      :submit
-                            :fullWidth true
-                            :className submit-button}
-              "Sign up")
-            (layout/box {:mt 2}
-              (layout/grid
-                {:container true
-                 :justify   :flex-end}
-                (layout/grid {:item true}
-                  (navigation/link
-                    (routing/with-route this (dr/path-to LoginPage)
-                      {:variant :body2})
-                    "Already have an account? Sign In"))))))))))
-
+                   :ui/password-error nil}}
+  (paper-base
+    (dom/form
+      {:noValidate true
+       :onSubmit   (fn submit-sign-up [e]
+                     (evt/prevent-default! e)
+                     (comp/transact! this [(sign-up #:user{:email email :password password})]))}
+      (layout/grid {:container true
+                    :spacing   2}
+        (layout/grid {:item true :xs 12}
+          (dd/typography
+            {:align   "center"
+             :variant "h5"}
+            "Sign up"))
+        (layout/grid {:item true :xs 12}
+          (wide-textfield {:label      "E-Mail"
+                           :type       :email
+                           :value      email
+                           :error      (boolean email-error)
+                           :helperText email-error
+                           :inputProps {:aria-label   "E-Mail"
+                                        :autoComplete :email}
+                           :onChange   (fn [e]
+                                         (m/set-value!! this :ui/email-error nil)
+                                         (m/set-string!! this :user/email :event e))}))
+        (layout/grid {:item true :xs 12}
+          (wide-textfield {:label      "Password"
+                           :type       :password
+                           :value      password
+                           :error      (boolean password-error)
+                           :helperText password-error
+                           :inputProps {:aria-label   "Password"
+                                        :autoComplete :new-password}
+                           :onChange   (fn [e]
+                                         (m/set-value!! this :ui/password-error nil)
+                                         (m/set-string!! this :user/password :event e))}))
+        (layout/grid {:item true :xs 12}
+          (inputs/button {:variant   :contained
+                          :color     :primary
+                          :type      :submit
+                          :fullWidth true}
+            "Sign up"))
+        (layout/grid {:item true}))
+      (layout/grid
+        {:container true
+         :justify   :flex-end}
+        (layout/grid {:item true}
+          (navigation/link
+            (routing/with-route this (dr/path-to LoginPage)
+              {:variant :body2})
+            "Already have an account? Sign In"))))))
 
 
 (defmutation sign-in [{:user/keys [_email _password]}]
@@ -147,7 +147,7 @@
       (m/returning Session))))
 
 (defsc LoginPage [this {:user/keys [email password]
-                        :ui/keys   [email-error password-error]} _ {:keys [sign-in-button]}]
+                        :ui/keys   [email-error password-error]}]
   {:query         [:user/email
                    :ui/email-error
 
@@ -159,58 +159,58 @@
                    :ui/email-error    nil
 
                    :user/password     ""
-                   :ui/password-error nil}
-   :css           [[:.sign-in-button {:margin-top    ((:spacing themes/shared) 2 "")}]]}
-  (layout/container {:maxWidth "sm"}
-    (mutils/css-baseline {})
-    (layout/box {:mt 8}
-      (surfaces/paper {}
-        (layout/box {:p 3}
-          (dom/form
-            {:noValidate true
-             :onSubmit   (fn submit-login [e]
-                           (evt/prevent-default! e)
-                           (comp/transact! this [(sign-in #:user{:email    email
-                                                                 :password password})]))}
-            (dd/typography
-              {:align   "center"
-               :variant "h5"}
-              "Sign in")
-            (wide-textfield {:label      "E-Mail"
-                             :type       :email
-                             :error      (boolean email-error)
-                             :helperText email-error
-                             :inputProps {:aria-label   "E-Mail"
-                                          :autoComplete :email}
-                             :value      email
-                             :onChange   (fn [e]
-                                           (m/set-value!! this :ui/email-error nil)
-                                           (m/set-string!! this :user/email :event e))})
-            (wide-textfield {:label      "Password"
-                             :type       :password
-                             :error      (boolean password-error)
-                             :helperText password-error
-                             :inputProps {:aria-label   "Password"
-                                          :autoComplete :current-password}
-                             :value      password
-                             :onChange   (fn [e]
-                                           (m/set-value!! this :ui/password-error nil)
-                                           (m/set-string!! this :user/password :event e))})
-            (inputs/button {:variant   :contained
-                            :color     :primary
-                            :type      :submit
-                            :fullWidth true
-                            :className sign-in-button}
-              "Sign in"))
-          (layout/box {:mt 2}
-            (layout/grid
-              {:container true
-               :justify   :space-between}
-              (layout/grid {:item true :xs true}
-                (navigation/link {:variant :body2} "Forgot password?"))
-              (layout/grid {:item true}
-
-                (navigation/link
-                  (routing/with-route this (dr/path-to SignUpPage)
-                    {:variant :body2})
-                  "Don't have an account? Sign Up")))))))))
+                   :ui/password-error nil}}
+  (paper-base
+    (dom/form
+      {:noValidate true
+       :onSubmit   (fn submit-login [e]
+                     (evt/prevent-default! e)
+                     (comp/transact! this [(sign-in #:user{:email    email
+                                                           :password password})]))}
+      (layout/grid {:container true
+                    :spacing   2
+                    :direction "column"}
+        (layout/grid {:item true :xs 12}
+          (dd/typography
+            {:align   "center"
+             :variant "h5"}
+            "Sign in"))
+        (layout/grid {:item true :xs 12}
+          (wide-textfield {:label      "E-Mail"
+                           :type       :email
+                           :error      (boolean email-error)
+                           :helperText email-error
+                           :inputProps {:aria-label   "E-Mail"
+                                        :autoComplete :email}
+                           :value      email
+                           :onChange   (fn [e]
+                                         (m/set-value!! this :ui/email-error nil)
+                                         (m/set-string!! this :user/email :event e))}))
+        (layout/grid {:item true :xs 12}
+          (wide-textfield {:label      "Password"
+                           :type       :password
+                           :error      (boolean password-error)
+                           :helperText password-error
+                           :inputProps {:aria-label   "Password"
+                                        :autoComplete :current-password}
+                           :value      password
+                           :onChange   (fn [e]
+                                         (m/set-value!! this :ui/password-error nil)
+                                         (m/set-string!! this :user/password :event e))}))
+        (layout/grid {:item true :xs 12}
+          (inputs/button {:variant   :contained
+                          :color     :primary
+                          :type      :submit
+                          :fullWidth true}
+            "Sign in"))))
+    (layout/box {:mt 2 :clone true}
+      (layout/grid
+        {:container true
+         :justify   :space-between}
+        (layout/grid {:item true :xs true}
+          (navigation/link {:variant :body2} "Forgot password?"))
+        (layout/grid {:item true}
+          (navigation/link
+            (routing/with-route this (dr/path-to SignUpPage)
+              {:variant :body2})
+            "Don't have an account? Sign Up"))))))
