@@ -5,7 +5,7 @@
 
 (defn breadcrumb-nav
   [crumbs]
-  (layout/box {:pt 1.5}
+  (layout/box {:pt 1.5 :clone true}
     (navigation/breadcrumbs {:aria-label "breadcrumb"}
       (for [[label href] (butlast crumbs)]
         (navigation/link {:color "inherit"

@@ -43,41 +43,41 @@
                                :body      body
                                :pro-votes 0
                                :con-votes 0})}
-  (surfaces/card
-    {:style   {:width "100%"}
-     :variant :outlined}
-    (surfaces/card-action-area
-      {:href (routing/path->url
-               (dr/path-to
-                 (comp/registry-key->class 'decide.ui.main-app/MainApp)
-                 (comp/registry-key->class `ProposalPage)
-                 id))}
-      (let [avatar (dd/avatar {} (some-> author-display-name first str/upper-case))
-            subheader [(str "#" (if (tempid/tempid? id) "?" id))
-                       author-display-name]]
-        (surfaces/card-header
-          {:title     title
-           :avatar    avatar
-           :subheader (str/join " · " subheader)
-           :style     {:paddingBottom 0}}))
-      (surfaces/card-content {}
-        (dd/typography {:variant "body2" :color "textSecondary" :component "p"}
-          body)))
-    (surfaces/card-actions {}
-      (input/button {:size      :small
-                     :color     (if (pos? opinion) "primary" "default")
-                     :variant   :text
-                     :onClick   #(comp/transact! this [(add-opinion {:proposal/id id
-                                                                     :opinion     (if (pos? opinion) 0 +1)})])
-                     :startIcon (React/createElement ThumbUpAltTwoTone)}
-        "Zustimmen")
-      (input/button {:size      :small
-                     :color     (if (neg? opinion) "primary" "default")
-                     :variant   :text
-                     :onClick   #(comp/transact! this [(add-opinion {:proposal/id id
-                                                                     :opinion     (if (neg? opinion) 0 -1)})])
-                     :startIcon (React/createElement ThumbDownAltTwoTone)}
-        "Ablehnen"))))
+  (layout/box {:width "100%" :clone true}
+    (surfaces/card
+      {:variant :outlined}
+      (surfaces/card-action-area
+        {:href (routing/path->url
+                 (dr/path-to
+                   (comp/registry-key->class 'decide.ui.main-app/MainApp)
+                   (comp/registry-key->class `ProposalPage)
+                   id))}
+        (layout/box {:pb 0 :clone true}
+          (let [avatar (dd/avatar {} (some-> author-display-name first str/upper-case))
+                subheader [(str "#" (if (tempid/tempid? id) "?" id))
+                           author-display-name]]
+            (surfaces/card-header
+              {:title     title
+               :avatar    avatar
+               :subheader (str/join " · " subheader)})))
+        (surfaces/card-content {}
+          (dd/typography {:variant "body2" :color "textSecondary" :component "p"}
+            body)))
+      (surfaces/card-actions {}
+        (input/button {:size      :small
+                       :color     (if (pos? opinion) "primary" "default")
+                       :variant   :text
+                       :onClick   #(comp/transact! this [(add-opinion {:proposal/id id
+                                                                       :opinion     (if (pos? opinion) 0 +1)})])
+                       :startIcon (React/createElement ThumbUpAltTwoTone)}
+          "Zustimmen")
+        (input/button {:size      :small
+                       :color     (if (neg? opinion) "primary" "default")
+                       :variant   :text
+                       :onClick   #(comp/transact! this [(add-opinion {:proposal/id id
+                                                                       :opinion     (if (neg? opinion) 0 -1)})])
+                       :startIcon (React/createElement ThumbDownAltTwoTone)}
+          "Ablehnen")))))
 
 (def ui-proposal (comp/computed-factory Proposal {:keyfn :proposal/id}))
 
@@ -121,13 +121,14 @@
                    :or            {pro-votes 0 con-votes 0}}]
   (layout/grid {:container  true
                 :alignItems :center
-                :justify    :space-between}
-    (layout/grid {:item true :xs 1 :align :center} (str pro-votes))
+                :justify    :space-between
+                :wrap       :nowrap}
+    (layout/grid {:item true :xs true :align :center} (str pro-votes))
     (layout/grid {:item true :xs 9}
       (vote-linear-progress
         {:variant "determinate"
          :value   (percent-of-pro-votes pro-votes con-votes)}))
-    (layout/grid {:item true :xs 1 :align :center} (str con-votes))))
+    (layout/grid {:item true :xs true :align :center} (str con-votes))))
 ;; endregion
 
 (defn proposal-section [title & children]
@@ -155,30 +156,31 @@
       [["Vorschläge" (href-to-proposal-list)]
        [(str "#" id) ""]])
     (surfaces/card {:variant "outlined"}
-      (let [avatar (dd/avatar {} (some-> author-display-name first str/upper-case))
-            subheader [(str "#" (if (tempid/tempid? id) "?" id))
-                       author-display-name]]
-        (surfaces/card-header
-          {:title     title
-           :avatar    avatar
-           :subheader (str/join " · " subheader)
-           :style     {:paddingBottom 0}}))
-      (surfaces/card-header {:title     title
-                             :subheader (str "#" id)})
+      (layout/box {:pb 0 :clone true}
+        (let [avatar (dd/avatar {} (some-> author-display-name first str/upper-case))
+              subheader [(str "#" (if (tempid/tempid? id) "?" id))
+                         author-display-name]]
+          (surfaces/card-header
+            {:title     title
+             :avatar    avatar
+             :subheader (str/join " · " subheader)})))
+      #_(surfaces/card-header {:title     title
+                               :subheader (str "#" id)})
       ;; :action                   (input/icon-button {} (React/createElement MoreVertIcon))})
 
-      (surfaces/card-content {:style {:paddingTop 0}}
-        (dd/typography {:variant   "body1"
-                        :paragraph true}
-          body)
+      (layout/box {:pt 0 :clone true}
+        (surfaces/card-content {}
+          (dd/typography {:variant   "body1"
+                          :paragraph true}
+            body)
 
-        (when-not (empty? parents)
-          (proposal-section
-            (str "Dieser Vorschlag basiert auf " (count parents) " weiteren Vorschlägen")
-            (dd/list {:dense false}
-              (map ui-parent parents))))
+          (when-not (empty? parents)
+            (proposal-section
+              (str "Dieser Vorschlag basiert auf " (count parents) " weiteren Vorschlägen")
+              (dd/list {:dense false}
+                (map ui-parent parents))))
 
-        (proposal-section "Meinungen"
-          (vote-scale props))
+          (proposal-section "Meinungen"
+            (vote-scale props))
 
-        (proposal-section "Argumente")))))
+          (proposal-section "Argumente"))))))
