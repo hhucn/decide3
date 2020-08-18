@@ -87,14 +87,20 @@
        (link-to-icon 512)
 
        [:link {:href "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" :rel "stylesheet"}]
-       [:script (str "var fulcro_network_csrf_token = '" csrf-token "';")]]
-      [:body
+       [:script (str "var fulcro_network_csrf_token = '" csrf-token "';")]
+       [:style
+        "body, html, #decide {height: 100%;}
+         #decide {flex-direction: column;
+            height: 100%;
+            display: flex;
+         }"]]
+      [:body {:style "background-color: #006AB3; overflow-x: hidden;"}
        [:div#decide
         (or
           initial-html
-          [:div {:style "background-color: #d32f2f; width: 100%;  height: 100%; margin: 0; position: absolute; top: 0; left: 0;
+          [:div {:style "background-color: #006AB3; width: 100%;  height: 100%; margin: 0; position: absolute; top: 0; left: 0;
                       display: flex; align-items: center; justify-content: center;"}
-           [:img {:src "/assets/decide.svg" :max-width "30%"}]])
+           [:h1 {:style "color: white"} "decide"]])
         initial-html]
        (include-js "/js/main/main.js")]])))
 
