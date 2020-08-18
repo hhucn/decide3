@@ -6,32 +6,17 @@
             [com.fulcrologic.fulcro.dom :as dom :refer [div]]
             [com.fulcrologic.fulcro.algorithms.merge :as mrg]
             [decide.utils :as utils]
-            [material-ui.surfaces :as surfaces]
             [material-ui.inputs :as inputs]
-            [material-ui.icons :as icons]
             [material-ui.data-display :as dd]
             [decide.models.proposal :as proposal]
-            [material-ui.styles :as styles]
-            [material-ui.lab :as lab]
             [taoensso.timbre :as log]
-            [decide.ui.themes :as themes]
-            [com.fulcrologic.fulcro-css.css :as css]
-            [clojure.string :as str]
-            [com.fulcrologic.fulcro.data-fetch :as df]
-            [material-ui.inputs :as input]
             [material-ui.feedback :as feedback]
             ["@material-ui/icons/RemoveCircleOutline" :default RemoveIcon]
             ["react" :as React]
             [com.fulcrologic.fulcro.dom.events :as evt]
-            [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
-            [goog.object :as gobj]
             [material-ui.navigation :as navigation]
             [clojure.tools.reader.edn :as edn]
-            [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
-            ["@material-ui/core/FilledInput" :default FilledInput]
-            [com.fulcrologic.fulcro.algorithms.react-interop :as interop]))
-
-(def filled-input (interop/react-input-factory FilledInput))
+            [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]))
 
 (defmutation add-new-proposal [{:proposal/keys [id title body parents] :as params}]
   (action [{:keys [app state]}]
@@ -50,8 +35,8 @@
     (dd/list-item-avatar {} (str "#" id))
     (dd/list-item-text {} (str title))
     (dd/list-item-secondary-action {}
-      (input/icon-button
-        {:onClick onDelete
+      (inputs/icon-button
+        {:onClick    onDelete
          :aria-label "Elternteil entfernen"}
         (React/createElement RemoveIcon #js {:color "error"})))))
 
@@ -82,7 +67,7 @@
                                                  :parents (mapv #(select-keys % [:proposal/id]) parents)})
                     (m/set-props (comp/get-initial-state NewProposalForm))])
                  (onClose))}
-    (input/textfield
+    (inputs/textfield
       {:label        "Titel"
        :variant      "filled"
        :fullWidth    true
@@ -106,7 +91,7 @@
                 :when (not (id-in-parents? parents id))]
             (navigation/menu-item {:key id :value (str [:proposal/id id])}
               (str "#" id " " title))))))
-    (input/textfield
+    (inputs/textfield
       {:label        "Details"
        :variant      "filled"
        :margin       "normal"
@@ -123,15 +108,15 @@
   [{:keys [open? onClose] :or {open? false}}
    form]
   (feedback/dialog
-    {:open    open?
-     :fullWidth true
+    {:open       open?
+     :fullWidth  true
      :fullScreen (utils/<=-breakpoint? "xs")
-     :maxWidth "md"
-     :onClose onClose}
+     :maxWidth   "md"
+     :onClose    onClose}
     (feedback/dialog-title {} "Neuer Vorschlag")
     (feedback/dialog-content {} form)
     (feedback/dialog-actions {}
-      (input/button {:color "primary" :onClick onClose} "Abbrechen")
-      (input/button {:color "primary"
-                     :form :new-proposal-dialog-form
-                     :type "submit"} "Absenden"))))
+      (inputs/button {:color "primary" :onClick onClose} "Abbrechen")
+      (inputs/button {:color "primary"
+                      :form  :new-proposal-dialog-form
+                      :type  "submit"} "Absenden"))))
