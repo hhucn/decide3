@@ -1,14 +1,32 @@
 (ns decide.utils
   (:require
+    [ghostwheel.core :refer [>defn =>]]
+    [cljs.spec.alpha :as s]
     ["@material-ui/core/styles" :refer (useTheme)]
     [material-ui.utils :as utils]))
 
-(defn <=-breakpoint?
+(s/def ::breakpoint #{"xs" "sm" "md" "lg" "xl"})
+
+(>defn <=-breakpoint?
   "Checks if the current width of the viewport is equal or below the breakpoint."
   [bp]
+  [::breakpoint => boolean?]
   (-> (useTheme) .-breakpoints (.down bp) utils/use-media-query))
 
-(defn >=-breakpoint?
+(>defn >=-breakpoint?
   "Checks if the current width of the viewport is equal or above the breakpoint."
   [bp]
+  [::breakpoint => boolean?]
   (-> (useTheme) .-breakpoints (.up bp) utils/use-media-query))
+
+(>defn =-breakpoint?
+  "Checks if the current width of the viewport is equal to the breakpoint."
+  [bp]
+  [::breakpoint => boolean?]
+  (-> (useTheme) .-breakpoints (.only bp) utils/use-media-query))
+
+(>defn between-breakpoint?
+  "Checks if the current width of the viewport is between the breakpoints."
+  [down-breakpoint up-breakpoint]
+  [::breakpoint ::breakpoint => boolean?]
+  (-> (useTheme) .-breakpoints (.between down-breakpoint up-breakpoint) utils/use-media-query))
