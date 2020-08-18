@@ -66,12 +66,20 @@
 
 (defresolver proposal-resolver [{:keys [db]} {:keys [proposal/id]}]
   {::pc/input  #{:proposal/id}
-   ::pc/output [:proposal/id :proposal/title :proposal/body :proposal/created {:proposal/parents [:proposal/id]}]}
-  (let [{:proposal/keys [id title body created parents]}
+   ::pc/output [:proposal/id :proposal/title :proposal/body :proposal/created
+                {:proposal/parents [:proposal/id]}
+                :proposal/author-display-name]}
+  (let [{:proposal/keys [id title body created parents original-author]}
         (d/pull db [:proposal/id :proposal/title :proposal/body :proposal/created
-                    {:proposal/parents [:proposal/id]}]
+                    {:proposal/parents [:proposal/id]}
+                    {:proposal/original-author [:user/email]}]
           [:proposal/id id])]
-    #:proposal{:id id :title title :body body :created created :parents (or parents [])}))
+    #:proposal{:id                  id
+               :title               title
+               :body                body
+               :created             created
+               :parents             (or parents [])
+               :author-display-name (:user/email original-author)}))
 
 (defresolver all-proposal-ids [{:keys [db]} _]
   {::pc/input  #{}

@@ -1,5 +1,6 @@
 (ns decide.models.proposal
   (:require
+    [clojure.string :as str]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.dom :as dom :refer [div ul li p h1 h3 form button input span]]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
@@ -28,41 +29,47 @@
   (remote [env]
     (m/with-server-side-mutation env 'decide.api.proposal/add-opinion)))
 
-(defsc Proposal [this {:proposal/keys [id title body opinion]}]
+(defsc Proposal [this {:proposal/keys [id title body opinion author-display-name]}]
   {:query         (fn []
                     [:proposal/id :proposal/title :proposal/body
                      :proposal/pro-votes :proposal/con-votes
                      :proposal/opinion
-                     {:proposal/parents '...}])
+                     {:proposal/parents '...}
+                     :proposal/author-display-name])
    :ident         :proposal/id
    :initial-state (fn [{:keys [id title body]}]
                     #:proposal{:id        id
                                :title     title
                                :body      body
-                               :pro-votes 534
-                               :con-votes 340})}
-  (surfaces/card {:style {:width "100%"}}
+                               :pro-votes 0
+                               :con-votes 0})}
+  (surfaces/card
+    {:style   {:width "100%"}
+     :variant :outlined}
     (surfaces/card-action-area
       {:href (routing/path->url
                (dr/path-to
                  (comp/registry-key->class 'decide.ui.main-app/MainApp)
                  (comp/registry-key->class `ProposalPage)
                  id))}
+      (let [avatar (dd/avatar {} (some-> author-display-name first str/upper-case))
+            subheader [(str "#" (if (tempid/tempid? id) "?" id))
+                       author-display-name]]
+        (surfaces/card-header
+          {:title     title
+           :avatar    avatar
+           :subheader (str/join " · " subheader)
+           :style     {:paddingBottom 0}}))
       (surfaces/card-content {}
-        (dd/typography {:gutterBottom true :variant "h6" :component "h2"}
-          (dd/typography
-            {:variant "subtitle1" :component "span" :color "textSecondary"
-             :style   {:marginRight ".25em"}}
-            (str "#" (if (tempid/tempid? id) "?" id)))
-          title)
-        (dd/typography {:variant "body2" :color "textSecondary" :component "p"} body)))
+        (dd/typography {:variant "body2" :color "textSecondary" :component "p"}
+          body)))
     (surfaces/card-actions {}
       (input/button {:size      :small
                      :color     (if (pos? opinion) "primary" "default")
                      :variant   :text
                      :onClick   #(comp/transact! this [(add-opinion {:proposal/id id
                                                                      :opinion     (if (pos? opinion) 0 +1)})])
-                     :startIcon (React/createElement ThumbUpAltTwoTone #js {:color "default"})}
+                     :startIcon (React/createElement ThumbUpAltTwoTone)}
         "Zustimmen")
       (input/button {:size      :small
                      :color     (if (neg? opinion) "primary" "default")
@@ -110,8 +117,8 @@
                    :colorPrimary    {:backgroundColor (.. theme -palette -error -main)}})))
      LinearProgress)))
 
-(defn vote-scale [{:proposal/keys [pro-votes con-votes] :or {pro-votes 0 con-votes 0}}]
-  (log/info pro-votes con-votes)
+(defn vote-scale [{:proposal/keys [pro-votes con-votes]
+                   :or            {pro-votes 0 con-votes 0}}]
   (layout/grid {:container  true
                 :alignItems :center
                 :justify    :space-between}
@@ -130,10 +137,11 @@
       (dd/typography {:variant "h6" :color "textSecondary" :component "h3"} title)
       children)))
 
-(defsc ProposalPage [this {:proposal/keys [id title body parents pro-votes con-votes] :as props}]
+(defsc ProposalPage [this {:proposal/keys [id title body parents author-display-name] :as props}]
   {:query         [:proposal/id :proposal/title :proposal/body
                    {:proposal/parents (comp/get-query Parent)}
-                   :proposal/pro-votes :proposal/con-votes]
+                   :proposal/pro-votes :proposal/con-votes
+                   :proposal/author-display-name]
    :ident         :proposal/id
    :route-segment ["proposal" :proposal-id]
    :will-enter    (fn will-enter-proposal-page
@@ -146,16 +154,21 @@
     (breadcrumbs/breadcrumb-nav
       [["Vorschläge" (href-to-proposal-list)]
        [(str "#" id) ""]])
-    (surfaces/card {}
-      (surfaces/card-header {:title                    title
-                             :subheader                (str "#" id)
-                             :subheaderTypographyProps {:style {:display    "inline"
-                                                                :marginLeft ".3rem"}}})
+    (surfaces/card {:variant "outlined"}
+      (let [avatar (dd/avatar {} (some-> author-display-name first str/upper-case))
+            subheader [(str "#" (if (tempid/tempid? id) "?" id))
+                       author-display-name]]
+        (surfaces/card-header
+          {:title     title
+           :avatar    avatar
+           :subheader (str/join " · " subheader)
+           :style     {:paddingBottom 0}}))
+      (surfaces/card-header {:title     title
+                             :subheader (str "#" id)})
       ;; :action                   (input/icon-button {} (React/createElement MoreVertIcon))})
 
       (surfaces/card-content {:style {:paddingTop 0}}
-        (dd/typography {:variant   "body2"
-                        :color     "textSecondary"
+        (dd/typography {:variant   "body1"
                         :paragraph true}
           body)
 
