@@ -23,7 +23,8 @@
             [com.fulcrologic.fulcro.mutations :as m]
             [decide.ui.components.breadcrumbs :as breadcrumbs]
             [decide.routing :as routing]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [decide.utils :as utils]))
 
 (defn add-proposal-fab [props]
   (inputs/fab
@@ -31,11 +32,15 @@
       {:aria-label "Neuer Vorschlag"
        :title      "Neuer Vorschlag"
        :color      "secondary"
+       :variant    (if (utils/>=-breakpoint? "sm") "extended" "round")
        :style      {:position "fixed"
-                    :bottom   "24px"
-                    :right    "24px"}}
+                    :bottom   "16px"
+                    :right    "16px"}}
       props)
-    (React/createElement Add)))
+    (React/createElement Add)
+    (when (utils/>=-breakpoint? "sm")
+      "Neuer Vorschlag")))
+
 
 (defn empty-proposal-list-message []
   (layout/box {:p 2 :mx "auto"}
