@@ -59,12 +59,14 @@
       [["Vorschläge" ""]])
     (if (empty? all-proposals)
       (empty-proposal-list-message)
-      (dd/list {:disablePadding true}
-        (for [proposal all-proposals]
-          (dd/list-item {:disableGutters true :key (:proposal/id proposal)}
-            (proposal/ui-proposal proposal)))))
+      (layout/box {:pb 8 :clone true}                       ; to not cover up the FAB
+        (dd/list {}
+          (for [proposal all-proposals]
+            (dd/list-item {:disableGutters true :key (:proposal/id proposal)}
+              (proposal/ui-proposal proposal))))))
 
     (add-proposal-fab {:onClick #(m/set-value! this :new-proposal-modal-open? true)})
+
     (new-proposal/new-proposal-dialog
       {:open? new-proposal-modal-open?
        :onClose #(m/set-value! this :new-proposal-modal-open? false)} ; TODO Reset form on close
