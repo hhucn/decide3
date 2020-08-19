@@ -12,7 +12,7 @@
     [decide.models.proposal :as proposal]
     [taoensso.timbre :as log]
     [com.fulcrologic.fulcro.data-fetch :as df]
-    [decide.ui.settings :as settings]
+    [decide.ui.pages.settings :as settings]
     ["@material-ui/icons/Add" :default Add]
     ["react" :as React]
     [com.fulcrologic.fulcro.mutations :as m]

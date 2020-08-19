@@ -1,17 +1,14 @@
-(ns decide.ui.settings
+(ns decide.ui.pages.settings
   (:require [material-ui.layout :as layout]
-            [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
             [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
             [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
             [com.fulcrologic.fulcro.algorithms.form-state :as fs]
             [material-ui.surfaces :as surfaces]
             [com.fulcrologic.fulcro.dom :as dom]
             [com.fulcrologic.fulcro.dom.events :as evt]
-            [material-ui.utils :as mutils]
             [material-ui.inputs :as inputs]
             [taoensso.timbre :as log]
             [material-ui.feedback :as feedback]
-            [decide.ui.themes :as themes]
             [material-ui.data-display :as dd]))
 
 (defn wide-textfield
