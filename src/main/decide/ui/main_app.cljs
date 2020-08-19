@@ -24,8 +24,7 @@
   (layout/box
     {:position "fixed"
      :bottom   "16px"
-     :right    "16px"
-     :clone    true}
+     :right    "16px"}
     (inputs/fab
       (merge
         {:aria-label "Neuer Vorschlag"

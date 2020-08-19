@@ -4,7 +4,6 @@
     #?@(:cljs [[com.fulcrologic.fulcro.networking.http-remote :as net]
                [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
                [com.fulcrologic.fulcro.algorithms.merge :as mrg]
-               [decide.models.todo :as todo]
                [decide.ui.login :as login]
                [decide.ui.main-app :as todo-app]
                [decide.routing :as routing]])

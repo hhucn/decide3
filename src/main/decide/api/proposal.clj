@@ -8,28 +8,28 @@
   (:import (java.util Date)))
 
 
-(defmutation add-proposal [{:keys [conn AUTH/user-id] :as env} {:proposal/keys [id title body parents]}]
+(defmutation add-proposal [{:keys [conn AUTH/profile-nickname] :as env} {:proposal/keys [id title body parents]}]
   {::pc/output [:proposal/id]}
-  (if user-id
+  (if profile-nickname
     (let [real-id (str (rand-int 1000))
           proposal #:proposal{:id              real-id
-                               :title           title
-                               :body            body
-                               :parents         (for [parent parents
-                                                      :let [id (:proposal/id parent)]]
-                                                  [:proposal/id id])
-                               :original-author [:user/id user-id]
-                               :created         (Date.)}
+                              :title           title
+                              :body            body
+                              :parents         (for [parent parents
+                                                     :let [id (:proposal/id parent)]]
+                                                 [:proposal/id id])
+                              :original-author [:profile/nickname profile-nickname]
+                              :created         (Date.)}
           tx-report (d/transact conn [proposal])]
       {:tempids     {id real-id}
        ::p/env      (assoc env :db (:db-after tx-report))
        :proposal/id real-id})
     (throw (ex-info "User is not logged in!" {}))))
 
-(defmutation add-opinion [{:keys [conn AUTH/user-id] :as env} {:keys [proposal/id opinion]}]
+(defmutation add-opinion [{:keys [conn AUTH/profile-nickname] :as env} {:keys [proposal/id opinion]}]
   {::pc/params [:proposal/id :opinion]}
-  (if user-id
-    (let [tx-report (opinion/set-opinion! conn user-id id opinion)]
+  (if profile-nickname
+    (let [tx-report (opinion/set-opinion! conn profile-nickname id opinion)]
       {::p/env (assoc env :db (:db-after tx-report))})
     (throw (ex-info "User is not logged in!" {}))))
 
@@ -49,37 +49,38 @@
                :con-votes (get opinions -1 0)}))
 
 
-(defresolver resolve-personal-opinion [{:keys [db AUTH/user-id]} {:keys [proposal/id]}]
+(defresolver resolve-personal-opinion [{:keys [db AUTH/profile-nickname]} {:keys [proposal/id]}]
   {::pc/input  #{:proposal/id}
    ::pc/output [:proposal/opinion]}
   (let [opinion-value
-        (d/q
-          '[:find ?value .
-            :in $ ?id ?user
-            :where
-            [?e :proposal/id ?id]
-            [?e :proposal/opinions ?opinions]
-            [?opinion :opinion/user ?user]
-            [?opinion :opinion/value ?value]]
-          db id [:user/id user-id])]
+        (log/spy :info
+          (d/q
+            '[:find ?value .
+              :in $ ?id ?user
+              :where
+              [?e :proposal/id ?id]
+              [?e :proposal/opinions ?opinions]
+              [?opinions :profile/opinions ?user]
+              [?opinions :opinion/value ?value]]
+            db id [:profile/nickname profile-nickname]))]
     #:proposal{:opinion (or opinion-value 0)}))
 
 (defresolver proposal-resolver [{:keys [db]} {:keys [proposal/id]}]
   {::pc/input  #{:proposal/id}
    ::pc/output [:proposal/id :proposal/title :proposal/body :proposal/created
                 {:proposal/parents [:proposal/id]}
-                :proposal/author-display-name]}
+                {:proposal/original-author [:profile/nickname]}]}
   (let [{:proposal/keys [id title body created parents original-author]}
         (d/pull db [:proposal/id :proposal/title :proposal/body :proposal/created
                     {:proposal/parents [:proposal/id]}
-                    {:proposal/original-author [:user/email]}]
+                    {:proposal/original-author [:profile/nickname]}]
           [:proposal/id id])]
-    #:proposal{:id                  id
-               :title               title
-               :body                body
-               :created             created
-               :parents             (or parents [])
-               :author-display-name (:user/email original-author)}))
+    #:proposal{:id              id
+               :title           title
+               :body            body
+               :created         created
+               :parents         (or parents [])
+               :original-author original-author}))
 
 (defresolver all-proposal-ids [{:keys [db]} _]
   {::pc/input  #{}

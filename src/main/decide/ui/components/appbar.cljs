@@ -2,6 +2,7 @@
   (:require
     [com.fulcrologic.fulcro.application :as app]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.mutations :refer [defmutation]]
     [material-ui.data-display :as dd]
     [material-ui.icons :as icons]
     [material-ui.inputs :as inputs]
@@ -13,6 +14,9 @@
     ["@material-ui/icons/AccountCircle" :default AccountCircleIcon]
     ["react" :as React]
     [material-ui.navigation :as navigation]))
+
+(defmutation logout [params]
+  (action [env] true))
 
 (defsc AppBar
   [this

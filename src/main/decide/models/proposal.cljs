@@ -29,13 +29,13 @@
   (remote [env]
     (m/with-server-side-mutation env 'decide.api.proposal/add-opinion)))
 
-(defsc Proposal [this {:proposal/keys [id title body opinion author-display-name]}]
+(defsc Proposal [this {:proposal/keys [id title body opinion original-author]}]
   {:query         (fn []
                     [:proposal/id :proposal/title :proposal/body
                      :proposal/pro-votes :proposal/con-votes
                      :proposal/opinion
                      {:proposal/parents '...}
-                     :proposal/author-display-name])
+                     {:proposal/original-author [:profile/name]}])
    :ident         :proposal/id
    :initial-state (fn [{:keys [id title body]}]
                     #:proposal{:id        id
@@ -53,9 +53,9 @@
                    (comp/registry-key->class `ProposalPage)
                    id))}
         (layout/box {:pb 0 :clone true}
-          (let [avatar (dd/avatar {} (some-> author-display-name first str/upper-case))
+          (let [avatar (dd/avatar {} (some-> original-author :profile/name first))
                 subheader [(str "#" (if (tempid/tempid? id) "?" id))
-                           author-display-name]]
+                           (:profile/name original-author)]]
             (surfaces/card-header
               {:title     title
                :avatar    avatar
@@ -138,11 +138,11 @@
       (dd/typography {:variant "h6" :color "textSecondary" :component "h3"} title)
       children)))
 
-(defsc ProposalPage [this {:proposal/keys [id title body parents author-display-name] :as props}]
+(defsc ProposalPage [this {:proposal/keys [id title body parents original-author] :as props}]
   {:query         [:proposal/id :proposal/title :proposal/body
                    {:proposal/parents (comp/get-query Parent)}
                    :proposal/pro-votes :proposal/con-votes
-                   :proposal/author-display-name]
+                   {:proposal/original-author [:profile/name]}]
    :ident         :proposal/id
    :route-segment ["proposal" :proposal-id]
    :will-enter    (fn will-enter-proposal-page
@@ -157,9 +157,9 @@
        [(str "#" id) ""]])
     (surfaces/card {:variant "outlined"}
       (layout/box {:pb 0 :clone true}
-        (let [avatar (dd/avatar {} (some-> author-display-name first str/upper-case))
+        (let [avatar (dd/avatar {} (some-> original-author :profile/name first))
               subheader [(str "#" (if (tempid/tempid? id) "?" id))
-                         author-display-name]]
+                         (:profile/name original-author)]]
           (surfaces/card-header
             {:title     title
              :avatar    avatar

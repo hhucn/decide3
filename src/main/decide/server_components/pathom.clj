@@ -7,9 +7,9 @@
     [com.wsscode.pathom.core :as p]
     [com.wsscode.common.async-clj :refer [let-chan]]
     [clojure.core.async :as async]
-    [decide.api.todo :as todo]
     [decide.api.user :as user]
     [decide.api.proposal :as proposal.api]
+    [decide.models.profile :as profile]
     [decide.server-components.config :refer [config]]
     [decide.server-components.database :refer [conn]]
     [datahike.api :as d]))
@@ -26,7 +26,7 @@
      (update ::pc/index-resolvers (fn [rs] (apply dissoc rs (filter #(str/starts-with? (namespace %) "com.wsscode.pathom") (keys rs)))))
      (update ::pc/index-mutations (fn [rs] (apply dissoc rs (filter #(str/starts-with? (namespace %) "com.wsscode.pathom") (keys rs))))))})
 
-(def all-resolvers [todo/resolvers index-explorer user/resolvers proposal.api/resolvers])
+(def all-resolvers [index-explorer user/resolvers proposal.api/resolvers profile/resolvers])
 
 (defn preprocess-parser-plugin
   "Helper to create a plugin that can view/modify the env/tx of a top-level request.
@@ -67,16 +67,16 @@
                                     (p/env-wrap-plugin (fn [env]
                                                          ;; Here is where you can dynamically add things to the resolver/mutation
                                                          ;; environment, like the server config, database connections, etc.
-                                                         (let [{user-id :user/id
-                                                                valid?  :session/valid?}
+                                                         (let [{nickname :profile/nickname
+                                                                valid?   :session/valid?}
                                                                (get-in env [:ring/request :session])]
                                                            ;:db @db-connection ; real datomic would use (d/db db-connection)
                                                            ;:connection db-connection
                                                            (merge
-                                                             {:AUTH/user-id (when valid? user-id)
-                                                              :conn         conn
-                                                              :db           (d/db conn)
-                                                              :config       config}
+                                                             {:AUTH/profile-nickname (when valid? nickname)
+                                                              :conn                  conn
+                                                              :db                    (d/db conn)
+                                                              :config                config}
                                                              env))))
                                     (when trace?
                                       (preprocess-parser-plugin log-requests))

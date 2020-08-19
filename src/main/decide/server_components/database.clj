@@ -6,9 +6,10 @@
     [datahike.api :as d]
     [decide.models.user :as user]
     [decide.models.proposal :as proposal]
-    [decide.models.opinion :as opinion]))
+    [decide.models.opinion :as opinion]
+    [decide.models.profile :as profile]))
 
-(def schema (into [] cat [user/schema proposal/schema opinion/schema]))
+(def schema (into [] cat [user/schema proposal/schema opinion/schema profile/schema]))
 
 (defn test-database [config]
   (d/delete-database config)

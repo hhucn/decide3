@@ -4,6 +4,7 @@
     [expound.alpha :as expound]
     [clojure.spec.alpha :as s]
     [mount.core :as mount]
+    [datahike.api :as d]
     ;; this is the top-level dependent component...mount will find the rest via ns requires
     [decide.server-components.http-server :refer [http-server]]))
 

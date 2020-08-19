@@ -22,17 +22,17 @@
 
 (defmutation sign-in [{:keys [db] :as env} {:user/keys [email password]}]
   {::pc/params [:user/email :user/password]
-   ::pc/output [:session/valid? :user/id :signin/result :errors]}
-  (log/info "Authenticating" email)
+   ::pc/output [:session/valid? :profile/nickname :signin/result :errors]}
   (if (user/email-in-db? db email)
-    (let [user (user/get-by-email db email [:user/id :user/password])]
+    (let [{:keys [profile/_identities] :as user} (user/get-by-email db email [:user/id :user/password {:profile/_identities [:profile/nickname]}])
+          nickname (:profile/nickname (first _identities))]
       (if (user/password-valid? user password)
         (response-updating-session env
-          {:signin/result  :success
-           :session/valid? true
-           :user/id       (:user/id user)}
-          {:user/id (:user/id user)
-           :session/valid? true})
+          {:signin/result    :success
+           :session/valid?   true
+           :profile/nickname nickname}
+          {:profile/nickname nickname
+           :session/valid?   true})
         {:signin/result :fail
          :signin/errors #{:invalid-credentials}}))
     {:signin/result :fail
@@ -41,7 +41,7 @@
 
 (defmutation sign-up-user [{:keys [conn] :as env} {:user/keys [email password]}]
   {::pc/params [:user/email :user/password]
-   ::pc/output [:session/valid? :user/id :signup/result :errors]}
+   ::pc/output [:session/valid? :profile/nickname :signup/result :errors]}
   (if (user/email-in-db? @conn email)
     {:signup/result :fail
      :errors        #{:email-in-use}}
@@ -49,26 +49,30 @@
           user #:user{:id       id
                       :email    email
                       :password (user/hash-password password)}
-          tx-report (d/transact conn [user])]
+          profile #:profile{:nickname   email
+                            :name       email
+                            :identities [[:user/id id]]}
+          tx-report (d/transact conn [user profile])]
       (response-updating-session env
-        {:signup/result  :success
-         :user/id       id
-         :session/valid? true
-         ::p/env         (assoc env :db (:db-after tx-report))}
-        {:user/id        (:user/id user)
-         :session/valid? true}))))
+        {:signup/result    :success
+         :profile/nickname email
+         :session/valid?   true
+         ::p/env           (assoc env :db (:db-after tx-report))}
+        {:profile/nickname email
+         :session/valid?   true}))))
 
 (defmutation sign-out [env _]
   {::pc/output [:session/valid?]}
   (response-updating-session env
     {:session/valid? false}
-    {:session/valid? false :user/id nil}))
+    {:session/valid? false :profile/nickname nil}))
 
 (defresolver current-session-resolver [env _]
-  {::pc/output [{::current-session [:session/valid? :user/id]}]}
-  (let [{:keys [session/valid?] :as session} (get-in env [:ring/request :session])]
+  {::pc/output [{::current-session [:session/valid? :profile/nickname]}]}
+  (let [{:keys [session/valid? profile/nickname] :as session} (get-in env [:ring/request :session])]
+    (log/debug "Resolve Session for: " session)
     (if valid?
-      {::current-session {:session/valid? true :user/id (:user/id session)}}
+      {::current-session {:session/valid? true :profile/nickname nickname}}
       {::current-session {:session/valid? false}})))
 
 (defmutation change-password [{:keys [db conn AUTH/user-id]} {:keys [old-password new-password]}]
