@@ -44,7 +44,7 @@
            {}))))})
 
 (defn log-requests [{:keys [env tx] :as req}]
-  (log/debug "Pathom transaction:" (pr-str tx))
+  (log/debug "Pathom transaction:\n" tx)
   req)
 
 (defn process-error [env err]

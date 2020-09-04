@@ -2,13 +2,24 @@
   (:require
     [mount.core :refer [defstate args]]
     [com.fulcrologic.fulcro.server.config :refer [load-config!]]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [clojure.pprint :as pprint]))
 
+(defn prettify-data [data]
+  (if (string? data)
+    data
+    (with-out-str (pprint/pprint data))))
+
+(defn pretty-print-middleware [{:keys [level] :as data}]
+  (cond-> data
+    (#{:debug} level) (update :vargs (partial mapv prettify-data))))
 
 (defn configure-logging! [config]
   (let [{:keys [taoensso.timbre/logging-config]} config]
     (log/info "Configuring Timbre with " logging-config)
-    (log/merge-config! logging-config)))
+    (-> logging-config
+      (assoc :middleware [pretty-print-middleware])
+      log/merge-config!)))
 
 
 (defstate config
