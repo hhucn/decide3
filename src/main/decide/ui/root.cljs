@@ -28,7 +28,7 @@
   (and dark-mode-matcher (.-matches dark-mode-matcher)))
 
 
-(defrouter RootRouter [this {:keys [current-state]}]
+(defrouter PageRouter [this {:keys [current-state]}]
   {:router-targets [login/LoginPage todo-app/MainApp login/SignUpPage]}
   #_(case current-state
       :pending (dom/div "Loading...")
@@ -36,17 +36,17 @@
       ;; default will be used when the current state isn't yet set
       (dom/div "No route selected.")))
 
-(def ui-root-router (comp/factory RootRouter))
+(def ui-page-router (comp/factory PageRouter))
 
-(defsc Root [this {:keys [ui/theme ui/root-router]}]
+(defsc Root [this {:keys [ui/theme ui/page-router]}]
   {:query [:ui/theme
-           {:ui/root-router (comp/get-query RootRouter)}
+           {:ui/page-router (comp/get-query PageRouter)}
            {:all-proposals (comp/get-query proposal/Proposal)}]
    :initial-state
-          (fn [_] {:ui/root-router (comp/get-initial-state RootRouter)
+          (fn [_] {:ui/page-router (comp/get-initial-state PageRouter)
                    :ui/theme       (if (dark-mode?) :dark :light)
                    :all-proposals  []})}
   (styles/theme-provider {:theme (themes/get-mui-theme theme)}
     (mutils/css-baseline {})
     (inj/style-element {:component Root})
-    (ui-root-router root-router)))
+    (ui-page-router page-router)))
