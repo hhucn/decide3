@@ -54,7 +54,7 @@
   (layout/container {:maxWidth "sm"}
     (mutils/css-baseline {})
     (layout/box {:mt 8 :p 3 :clone true}
-      (surfaces/paper {}
+      (apply surfaces/paper {}
         children))))
 
 
