@@ -1,4 +1,6 @@
-(ns decide.models.proposal)
+(ns decide.models.proposal
+  (:require [clojure.spec.alpha :as s]
+            [clojure.string :as str]))
 
 (def schema
   [{:db/ident       :proposal/id
@@ -31,9 +33,8 @@
    {:db/ident       :proposal/parents
     :db/doc         "≥0 parent proposals from which the proposal is derived."
     :db/cardinality :db.cardinality/many
-    :db/valueType   :db.type/ref}
+    :db/valueType   :db.type/ref}])
 
-   {:db/ident       :proposal/opinions
-    :db/cardinality :db.cardinality/many
-    :db/valueType   :db.type/ref
-    :db/isComponent true}])
+(s/def :proposal/id (s/and string? (complement str/blank?)))
+(s/def :proposal/title (s/and string? (complement str/blank?)))
+(s/def :proposal/body string?)
