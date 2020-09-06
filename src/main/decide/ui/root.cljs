@@ -4,6 +4,7 @@
     [material-ui.utils :as mutils :refer [css-baseline]]
     [material-ui.styles :as styles :refer [prefers-dark?]]
     [decide.ui.themes :as themes]
+    [decide.ui.components.NewProposal :as new-proposal]
     [taoensso.timbre :as log]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr :refer [defrouter]]
     [decide.ui.main-app :as todo-app]
@@ -38,15 +39,18 @@
 
 (def ui-page-router (comp/factory PageRouter))
 
-(defsc Root [this {:keys [ui/theme ui/page-router]}]
+(defsc Root [_this {:keys [ui/theme ui/page-router new-proposal-dialog]}]
   {:query [:ui/theme
            {:ui/page-router (comp/get-query PageRouter)}
-           {:all-proposals (comp/get-query proposal/Proposal)}]
+           {:all-proposals (comp/get-query proposal/Proposal)}
+           {:new-proposal-dialog (comp/get-query new-proposal/NewProposalFormDialog)}]
    :initial-state
-          (fn [_] {:ui/page-router (comp/get-initial-state PageRouter)
-                   :ui/theme       (if (dark-mode?) :dark :light)
-                   :all-proposals  []})}
+          (fn [_] {:ui/page-router      (comp/get-initial-state PageRouter)
+                   :ui/theme            (if (dark-mode?) :dark :light)
+                   :all-proposals       []
+                   :new-proposal-dialog (comp/get-initial-state new-proposal/NewProposalFormDialog)})}
   (styles/theme-provider {:theme (themes/get-mui-theme theme)}
     (mutils/css-baseline {})
     (inj/style-element {:component Root})
-    (ui-page-router page-router)))
+    (ui-page-router page-router)
+    (new-proposal/ui-new-proposal-form2 new-proposal-dialog)))
