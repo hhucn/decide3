@@ -3,70 +3,18 @@
     [material-ui.layout :as layout]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr :refer [defrouter]]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-    [decide.ui.components.NewProposal :as new-proposal]
     [decide.ui.components.appbar :as appbar]
     [material-ui.surfaces :as surfaces]
-    [material-ui.inputs :as inputs]
     [material-ui.utils :as mutils :refer [css-baseline]]
     [material-ui.data-display :as dd]
     [decide.models.proposal :as proposal]
-    [taoensso.timbre :as log]
     [com.fulcrologic.fulcro.data-fetch :as df]
     [decide.ui.pages.settings :as settings]
-    ["@material-ui/icons/Add" :default Add]
-    ["react" :as React]
-    [com.fulcrologic.fulcro.mutations :as m]
-    [decide.ui.components.breadcrumbs :as breadcrumbs]
-    [decide.routing :as routing]
-    [decide.utils :as utils]
-    [com.fulcrologic.fulcro.react.hooks :as hooks]))
-
-(defn add-proposal-fab [props]
-  (layout/box
-    {:position "fixed"
-     :bottom   "16px"
-     :right    "16px"}
-    (inputs/fab
-      (merge
-        {:aria-label "Neuer Vorschlag"
-         :title      "Neuer Vorschlag"
-         :color      "secondary"
-         :variant    (if (utils/>=-breakpoint? "sm") "extended" "round")}
-        props)
-      (React/createElement Add)
-      (when (utils/>=-breakpoint? "sm")
-        "Neuer Vorschlag"))))
-
-
-(defn empty-proposal-list-message []
-  (layout/box {:p 2 :mx "auto"}
-    (dd/typography {:align "center"
-                    :color "textSecondary"}
-      "Bisher gibt es keine Vorschläge.")))
-
-(defsc MainProposalList [this {:keys [all-proposals]}]
-  {:query         [{[:all-proposals '_] (comp/get-query proposal/Proposal)}]
-   :ident         (fn [] [:content/id :main-proposal-list])
-   :initial-state {:all-proposals []}
-   :route-segment ["home"]
-   :use-hooks?    true}
-  (let [open-new-proposal-dialog (hooks/use-callback #(comp/transact! this [(new-proposal/show-new-proposal-form-dialog {})]))]
-    (comp/fragment
-      (layout/container {:maxWidth :md}
-        (breadcrumbs/breadcrumb-nav
-          [["Vorschläge" ""]])
-        (if (empty? all-proposals)
-          (empty-proposal-list-message)
-          (layout/box {:pb 8 :clone true}                   ; to not cover up the FAB
-            (dd/list {}
-              (for [proposal all-proposals]
-                (dd/list-item {:disableGutters true :key (:proposal/id proposal)}
-                  (proposal/ui-proposal proposal)))))))
-
-      (add-proposal-fab {:onClick open-new-proposal-dialog}))))
+    [decide.ui.components.main-proposal-list :as main-proposal-list]
+    [decide.routing :as routing]))
 
 (defrouter ContentRouter [this props]
-  {:router-targets [MainProposalList settings/SettingsPage proposal/ProposalPage]})
+  {:router-targets [main-proposal-list/MainProposalList settings/SettingsPage proposal/ProposalPage]})
 
 (def ui-content-router (comp/factory ContentRouter))
 
@@ -103,10 +51,10 @@
       (dd/list {}
         (nav-entry this
           {:label "Vorschläge"
-           :path  (dr/path-to MainApp MainProposalList)})
+           :path  (dr/path-to MainApp main-proposal-list/MainProposalList)})
         (nav-entry this
           {:label "Einstellungen"
-           :path  (dr/path-to MainProposalList settings/SettingsPage)})))
+           :path  (dr/path-to main-proposal-list/MainProposalList settings/SettingsPage)})))
     (layout/box {:flex 1 :clone true}
       (surfaces/paper {:component :main}
         (ui-content-router content-router)))))

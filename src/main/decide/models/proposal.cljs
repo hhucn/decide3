@@ -85,7 +85,7 @@
   (routing/path->url
     (dr/path-to
       (comp/registry-key->class 'decide.ui.main-app/MainApp)
-      (comp/registry-key->class 'decide.ui.main-app/MainProposalList))))
+      (comp/registry-key->class 'decide.ui.components.main-proposal-list/MainProposalList))))
 
 (defsc Parent [this {:proposal/keys [id title]}]
   {:query [:proposal/id :proposal/title]

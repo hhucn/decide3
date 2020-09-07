@@ -13,7 +13,8 @@
             [material-ui.inputs :as inputs]
             [taoensso.timbre :as log]
             [decide.routing :as routing]
-            [material-ui.navigation :as navigation]))
+            [material-ui.navigation :as navigation]
+            [decide.ui.components.main-proposal-list :as main-proposal-list]))
 
 (declare LoginPage)
 
@@ -40,7 +41,7 @@
       (if (empty? errors)
         (do
           (m/set-string! component :user/password :value "")
-          (comp/transact! component [(routing/route-to {:path (dr/path-to todo-app/MainApp todo-app/MainProposalList)})]))
+          (comp/transact! component [(routing/route-to {:path (dr/path-to todo-app/MainApp main-proposal-list/MainProposalList)})]))
         (cond
           (contains? errors :email-in-use)
           (m/set-string! component :ui/email-error :value "E-Mail already in use!")))))
@@ -135,7 +136,7 @@
       (if (empty? errors)
         (do
           (m/set-string! component :user/password :value "")
-          (comp/transact! component [(routing/route-to {:path (dr/path-to todo-app/MainApp todo-app/MainProposalList)})]))
+          (comp/transact! component [(routing/route-to {:path (dr/path-to todo-app/MainApp main-proposal-list/MainProposalList)})]))
         (when errors
           (or
             (contains? errors :account-does-not-exist)
