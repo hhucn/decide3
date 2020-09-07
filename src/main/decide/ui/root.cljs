@@ -11,7 +11,8 @@
     [decide.ui.login :as login]
     [com.fulcrologic.fulcro-css.css-injection :as inj]
     [clojure.string :as str]
-    [decide.models.proposal :as proposal]))
+    [decide.models.proposal :as proposal]
+    [decide.ui.pages.splash :as splash]))
 
 
 (def dark-mode-matcher
@@ -31,11 +32,12 @@
 
 (defrouter PageRouter [this {:keys [current-state]}]
   {:router-targets [login/LoginPage todo-app/MainApp login/SignUpPage]}
+  (when-not current-state splash/splash)
   #_(case current-state
-      :pending (dom/div "Loading...")
-      :failed (dom/div "Failed!")
+      ; :pending "Loading..."
+      :failed "Failed!"
       ;; default will be used when the current state isn't yet set
-      (dom/div "No route selected.")))
+      (splash/ui-splash-screen nil)))
 
 (def ui-page-router (comp/factory PageRouter))
 

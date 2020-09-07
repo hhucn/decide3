@@ -17,7 +17,8 @@
     [ring.util.response :as resp]
     [hiccup.page :refer [html5 include-js include-css]]
     [taoensso.timbre :as log]
-    [decide.application :refer [SPA]]))
+    [decide.application :refer [SPA]]
+    [decide.ui.pages.splash :as splash]))
 
 (def ^:private not-found-handler
   (fn [req]
@@ -95,13 +96,7 @@
             display: flex;
          }"]]
       [:body {:style "background-color: #006AB3; overflow-x: hidden;"}
-       [:div#decide
-        (or
-          initial-html
-          [:div {:style "background-color: #006AB3; width: 100%;  height: 100%; margin: 0; position: absolute; top: 0; left: 0;
-                      display: flex; align-items: center; justify-content: center;"}
-           [:h1 {:style "color: white"} "decide"]])
-        initial-html]
+       [:div#decide initial-html]
        (include-js "/js/main/main.js")]])))
 
 (defn index-with-db [csrf-token normalized-db]
@@ -111,7 +106,8 @@
 
 (defn index-with-credentials [csrf-token request]
   (let [initial-state (ssr/build-initial-state (parser {:ring/request request} (comp/get-query Session)) Session)]
-    (index csrf-token (ssr/initial-state->script-tag initial-state))))
+    (index csrf-token (ssr/initial-state->script-tag initial-state)
+      splash/splash)))
 
 (defn ssr-html [csrf-token app normalized-db root-component-class]
   (log/debug "Serving index.html")
