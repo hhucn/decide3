@@ -14,19 +14,10 @@
   resolved "https://registry.yarnpkg.com/@emotion/hash/-/hash-0.8.0.tgz#bbbff68978fefdbe68ccb533bc8cbe1d1afb5413"
   integrity sha512-kBJtf7PH6aWwZ6fka3zQ0p6SBYzx4fl1LoZXE2RrnYST9Xljm7WfKJrU4g/Xr3Beg72MLrp1AWNUmuYJTL7Cow==
 
-"@formatjs/intl-numberformat@^5.5.0":
-  version "5.5.0"
-  resolved "https://registry.yarnpkg.com/@formatjs/intl-numberformat/-/intl-numberformat-5.5.0.tgz#d4a7b138f8a5c385ff1eb2b676334a4006fbdd69"
-  integrity sha512-cI4NM94XFpanT/8pjrHa9jwk84kIeJfOreaMuYkSzDVdsO/6ErII2DL1Fawn2ZtHY3eSwv5A/l/CatuUuEykKQ==
-  dependencies:
-    "@formatjs/intl-utils" "^3.8.4"
-
-"@formatjs/intl-utils@^3.8.4":
-  version "3.8.4"
-  resolved "https://registry.yarnpkg.com/@formatjs/intl-utils/-/intl-utils-3.8.4.tgz#291baac91001db428fc3275c515a3e40fbe95945"
-  integrity sha512-j5C6NyfKevIxsfLK8KwO1C0vvP7k1+h4A9cFpc+cr6mEwCc1sPkr17dzh0Ke6k9U5pQccAQoXdcNBl3IYa4+ZQ==
-  dependencies:
-    emojis-list "^3.0.0"
+"@formatjs/ecma402-abstract@^1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@formatjs/ecma402-abstract/-/ecma402-abstract-1.2.1.tgz#ad966998d7f0e96fca4bdc5de0ca28d02f371279"
+  integrity sha512-LvbwgHxprafjceDfOC7yMl4sP5al71rAWahXk3qug5bV020aCq64WjqAo+zNnkIJk8hqK2pFKnNdDsT58HZJQw==
 
 "@material-ui/core@^4.11.0":
   version "4.11.0"
@@ -285,10 +276,10 @@ body-parser@^1.19.0:
     raw-body "2.4.0"
     type-is "~1.6.17"
 
-body-scroll-lock@^3.0.2:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/body-scroll-lock/-/body-scroll-lock-3.0.2.tgz#97df9bb3b17a0140c4a09b3568d146ae9af6b981"
-  integrity sha512-PtItUun94iIupKry8J/h6SfRCLWZnly77KbPsTSKALmxfR282L8R0Ujkv7bydSZvLxAJS4sBJ3y/E6X8gYkGrQ==
+body-scroll-lock@^3.1.3:
+  version "3.1.3"
+  resolved "https://registry.yarnpkg.com/body-scroll-lock/-/body-scroll-lock-3.1.3.tgz#cf78cc04d82328bb54276e104bda66dc93cb3695"
+  integrity sha512-KMV9MT96y2PFUL2C98e2nx/Gs2mhCAzYP6Gsu/9r7Rhn27qxu1yTnQBqHogUuvwVSbstEHNXTaToPNsL7oBZ9g==
 
 brace-expansion@^1.1.7:
   version "1.1.11"
@@ -413,10 +404,10 @@ chalk@^2.4.1:
     escape-string-regexp "^1.0.5"
     supports-color "^5.3.0"
 
-chokidar@^3.0.0:
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-3.4.0.tgz#b30611423ce376357c765b9b8f904b9fba3c0be8"
-  integrity sha512-aXAaho2VJtisB/1fg1+3nlLJqGOuewTzQpd/Tz0yTg2R0e4IGtshYvtjowyEumcBv2z+y4+kc75Mz7j5xJskcQ==
+chokidar@^3.4.2:
+  version "3.4.2"
+  resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-3.4.2.tgz#38dc8e658dec3809741eb3ef7bb0a47fe424232d"
+  integrity sha512-IZHaDeBeI+sZJRX7lGcXsdzgvZqKv6sECqsbErJA4mHWfpRrD8B97kSFN4cQz6nGBGiuFia1MKR4d6c1o8Cv7A==
   dependencies:
     anymatch "~3.1.1"
     braces "~3.0.2"
@@ -744,11 +735,6 @@ emoji-regex@^8.0.0:
   resolved "https://registry.yarnpkg.com/emoji-regex/-/emoji-regex-8.0.0.tgz#e818fd69ce5ccfcb404594f842963bf53164cc37"
   integrity sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==
 
-emojis-list@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/emojis-list/-/emojis-list-3.0.0.tgz#5570662046ad29e2e916e71aae260abdff4f6a78"
-  integrity sha512-/kyM18EfinwXZbno9FyUGeFh87KC8HRQBQGildHZbEuRyWFOmv1U10o9BBp8XVZDVNNuQKyIGIu5ZYAAXJ0V2Q==
-
 encodeurl@~1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/encodeurl/-/encodeurl-1.0.2.tgz#ad3ff4c86ec2d029322f5a02c3a9a606c95b3f59"
@@ -898,7 +884,7 @@ find-up@^4.1.0:
     locate-path "^5.0.0"
     path-exists "^4.0.0"
 
-flatted@^2.0.1, flatted@^2.0.2:
+flatted@^2.0.1:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/flatted/-/flatted-2.0.2.tgz#4575b21e2bcee7434aa9be662f4b7b5f9c2b5138"
   integrity sha512-r5wGx7YeOwNWNlCA0wQ86zKyDLMQr+/RB8xy74M4hTphfmjlijTSSXGuH8rnvKZnfT9i+75zmd8jcKdMR4O6jA==
@@ -1009,10 +995,10 @@ hash.js@^1.0.0, hash.js@^1.0.3:
     inherits "^2.0.3"
     minimalistic-assert "^1.0.1"
 
-highlight.js@10.1.2:
-  version "10.1.2"
-  resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-10.1.2.tgz#c20db951ba1c22c055010648dfffd7b2a968e00c"
-  integrity sha512-Q39v/Mn5mfBlMff9r+zzA+gWxRsCRKwEMvYTiisLr/XUiFI/4puWt0Ojdko3R3JCNWGdOWaA5g/Yxqa23kC5AA==
+highlight.js@10.2.0:
+  version "10.2.0"
+  resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-10.2.0.tgz#367151bcf813adebc54822f1cb51d2e1e599619f"
+  integrity sha512-OryzPiqqNCfO/wtFo619W+nPYALM6u7iCQkum4bqRmmlcTikOkmlL06i009QelynBPAlNByTQU6cBB2cOBQtCw==
 
 hmac-drbg@^1.0.0:
   version "1.0.1"
@@ -1105,20 +1091,20 @@ inherits@2.0.3:
   resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.3.tgz#633c2c83e3da42a502f52466022480f4208261de"
   integrity sha1-Yzwsg+PaQqUC9SRmAiSA9CCCYd4=
 
-intl-messageformat-parser@^5.4.2:
-  version "5.4.2"
-  resolved "https://registry.yarnpkg.com/intl-messageformat-parser/-/intl-messageformat-parser-5.4.2.tgz#d8b106458798ccd81e79d8d52c6f97f3a4124356"
-  integrity sha512-VHu6UWgWLJykaSeI1M2DpZMVRLuGCOV91i5I81xnJuAI0MKHP7ZJ3my5naOQkzG10ris3hBr+o5RElF1wQ5IXA==
+intl-messageformat-parser@^6.0.6:
+  version "6.0.6"
+  resolved "https://registry.yarnpkg.com/intl-messageformat-parser/-/intl-messageformat-parser-6.0.6.tgz#c06c79c534612808e1f3c39288a3c009fb1ff7cd"
+  integrity sha512-XPAgYvCTSwgr92zzy5sfaglUu4uKjIWXHNTenEQRTo5t3o2TGxuPYPruxZqnvSLgnlAegiT/hBemmPcnFPNjAg==
   dependencies:
-    "@formatjs/intl-numberformat" "^5.5.0"
+    "@formatjs/ecma402-abstract" "^1.2.1"
 
-intl-messageformat@^9.2.5:
-  version "9.2.5"
-  resolved "https://registry.yarnpkg.com/intl-messageformat/-/intl-messageformat-9.2.5.tgz#59bd1dfccf247976cb233e896302b25373cd7423"
-  integrity sha512-B6JtCo/ybavlY5j02c9Sq3QEtdeFFu8ZcCbhWy8t2MM1f3omCCw3Gi6djCTEG6l9iIfmxp/NFcsoaVhCncS3GA==
+intl-messageformat@^9.3.7:
+  version "9.3.7"
+  resolved "https://registry.yarnpkg.com/intl-messageformat/-/intl-messageformat-9.3.7.tgz#d40e61dc20ded8952fef00d97237880ff380550a"
+  integrity sha512-DUc+BJ6QN/IyT05gyKTuSJuauuYheV/5IhP+KEwmLhaJzONu0U/nnL5P6L5Ck9DXAx8iy7HM0CwFUctD7CmqZw==
   dependencies:
     fast-memoize "^2.5.2"
-    intl-messageformat-parser "^5.4.2"
+    intl-messageformat-parser "^6.0.6"
 
 is-arrayish@^0.2.1:
   version "0.2.1"
@@ -1301,24 +1287,23 @@ karma-cljs-test@^0.1.0:
   resolved "https://registry.yarnpkg.com/karma-cljs-test/-/karma-cljs-test-0.1.0.tgz#cb8605ef0e11f9a6f6d28f56ba5dbdf26f389923"
   integrity sha1-y4YF7w4R+ab20o9Wul298m84mSM=
 
-karma@^5.1.1:
-  version "5.1.1"
-  resolved "https://registry.yarnpkg.com/karma/-/karma-5.1.1.tgz#4e472c1e5352d73edbd2090726afdb01d7869d72"
-  integrity sha512-xAlOr5PMqUbiKXSv5PCniHWV3aiwj6wIZ0gUVcwpTCPVQm/qH2WAMFWxtnpM6KJqhkRWrIpovR4Rb0rn8GtJzQ==
+karma@^5.2.2:
+  version "5.2.2"
+  resolved "https://registry.yarnpkg.com/karma/-/karma-5.2.2.tgz#2e51d877635a8c3e4d07e83f1271ec2b1ab75cc0"
+  integrity sha512-rB3Ua5yDxmIupTj67r3Q8itz7TxJzRE6DmVcOfV20D509Uu9AoBKlVwbZhND4kcm6BqLfbHtv4DZC9QJfrUY+w==
   dependencies:
     body-parser "^1.19.0"
     braces "^3.0.2"
-    chokidar "^3.0.0"
+    chokidar "^3.4.2"
     colors "^1.4.0"
     connect "^3.7.0"
     di "^0.0.1"
     dom-serialize "^2.2.1"
-    flatted "^2.0.2"
     glob "^7.1.6"
     graceful-fs "^4.2.4"
     http-proxy "^1.18.1"
     isbinaryfile "^4.0.6"
-    lodash "^4.17.15"
+    lodash "^4.17.19"
     log4js "^6.2.1"
     mime "^2.4.5"
     minimatch "^3.0.4"
@@ -1353,10 +1338,10 @@ lodash.isequal@^4.0.0:
   resolved "https://registry.yarnpkg.com/lodash.isequal/-/lodash.isequal-4.5.0.tgz#415c4478f2bcc30120c22ce10ed3226f7d3e18e0"
   integrity sha1-QVxEePK8wwEgwizhDtMib30+GOA=
 
-lodash@^4.17.15:
-  version "4.17.15"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
-  integrity sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==
+lodash@^4.17.19:
+  version "4.17.20"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.20.tgz#b44a9b6297bcb698f1c51a3545a2b3b368d59c52"
+  integrity sha512-PlhdFcillOINfeV7Ni6oF1TAEayyZBoZ8bcshTHqOYJYlrqzRK5hagpagky5o4HfCzzd1TRkXPMFq6cKk9rGmA==
 
 log4js@^6.2.1:
   version "6.3.0"
@@ -1457,7 +1442,7 @@ nice-try@^1.0.4:
   resolved "https://registry.yarnpkg.com/nice-try/-/nice-try-1.0.5.tgz#a3378a7696ce7d223e88fc9b764bd7ef1089e366"
   integrity sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==
 
-node-libs-browser@^2.0.0:
+node-libs-browser@^2.2.1:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/node-libs-browser/-/node-libs-browser-2.2.1.tgz#b64f513d18338625f90346d27b0d235e631f6425"
   integrity sha512-h/zcD8H9kaDZ9ALUWwlBUDo6TKF8a7qBSCSEGfjTVIYeqsioSKaAX+BN7NgiMGp6iSIXZ3PxgCu8KS3b71YK5Q==
@@ -1886,35 +1871,35 @@ readline-sync@^1.4.7:
   resolved "https://registry.yarnpkg.com/readline-sync/-/readline-sync-1.4.10.tgz#41df7fbb4b6312d673011594145705bf56d8873b"
   integrity sha512-gNva8/6UAe8QYepIQH/jQ2qn91Qj0B9sYjMBBs3QOB8F2CXcKgLxQaJRP76sWVRQt+QU+8fAkCbCvjjMFu7Ycw==
 
-reakit-system@^0.14.2:
-  version "0.14.2"
-  resolved "https://registry.yarnpkg.com/reakit-system/-/reakit-system-0.14.2.tgz#44787822962890e12290f13aef8df896942d92d2"
-  integrity sha512-JB/wvMIs6Nf7xgZ4CXFX0E31aosUL6FErTyQMUFJzEIyjUCwsw3WO+RXeJXKauIYo9UPrvGAj071L/2LpJyzHQ==
+reakit-system@^0.14.4:
+  version "0.14.4"
+  resolved "https://registry.yarnpkg.com/reakit-system/-/reakit-system-0.14.4.tgz#93e3883ad441bfa6167bede147dc7cee5db51ec1"
+  integrity sha512-nQlo+fLKttGfEMzLJP9ubvALVUZXAhil2gEXpu26Gzvd4Mk4ywhBcAVhX0GrkesDx5Qzo2E0J5OYytPTeXvo5Q==
   dependencies:
-    reakit-utils "^0.14.2"
+    reakit-utils "0.14.3"
 
-reakit-utils@^0.14.2:
-  version "0.14.2"
-  resolved "https://registry.yarnpkg.com/reakit-utils/-/reakit-utils-0.14.2.tgz#c66546221fef3423e672b3c2527ec4c8ddb82ee6"
-  integrity sha512-tNEZ0BPKf6WBrUR17yU5Gn4ErTQq6BF067fD5/kjbwWNHABSfAZgMX1dJH6dY2OXp2ENszvstgUbGWorXcdhLA==
+reakit-utils@0.14.3:
+  version "0.14.3"
+  resolved "https://registry.yarnpkg.com/reakit-utils/-/reakit-utils-0.14.3.tgz#ea77684c2126ec41a26f02ef2b154e47a100371e"
+  integrity sha512-EQlalje+8UiybchMobZi6LrwbBBrqMFOG7f8Z5RJQil1Szt6SFP5BXfAIFj9J3gZunCXVk/NRaiyTdTbFiZ1CA==
 
-reakit-warning@^0.5.2:
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/reakit-warning/-/reakit-warning-0.5.2.tgz#89331bcde4dd037645aeb11064ba6582d1547606"
-  integrity sha512-up8vtYzTNiNLbBNkR898mW8DRerKjteLgNRvKv7EHqgjtRno8gf8LNKZ72uBwDI2r0dS07WBqUhYEzeYOPBpDw==
+reakit-warning@^0.5.4:
+  version "0.5.4"
+  resolved "https://registry.yarnpkg.com/reakit-warning/-/reakit-warning-0.5.4.tgz#78bcbf0a11b0f963d61c8796e1c60f6f1eaad33f"
+  integrity sha512-11EFsGnnT/Y5wVa6OJl3IlfzAl1P77aANlXnuiS5ToDd94xGCwOWM563YtjYaNlZppD/fC9S5p7YOa6W0LlmoQ==
   dependencies:
-    reakit-utils "^0.14.2"
+    reakit-utils "0.14.3"
 
-reakit@^1.2.2:
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/reakit/-/reakit-1.2.2.tgz#9088a88975e64b6bfdf4ddd6af245edc0254c032"
-  integrity sha512-hk4RF6YXBljukoZFnI9OZPQMKFIp7HP5VHrAGOE52AhxtTUyTbr8rmel/A7qGsOtQMTQ2mh1elqIhHIaNy+HiQ==
+reakit@^1.2.4:
+  version "1.2.4"
+  resolved "https://registry.yarnpkg.com/reakit/-/reakit-1.2.4.tgz#4cb6347038202eac1b944852309c6759f843cd47"
+  integrity sha512-l3Vll1Bg/spz6slVfpgikFoYySE6cSC81psMXyq90Sehxw5aB5eprnTqMbnMpp/kqsDf9u1RUr2ZXT6ItYhhpA==
   dependencies:
     "@popperjs/core" "^2.4.4"
-    body-scroll-lock "^3.0.2"
-    reakit-system "^0.14.2"
-    reakit-utils "^0.14.2"
-    reakit-warning "^0.5.2"
+    body-scroll-lock "^3.1.3"
+    reakit-system "^0.14.4"
+    reakit-utils "0.14.3"
+    reakit-warning "^0.5.4"
 
 regenerator-runtime@^0.13.4:
   version "0.13.5"
@@ -2019,12 +2004,12 @@ shadow-cljs-jar@1.3.2:
   resolved "https://registry.yarnpkg.com/shadow-cljs-jar/-/shadow-cljs-jar-1.3.2.tgz#97273afe1747b6a2311917c1c88d9e243c81957b"
   integrity sha512-XmeffAZHv8z7451kzeq9oKh8fh278Ak+UIOGGrapyqrFBB773xN8vMQ3O7J7TYLnb9BUwcqadKkmgaq7q6fhZg==
 
-shadow-cljs@^2.10.21:
-  version "2.10.21"
-  resolved "https://registry.yarnpkg.com/shadow-cljs/-/shadow-cljs-2.10.21.tgz#60ae60cf749ddfa5e1b8fcdd2ead303331443724"
-  integrity sha512-j3rVFCGftTIjl7cnv2sJn9AWISAc8gJw/Qcvkmd82p5XP1GNOenrIlIZKeSmiCcnTF9I1cwIKzWh+J/J3g6Atw==
+shadow-cljs@^2.11.3:
+  version "2.11.3"
+  resolved "https://registry.yarnpkg.com/shadow-cljs/-/shadow-cljs-2.11.3.tgz#77a86de8a240dd0c6a869078002ed5f5c96a9b84"
+  integrity sha512-nvruuaU5B/QRFyBnSJr9dMoQhOR2zr9A9vCmZhWL846MXBxXlLbdKVbEdyHJtuvyMrh/NZ0dLtecQ4QaykIxMg==
   dependencies:
-    node-libs-browser "^2.0.0"
+    node-libs-browser "^2.2.1"
     readline-sync "^1.4.7"
     shadow-cljs-jar "1.3.2"
     source-map-support "^0.4.15"
