@@ -2,26 +2,26 @@
   (:require
     [clojure.string :as str]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-    [com.fulcrologic.fulcro.dom :as dom :refer [div ul li p h1 h3 form button input span]]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
+    [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
+    [com.fulcrologic.fulcro.data-fetch :as df]
     [decide.routing :as routing]
-    [decide.ui.components.breadcrumbs :as breadcrumbs]
+    [decide.utils :as utils]
     [material-ui.data-display :as dd]
-    [material-ui.surfaces :as surfaces]
-    [material-ui.inputs :as input]
+    [material-ui.feedback :as feedback]
+    [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
+    [material-ui.surfaces :as surfaces]
     [com.fulcrologic.fulcro.algorithms.react-interop :as interop]
-    ["@material-ui/icons/ThumbUpAlt" :default ThumbUpAlt]
     ["@material-ui/icons/ThumbUpAltTwoTone" :default ThumbUpAltTwoTone]
     ["@material-ui/icons/ThumbDownAltTwoTone" :default ThumbDownAltTwoTone]
-    ["@material-ui/icons/MoreVert" :default MoreVertIcon]
+    ["@material-ui/icons/Close" :default Close]
     ["@material-ui/core/LinearProgress" :default LinearProgress]
     ["@material-ui/core/styles" :refer (withStyles useTheme)]
-    ["react" :as React]
-    [taoensso.timbre :as log]
-    [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
-    [com.fulcrologic.fulcro.data-fetch :as df]))
+    ["React" :as react]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [taoensso.timbre :as log]))
 
 (defmutation add-opinion [{:keys [proposal/id opinion]}]
   (action [{:keys [state]}]
@@ -29,10 +29,35 @@
   (remote [env]
     (m/with-server-side-mutation env 'decide.api.proposal/add-opinion)))
 
-(defsc Proposal [this {:proposal/keys [id title body opinion original-author]}]
+(defn today? [date]
+  (let [now (js/Date.)]
+    (and
+      (= (.getFullYear date) (.getFullYear now))
+      (= (.getMonth date) (.getMonth now))
+      (= (.getDate date) (.getDate now)))))
+
+(defn yesterday? [date]
+  (let [now (js/Date.)]
+    (and
+      (= (.getFullYear date) (.getFullYear now))
+      (= (.getMonth date) (.getMonth now))
+      (= (.getDate date) (dec (.getDate now))))))
+
+
+(defn time-string [created]
+  (when created
+    (let [now (js/Date.now)]
+      (cond
+        (today? created) (str "heute um " (.getHours created) ":" (.getMinutes created) " Uhr")
+        (yesterday? created) (str "gestern um " (.getHours created) ":" (.getMinutes created) " Uhr")
+        :else (.toLocaleDateString created)))))
+
+
+(defsc Proposal [this {:proposal/keys [id title body opinion created original-author]}]
   {:query         (fn []
                     [:proposal/id :proposal/title :proposal/body
                      :proposal/pro-votes :proposal/con-votes
+                     :proposal/created
                      :proposal/opinion
                      {:proposal/parents '...}
                      {:proposal/original-author [:profile/name]}])
@@ -53,30 +78,32 @@
                    (comp/registry-key->class `ProposalPage)
                    id))}
         (layout/box {:pb 0 :clone true}
-          (let [avatar (dd/avatar {} (some-> original-author :profile/name first))
-                subheader [(str "#" (if (tempid/tempid? id) "?" id))
-                           (:profile/name original-author)]]
+          (let [subheader [(dom/data {:class "proposal-id"
+                                      :value id}
+                             (str "#" (if (tempid/tempid? id) "?" id)))
+                           (dom/span
+                             "von " (dom/address (dom/a {:rel "author"} (:profile/name original-author)))
+                             " am " (dom/time {:datetime (some-> created .toISOString)} (time-string created)))]]
             (surfaces/card-header
               {:title     title
-               :avatar    avatar
-               :subheader (str/join " · " subheader)})))
+               :subheader (apply comp/fragment (interpose " · " subheader))})))
         (surfaces/card-content {}
           (dd/typography {:variant "body2" :color "textSecondary" :component "p"}
             body)))
       (surfaces/card-actions {}
-        (input/button {:size      :small
-                       :color     (if (pos? opinion) "primary" "default")
-                       :variant   :text
-                       :onClick   #(comp/transact! this [(add-opinion {:proposal/id id
-                                                                       :opinion     (if (pos? opinion) 0 +1)})])
-                       :startIcon (React/createElement ThumbUpAltTwoTone)}
+        (inputs/button {:size      :small
+                        :color     (if (pos? opinion) "primary" "default")
+                        :variant   :text
+                        :onClick   #(comp/transact! this [(add-opinion {:proposal/id id
+                                                                        :opinion     (if (pos? opinion) 0 +1)})])
+                        :startIcon (react/createElement ThumbUpAltTwoTone)}
           "Zustimmen")
-        (input/button {:size      :small
-                       :color     (if (neg? opinion) "primary" "default")
-                       :variant   :text
-                       :onClick   #(comp/transact! this [(add-opinion {:proposal/id id
-                                                                       :opinion     (if (neg? opinion) 0 -1)})])
-                       :startIcon (React/createElement ThumbDownAltTwoTone)}
+        (inputs/button {:size      :small
+                        :color     (if (neg? opinion) "primary" "default")
+                        :variant   :text
+                        :onClick   #(comp/transact! this [(add-opinion {:proposal/id id
+                                                                        :opinion     (if (neg? opinion) 0 -1)})])
+                        :startIcon (react/createElement ThumbDownAltTwoTone)}
           "Ablehnen")))))
 
 (def ui-proposal (comp/computed-factory Proposal {:keyfn :proposal/id}))
@@ -150,37 +177,40 @@
                     (dr/route-deferred [:proposal/id proposal-id]
                       #(df/load! app [:proposal/id proposal-id] ProposalPage
                          {:post-mutation        `dr/target-ready
-                          :post-mutation-params {:target (comp/get-ident ProposalPage {:proposal/id proposal-id})}})))}
-  (layout/container {:maxWidth :lg}
-    (breadcrumbs/breadcrumb-nav
-      [["Vorschläge" (href-to-proposal-list)]
-       [(str "#" id) ""]])
-    (surfaces/card {:variant "outlined"}
-      (layout/box {:pb 0 :clone true}
-        (let [avatar (dd/avatar {} (some-> original-author :profile/name first))
-              subheader [(str "#" (if (tempid/tempid? id) "?" id))
-                         (:profile/name original-author)]]
-          (surfaces/card-header
-            {:title     title
-             :avatar    avatar
-             :subheader (str/join " · " subheader)})))
-      #_(surfaces/card-header {:title     title
-                               :subheader (str "#" id)})
-      ;; :action                   (input/icon-button {} (React/createElement MoreVertIcon))})
+                          :post-mutation-params {:target (comp/get-ident ProposalPage {:proposal/id proposal-id})}})))
+   :use-hooks?    true}
+  (feedback/dialog
+    {:open       true
+     :fullScreen (utils/<=-breakpoint? "xs")
+     :fullWidth  true
+     :maxWidth   "md"
+     :onClose    #(js/window.history.back)}
 
-      (layout/box {:pt 0 :clone true}
-        (surfaces/card-content {}
-          (dd/typography {:variant   "body1"
-                          :paragraph true}
-            body)
+    (surfaces/toolbar {:variant "dense"}
+      (inputs/icon-button
+        {:edge       :start
+         :color      :inherit
+         :aria-label "back"
+         :onClick    #(js/window.history.back)}
+        (react/createElement Close))
+      (feedback/dialog-title {} title))
+    (feedback/dialog-content {}
+      (dd/typography {:variant   "body1"
+                      :paragraph true}
+        body)
 
-          (when-not (empty? parents)
-            (proposal-section
-              (str "Dieser Vorschlag basiert auf " (count parents) " weiteren Vorschlägen")
-              (dd/list {:dense false}
-                (map ui-parent parents))))
+      (when-not (empty? parents)
+        (proposal-section
+          (str "Dieser Vorschlag basiert auf " (count parents) " weiteren Vorschlägen")
+          (dd/list {:dense false}
+            (map ui-parent parents))))
 
-          (proposal-section "Meinungen"
-            (vote-scale props))
+      (proposal-section "Meinungen"
+        (vote-scale props))
 
-          (proposal-section "Argumente"))))))
+      (proposal-section "Argumente"))))
+
+(dr/defrouter ProposalRouter [this props]
+  {:router-targets [ProposalPage]})
+
+(def ui-proposal-router (comp/factory ProposalRouter))
