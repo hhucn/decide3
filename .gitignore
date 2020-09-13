@@ -206,4 +206,4 @@ typings/
 
 js/
 .shadow-cljs/
-css/
+*.css

@@ -89,6 +89,7 @@
 
        [:link {:href "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" :rel "stylesheet"}]
        [:script (str "var fulcro_network_csrf_token = '" csrf-token "';")]
+       (include-css "/styles/decide.css")
        [:style
         "body, html, #decide {height: 100%;}
          #decide {flex-direction: column;
