@@ -7,7 +7,7 @@
 
 (defn ^:export refresh []
   (log/info "Hot code Remount")
-  (app/mount! SPA root/Root "decide"))
+  (app/mount! SPA root/Root "decide" {:initialize-state? false}))
 
 (defn ^:export init []
   (log/info "Application starting.")
