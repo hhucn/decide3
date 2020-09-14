@@ -18,7 +18,9 @@
     [hiccup.page :refer [html5 include-js include-css]]
     [taoensso.timbre :as log]
     [decide.application :refer [SPA]]
-    [decide.ui.pages.splash :as splash]))
+    [decide.ui.pages.splash :as splash]
+    [garden.core :as garden]
+    [decide.ui.styles :as styles]))
 
 (def ^:private not-found-handler
   (fn [req]
@@ -89,14 +91,8 @@
 
        [:link {:href "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" :rel "stylesheet"}]
        [:script (str "var fulcro_network_csrf_token = '" csrf-token "';")]
-       (include-css "/styles/decide.css")
-       [:style
-        "body, html, #decide {height: 100%;}
-         #decide {flex-direction: column;
-            height: 100%;
-            display: flex;
-         }"]]
-      [:body {:style "background-color: #006AB3; overflow-x: hidden;"}
+       [:style (garden/css styles/body styles/splashscreen styles/sizing styles/address)]]
+      [:body
        [:div#decide initial-html]
        (include-js "/js/main/main.js")]])))
 
