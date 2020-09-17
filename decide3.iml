@@ -29,16 +29,17 @@
     <orderEntry type="library" name="Deps: com.wsscode/pathom:2.2.31" level="project" />
     <orderEntry type="library" name="Deps: javax.activation/javax.activation-api:1.2.0" level="project" />
     <orderEntry type="library" name="Deps: com.ibm.icu/icu4j:66.1" level="project" />
-    <orderEntry type="library" name="Deps: commons-codec:1.11" level="project" />
+    <orderEntry type="library" name="Deps: commons-codec:1.14" level="project" />
     <orderEntry type="library" name="Deps: io.lambdaforge/datalog-parser:0.1.7" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/tools.analyzer:1.0.0" level="project" />
     <orderEntry type="library" name="Deps: com.bhauman/cljs-test-display:0.1.1" level="project" />
+    <orderEntry type="library" name="Deps: com.fulcrologic/fulcro-rad:1.0.4" level="project" />
     <orderEntry type="library" name="Deps: com.fulcrologic/guardrails:0.0.12" level="project" />
     <orderEntry type="library" name="Deps: com.google.errorprone/error_prone_annotations:2.3.1" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/core.specs.alpha:0.2.44" level="project" />
     <orderEntry type="library" name="Deps: org.bouncycastle/bcpkix-jdk15on:1.58" level="project" />
     <orderEntry type="library" name="Deps: colorize:0.1.1" level="project" />
-    <orderEntry type="library" name="Deps: edn-query-language/eql:0.0.9" level="project" />
+    <orderEntry type="library" name="Deps: edn-query-language/eql:1.0.0" level="project" />
     <orderEntry type="library" name="Deps: io.undertow/undertow-core:2.1.3.Final" level="project" />
     <orderEntry type="library" name="Deps: io.replikativ/hitchhiker-tree:0.1.7" level="project" />
     <orderEntry type="library" name="Deps: org.graalvm.js/js:20.1.0" level="project" />
@@ -50,7 +51,8 @@
     <orderEntry type="library" name="Deps: ring/ring-ssl:0.3.0" level="project" />
     <orderEntry type="library" name="Deps: org.codehaus.mojo/animal-sniffer-annotations:1.14" level="project" />
     <orderEntry type="library" name="Deps: tailrecursion/cljs-priority-map:1.2.1" level="project" />
-    <orderEntry type="library" name="Deps: com.taoensso/encore:2.117.0" level="project" />
+    <orderEntry type="library" name="Deps: henryw374/js-joda:1.10.1-1" level="project" />
+    <orderEntry type="library" name="Deps: com.taoensso/encore:2.120.0" level="project" />
     <orderEntry type="library" name="Deps: io.replikativ/incognito:0.2.5" level="project" />
     <orderEntry type="library" name="Deps: com.lucasbradstreet/cljs-uuid-utils:1.0.2" level="project" />
     <orderEntry type="library" name="Deps: org.graalvm.regex/regex:20.1.0" level="project" />
@@ -66,10 +68,11 @@
     <orderEntry type="library" name="Deps: com.cognitect/transit-cljs:0.8.264" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/google-closure-library:0.0-20191016-6ae1f72f" level="project" />
     <orderEntry type="library" name="Deps: io.aviso/pretty:0.1.37" level="project" />
-    <orderEntry type="library" name="Deps: thheller/shadow-cljs:2.11.3" level="project" />
+    <orderEntry type="library" name="Deps: thheller/shadow-cljs:2.11.4" level="project" />
     <orderEntry type="library" name="Deps: org.graalvm.sdk/graal-sdk:20.1.0" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/clojurescript:1.10.773" level="project" />
     <orderEntry type="library" name="Deps: fress:0.3.1" level="project" />
+    <orderEntry type="library" name="Deps: cljsjs/js-joda:1.10.1-0" level="project" />
     <orderEntry type="library" name="Deps: com.yahoo.platform.yui/yuicompressor:2.4.8" level="project" />
     <orderEntry type="library" name="Deps: cljsjs/highlight:9.12.0-2" level="project" />
     <orderEntry type="library" name="Deps: spec-coerce:1.0.0-alpha6" level="project" />
@@ -96,7 +99,7 @@
     <orderEntry type="library" name="Deps: funcool/cuerdas:2.0.3" level="project" />
     <orderEntry type="library" name="Deps: ring/ring-headers:0.3.0" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/google-closure-library-third-party:0.0-20191016-6ae1f72f" level="project" />
-    <orderEntry type="library" name="Deps: com.fulcrologic/fulcro:3.2.16" level="project" />
+    <orderEntry type="library" name="Deps: com.fulcrologic/fulcro:3.3.2" level="project" />
     <orderEntry type="library" name="Deps: org.clojars.mmb90/cljs-cache:0.1.4" level="project" />
     <orderEntry type="library" name="Deps: hiccup:1.0.5" level="project" />
     <orderEntry type="library" name="Deps: cljsjs/react-grid-layout:0.16.6-0" level="project" />
@@ -104,7 +107,7 @@
     <orderEntry type="library" name="Deps: org.javassist/javassist:3.18.1-GA" level="project" />
     <orderEntry type="library" name="Deps: org.jboss.xnio/xnio-nio:3.8.0.Final" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/java.classpath:1.0.0" level="project" />
-    <orderEntry type="library" name="Deps: com.taoensso/sente:1.15.0" level="project" />
+    <orderEntry type="library" name="Deps: com.taoensso/sente:1.16.0-alpha1" level="project" />
     <orderEntry type="library" name="Deps: gnl/ghostwheel.logging:0.3.9" level="project" />
     <orderEntry type="library" name="Deps: clout:2.1.2" level="project" />
     <orderEntry type="library" name="Deps: environ:1.2.0" level="project" />
@@ -113,12 +116,14 @@
     <orderEntry type="library" name="Deps: org.graalvm.truffle/truffle-api:20.1.0" level="project" />
     <orderEntry type="library" name="Deps: adzerk/boot-test:1.1.2" level="project" />
     <orderEntry type="library" name="Deps: binaryage/devtools:1.0.2" level="project" />
+    <orderEntry type="library" name="Deps: net.cgrand/macrovich:0.2.0" level="project" />
     <orderEntry type="library" name="Deps: buddy:2.0.0" level="project" />
     <orderEntry type="library" name="Deps: org.msgpack/msgpack:0.6.12" level="project" />
     <orderEntry type="library" name="Deps: orchestra:2019.02.06-1" level="project" />
     <orderEntry type="library" name="Deps: org.graalvm.js/js-scriptengine:20.1.0" level="project" />
     <orderEntry type="library" name="Deps: org.jboss.threads/jboss-threads:3.1.0.Final" level="project" />
     <orderEntry type="library" name="Deps: com.google.j2objc/j2objc-annotations:1.1" level="project" />
+    <orderEntry type="library" name="Deps: cljc.java-time:0.1.7" level="project" />
     <orderEntry type="library" name="Deps: com.taoensso/timbre:4.10.0" level="project" />
     <orderEntry type="library" name="Deps: com.cognitect/transit-clj:1.0.324" level="project" />
     <orderEntry type="library" name="Deps: args4j:2.0.26" level="project" />
@@ -136,6 +141,7 @@
     <orderEntry type="library" name="Deps: org.hamcrest/hamcrest-core:1.3" level="project" />
     <orderEntry type="library" name="Deps: org.checkerframework/checker-qual:2.0.0" level="project" />
     <orderEntry type="library" name="Deps: org.wildfly.client/wildfly-client-config:1.0.1.Final" level="project" />
+    <orderEntry type="library" name="Deps: cljs.java-time:0.1.13" level="project" />
     <orderEntry type="library" name="Deps: persistent-sorted-set:0.1.2" level="project" />
     <orderEntry type="library" name="Deps: net.java.dev.jna/jna:3.2.2" level="project" />
     <orderEntry type="library" name="Deps: junit:4.13" level="project" />
@@ -150,6 +156,7 @@
     <orderEntry type="library" name="Deps: nrepl:0.7.0" level="project" />
     <orderEntry type="library" name="Deps: mount:0.1.16" level="project" />
     <orderEntry type="library" name="Deps: buddy/buddy-auth:2.1.0" level="project" />
+    <orderEntry type="library" name="Deps: cljsjs/js-joda-timezone:2.0.1-0" level="project" />
     <orderEntry type="library" name="Deps: com.fulcrologic/fulcro-garden-css:3.0.8" level="project" />
     <orderEntry type="library" name="Deps: com.google.re2j/re2j:1.3" level="project" />
     <orderEntry type="library" name="Deps: org.jboss.xnio/xnio-api:3.8.0.Final" level="project" />

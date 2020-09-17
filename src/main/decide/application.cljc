@@ -4,6 +4,7 @@
     #?@(:cljs [[com.fulcrologic.fulcro.networking.http-remote :as net]
                [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
                [com.fulcrologic.fulcro.algorithms.merge :as mrg]
+               [com.fulcrologic.fulcro.algorithms.timbre-support :refer [console-appender prefix-output-fn]]
                [decide.ui.login :as login]
                [decide.ui.main-app :as todo-app]
                [decide.routing :as routing]])
@@ -22,8 +23,6 @@
 
 #?(:cljs
    (defn client-did-mount [app]
-     (routing/start-history! app)
-     (routing/start!)
      (let [{:decide.api.user/keys [current-session]} (ssr/get-SSR-initial-state)]
        (mrg/merge-component! app login/Session current-session :replace [:decide.api.user/current-session]))
      (let [logged-in? (get-in (app/current-state app) (into (comp/get-ident login/Session nil) [:session/valid?]))]
@@ -31,10 +30,16 @@
          (comp/transact! app [(routing/route-to {:path (dr/path-to login/LoginPage)})])))))
 
 
-(defonce SPA (app/fulcro-app
-               #?(:cljs {:client-did-mount client-did-mount
-                         :remotes          {:remote (net/fulcro-http-remote {:url                "/api"
-                                                                             :request-middleware secured-request-middleware})}
-                         :props-middleware (comp/wrap-update-extra-props
-                                             (fn [cls extra-props]
-                                               (merge extra-props (css/get-classnames cls))))})))
+(defonce SPA
+  (app/fulcro-app
+    #?(:cljs {:client-will-mount (fn [app]
+                                   (log/merge-config! {:output-fn prefix-output-fn
+                                                       :appenders {:console (console-appender)}})
+                                   (routing/start-history! app)
+                                   (routing/start!))
+              :client-did-mount  client-did-mount
+              :remotes           {:remote (net/fulcro-http-remote {:url                "/api"
+                                                                   :request-middleware secured-request-middleware})}
+              :props-middleware  (comp/wrap-update-extra-props
+                                   (fn [cls extra-props]
+                                     (merge extra-props (css/get-classnames cls))))})))
