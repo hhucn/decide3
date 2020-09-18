@@ -25,7 +25,8 @@
         props)
       (react/createElement AddIcon)
       (when (utils/>=-breakpoint? "sm")
-        "Neuer Vorschlag"))))
+        (layout/box {:ml 1}
+          "Neuer Vorschlag")))))
 
 (defn empty-proposal-list-message []
   (layout/box {:p 2 :mx "auto"}
