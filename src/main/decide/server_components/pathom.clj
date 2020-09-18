@@ -82,7 +82,7 @@
                                       (preprocess-parser-plugin log-requests))
                                     p/error-handler-plugin
                                     (p/post-process-parser-plugin p/elide-not-found)
-                                    p/trace-plugin]})]
+                                    (when trace? p/trace-plugin)]})]
     (fn wrapped-parser [env tx]
       (async/<!! (real-parser env (if trace?
                                     (conj tx :com.wsscode.pathom/trace)
