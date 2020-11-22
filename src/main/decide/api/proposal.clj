@@ -53,16 +53,7 @@
   {::pc/input  #{:proposal/id}
    ::pc/output [:proposal/opinion]}
   (let [opinion-value
-        (log/spy :info
-          (d/q
-            '[:find ?value .
-              :in $ ?id ?user
-              :where
-              [?e :proposal/id ?id]
-              [?e :proposal/opinions ?opinions]
-              [?opinions :profile/opinions ?user]
-              [?opinions :opinion/value ?value]]
-            db id [:profile/nickname profile-nickname]))]
+        (opinion/pull-personal-opinion db [:proposal/id id] [:profile/nickname profile-nickname])]
     #:proposal{:opinion (or opinion-value 0)}))
 
 (defresolver proposal-resolver [{:keys [db]} {:keys [proposal/id]}]

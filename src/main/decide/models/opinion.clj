@@ -3,9 +3,15 @@
     [clojure.spec.alpha :as s]
     [datahike.api :as d]
     [datahike.core :as d.core]
-    [ghostwheel.core :refer [>defn =>]]))
+    [ghostwheel.core :refer [>defn =>]]
+    [taoensso.timbre :as log]))
 
 (def schema [{:db/ident       :profile/opinions
+              :db/cardinality :db.cardinality/many
+              :db/valueType   :db.type/ref
+              :db/isComponent true}
+
+             {:db/ident       :proposal/opinions
               :db/cardinality :db.cardinality/many
               :db/valueType   :db.type/ref
               :db/isComponent true}
@@ -24,3 +30,14 @@
      [:db/add [:profile/nickname profile-nickname] :profile/opinions "temp"]
      {:db/id         "temp"
       :opinion/value opinion-value}]))
+
+(defn pull-personal-opinion [db proposal profile]
+  (log/spy :debug
+    (d/q
+      '[:find ?value .
+        :in $ ?proposal ?profile
+        :where
+        [?proposal :proposal/opinions ?opinions]
+        [?profile :profile/opinions ?opinions]
+        [?opinions :opinion/value ?value]]
+      db proposal profile)))
