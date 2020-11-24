@@ -1,8 +1,8 @@
-(ns decide.ui.components.main-proposal-list
-  (:require [decide.models.proposal :as proposal]
+(ns decide.ui.proposal.main-proposal-list
+  (:require [decide.ui.proposal.card :as proposal]
             [material-ui.data-display :as dd]
             [com.fulcrologic.fulcro.react.hooks :as hooks]
-            [decide.ui.components.NewProposal :as new-proposal]
+            [decide.ui.proposal.NewProposal :as new-proposal]
             [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
             [material-ui.layout :as layout]
             [decide.utils :as utils]

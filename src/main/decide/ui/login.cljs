@@ -14,7 +14,7 @@
             [taoensso.timbre :as log]
             [decide.routing :as routing]
             [material-ui.navigation :as navigation]
-            [decide.ui.components.main-proposal-list :as main-proposal-list]))
+            [decide.ui.proposal.main-proposal-list :as main-proposal-list]))
 
 (declare LoginPage)
 

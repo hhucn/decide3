@@ -1,4 +1,4 @@
-(ns decide.ui.components.NewProposal
+(ns decide.ui.proposal.NewProposal
   (:require
     [com.fulcrologic.fulcro.algorithms.merge :as mrg]
     [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
@@ -9,7 +9,7 @@
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [clojure.tools.reader.edn :as edn]
-    [decide.models.proposal :as proposal]
+    [decide.models.proposal :as model]
     [decide.utils :as utils]
     [material-ui.data-display :as dd]
     [material-ui.feedback :as feedback]
@@ -39,12 +39,6 @@
 (defmutation remove-parent [{:keys [parent/ident]}]
   (action [{:keys [state ref]}]
     (swap! state mrg/remove-ident* ident (conj ref :ui/parents))))
-
-(defmutation add-new-proposal [{:proposal/keys [_id _title _body _parents] :as params}]
-  (action [{:keys [app]}]
-    (mrg/merge-component! app proposal/Proposal params :append [:all-proposals]))
-  (remote [env]
-    (m/with-server-side-mutation env 'decide.api.proposal/add-proposal)))
 
 (defn- id-in-parents? [parents id]
   ((set (map :proposal/id parents)) id))
@@ -92,7 +86,7 @@
                     :onSubmit  (fn submit-new-proposal-form [e]
                                  (evt/prevent-default! e)
                                  (comp/transact! this
-                                   [(add-new-proposal
+                                   [(model/add-proposal
                                       #:proposal{:id      (tempid/tempid)
                                                  :title   title
                                                  :body    body

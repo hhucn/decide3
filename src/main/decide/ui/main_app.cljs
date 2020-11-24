@@ -7,14 +7,15 @@
     [material-ui.surfaces :as surfaces]
     [material-ui.utils :as mutils :refer [css-baseline]]
     [material-ui.data-display :as dd]
-    [decide.models.proposal :as proposal]
+    [decide.ui.proposal.page :as proposal-page]
+    [decide.ui.proposal.card :as proposal-card]
+    [decide.ui.proposal.main-proposal-list :as main-proposal-list]
     [com.fulcrologic.fulcro.data-fetch :as df]
     [decide.ui.pages.settings :as settings]
-    [decide.ui.components.main-proposal-list :as main-proposal-list]
     [decide.routing :as routing]))
 
 (defrouter ContentRouter [this props]
-  {:router-targets [main-proposal-list/MainProposalList settings/SettingsPage proposal/ProposalPage]})
+  {:router-targets [main-proposal-list/MainProposalList settings/SettingsPage proposal-page/ProposalPage]})
 
 (def ui-content-router (comp/factory ContentRouter))
 
@@ -43,7 +44,7 @@
    :route-segment ["app"]
    :will-enter    (fn will-enter [app _]
                     (dr/route-deferred (comp/get-ident MainApp nil)
-                      #(df/load! app :all-proposals proposal/Proposal
+                      #(df/load! app :all-proposals proposal-card/Proposal
                          {:post-mutation        `dr/target-ready
                           :post-mutation-params {:target (comp/get-ident MainApp nil)}})))}
   (mutils/css-baseline {}

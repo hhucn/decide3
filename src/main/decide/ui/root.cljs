@@ -5,8 +5,8 @@
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr :refer [defrouter]]
 
-    [decide.models.proposal :as proposal]
-    [decide.ui.components.NewProposal :as new-proposal]
+    [decide.ui.proposal.card :as proposal-card]
+    [decide.ui.proposal.NewProposal :as new-proposal]
     [decide.ui.login :as login]
     [decide.ui.main-app :as todo-app]
     [decide.ui.pages.splash :as splash]
@@ -31,7 +31,7 @@
 (defsc Root [this {:keys [ui/theme ui/page-router new-proposal-dialog]}]
   {:query      [:ui/theme
                 {:ui/page-router (comp/get-query PageRouter)}
-                {:all-proposals (comp/get-query proposal/Proposal)}
+                {:all-proposals (comp/get-query proposal-card/Proposal)}
                 {:new-proposal-dialog (comp/get-query new-proposal/NewProposalFormDialog)}]
    :initial-state
                (fn [_] {:ui/page-router      (comp/get-initial-state PageRouter)
