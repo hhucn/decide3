@@ -8,7 +8,7 @@
     [com.wsscode.common.async-clj :refer [let-chan]]
     [clojure.core.async :as async]
     [decide.api.user :as user]
-    [decide.api.proposal :as proposal.api]
+    [decide.models.proposal :as proposal.api]
     [decide.models.profile :as profile]
     [decide.server-components.config :refer [config]]
     [decide.server-components.database :refer [conn]]
