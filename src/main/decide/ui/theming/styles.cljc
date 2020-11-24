@@ -1,4 +1,4 @@
-(ns decide.ui.styles)
+(ns decide.ui.theming.styles)
 
 (def hhu-blue "#006AB3")
 

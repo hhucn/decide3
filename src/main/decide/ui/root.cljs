@@ -7,11 +7,11 @@
 
     [decide.models.proposal :as proposal]
     [decide.ui.components.NewProposal :as new-proposal]
-    [decide.ui.dark-mode :as dark-mode]
     [decide.ui.login :as login]
     [decide.ui.main-app :as todo-app]
     [decide.ui.pages.splash :as splash]
-    [decide.ui.themes :as themes]
+    [decide.ui.theming.themes :as themes]
+    [decide.ui.theming.dark-mode :as dark-mode]
 
     [material-ui.utils :as mutils :refer [css-baseline]]
     [material-ui.styles :as styles :refer [prefers-dark?]]

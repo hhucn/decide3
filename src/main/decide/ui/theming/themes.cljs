@@ -1,7 +1,6 @@
-(ns decide.ui.themes
+(ns decide.ui.theming.themes
   (:require [material-ui.styles :refer [create-mui-theme]]
-            [decide.ui.styles :as styles]
-            [taoensso.timbre :as log]))
+            [decide.ui.theming.styles :as styles]))
 
 (def shared (js->clj (create-mui-theme {}) :keywordize-keys true))
 (def light-theme (merge

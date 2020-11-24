@@ -20,7 +20,7 @@
     [decide.application :refer [SPA]]
     [decide.ui.pages.splash :as splash]
     [garden.core :as garden]
-    [decide.ui.styles :as styles]))
+    [decide.ui.theming.styles :as styles]))
 
 (def ^:private not-found-handler
   (fn [req]
