@@ -5,6 +5,7 @@
                [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
                [com.fulcrologic.fulcro.algorithms.merge :as mrg]
                [com.fulcrologic.fulcro.algorithms.timbre-support :refer [console-appender prefix-output-fn]]
+               [decide.models.user :as user]
                [decide.ui.login :as login]
                [decide.ui.main-app :as todo-app]
                [decide.routing :as routing]])
@@ -24,8 +25,8 @@
 #?(:cljs
    (defn client-did-mount [app]
      (let [{:decide.api.user/keys [current-session]} (ssr/get-SSR-initial-state)]
-       (mrg/merge-component! app login/Session current-session :replace [:decide.api.user/current-session]))
-     (let [logged-in? (get-in (app/current-state app) (into (comp/get-ident login/Session nil) [:session/valid?]))]
+       (mrg/merge-component! app user/Session current-session :replace [:decide.api.user/current-session]))
+     (let [logged-in? (get-in (app/current-state app) (into (comp/get-ident user/Session nil) [:session/valid?]))]
        (when-not logged-in?
          (comp/transact! app [(routing/route-to {:path (dr/path-to login/LoginPage)})])))))
 

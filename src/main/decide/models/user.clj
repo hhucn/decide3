@@ -88,7 +88,7 @@
      :errors #{:account-does-not-exist}}))
 
 ;; API
-(defmutation sign-up-user [{:keys [conn] :as env} {:user/keys [email password]}]
+(defmutation sign-up [{:keys [conn] :as env} {:user/keys [email password]}]
   {::pc/params [:user/email :user/password]
    ::pc/output [:session/valid? :profile/nickname :signup/result :errors]}
   (if (email-in-db? @conn email)
@@ -137,4 +137,4 @@
       {:errors #{:invalid-credentials}})))
 
 
-(def resolvers [sign-up-user sign-in current-session-resolver sign-out change-password])
+(def resolvers [sign-up sign-in current-session-resolver sign-out change-password])

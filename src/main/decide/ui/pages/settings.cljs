@@ -1,13 +1,13 @@
 (ns decide.ui.pages.settings
   (:require [material-ui.layout :as layout]
             [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-            [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+            [com.fulcrologic.fulcro.mutations :as m]
             [com.fulcrologic.fulcro.algorithms.form-state :as fs]
+            [decide.models.user :as user]
             [material-ui.surfaces :as surfaces]
             [com.fulcrologic.fulcro.dom :as dom]
             [com.fulcrologic.fulcro.dom.events :as evt]
             [material-ui.inputs :as inputs]
-            [taoensso.timbre :as log]
             [material-ui.feedback :as feedback]
             [material-ui.data-display :as dd]))
 
@@ -20,18 +20,6 @@
        :fullWidth true
        :margin    :normal}
       props)))
-
-(defmutation change-password [{:keys [old-password new-password]}]
-  (ok-action [{:keys [component] :as env}]
-    (let [{:keys [errors]}
-          (get-in env [:result :body 'decide.api.user/change-password])]
-      (if (empty? errors)
-        (m/set-value!! component :ui/success-open? true)
-        (cond
-          (contains? errors :invalid-credentials)
-          (m/set-string!! component :ui/old-password-error :value "Password is wrong.")))))
-  (remote [env]
-    (m/with-server-side-mutation env 'decide.api.user/change-password)))
 
 (defsc NewPasswordForm [this {:ui/keys [old-password new-password
                                         old-password-error new-password-error
@@ -52,7 +40,7 @@
                      (comp/transact!! this
                        [(m/set-props {:ui/old-password ""
                                       :ui/new-password ""})
-                        (change-password {:old-password old-password :new-password new-password})]))}
+                        (user/change-password {:old-password old-password :new-password new-password})]))}
 
         (dd/typography
           {:component :h1
