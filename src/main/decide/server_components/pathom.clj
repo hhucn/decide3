@@ -33,21 +33,6 @@
 
 (def all-resolvers [index-explorer user/resolvers proposal.api/resolvers profile/resolvers])
 
-(defn preprocess-parser-plugin
-  "Helper to create a plugin that can view/modify the env/tx of a top-level request.
-
-  f - (fn [{:keys [env tx]}] {:env new-env :tx new-tx})
-
-  If the function returns no env or tx, then the parser will not be called (aborts the parse)"
-  [f]
-  {::p/wrap-parser
-   (fn transform-parser-out-plugin-external [parser]
-     (fn transform-parser-out-plugin-internal [env tx]
-       (let [{:keys [env tx] :as req} (f {:env env :tx tx})]
-         (if (and (map? env) (seq tx))
-           (parser env tx)
-           {}))))})
-
 (defn log-requests [{:keys [env tx] :as req}]
   (log/debug "Pathom transaction:\n" tx)
   req)
@@ -84,7 +69,7 @@
                                                               :config                config}
                                                              env))))
                                     (when trace?
-                                      (preprocess-parser-plugin log-requests))
+                                      (p/pre-process-parser-plugin log-requests))
                                     p/error-handler-plugin
                                     (p/post-process-parser-plugin p/elide-not-found)
                                     (when trace? p/trace-plugin)]})]
