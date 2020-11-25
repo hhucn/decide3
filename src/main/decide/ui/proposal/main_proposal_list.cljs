@@ -1,15 +1,17 @@
 (ns decide.ui.proposal.main-proposal-list
-  (:require [decide.ui.proposal.card :as proposal]
-            [material-ui.data-display :as dd]
-            [com.fulcrologic.fulcro.react.hooks :as hooks]
-            [decide.ui.proposal.NewProposal :as new-proposal]
-            [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-            [material-ui.layout :as layout]
-            [decide.utils :as utils]
-            [decide.ui.components.breadcrumbs :as breadcrumbs]
-            [material-ui.inputs :as inputs]
-            ["@material-ui/icons/Add" :default AddIcon]
-            ["React" :as react]))
+  (:require
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.react.hooks :as hooks]
+    [decide.models.proposal :as proposal]
+    [decide.ui.components.breadcrumbs :as breadcrumbs]
+    [decide.ui.proposal.card :as proposal-card]
+    [decide.ui.proposal.NewProposal :as new-proposal]
+    [decide.utils :as utils]
+    [material-ui.data-display :as dd]
+    [material-ui.inputs :as inputs]
+    [material-ui.layout :as layout]
+    ["@material-ui/icons/Add" :default AddIcon]
+    ["React" :as react]))
 
 (defn add-proposal-fab [props]
   (layout/box
@@ -51,6 +53,6 @@
             (dd/list {}
               (for [proposal all-proposals]
                 (dd/list-item {:disableGutters true :key (:proposal/id proposal)}
-                  (proposal/ui-proposal proposal)))))))
+                  (proposal-card/ui-proposal proposal)))))))
 
       (add-proposal-fab {:onClick open-new-proposal-dialog}))))

@@ -1,18 +1,19 @@
 (ns decide.ui.main-app
   (:require
-    [material-ui.layout :as layout]
-    [com.fulcrologic.fulcro.routing.dynamic-routing :as dr :refer [defrouter]]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-    [decide.ui.components.appbar :as appbar]
-    [material-ui.surfaces :as surfaces]
-    [material-ui.utils :as mutils :refer [css-baseline]]
-    [material-ui.data-display :as dd]
-    [decide.ui.proposal.page :as proposal-page]
-    [decide.ui.proposal.card :as proposal-card]
-    [decide.ui.proposal.main-proposal-list :as main-proposal-list]
     [com.fulcrologic.fulcro.data-fetch :as df]
+    [com.fulcrologic.fulcro.routing.dynamic-routing :as dr :refer [defrouter]]
+    [decide.models.proposal :as proposal]
+    [decide.routing :as routing]
+    [decide.ui.components.appbar :as appbar]
     [decide.ui.pages.settings :as settings]
-    [decide.routing :as routing]))
+    [decide.ui.proposal.main-proposal-list :as main-proposal-list]
+    [decide.ui.proposal.page :as proposal-page]
+    [material-ui.data-display :as dd]
+    [material-ui.layout :as layout]
+    [material-ui.surfaces :as surfaces]
+    [material-ui.utils :as mutils :refer [css-baseline]]))
+
 
 (defrouter ContentRouter [this props]
   {:router-targets [main-proposal-list/MainProposalList settings/SettingsPage proposal-page/ProposalPage]})
@@ -44,7 +45,7 @@
    :route-segment ["app"]
    :will-enter    (fn will-enter [app _]
                     (dr/route-deferred (comp/get-ident MainApp nil)
-                      #(df/load! app :all-proposals proposal-card/Proposal
+                      #(df/load! app :all-proposals proposal/Proposal
                          {:post-mutation        `dr/target-ready
                           :post-mutation-params {:target (comp/get-ident MainApp nil)}})))}
   (mutils/css-baseline {}

@@ -26,6 +26,7 @@
            :unused-binding      {:level :off}
            :unused-referred-var {:level :off}
            :single-key-in       {:level :warning}
+           :unsorted-required-namespaces {:level :warning}
            :consistent-alias    {;; warn when alias for clojure.string is
                                  ;; different from str
                                  :aliases {clojure.string                                 str
