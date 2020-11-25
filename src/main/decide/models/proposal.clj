@@ -44,31 +44,40 @@
 (s/def :proposal/title (s/and string? (complement str/blank?)))
 (s/def :proposal/body string?)
 
+(defn check-auth [{::pc/keys [mutate] :as mutation}]
+  (assoc mutation
+    ::pc/mutate
+    (fn [{:keys [AUTH/profile-nickname] :as env} params]
+      (if profile-nickname
+        (mutate env params)
+        (throw (ex-info "User is not logged in!" {}))))))
+
+(defn new-proposal-id []
+  (str (rand-int 1000)))
+
 ;;; API
 (defmutation add-proposal [{:keys [conn AUTH/profile-nickname] :as env} {:proposal/keys [id title body parents]}]
-  {::pc/output [:proposal/id]}
-  (if profile-nickname
-    (let [real-id (str (rand-int 1000))
-          proposal #:proposal{:id              real-id
-                              :title           title
-                              :body            body
-                              :parents         (for [parent parents
-                                                     :let [id (:proposal/id parent)]]
-                                                 [:proposal/id id])
-                              :original-author [:profile/nickname profile-nickname]
-                              :created         (Date.)}
-          tx-report (d/transact conn [proposal])]
-      {:tempids     {id real-id}
-       ::p/env      (assoc env :db (:db-after tx-report))
-       :proposal/id real-id})
-    (throw (ex-info "User is not logged in!" {}))))
+  {::pc/output    [:proposal/id]
+   ::pc/transform check-auth}
+  (let [real-id (new-proposal-id)
+        proposal #:proposal{:id              real-id
+                            :title           title
+                            :body            body
+                            :parents         (for [parent parents
+                                                   :let [id (:proposal/id parent)]]
+                                               [:proposal/id id])
+                            :original-author [:profile/nickname profile-nickname]
+                            :created         (Date.)}
+        tx-report (d/transact conn [proposal])]
+    {:tempids     {id real-id}
+     ::p/env      (assoc env :db (:db-after tx-report))
+     :proposal/id real-id}))
 
 (defmutation add-opinion [{:keys [conn AUTH/profile-nickname] :as env} {:keys [proposal/id opinion]}]
-  {::pc/params [:proposal/id :opinion]}
-  (if profile-nickname
-    (let [tx-report (opinion/set-opinion! conn profile-nickname id opinion)]
-      {::p/env (assoc env :db (:db-after tx-report))})
-    (throw (ex-info "User is not logged in!" {}))))
+  {::pc/params [:proposal/id :opinion]
+   ::pc/transform check-auth}
+  (let [tx-report (opinion/set-opinion! conn profile-nickname id opinion)]
+    {::p/env (assoc env :db (:db-after tx-report))}))
 
 (defresolver resolve-proposal-opinions [{:keys [db]} {:keys [proposal/id]}]
   {::pc/input  #{:proposal/id}

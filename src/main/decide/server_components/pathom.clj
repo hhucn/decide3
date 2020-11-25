@@ -14,14 +14,19 @@
     [decide.server-components.database :refer [conn]]
     [datahike.api :as d]))
 
+(defn- remove-keys-from-map-values [m & ks]
+  (->> m
+    (map (fn [[k v]] [k (apply dissoc v ks)]))
+    (into {})))
+
 (pc/defresolver index-explorer [env _]
   {::pc/input  #{:com.wsscode.pathom.viz.index-explorer/id}
    ::pc/output [:com.wsscode.pathom.viz.index-explorer/index]}
   {:com.wsscode.pathom.viz.index-explorer/index
    (-> (get env ::pc/indexes)
      ; this is necessary for now, because the index contains functions which can not be serialized by transit.
-     (update ::pc/index-resolvers #(into {} (map (fn [[k v]] [k (dissoc v ::pc/resolve)])) %))
-     (update ::pc/index-mutations #(into {} (map (fn [[k v]] [k (dissoc v ::pc/mutate)])) %))
+     (update ::pc/index-resolvers remove-keys-from-map-values ::pc/resolve ::pc/transform)
+     (update ::pc/index-mutations remove-keys-from-map-values ::pc/mutate ::pc/transform)
      ; to minimize clutter in the Index Explorer
      (update ::pc/index-resolvers (fn [rs] (apply dissoc rs (filter #(str/starts-with? (namespace %) "com.wsscode.pathom") (keys rs)))))
      (update ::pc/index-mutations (fn [rs] (apply dissoc rs (filter #(str/starts-with? (namespace %) "com.wsscode.pathom") (keys rs))))))})
