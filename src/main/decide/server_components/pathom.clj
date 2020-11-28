@@ -1,12 +1,11 @@
 (ns decide.server-components.pathom
   (:require
     [clojure.string :as str]
+    [com.fulcrologic.rad.pathom :as rad-pathom]
     [mount.core :refer [defstate]]
-    [taoensso.timbre :as log]
     [com.wsscode.pathom.connect :as pc]
     [com.wsscode.pathom.core :as p]
     [com.wsscode.common.async-clj :refer [let-chan]]
-    [clojure.core.async :as async]
     [decide.models.user :as user]
     [decide.models.proposal :as proposal.api]
     [decide.models.profile :as profile]
@@ -31,52 +30,20 @@
      (update ::pc/index-resolvers (fn [rs] (apply dissoc rs (filter #(str/starts-with? (namespace %) "com.wsscode.pathom") (keys rs)))))
      (update ::pc/index-mutations (fn [rs] (apply dissoc rs (filter #(str/starts-with? (namespace %) "com.wsscode.pathom") (keys rs))))))})
 
-(def all-resolvers [index-explorer user/resolvers proposal.api/resolvers profile/resolvers])
-
-(defn log-requests [{:keys [env tx] :as req}]
-  (log/debug "Pathom transaction:\n" tx)
-  req)
-
-(defn process-error [env err]
-  (log/error err))
-
-(def ^:dynamic *trace?* false)
-
-(defn build-parser [conn & {:keys [tempids?] :or {tempids? true}}]
-  (let [;; NOTE: Add -Dtrace to the server JVM to enable Fulcro Inspect query performance traces to the network tab.
-        ;; Understand that this makes the network responses much larger and should not be used in production.
-        trace? (get-in config [:parser :trace?])
-        real-parser (p/parallel-parser
-                      {::p/mutate  pc/mutate-async
-                       ::p/env     {::p/reader                 [p/map-reader pc/parallel-reader
-                                                                pc/open-ident-reader p/env-placeholder-reader]
-                                    ::p/placeholder-prefixes   #{">"}
-                                    ::pc/mutation-join-globals [(when tempids? :tempids) :errors]}
-                       ::p/plugins [(pc/connect-plugin {::pc/register all-resolvers})
-                                    (p/env-plugin {::p/process-error process-error})
-                                    (p/env-wrap-plugin (fn [env]
-                                                         ;; Here is where you can dynamically add things to the resolver/mutation
-                                                         ;; environment, like the server config, database connections, etc.
-                                                         (let [{nickname :profile/nickname
-                                                                valid?   :session/valid?}
-                                                               (get-in env [:ring/request :session])]
-                                                           ;:db @db-connection ; real datomic would use (d/db db-connection)
-                                                           ;:connection db-connection
-                                                           (merge
-                                                             {:AUTH/profile-nickname (when valid? nickname)
-                                                              :conn                  conn
-                                                              :db                    (d/db conn)
-                                                              :config                config}
-                                                             env))))
-                                    (when trace?
-                                      (p/pre-process-parser-plugin log-requests))
-                                    p/error-handler-plugin
-                                    (p/post-process-parser-plugin p/elide-not-found)
-                                    (when trace? p/trace-plugin)]})]
-    (fn wrapped-parser [env tx]
-      (async/<!! (real-parser env (if trace?
-                                    (conj tx :com.wsscode.pathom/trace)
-                                    tx))))))
-
 (defstate parser
-  :start (build-parser conn))
+  :start
+  (rad-pathom/new-parser config
+    [(p/env-plugin {:conn conn :db (d/db conn)})
+     (p/env-plugin {:config config})
+     (p/env-wrap-plugin
+       (fn [env]
+         (let [session (get-in env [:ring/request :session])
+               {nickname :profile/nickname
+                valid?   :session/valid?} session]
+           (merge
+             {:AUTH/profile-nickname (when valid? nickname)}
+             env))))]
+    [index-explorer
+     user/resolvers
+     proposal.api/resolvers
+     profile/resolvers]))

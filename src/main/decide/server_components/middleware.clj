@@ -1,7 +1,7 @@
 (ns decide.server-components.middleware
   (:require
     [decide.server-components.config :refer [config]]
-    [decide.server-components.pathom :refer [parser *trace?*]]
+    [decide.server-components.pathom :refer [parser]]
     [mount.core :refer [defstate]]
     [com.fulcrologic.fulcro.server.api-middleware :refer [handle-api-request
                                                           wrap-transit-params
@@ -30,14 +30,13 @@
 
 
 (defn wrap-api [handler uri]
-  (binding [*trace?* (not (nil? (System/getProperty "trace")))]
-    (fn [request]
-      (if (= uri (:uri request))
-        (handle-api-request
-          (:transit-params request)
-          (fn request-handler [tx]
-            (parser {:ring/request request} tx)))
-        (handler request)))))
+  (fn [request]
+    (if (= uri (:uri request))
+      (handle-api-request
+        (:transit-params request)
+        (fn request-handler [tx]
+          (parser {:ring/request request} tx)))
+      (handler request))))
 
 (comp/defsc Session [_ _]
   {:query         [{:decide.api.user/current-session [:session/valid? :decide.models.user/id]}]

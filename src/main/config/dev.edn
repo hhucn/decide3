@@ -1,12 +1,14 @@
-{:taoensso.timbre/logging-config {:level :debug}
- :ring.middleware/defaults-config
-                                 {:security {:anti-forgery   false
-                                             :hsts           true
-                                             :ssl-redirect   false
-                                             :frame-options  :sameorigin
-                                             :xss-protection {:enable? false
-                                                              :mode    :block}}}
- :parser                         {:trace? true}
- :db                             {:db/reset? true
-                                  :store     {:backend :file
-                                              :path    "/tmp/decide"}}}
+{:taoensso.timbre/logging-config    {:level :debug}
+ :ring.middleware/defaults-config   {:security {:anti-forgery   false
+                                                :hsts           true
+                                                :ssl-redirect   false
+                                                :frame-options  :sameorigin
+                                                :xss-protection {:enable? false
+                                                                 :mode    :block}}}
+ :com.fulcrologic.rad.pathom/config {:trace?         true
+                                     :log-requests?  true
+                                     :log-responses? true}
+
+ :db                                {:db/reset? true
+                                     :store     {:backend :file
+                                                 :path    "/tmp/decide"}}}

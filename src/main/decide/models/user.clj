@@ -90,10 +90,9 @@
 ;; API
 (defmutation sign-up [{:keys [conn] :as env} {:user/keys [email password]}]
   {::pc/params [:user/email :user/password]
-   ::pc/output [:session/valid? :profile/nickname :signup/result :errors]}
+   ::pc/output [:session/valid? :profile/nickname :signup/result]}
   (if (email-in-db? @conn email)
-    {:signup/result :fail
-     :errors        #{:email-in-use}}
+    {:errors #{:email-in-use}}
     (let [id (d.core/squuid)
           user #:user{:id       id
                       :email    email
