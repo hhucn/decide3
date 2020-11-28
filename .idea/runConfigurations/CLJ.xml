@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Server" type="ClojureREPL" factoryName="Local" activateToolWindowBeforeRun="false" singleton="true">
+  <configuration default="false" name="CLJ" type="ClojureREPL" factoryName="Local" activateToolWindowBeforeRun="false" singleton="true">
     <module name="decide3" />
     <setting name="replType" value="NREPL" />
     <setting name="execution" value="DEPS" />
