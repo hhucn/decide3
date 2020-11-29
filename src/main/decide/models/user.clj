@@ -2,6 +2,7 @@
   (:require
     [buddy.hashers :as hs]
     [clojure.spec.alpha :as s]
+    [com.fulcrologic.fulcro.components :refer [defsc]]
     [com.fulcrologic.fulcro.server.api-middleware :as fmw]
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
     [com.wsscode.pathom.core :as p]
@@ -30,6 +31,12 @@
 (s/def :user/id uuid?)
 (s/def :user/email string?)
 (s/def :user/password string?)
+
+(defsc Session [_ _]
+  {:query         [:session/valid? :user/id]
+   :ident         (fn [] [:authorization :current-session])
+   :initial-state {:session/valid? false
+                   :user/id        nil}})
 
 (>defn hash-password [password]
   [:user/password => string?]

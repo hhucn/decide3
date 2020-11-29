@@ -1,5 +1,6 @@
 (ns decide.server-components.middleware
   (:require
+    [decide.models.user :as user]
     [decide.server-components.config :refer [config]]
     [decide.server-components.pathom :refer [parser]]
     [mount.core :refer [defstate]]
@@ -38,11 +39,6 @@
           (parser {:ring/request request} tx)))
       (handler request))))
 
-(comp/defsc Session [_ _]
-  {:query         [{:decide.api.user/current-session [:session/valid? :decide.models.user/id]}]
-   :ident         (fn [] [:component/id :session])
-   :initial-state {:decide.api.user/current-session {:session/valid?         false
-                                                      :decide.models.user/id nil}}})
 (defmacro link-to-icon [size]
   (let [url (str "/assets/icons/icon-" size "x" size ".png")
         dimensions (str size "x" size)]
@@ -101,7 +97,7 @@
     (index csrf-token initial-state-script nil)))
 
 (defn index-with-credentials [csrf-token request]
-  (let [initial-state (ssr/build-initial-state (parser {:ring/request request} (comp/get-query Session)) Session)]
+  (let [initial-state (ssr/build-initial-state (parser {:ring/request request} (comp/get-query user/Session)) user/Session)]
     (index csrf-token (ssr/initial-state->script-tag initial-state)
       splash/splash)))
 
