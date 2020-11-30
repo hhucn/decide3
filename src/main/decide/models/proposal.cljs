@@ -20,7 +20,7 @@
 (defmutation add-proposal [{:proposal/keys [_id _title _body _parents] :as params}]
   (action [{:keys [app]}]
     (mrg/merge-component! app Proposal params :append [:all-proposals]))
-  (remote [_] true))
+  (remote [env] (m/returning env Proposal)))
 
 (defmutation add-opinion [{:keys [proposal/id opinion]}]
   (action [{:keys [state]}]
