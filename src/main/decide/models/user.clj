@@ -106,9 +106,10 @@
   (if (email-in-db? @conn email)
     {:errors #{:email-in-use}}
     (let [id (d.core/squuid)
-          user #:user{:id       id
-                      :email    email
-                      :password (hash-password password)}
+          user #:user{:id            id
+                      :email         email
+                      ::display-name email
+                      :password      (hash-password password)}
           tx-report (d/transact conn [user])]
       (response-updating-session env
         {:signup/result  :success
@@ -139,10 +140,15 @@
                     (d/pull [::password] [:user/id user-id])
                     (password-valid? old-password))]
     (if pw-valid?
-      (do (d/transact! conn [{:db/id          [:user/id user-id]
+      (do (d/transact! conn [{:db/id     [:user/id user-id]
                               ::password new-password}])
           {})
       {:errors #{:invalid-credentials}})))
 
+(defresolver resolve-public-infos [{:keys [db]} {:user/keys [id]}]
+  {::pc/input  #{:user/id}
+   ::pc/output [::display-name]}
+  (d/pull db [::display-name] [:user/id id]))
 
-(def resolvers [sign-up sign-in current-session-resolver sign-out change-password])
+
+(def resolvers [sign-up sign-in current-session-resolver sign-out change-password resolve-public-infos])

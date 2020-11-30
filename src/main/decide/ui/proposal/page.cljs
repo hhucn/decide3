@@ -6,6 +6,7 @@
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
     [com.fulcrologic.fulcro.data-fetch :as df]
+    [decide.models.user :as user]
     [decide.routing :as routing]
     [decide.utils :as utils]
     [material-ui.data-display :as dd]
@@ -78,7 +79,7 @@
   {:query         [:proposal/id :proposal/title :proposal/body
                    {:proposal/parents (comp/get-query Parent)}
                    :proposal/pro-votes :proposal/con-votes
-                   {:proposal/original-author [:profile/name]}]
+                   {:proposal/original-author [:user/id ::user/display-name]}]
    :ident         :proposal/id
    :route-segment ["proposal" :proposal-id]
    :will-enter    (fn will-enter-proposal-page

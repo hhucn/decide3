@@ -5,6 +5,7 @@
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
+    [decide.models.user :as user]
     [decide.routing :as routing]
     [material-ui.data-display :as dd]
     [material-ui.inputs :as inputs]
@@ -43,7 +44,7 @@
         :else (.toLocaleDateString created)))))
 
 (defn subheader [{:proposal/keys [id created original-author]}]
-  (let [author-name (:profile/name original-author)]
+  (let [author-name (::user/display-name original-author)]
     (comp/fragment
       (dom/data {:className "proposal-id"
                  :value     id}
@@ -63,7 +64,7 @@
                      :proposal/created
                      :proposal/opinion
                      {:proposal/parents '...}
-                     {:proposal/original-author [:profile/name]}])
+                     {:proposal/original-author [::user/display-name]}])
    :ident         :proposal/id
    :initial-state (fn [{:keys [id title body]}]
                     #:proposal{:id        id
