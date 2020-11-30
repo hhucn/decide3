@@ -7,10 +7,9 @@
     [decide.models.user :as user]
     [decide.models.proposal :as proposal]
     [decide.models.opinion :as opinion]
-    [decide.models.profile :as profile]
     [decide.models.statement :as statement]))
 
-(def schema (into [] cat [user/schema proposal/schema opinion/schema profile/schema statement/schema]))
+(def schema (into [] cat [user/schema proposal/schema opinion/schema statement/schema]))
 
 (defn test-database [config]
   (d/delete-database config)
