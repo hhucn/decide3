@@ -9,6 +9,7 @@
     [decide.models.user :as user]
     [decide.models.proposal :as proposal.api]
     [decide.models.profile :as profile]
+    [decide.models.statement :as statement]
     [decide.server-components.config :refer [config]]
     [decide.server-components.database :refer [conn]]
     [datahike.api :as d]))
@@ -46,4 +47,5 @@
     [index-explorer
      user/resolvers
      proposal.api/resolvers
-     profile/resolvers]))
+     profile/resolvers
+     statement/resolvers]))
