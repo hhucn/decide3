@@ -6,7 +6,8 @@
     [com.wsscode.pathom.core :as p]
     [datahike.api :as d]
     [decide.models.opinion :as opinion]
-    [decide.models.statement :as statement])
+    [decide.models.statement :as statement]
+    [taoensso.timbre :as log])
   (:import (java.util Date)))
 
 (def schema
@@ -107,7 +108,7 @@
         (opinion/pull-personal-opinion db [:proposal/id id] [:user/id user-id])]
     #:proposal{:opinion (or opinion-value 0)}))
 
-(defresolver proposal-resolver [{:keys [db]} {:keys [proposal/id]}]
+(defresolver resolve-proposal [{:keys [db]} {:keys [proposal/id]}]
   {::pc/input  #{:proposal/id}
    ::pc/output [:proposal/id :proposal/title :proposal/body :proposal/created
                 {:proposal/parents [:proposal/id]}
@@ -134,6 +135,6 @@
 (defresolver resolve-comments [{:keys [db]} {:proposal/keys [id]}]
   {::pc/input  #{:proposal/id}
    ::pc/output [{::comments [::statement/id]}]}
-  (d/pull db [::comments] [:proposal/id id]))
+  (d/pull db [{::comments [::statement/id]}] [:proposal/id id]))
 
-(def resolvers [add-proposal proposal-resolver all-proposal-ids resolve-proposal-opinions add-opinion resolve-personal-opinion resolve-comments])
+(def resolvers [add-proposal resolve-proposal all-proposal-ids resolve-proposal-opinions add-opinion resolve-personal-opinion resolve-comments])
