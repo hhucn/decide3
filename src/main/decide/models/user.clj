@@ -39,10 +39,10 @@
 (s/def ::display-name string?)
 
 (defsc Session [_ _]
-  {:query         [:session/valid? :user/id]
+  {:query         [{::current-session [:session/valid? :user/id]}]
    :ident         (fn [] [:authorization :current-session])
-   :initial-state {:session/valid? false
-                   :user/id        nil}})
+   :initial-state {::current-session {:session/valid? false
+                                      :user/id        nil}}})
 
 (>defn hash-password [password]
   [:user/password => string?]
