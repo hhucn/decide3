@@ -5,9 +5,10 @@
                                                 :frame-options  :sameorigin
                                                 :xss-protection {:enable? false
                                                                  :mode    :block}}}
- :com.fulcrologic.rad.pathom/config #:com.fulcrologic.rad.pathom{:trace?         true
-                                                                 :log-requests?  true
-                                                                 :log-responses? true}
+ :com.fulcrologic.rad.pathom/config {:sensitive-keys #{:user/password}
+                                     :trace?         true
+                                     :log-requests?  true
+                                     :log-responses? true}
 
  :db                                {:db/reset? true
                                      :store     {:backend :file

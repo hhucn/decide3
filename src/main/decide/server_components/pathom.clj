@@ -2,17 +2,16 @@
   (:require
     [clojure.string :as str]
     [com.fulcrologic.rad.pathom :as rad-pathom]
-    [mount.core :refer [defstate]]
     [com.wsscode.pathom.connect :as pc]
     [com.wsscode.pathom.core :as p]
-    [com.wsscode.common.async-clj :refer [let-chan]]
-    [decide.models.user :as user]
-    [decide.models.proposal :as proposal.api]
-    [decide.models.profile :as profile]
+    [datahike.api :as d]
+    [decide.models.proposal :as proposal]
     [decide.models.statement :as statement]
+    [decide.models.user :as user]
     [decide.server-components.config :refer [config]]
     [decide.server-components.database :refer [conn]]
-    [datahike.api :as d]))
+    [mount.core :refer [defstate]]
+    [taoensso.timbre :as log]))
 
 (defn- remove-keys-from-map-values [m & ks]
   (->> m
@@ -39,21 +38,67 @@
      (update ::pc/index-resolvers (fn [rs] (apply dissoc rs (filter #(str/starts-with? (namespace %) "com.wsscode.pathom") (keys rs)))))
      (update ::pc/index-mutations (fn [rs] (apply dissoc rs (filter #(str/starts-with? (namespace %) "com.wsscode.pathom") (keys rs))))))})
 
+;;;
+;;; This is borrowed from com.fulcrologic.rad.pathom
+;;;
+
+(defn parser-args [config plugins resolvers]
+  (let [{:keys [trace? log-requests? log-responses? no-tempids?]} (::rad-pathom/config config)]
+    {::p/mutate  pc/mutate
+     ::p/env     {::p/reader                 [p/map-reader pc/reader2 pc/index-reader
+                                              pc/open-ident-reader p/env-placeholder-reader]
+                  ::p/placeholder-prefixes   #{">"}
+                  ::pc/mutation-join-globals [(when-not no-tempids? :tempids) :errors]}
+     ::p/plugins (into []
+                   (keep identity
+                     (concat
+                       [(pc/connect-plugin {::pc/register resolvers})]
+                       plugins
+                       [(p/env-plugin {::p/process-error rad-pathom/process-error})
+                        (when log-requests? (p/pre-process-parser-plugin rad-pathom/log-request!))
+                        ;; TODO: Do we need this, and if so, we need to pass the attribute map
+                        ;(p/post-process-parser-plugin add-empty-vectors)
+                        (p/post-process-parser-plugin p/elide-not-found)
+                        (p/post-process-parser-plugin rad-pathom/elide-reader-errors)
+                        (when log-responses? (rad-pathom/post-process-parser-plugin-with-env rad-pathom/log-response!))
+                        rad-pathom/query-params-to-env-plugin
+                        p/error-handler-plugin
+                        (when trace? p/trace-plugin)])))}))
+
+(defn new-parser
+  "Create a new pathom parser. `config` is a map containing a ::config key with parameters
+  that affect the parser. `extra-plugins` is a sequence of pathom plugins to add to the parser. The
+  plugins will typically need to include plugins from any storage adapters that are being used,
+  such as the `datomic/pathom-plugin`.
+  `resolvers` is a vector of all of the resolvers to register with the parser, which can be a nested collection.
+
+  Supported config options under the ::config key:
+
+  - `:trace? true` Enable the return of pathom performance trace data (development only, high overhead)
+  - `:log-requests? boolean` Enable logging of incoming queries/mutations.
+  - `:log-responses? boolean` Enable logging of parser results."
+  [config extra-plugins resolvers]
+  (let [real-parser (p/parser (parser-args config extra-plugins resolvers))
+        {:keys [trace?]} (get config ::rad-pathom/config {})]
+    (fn wrapped-parser [env tx]
+      (real-parser env (if trace?
+                         (conj tx :com.wsscode.pathom/trace)
+                         tx)))))
+
 (defstate parser
   :start
-  (rad-pathom/new-parser config
+  (new-parser config
     [(p/env-plugin {:conn conn :db (d/db conn)})
      (p/env-plugin {:config config})
      (p/env-wrap-plugin
        (fn [env]
          (let [session (get-in env [:ring/request :session])
-               {nickname :profile/nickname
-                valid?   :session/valid?} session]
+               {id     :user/id
+                valid? :session/valid?} session]
            (merge
-             {:AUTH/profile-nickname (when valid? nickname)}
+             {:AUTH/user-id (when valid? id)}
              env))))]
     [index-explorer
      user/resolvers
-     proposal.api/resolvers
-     profile/resolvers
+     proposal/resolvers
      statement/resolvers]))
