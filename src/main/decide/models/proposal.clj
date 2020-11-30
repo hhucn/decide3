@@ -53,8 +53,8 @@
 (defn check-auth [{::pc/keys [mutate] :as mutation}]
   (assoc mutation
     ::pc/mutate
-    (fn [{:keys [AUTH/profile-nickname] :as env} params]
-      (if profile-nickname
+    (fn [{:keys [AUTH/user-id] :as env} params]
+      (if user-id
         (mutate env params)
         (throw (ex-info "User is not logged in!" {}))))))
 
@@ -62,7 +62,7 @@
   (str (rand-int 1000)))
 
 ;;; API
-(defmutation add-proposal [{:keys [conn AUTH/profile-nickname] :as env} {:proposal/keys [id title body parents]}]
+(defmutation add-proposal [{:keys [conn AUTH/user-id] :as env} {:proposal/keys [id title body parents]}]
   {::pc/output    [:proposal/id]
    ::pc/transform check-auth}
   (let [real-id (new-proposal-id)
@@ -72,17 +72,17 @@
                             :parents         (for [parent parents
                                                    :let [id (:proposal/id parent)]]
                                                [:proposal/id id])
-                            :original-author [:profile/nickname profile-nickname]
+                            :original-author [:user/id user-id]
                             :created         (Date.)}
         tx-report (d/transact conn [proposal])]
     {:tempids     {id real-id}
      ::p/env      (assoc env :db (:db-after tx-report))
      :proposal/id real-id}))
 
-(defmutation add-opinion [{:keys [conn AUTH/profile-nickname] :as env} {:keys [proposal/id opinion]}]
+(defmutation add-opinion [{:keys [conn AUTH/user-id] :as env} {:keys [proposal/id opinion]}]
   {::pc/params [:proposal/id :opinion]
    ::pc/transform check-auth}
-  (let [tx-report (opinion/set-opinion! conn profile-nickname id opinion)]
+  (let [tx-report (opinion/set-opinion! conn user-id id opinion)]
     {::p/env (assoc env :db (:db-after tx-report))}))
 
 (defresolver resolve-proposal-opinions [{:keys [db]} {:keys [proposal/id]}]
@@ -100,22 +100,22 @@
     #:proposal{:pro-votes (get opinions 1 0)
                :con-votes (get opinions -1 0)}))
 
-(defresolver resolve-personal-opinion [{:keys [db AUTH/profile-nickname]} {:keys [proposal/id]}]
+(defresolver resolve-personal-opinion [{:keys [db AUTH/user-id]} {:keys [proposal/id]}]
   {::pc/input  #{:proposal/id}
    ::pc/output [:proposal/opinion]}
   (let [opinion-value
-        (opinion/pull-personal-opinion db [:proposal/id id] [:profile/nickname profile-nickname])]
+        (opinion/pull-personal-opinion db [:proposal/id id] [:user/id user-id])]
     #:proposal{:opinion (or opinion-value 0)}))
 
 (defresolver proposal-resolver [{:keys [db]} {:keys [proposal/id]}]
   {::pc/input  #{:proposal/id}
    ::pc/output [:proposal/id :proposal/title :proposal/body :proposal/created
                 {:proposal/parents [:proposal/id]}
-                {:proposal/original-author [:profile/nickname]}]}
+                {:proposal/original-author [:user/id]}]}
   (let [{:proposal/keys [id title body created parents original-author]}
         (d/pull db [:proposal/id :proposal/title :proposal/body :proposal/created
                     {:proposal/parents [:proposal/id]}
-                    {:proposal/original-author [:profile/nickname]}]
+                    {:proposal/original-author [:user/id]}]
           [:proposal/id id])]
     #:proposal{:id              id
                :title           title

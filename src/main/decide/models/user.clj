@@ -26,11 +26,17 @@
              {:db/ident       :user/email
               :db/unique      :db.unique/identity
               :db/cardinality :db.cardinality/one
+              :db/valueType   :db.type/string}
+
+             {:db/ident       ::display-name
+              :db/doc         "A (not unique) name to display for the public."
+              :db/cardinality :db.cardinality/one
               :db/valueType   :db.type/string}])
 
 (s/def :user/id uuid?)
 (s/def :user/email string?)
 (s/def :user/password string?)
+(s/def ::display-name string?)
 
 (defsc Session [_ _]
   {:query         [:session/valid? :user/id]
@@ -78,17 +84,16 @@
 
 (defmutation sign-in [{:keys [db] :as env} {:user/keys [email password]}]
   {::pc/params [:user/email :user/password]
-   ::pc/output [:session/valid? :profile/nickname :signin/result :errors]}
+   ::pc/output [:session/valid? :user/id :signin/result :errors]}
   (if (email-in-db? db email)
-    (let [{:keys [profile/_identities] :as user} (get-by-email db email [:user/id :user/password {:profile/_identities [:profile/nickname]}])
-          nickname (:profile/nickname (first _identities))]
+    (let [{:user/keys [id] :as user} (get-by-email db email [:user/id :user/password])]
       (if (password-valid? user password)
         (response-updating-session env
-          {:signin/result    :success
-           :session/valid?   true
-           :profile/nickname nickname}
-          {:profile/nickname nickname
-           :session/valid?   true})
+          {:signin/result  :success
+           :session/valid? true
+           :user/id        id}
+          {:user/id        id
+           :session/valid? true})
         {:signin/result :fail
          :signin/errors #{:invalid-credentials}}))
     {:signin/result :fail
@@ -97,37 +102,34 @@
 ;; API
 (defmutation sign-up [{:keys [conn] :as env} {:user/keys [email password]}]
   {::pc/params [:user/email :user/password]
-   ::pc/output [:session/valid? :profile/nickname :signup/result]}
+   ::pc/output [:session/valid? :user/id :signup/result]}
   (if (email-in-db? @conn email)
     {:errors #{:email-in-use}}
     (let [id (d.core/squuid)
           user #:user{:id       id
                       :email    email
                       :password (hash-password password)}
-          profile #:profile{:nickname   email
-                            :name       email
-                            :identities [[:user/id id]]}
-          tx-report (d/transact conn [user profile])]
+          tx-report (d/transact conn [user])]
       (response-updating-session env
-        {:signup/result    :success
-         :profile/nickname email
-         :session/valid?   true
-         ::p/env           (assoc env :db (:db-after tx-report))}
-        {:profile/nickname email
-         :session/valid?   true}))))
+        {:signup/result  :success
+         :user/id        id
+         :session/valid? true
+         ::p/env         (assoc env :db (:db-after tx-report))}
+        {:user/id        id
+         :session/valid? true}))))
 
 (defmutation sign-out [env _]
   {::pc/output [:session/valid?]}
   (response-updating-session env
     {:session/valid? false}
-    {:session/valid? false :profile/nickname nil}))
+    {:session/valid? false :user/id nil}))
 
 (defresolver current-session-resolver [env _]
-  {::pc/output [{::current-session [:session/valid? :profile/nickname]}]}
-  (let [{:keys [session/valid? profile/nickname] :as session} (get-in env [:ring/request :session])]
+  {::pc/output [{::current-session [:session/valid? :user/id]}]}
+  (let [{:keys [session/valid? user/id] :as session} (get-in env [:ring/request :session])]
     (log/debug "Resolve Session for: " session)
     (if valid?
-      {::current-session {:session/valid? true :profile/nickname nickname}}
+      {::current-session {:session/valid? true :user/id id}}
       {::current-session {:session/valid? false}})))
 
 (defmutation change-password [{:keys [db conn AUTH/user-id]} {:keys [old-password new-password]}]

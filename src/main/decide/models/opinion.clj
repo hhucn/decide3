@@ -6,7 +6,7 @@
     [ghostwheel.core :refer [>defn =>]]
     [taoensso.timbre :as log]))
 
-(def schema [{:db/ident       :profile/opinions
+(def schema [{:db/ident       :user/opinions
               :db/cardinality :db.cardinality/many
               :db/valueType   :db.type/ref
               :db/isComponent true}
@@ -23,21 +23,21 @@
 
 (s/def :opinion/value #{-1 0 +1})
 
-(>defn set-opinion! [conn profile-nickname proposal-id opinion-value]
-  [d.core/conn? :profile/nickname :proposal/id :opinion/value => map?]
+(>defn set-opinion! [conn user-id proposal-id opinion-value]
+  [d.core/conn? :user/id :proposal/id :opinion/value => map?]
   (d/transact conn
     [[:db/add [:proposal/id proposal-id] :proposal/opinions "temp"]
-     [:db/add [:profile/nickname profile-nickname] :profile/opinions "temp"]
+     [:db/add [:user/id user-id] :user/opinions "temp"]
      {:db/id         "temp"
       :opinion/value opinion-value}]))
 
-(defn pull-personal-opinion [db proposal profile]
+(defn pull-personal-opinion [db proposal user]
   (log/spy :debug
     (d/q
       '[:find ?value .
-        :in $ ?proposal ?profile
+        :in $ ?proposal ?user
         :where
         [?proposal :proposal/opinions ?opinions]
-        [?profile :profile/opinions ?opinions]
+        [?user :user/opinions ?opinions]
         [?opinions :opinion/value ?value]]
-      db proposal profile)))
+      db proposal user)))

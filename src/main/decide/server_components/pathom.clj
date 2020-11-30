@@ -24,6 +24,14 @@
    ::pc/output [:com.wsscode.pathom.viz.index-explorer/index]}
   {:com.wsscode.pathom.viz.index-explorer/index
    (-> (get env ::pc/indexes)
+     (update ::pc/index-attributes (fn [attribute-map]
+                                     (let [attribute-keys (keys attribute-map)
+                                           keys-to-keep (remove (fn [k]
+                                                                  (if (keyword? k)
+                                                                    (some-> k namespace (str/starts-with? "com.wsscode.pathom.connect"))
+                                                                    k))
+                                                          attribute-keys)]
+                                       (select-keys attribute-map keys-to-keep))))
      ; this is necessary for now, because the index contains functions which can not be serialized by transit.
      (update ::pc/index-resolvers remove-keys-from-map-values ::pc/resolve ::pc/transform)
      (update ::pc/index-mutations remove-keys-from-map-values ::pc/mutate ::pc/transform)
