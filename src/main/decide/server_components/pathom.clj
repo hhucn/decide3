@@ -88,16 +88,16 @@
 (defstate parser
   :start
   (new-parser config
-    [(p/env-plugin {:conn conn :db (d/db conn)})
-     (p/env-plugin {:config config})
+    [(p/env-plugin {:config config})
      (p/env-wrap-plugin
        (fn [env]
          (let [session (get-in env [:ring/request :session])
                {id     :user/id
                 valid? :session/valid?} session]
-           (merge
-             {:AUTH/user-id (when valid? id)}
-             env))))]
+           (merge env
+             {:AUTH/user-id (when valid? id)
+              :conn         conn
+              :db           (d/db conn)}))))]
     [index-explorer
      user/resolvers
      proposal/resolvers

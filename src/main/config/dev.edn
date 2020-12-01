@@ -10,6 +10,7 @@
                                      :log-requests?  true
                                      :log-responses? true}
 
- :db                                {:db/reset? true
+ :db                                {:name      "dev-db"
+                                     :db/reset? true
                                      :store     {:backend :file
                                                  :path    "/tmp/decide"}}}
