@@ -7,6 +7,7 @@
     [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
     [decide.models.user :as user]
     [decide.routing :as routing]
+    [decide.ui.common.time :as time]
     [material-ui.data-display :as dd]
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
@@ -18,44 +19,31 @@
     [taoensso.timbre :as log]
     [decide.models.proposal :as model]))
 
+(defn id-part [proposal-id]
+  (dom/data {:className "proposal-id"
+             :value     proposal-id}
+    (str "#" (if (tempid/tempid? proposal-id) "?" proposal-id))))
 
+(defn author-part [author-name]
+  (comp/fragment "von " (dom/address (str author-name))))
 
-(defn today? [date]
-  (let [now (js/Date.)]
-    (and
-      (= (.getFullYear date) (.getFullYear now))
-      (= (.getMonth date) (.getMonth now))
-      (= (.getDate date) (.getDate now)))))
-
-(defn yesterday? [date]
-  (let [now (js/Date.)]
-    (and
-      (= (.getFullYear date) (.getFullYear now))
-      (= (.getMonth date) (.getMonth now))
-      (= (.getDate date) (dec (.getDate now))))))
-
-
-(defn time-string [created]
-  (when created
-    (let [now (js/Date.now)]
-      (cond
-        (today? created) (str "heute um " (.getHours created) ":" (.getMinutes created) " Uhr")
-        (yesterday? created) (str "gestern um " (.getHours created) ":" (.getMinutes created) " Uhr")
-        :else (.toLocaleDateString created)))))
+(defn time-part [^js/Date created]
+  (let [iso-string (.toISOString created)]
+    (comp/fragment
+      " "
+      (dom/time {:dateTime iso-string
+                 :title    created}
+        (time/nice-string created)))))
 
 (defn subheader [{:proposal/keys [id created original-author]}]
   (let [author-name (::user/display-name original-author)]
     (comp/fragment
-      (dom/data {:className "proposal-id"
-                 :value     id}
-        (str "#" (if (tempid/tempid? id) "?" id)))
+      (id-part id)
       " · "
       (when author-name
-        (comp/fragment
-          "von " (dom/address (str author-name))))
-      (when created
-        (comp/fragment
-          " am " (dom/time {:dateTime (some-> created .toISOString)} (time-string created)))))))
+        (author-part author-name))
+      (when (instance? js/Date created)
+        (time-part created)))))
 
 (defsc Proposal [this {:proposal/keys [id title body opinion created original-author] :as props}]
   {:query         (fn []
