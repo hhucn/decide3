@@ -5,7 +5,7 @@
            com.taoensso/timbre                                {:mvn/version "5.1.0"}
            com.taoensso/tufte                                 {:mvn/version "2.2.0"}
            com.wsscode/pathom                                 {:mvn/version "2.2.31"}
-           com.fulcrologic/fulcro                             {:mvn/version "3.4.3"}
+           com.fulcrologic/fulcro                             {:mvn/version "3.4.5"}
            com.fulcrologic/fulcro-rad                         {:mvn/version "1.0.6"}
            com.fulcrologic/fulcro-garden-css                  {:mvn/version "3.0.8"}
            gnl/ghostwheel                                     {:mvn/version "0.3.9"}
@@ -31,12 +31,12 @@
            :dev       {:extra-paths ["src/test" "src/dev" "src/workspaces"]
                        :jvm-opts    ["-XX:-OmitStackTraceInFastThrow"]
                        :extra-deps  {org.clojure/clojurescript   {:mvn/version "1.10.773"}
-                                     thheller/shadow-cljs        {:mvn/version "2.11.7"}
+                                     thheller/shadow-cljs        {:mvn/version "2.11.8"}
                                      expound/expound             {:mvn/version "0.8.6"}
                                      fulcrologic/fulcro-spec     {:mvn/version "3.1.8"}
                                      binaryage/devtools          {:mvn/version "1.0.2"}
                                      com.github.awkay/workspaces {:mvn/version "1.0.2"},
-                                     org.clojure/tools.namespace {:mvn/version "1.0.0"}}}
+                                     org.clojure/tools.namespace {:mvn/version "1.1.0"}}}
 
            :depstar   {:extra-deps {seancorfield/depstar {:mvn/version "1.1.136"}}
                        :ns-default hf.depstar

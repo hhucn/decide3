@@ -13,26 +13,26 @@
         "reakit": "^1.2.5"
     },
     "scripts": {
-        "client/main": "npx shadow-cljs watch :main",
-        "client/workspaces": "npx shadow-cljs watch :workspaces",
-        "client/tests": "npx shadow-cljs watch :test",
+        "client/main": "shadow-cljs watch :main",
+        "client/workspaces": "shadow-cljs watch :workspaces",
+        "client/tests": "shadow-cljs watch :test",
         "client/cljs": "shadow-cljs cljs-repl :main",
         "client/clj": "shadow-cljs clj-repl",
-        "client/server": "npx shadow-cljs server",
-        "client/nodejs": "npx shadow-cljs node-repl",
+        "client/server": "shadow-cljs server",
+        "client/nodejs": "shadow-cljs node-repl",
         "clj/watch-tests": "clojure -A:dev:clj-tests -J-Dghostwheel.enabled=true --watch",
         "server": "clojure -A:dev -J-Dtrace -J-Dghostwheel.enabled=true",
         "start": "npx run-p client/server server"
     },
     "devDependencies": {
-        "intl-messageformat": "^9.3.17",
+        "intl-messageformat": "^9.3.20",
         "karma": "^5.2.3",
         "karma-chrome-launcher": "^3.1.0",
         "karma-cljs-test": "^0.1.0",
         "npm-run-all": "^4.1.5",
         "react": "^16.8.0",
         "react-dom": "^16.8.0",
-        "shadow-cljs": "^2.11.7"
+        "shadow-cljs": "^2.11.8"
     },
     "author": "ebbinghaus@hhu.de",
     "license": "MIT"
