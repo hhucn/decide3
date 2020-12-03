@@ -61,11 +61,7 @@
                                :pro-votes 0
                                :con-votes 0})
    :use-hooks?    true}
-  (let [proposal-href (hooks/use-memo #(routing/path->url
-                                         (dr/path-to
-                                           (comp/registry-key->class 'decide.ui.main-app/MainApp)
-                                           (comp/registry-key->class `ProposalPage)
-                                           id)))]
+  (let [proposal-href (hooks/use-memo #(routing/path->url ["app" "proposal" id]))]
     (layout/box {:width "100%" :clone true}
       (surfaces/card
         {:variant :outlined}
@@ -81,8 +77,8 @@
              :color     "textSecondary"
              :style     {:whiteSpace "pre-line"}}
             body))
-        (surfaces/card-actions {}
 
+        (surfaces/card-actions {}
           (inputs/button {:size      :small
                           :color     (if (pos? opinion) "primary" "default")
                           :variant   :text

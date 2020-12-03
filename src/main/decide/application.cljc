@@ -52,9 +52,7 @@
   (app/fulcro-app
     #?(:cljs {:client-will-mount (fn [app]
                                    (log/merge-config! {:output-fn prefix-output-fn
-                                                       :appenders {:console (console-appender)}})
-                                   (routing/start-history! app)
-                                   (routing/start!))
+                                                       :appenders {:console (console-appender)}}))
               :client-did-mount  client-did-mount
               :remotes           {:remote (net/fulcro-http-remote {:url                "/api"
                                                                    :request-middleware secured-request-middleware})}
