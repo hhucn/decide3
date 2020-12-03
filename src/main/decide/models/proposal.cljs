@@ -25,7 +25,7 @@
 (defn load-all! [app-or-comp]
   (df/load! app-or-comp :all-proposals Proposal))
 
-(defmutation add-proposal [{::keys [_id _title _body _parents] :as params}]
+(defmutation add [{::keys [_id _title _body _parents] :as params}]
   (action [{:keys [app]}]
     (mrg/merge-component! app Proposal params :append [:all-proposals]))
   (remote [env] (m/returning env Proposal)))

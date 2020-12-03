@@ -56,7 +56,7 @@
   (str (rand-int 1000)))
 
 ;;; API
-(defmutation add-proposal [{:keys [conn AUTH/user-id] :as env} {::keys [id title body parents]}]
+(defmutation add [{:keys [conn AUTH/user-id] :as env} {::keys [id title body parents]}]
   {::pc/output    [::id]
    ::pc/transform check-auth}
   (let [real-id (new-proposal-id)
@@ -97,4 +97,4 @@
    (for [id (d/q '[:find [?id ...] :where [_ ::id ?id]] db)]
      {::id id})})
 
-(def resolvers [add-proposal resolve-proposal all-proposal-ids])
+(def resolvers [add resolve-proposal all-proposal-ids])

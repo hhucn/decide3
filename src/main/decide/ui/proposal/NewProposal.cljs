@@ -86,7 +86,7 @@
                     :onSubmit  (fn submit-new-proposal-form [e]
                                  (evt/prevent-default! e)
                                  (comp/transact! this
-                                   [(proposal/add-proposal
+                                   [(proposal/add
                                       {::proposal/id      (tempid/tempid)
                                        ::proposal/title   title
                                        ::proposal/body    body
