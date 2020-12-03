@@ -3,7 +3,8 @@
     [com.fulcrologic.fulcro.components :refer [defsc]]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.algorithms.merge :as mrg]
-    [decide.models.user :as user]))
+    [decide.models.user :as user]
+    [com.fulcrologic.fulcro.data-fetch :as df]))
 
 (defsc Proposal [_this _props]
   {:query (fn []
@@ -16,6 +17,9 @@
              {:proposal/parents '...}                       ; this is a recursion
              {:proposal/original-author [::user/display-name]}]) ; TODO replace join with real model
    :ident :proposal/id})
+
+(defn load-all! [app-or-comp]
+  (df/load! app-or-comp :all-proposals Proposal))
 
 (defmutation add-proposal [{:proposal/keys [_id _title _body _parents] :as params}]
   (action [{:keys [app]}]

@@ -1,7 +1,6 @@
 (ns decide.ui.main-app
   (:require
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-    [com.fulcrologic.fulcro.data-fetch :as df]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr :refer [defrouter]]
     [decide.models.proposal :as proposal]
     [decide.routing :as routing]
@@ -29,6 +28,7 @@
       props)
     children))
 
+;; TODO current-route doesn't get the path of subrouter...
 (defn nav-entry [component {:keys [label path]}]
   (list-item-link
     {:href     (routing/path->url path)
@@ -43,11 +43,9 @@
    :initial-state (fn [_] {:ui/content-router (comp/get-initial-state ContentRouter)
                            :ui/app-bar        (comp/get-initial-state appbar/AppBar)})
    :route-segment ["app"]
-   :will-enter    (fn will-enter [app _]
-                    (dr/route-deferred (comp/get-ident MainApp nil)
-                      #(df/load! app :all-proposals proposal/Proposal
-                         {:post-mutation        `dr/target-ready
-                          :post-mutation-params {:target (comp/get-ident MainApp nil)}})))}
+   :will-enter    (fn will-enter [app]
+                    (proposal/load-all! app)
+                    (dr/route-immediate (comp/get-ident MainApp nil)))}
   (mutils/css-baseline {}
     (appbar/ui-appbar app-bar {}
       (dd/list {}
@@ -56,7 +54,7 @@
            :path  (dr/path-to MainApp main-proposal-list/MainProposalList)})
         (nav-entry this
           {:label "Einstellungen"
-           :path  (dr/path-to main-proposal-list/MainProposalList settings/SettingsPage)})))
+           :path  (dr/path-to MainApp settings/SettingsPage)})))
     (layout/box {:flex 1 :clone true}
       (surfaces/paper {:component :main}
         (ui-content-router content-router)))))
