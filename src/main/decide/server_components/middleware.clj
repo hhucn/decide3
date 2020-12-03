@@ -56,34 +56,11 @@
   ([csrf-token initial-state-script initial-html]
 
    (html5
-     [:html {:lang "en"}
+     [:html {:lang "de"}
       [:head
        [:title "decide"]
        [:meta {:charset "utf-8"}]
-       [:link {:rel "icon" :type "image/png" :href "/assets/icons/favicon-16.png" :sizes "16x16"}]
-       [:link {:rel "icon" :type "image/png" :href "/assets/icons/favicon-32.png" :sizes "32x32"}]
-       [:link {:rel "icon" :type "image/png" :href "/assets/icons/favicon-48.png" :sizes "48x48"}]
        initial-state-script
-       [:link {:rel "manifest" :href "/manifest.json"}]
-       [:meta {:name "mobile-web-app-capable" :content "yes"}]
-       [:meta {:name "apple-mobile-web-app-capable" :content "yes"}]
-       [:meta {:name "application-name" :content "decide"}]
-       [:meta {:name "apple-mobile-web-app-title" :content "decide"}]
-       [:meta {:name "theme-color" :content "#d32f2f"}]
-       [:meta {:name "msapplication-navbutton-color" :content "#d32f2f"}]
-       [:meta {:name "apple-mobile-web-app-status-bar-style" :content "default"}]
-       [:link {:rel "mask-icon" :sizes "any" :href "/assets/icons/T.svg" :color "#d32f2f"}]
-       [:meta {:name "msapplication-starturl" :content "/app/home"}]
-       [:meta {:name "viewport" :content "width=device-width, initial-scale=1, maximum-scale=5"}]
-       (link-to-icon 72)
-       (link-to-icon 96)
-       (link-to-icon 128)
-       (link-to-icon 144)
-       (link-to-icon 152)
-       (link-to-icon 192)
-       (link-to-icon 384)
-       (link-to-icon 512)
-
        [:link {:href "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" :rel "stylesheet"}]
        [:script (str "var fulcro_network_csrf_token = '" csrf-token "';")]
        [:style (garden/css styles/body styles/splashscreen styles/sizing styles/address)]]
