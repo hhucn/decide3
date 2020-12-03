@@ -73,21 +73,6 @@
      ::p/env  (assoc env :db (:db-after tx-report))
      ::id     real-id}))
 
-(defresolver resolve-proposal-opinions [{:keys [db]} {::keys [id]}]
-  {::pc/input  #{::id}
-   ::pc/output [::pro-votes ::con-votes]}
-  (let [opinions
-        (d/q
-          '[:find (clojure.core/frequencies ?values) .
-            :in $ ?id
-            :where
-            [?e ::id ?id]
-            [?e ::opinions ?opinions]
-            [?opinions :opinion/value ?values]]
-          db id)]
-    {::pro-votes (get opinions 1 0)
-     ::con-votes (get opinions -1 0)}))
-
 (defresolver resolve-proposal [{:keys [db]} {::keys [id]}]
   {::pc/input  #{::id}
    ::pc/output [::id ::title ::body ::created
@@ -112,4 +97,4 @@
    (for [id (d/q '[:find [?id ...] :where [_ ::id ?id]] db)]
      {::id id})})
 
-(def resolvers [add-proposal resolve-proposal all-proposal-ids resolve-proposal-opinions])
+(def resolvers [add-proposal resolve-proposal all-proposal-ids])

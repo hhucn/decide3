@@ -6,6 +6,7 @@
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
     [decide.models.user :as user]
+    [decide.models.opinion :as opinion]
     [decide.models.proposal :as proposal]
     [decide.routing :as routing]
     [decide.ui.common.time :as time]
@@ -83,15 +84,15 @@
           (inputs/button {:size      :small
                           :color     (if (pos? opinion) "primary" "default")
                           :variant   :text
-                          :onClick   #(comp/transact! this [(model/add-opinion {::proposal/id id
-                                                                                :opinion      (if (pos? opinion) 0 +1)})])
+                          :onClick   #(comp/transact! this [(opinion/add {::proposal/id id
+                                                                          :opinion      (if (pos? opinion) 0 +1)})])
                           :startIcon (react/createElement ThumbUpAltTwoTone)}
             "Zustimmen")
           (inputs/button {:size      :small
                           :color     (if (neg? opinion) "primary" "default")
                           :variant   :text
-                          :onClick   #(comp/transact! this [(model/add-opinion {::proposal/id id
-                                                                                :opinion      (if (neg? opinion) 0 -1)})])
+                          :onClick   #(comp/transact! this [(opinion/add {::proposal/id id
+                                                                          :opinion      (if (neg? opinion) 0 -1)})])
                           :startIcon (react/createElement ThumbDownAltTwoTone)}
             "Ablehnen")
           (layout/box {:clone true

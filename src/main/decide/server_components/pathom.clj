@@ -6,6 +6,7 @@
     [com.wsscode.pathom.core :as p]
     [datahike.api :as d]
     [decide.models.argument :as argument]
+    [decide.models.opinion :as opinion]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
     [decide.server-components.config :refer [config]]
@@ -100,4 +101,5 @@
     [index-explorer
      user/resolvers
      proposal/resolvers
-     argument/resolvers]))
+     argument/resolvers
+     opinion/resolvers]))

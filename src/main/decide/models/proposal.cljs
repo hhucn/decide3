@@ -29,9 +29,3 @@
   (action [{:keys [app]}]
     (mrg/merge-component! app Proposal params :append [:all-proposals]))
   (remote [env] (m/returning env Proposal)))
-
-(defmutation add-opinion [{::keys [id]
-                           :keys  [opinion]}]
-  (action [{:keys [state]}]
-    (swap! state update-in [::id id] assoc ::opinion opinion))
-  (remote [env] true))
