@@ -52,7 +52,7 @@
           (layout/box {:pb 8 :clone true}                   ; to not cover up the FAB
             (dd/list {}
               (for [proposal all-proposals]
-                (dd/list-item {:disableGutters true :key (:proposal/id proposal)}
+                (dd/list-item {:disableGutters true :key (::proposal/id proposal)}
                   (proposal-card/ui-proposal proposal)))))))
 
       (add-proposal-fab {:onClick open-new-proposal-dialog}))))

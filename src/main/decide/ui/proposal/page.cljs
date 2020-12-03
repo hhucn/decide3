@@ -32,9 +32,9 @@
 
 (declare ProposalPage)
 
-(defsc Parent [this {:proposal/keys [id title]}]
-  {:query [:proposal/id :proposal/title]
-   :ident :proposal/id}
+(defsc Parent [this {::proposal/keys [id title]}]
+  {:query [::proposal/id ::proposal/title]
+   :ident ::proposal/id}
   (dd/list-item
     {:button    true
      :component "a"
@@ -46,7 +46,7 @@
     (dd/list-item-avatar {} (str "#" id))
     (dd/list-item-text {} (str title))))
 
-(def ui-parent (comp/computed-factory Parent {:keyfn :proposal/id}))
+(def ui-parent (comp/computed-factory Parent {:keyfn ::proposal/id}))
 
 ;; region Vote scale
 (defn percent-of-pro-votes [pro-votes con-votes]
@@ -62,8 +62,8 @@
                    :colorPrimary    {:backgroundColor (.. theme -palette -error -main)}})))
      LinearProgress)))
 
-(defn vote-scale [{:proposal/keys [pro-votes con-votes]
-                   :or            {pro-votes 0 con-votes 0}}]
+(defn vote-scale [{::proposal/keys [pro-votes con-votes]
+                   :or             {pro-votes 0 con-votes 0}}]
   (layout/grid {:container  true
                 :alignItems :center
                 :justify    :space-between
@@ -99,28 +99,29 @@
 
 (def ui-comment-row (comp/computed-factory ArgumentRow {:keyfn ::argument/id}))
 
-(defmutation add-argument [{:keys [temp-id content proposal/id]}]
+(defmutation add-argument [{::proposal/keys [id]
+                            :keys [temp-id content]}]
   (action [{:keys [state]}]
     (let [new-comment-data {::argument/id      temp-id
                             ::argument/content content}]
       (norm/swap!-> state
         (mrg/merge-component ArgumentRow new-comment-data)
         (targeting/integrate-ident* (comp/get-ident ArgumentRow new-comment-data)
-          :append (conj (comp/get-ident ProposalPage {:proposal/id id}) ::proposal/arguments)))))
+          :append (conj (comp/get-ident ProposalPage {::proposal/id id}) ::proposal/arguments)))))
   (remote [env]
     (-> env
       (m/with-server-side-mutation argument/add-argument)
       (m/returning ArgumentRow))))
 
-(defsc NewCommentLine [this _ {:proposal/keys [id]}]
+(defsc NewCommentLine [this _ {::proposal/keys [id]}]
   {:use-hooks? true}
   (let [[new-argument set-new-argument] (hooks/use-state "")
         submit (hooks/use-callback
                  (fn [e]
                    (evt/prevent-default! e)
-                   (comp/transact! this [(add-argument {:proposal/id id
-                                                        :temp-id     (tempid/tempid)
-                                                        :content     new-argument})])
+                   (comp/transact! this [(add-argument {::proposal/id id
+                                                        :temp-id      (tempid/tempid)
+                                                        :content      new-argument})])
                    (set-new-argument ""))
                  [new-argument])]
     (layout/grid {:container true
@@ -136,22 +137,21 @@
 
 (def ui-new-comment-line (comp/computed-factory NewCommentLine))
 
-(defsc ProposalPage [this {:proposal/keys  [id title body parents original-author]
-                           ::proposal/keys [arguments]
+(defsc ProposalPage [this {::proposal/keys [id title body parents original-author arguments]
                            :as             props}]
-  {:query         [:proposal/id :proposal/title :proposal/body
-                   {:proposal/parents (comp/get-query Parent)}
-                   :proposal/pro-votes :proposal/con-votes
-                   {:proposal/original-author [:user/id ::user/display-name]}
+  {:query         [::proposal/id ::proposal/title ::proposal/body
+                   {::proposal/parents (comp/get-query Parent)}
+                   ::proposal/pro-votes ::proposal/con-votes
+                   {::proposal/original-author [:user/id ::user/display-name]}
                    {::proposal/arguments (comp/get-query ArgumentRow)}]
-   :ident         :proposal/id
+   :ident         ::proposal/id
    :route-segment ["proposal" :proposal-id]
    :will-enter    (fn will-enter-proposal-page
                     [app {:keys [proposal-id]}]
-                    (dr/route-deferred [:proposal/id proposal-id]
-                      #(df/load! app [:proposal/id proposal-id] ProposalPage
+                    (dr/route-deferred [::proposal/id proposal-id]
+                      #(df/load! app [::proposal/id proposal-id] ProposalPage
                          {:post-mutation        `dr/target-ready
-                          :post-mutation-params {:target (comp/get-ident ProposalPage {:proposal/id proposal-id})}})))
+                          :post-mutation-params {:target (comp/get-ident ProposalPage {::proposal/id proposal-id})}})))
    :use-hooks?    true}
   (feedback/dialog
     {:open       true
@@ -188,4 +188,4 @@
             (dd/list {:dense true}
               (map ui-comment-row arguments))
             (dd/typography {:variant :body2 :color :textSecondary} "Bisher gibt es noch keinen Kommentar")))
-        (ui-new-comment-line {} {:proposal/id id})))))
+        (ui-new-comment-line {} {::proposal/id id})))))

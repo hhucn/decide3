@@ -9,7 +9,7 @@
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [clojure.tools.reader.edn :as edn]
-    [decide.models.proposal :as model]
+    [decide.models.proposal :as proposal]
     [decide.utils :as utils]
     [material-ui.data-display :as dd]
     [material-ui.feedback :as feedback]
@@ -18,8 +18,8 @@
     [material-ui.navigation :as navigation]
     ["@material-ui/icons/RemoveCircleOutline" :default RemoveIcon]))
 
-(defsc Parent [_this {:proposal/keys [id title]} {:keys [onDelete]}]
-  {:query [:proposal/id :proposal/title]}
+(defsc Parent [_this {::proposal/keys [id title]} {:keys [onDelete]}]
+  {:query [::proposal/id ::proposal/title]}
   (dd/list-item {}
     (dd/list-item-avatar {} (dom/span (str "#" id)))
     (dd/list-item-text {} (str title))
@@ -29,7 +29,7 @@
          :aria-label "Elternteil entfernen"}
         (comp/create-element RemoveIcon #js {:color "error"} nil)))))
 
-(def ui-parent (comp/computed-factory Parent {:keyfn :proposal/id}))
+(def ui-parent (comp/computed-factory Parent {:keyfn ::proposal/id}))
 
 ;;; region Mutations
 (defmutation add-parent [{:keys [parent/ident]}]
@@ -41,7 +41,7 @@
     (swap! state mrg/remove-ident* ident (conj ref :ui/parents))))
 
 (defn- id-in-parents? [parents id]
-  ((set (map :proposal/id parents)) id))
+  ((set (map ::proposal/id parents)) id))
 
 (defmutation show-new-proposal-form-dialog [{:keys [title body parents]
                                              :or   {title "" body "" parents []}}]
@@ -86,11 +86,11 @@
                     :onSubmit  (fn submit-new-proposal-form [e]
                                  (evt/prevent-default! e)
                                  (comp/transact! this
-                                   [(model/add-proposal
-                                      #:proposal{:id      (tempid/tempid)
-                                                 :title   title
-                                                 :body    body
-                                                 :parents (mapv #(select-keys % [:proposal/id]) parents)})])
+                                   [(proposal/add-proposal
+                                      {::proposal/id      (tempid/tempid)
+                                       ::proposal/title   title
+                                       ::proposal/body    body
+                                       ::proposal/parents (mapv #(select-keys % [::proposal/id]) parents)})])
                                  (close-dialog))}}
       (feedback/dialog-title {} "Neuer Vorschlag")
       (let [change-title (hooks/use-callback (partial m/set-string! this :ui/title :event))
@@ -106,8 +106,8 @@
           (layout/box {:my 1}
             (dd/typography {:component "h3"} "Eltern")
             (dd/list {}
-              (for [{:proposal/keys [id] :as props} parents
-                    :let [delete-parent #(comp/transact! this [(remove-parent {:parent/ident [:proposal/id id]})])]]
+              (for [{::proposal/keys [id] :as props} parents
+                    :let [delete-parent #(comp/transact! this [(remove-parent {:parent/ident [::proposal/id id]})])]]
                 (ui-parent props
                   {:onDelete delete-parent}))
               (inputs/textfield {:label     "Eltern hinzufügen"
@@ -117,9 +117,9 @@
                                  :value     ""
                                  :fullWidth true
                                  :onChange  #(comp/transact! this [(add-parent {:parent/ident (edn/read-string (evt/target-value %))})])}
-                (for [{:proposal/keys [id title]} all-proposals
+                (for [{::proposal/keys [id title]} all-proposals
                       :when (not (id-in-parents? parents id))]
-                  (navigation/menu-item {:key id :value (str [:proposal/id id])}
+                  (navigation/menu-item {:key id :value (str [::proposal/id id])}
                     (str "#" id " " title))))))
           (inputs/textfield
             {:label        "Details"

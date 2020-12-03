@@ -6,6 +6,7 @@
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
     [decide.models.user :as user]
+    [decide.models.proposal :as proposal]
     [decide.routing :as routing]
     [decide.ui.common.time :as time]
     [material-ui.data-display :as dd]
@@ -35,7 +36,7 @@
                  :title    created}
         (time/nice-string created)))))
 
-(defn subheader [{:proposal/keys [id created original-author]}]
+(defn subheader [{::proposal/keys [id created original-author]}]
   (let [author-name (::user/display-name original-author)]
     (comp/fragment
       (id-part id)
@@ -45,21 +46,21 @@
       (when (instance? js/Date created)
         (time-part created)))))
 
-(defsc Proposal [this {:proposal/keys [id title body opinion created original-author] :as props}]
+(defsc Proposal [this {::proposal/keys [id title body opinion created original-author] :as props}]
   {:query         (fn []
-                    [:proposal/id :proposal/title :proposal/body
-                     :proposal/pro-votes :proposal/con-votes
-                     :proposal/created
-                     :proposal/opinion
-                     {:proposal/parents '...}
-                     {:proposal/original-author [::user/display-name]}])
-   :ident         :proposal/id
+                    [::proposal/id ::proposal/title ::proposal/body
+                     ::proposal/pro-votes ::proposal/con-votes
+                     ::proposal/created
+                     ::proposal/opinion
+                     {::proposal/parents '...}
+                     {::proposal/original-author [::user/display-name]}])
+   :ident         ::proposal/id
    :initial-state (fn [{:keys [id title body]}]
-                    #:proposal{:id        id
-                               :title     title
-                               :body      body
-                               :pro-votes 0
-                               :con-votes 0})
+                    {::proposal/id        id
+                     ::proposal/title     title
+                     ::proposal/body      body
+                     ::proposal/pro-votes 0
+                     ::proposal/con-votes 0})
    :use-hooks?    true}
   (let [proposal-href (hooks/use-memo #(routing/path->url ["app" "proposal" id]))]
     (layout/box {:width "100%" :clone true}
@@ -82,15 +83,15 @@
           (inputs/button {:size      :small
                           :color     (if (pos? opinion) "primary" "default")
                           :variant   :text
-                          :onClick   #(comp/transact! this [(model/add-opinion {:proposal/id id
-                                                                                :opinion     (if (pos? opinion) 0 +1)})])
+                          :onClick   #(comp/transact! this [(model/add-opinion {::proposal/id id
+                                                                                :opinion      (if (pos? opinion) 0 +1)})])
                           :startIcon (react/createElement ThumbUpAltTwoTone)}
             "Zustimmen")
           (inputs/button {:size      :small
                           :color     (if (neg? opinion) "primary" "default")
                           :variant   :text
-                          :onClick   #(comp/transact! this [(model/add-opinion {:proposal/id id
-                                                                                :opinion     (if (neg? opinion) 0 -1)})])
+                          :onClick   #(comp/transact! this [(model/add-opinion {::proposal/id id
+                                                                                :opinion      (if (neg? opinion) 0 -1)})])
                           :startIcon (react/createElement ThumbDownAltTwoTone)}
             "Ablehnen")
           (layout/box {:clone true
@@ -98,4 +99,4 @@
             (inputs/button {:component "a"
                             :href      proposal-href} "Mehr")))))))
 
-(def ui-proposal (comp/computed-factory Proposal {:keyfn :proposal/id}))
+(def ui-proposal (comp/computed-factory Proposal {:keyfn ::proposal/id}))

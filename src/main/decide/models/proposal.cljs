@@ -8,25 +8,26 @@
 
 (defsc Proposal [_this _props]
   {:query (fn []
-            [:proposal/id
-             :proposal/title
-             :proposal/body
-             :proposal/pro-votes :proposal/con-votes
-             :proposal/created
-             :proposal/opinion
-             {:proposal/parents '...}                       ; this is a recursion
-             {:proposal/original-author [::user/display-name]}]) ; TODO replace join with real model
-   :ident :proposal/id})
+            [::id
+             ::title
+             ::body
+             ::pro-votes ::con-votes
+             ::created
+             ::opinion
+             {::parents '...}                               ; this is a recursion
+             {::original-author [::user/display-name]}])    ; TODO replace join with real model
+   :ident ::id})
 
 (defn load-all! [app-or-comp]
   (df/load! app-or-comp :all-proposals Proposal))
 
-(defmutation add-proposal [{:proposal/keys [_id _title _body _parents] :as params}]
+(defmutation add-proposal [{::keys [_id _title _body _parents] :as params}]
   (action [{:keys [app]}]
     (mrg/merge-component! app Proposal params :append [:all-proposals]))
   (remote [env] (m/returning env Proposal)))
 
-(defmutation add-opinion [{:keys [proposal/id opinion]}]
+(defmutation add-opinion [{::keys [id]
+                           :keys  [opinion]}]
   (action [{:keys [state]}]
-    (swap! state update-in [:proposal/id id] assoc :proposal/opinion opinion))
+    (swap! state update-in [::id id] assoc ::opinion opinion))
   (remote [env] true))

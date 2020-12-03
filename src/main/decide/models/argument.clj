@@ -34,23 +34,24 @@
    ::pc/output [::content {::author [:user/id]}]}
   (d/pull db [::content {::author [:user/id]}] [::id id]))
 
-(defmutation add-argument [{:keys [conn AUTH/user-id] :as env} {:keys [temp-id content proposal/id]}]
+(defmutation add-argument [{:keys [conn AUTH/user-id] :as env} {::proposal/keys [id]
+                                                                :keys           [temp-id content]}]
   {::pc/output [::id]}
   (let [real-id (d.core/squuid)
-        statement {:db/id "temp"
-                   ::id real-id
+        statement {:db/id    "temp"
+                   ::id      real-id
                    ::content content
-                   ::author [:user/id user-id]}
+                   ::author  [:user/id user-id]}
         tx-report (d/transact conn
                     [statement
-                     [:db/add [:proposal/id id] ::proposal/arguments "temp"]])]
+                     [:db/add [::proposal/id id] ::proposal/arguments "temp"]])]
     {:tempids     {temp-id real-id}
      ::p/env      (assoc env :db (:db-after tx-report))
      ::id real-id}))
 
-(defresolver resolve-arguments [{:keys [db]} {:proposal/keys [id]}]
-  {::pc/input  #{:proposal/id}
+(defresolver resolve-arguments [{:keys [db]} {::proposal/keys [id]}]
+  {::pc/input  #{::proposal/id}
    ::pc/output [{::proposal/arguments [::id]}]}
-  (d/pull db [{::proposal/arguments [::id]}] [:proposal/id id]))
+  (d/pull db [{::proposal/arguments [::id]}] [::proposal/id id]))
 
 (def resolvers [add-argument resolve-argument resolve-arguments])
