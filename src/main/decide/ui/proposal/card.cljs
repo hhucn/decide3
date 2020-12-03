@@ -53,7 +53,7 @@
                      ::proposal/created
                      ::proposal/opinion
                      {::proposal/parents '...}
-                     {::proposal/original-author [::user/display-name]}])
+                     {::proposal/original-author (comp/get-query proposal/Author)}])
    :ident         ::proposal/id
    :initial-state (fn [{:keys [id title body]}]
                     {::proposal/id        id

@@ -37,7 +37,7 @@
       "Bisher gibt es keine Vorschläge.")))
 
 (defsc MainProposalList [this {:keys [all-proposals]}]
-  {:query         [{[:all-proposals '_] (comp/get-query proposal/Proposal)}]
+  {:query         [{[:all-proposals '_] (comp/get-query proposal-card/Proposal)}]
    :ident         (fn [] [:content/id :main-proposal-list])
    :initial-state {:all-proposals []}
    :route-segment ["home"]

@@ -1,10 +1,14 @@
 (ns decide.models.proposal
   (:require
-    [com.fulcrologic.fulcro.components :refer [defsc]]
-    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.algorithms.merge :as mrg]
-    [decide.models.user :as user]
-    [com.fulcrologic.fulcro.data-fetch :as df]))
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+    [decide.models.user :as user]))
+
+(defsc Author [_ _]
+  {:query [:user/id ::user/display-name]
+   :ident :user/id})
 
 (defsc Proposal [_this _props]
   {:query (fn []
@@ -15,7 +19,7 @@
              ::created
              ::opinion
              {::parents '...}                               ; this is a recursion
-             {::original-author [::user/display-name]}])    ; TODO replace join with real model
+             {::original-author (comp/get-query Author)}])  ; TODO replace join with real model
    :ident ::id})
 
 (defn load-all! [app-or-comp]
