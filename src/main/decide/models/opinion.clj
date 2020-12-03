@@ -6,7 +6,8 @@
     [datahike.api :as d]
     [datahike.core :as d.core]
     [decide.models.proposal :as proposal]
-    [ghostwheel.core :refer [>defn =>]]))
+    [ghostwheel.core :refer [>defn =>]]
+    [decide.models.authorization :as auth]))
 
 (def schema [{:db/ident       :user/opinions
               :db/cardinality :db.cardinality/many
@@ -45,7 +46,8 @@
 
 (defmutation add [{:keys [conn AUTH/user-id] :as env} {::proposal/keys [id]
                                                        :keys           [opinion]}]
-  {::pc/params [::proposal/id :opinion]}
+  {::pc/params    [::proposal/id :opinion]
+   ::pc/transform auth/check-logged-in}
   (let [tx-report (set-opinion! conn user-id id opinion)]
     {::p/env (assoc env :db (:db-after tx-report))}))
 

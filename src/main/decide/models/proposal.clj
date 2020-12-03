@@ -4,7 +4,8 @@
     [clojure.string :as str]
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
     [com.wsscode.pathom.core :as p]
-    [datahike.api :as d])
+    [datahike.api :as d]
+    [decide.models.authorization :as auth])
   (:import (java.util Date)))
 
 (def schema
@@ -44,21 +45,13 @@
 (s/def ::title (s/and string? (complement str/blank?)))
 (s/def ::body string?)
 
-(defn check-auth [{::pc/keys [mutate] :as mutation}]
-  (assoc mutation
-    ::pc/mutate
-    (fn [{:keys [AUTH/user-id] :as env} params]
-      (if user-id
-        (mutate env params)
-        (throw (ex-info "User is not logged in!" {}))))))
-
 (defn new-proposal-id []
   (str (rand-int 1000)))
 
-;;; API
+;;; region API
 (defmutation add [{:keys [conn AUTH/user-id] :as env} {::keys [id title body parents]}]
   {::pc/output    [::id]
-   ::pc/transform check-auth}
+   ::pc/transform auth/check-logged-in}
   (let [real-id (new-proposal-id)
         proposal {::id              real-id
                   ::title           title
@@ -90,11 +83,12 @@
      ::parents         (or parents [])
      ::original-author original-author}))
 
-(defresolver all-proposal-ids [{:keys [db]} _]
+(defresolver resolve-all-proposal-ids [{:keys [db]} _]
   {::pc/input  #{}
    ::pc/output [{:all-proposals [::id]}]}
   {:all-proposals
    (for [id (d/q '[:find [?id ...] :where [_ ::id ?id]] db)]
      {::id id})})
+;;; endregion
 
-(def resolvers [add resolve-proposal all-proposal-ids])
+(def resolvers [add resolve-proposal resolve-all-proposal-ids])

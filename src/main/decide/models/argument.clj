@@ -4,6 +4,7 @@
     [com.wsscode.pathom.core :as p]
     [datahike.api :as d]
     [datahike.core :as d.core]
+    [decide.models.authorization :as auth]
     [decide.models.proposal :as proposal]))
 
 (def schema
@@ -34,9 +35,12 @@
    ::pc/output [::content {::author [:user/id]}]}
   (d/pull db [::content {::author [:user/id]}] [::id id]))
 
-(defmutation add-argument [{:keys [conn AUTH/user-id] :as env} {::proposal/keys [id]
-                                                                :keys           [temp-id content]}]
-  {::pc/output [::id]}
+(defmutation add-argument
+  [{:keys [conn AUTH/user-id] :as env} {::proposal/keys [id]
+                                        :keys           [temp-id content]}]
+  {::pc/params    [::proposal/id :temp-id :content]
+   ::pc/output    [::id]
+   ::pc/transform auth/check-logged-in}
   (let [real-id (d.core/squuid)
         statement {:db/id    "temp"
                    ::id      real-id
@@ -45,9 +49,9 @@
         tx-report (d/transact conn
                     [statement
                      [:db/add [::proposal/id id] ::proposal/arguments "temp"]])]
-    {:tempids     {temp-id real-id}
-     ::p/env      (assoc env :db (:db-after tx-report))
-     ::id real-id}))
+    {:tempids {temp-id real-id}
+     ::p/env  (assoc env :db (:db-after tx-report))
+     ::id     real-id}))
 
 (defresolver resolve-arguments [{:keys [db]} {::proposal/keys [id]}]
   {::pc/input  #{::proposal/id}
