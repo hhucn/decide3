@@ -23,6 +23,7 @@
     ["@material-ui/icons/ThumbDownAltTwoTone" :default ThumbDownAltTwoTone]
     ["@material-ui/icons/Close" :default Close]
     ["@material-ui/core/LinearProgress" :default LinearProgress]
+    ["@material-ui/icons/Send" :default Send]
     ["@material-ui/core/styles" :refer (withStyles useTheme)]
     ["React" :as react]
     [com.fulcrologic.fulcro.dom :as dom]
@@ -105,8 +106,7 @@
     (let [new-comment-data {::argument/id      temp-id
                             ::argument/content content}]
       (norm/swap!-> state
-        (mrg/merge-component ArgumentRow new-comment-data)
-        (targeting/integrate-ident* (comp/get-ident ArgumentRow new-comment-data)
+        (mrg/merge-component ArgumentRow new-comment-data
           :append (conj (comp/get-ident ProposalPage {::proposal/id id}) ::proposal/arguments)))))
   (remote [env]
     (-> env
@@ -133,7 +133,9 @@
          :value      new-argument
          :onChange   #(set-new-argument (evt/target-value %))
          :inputProps {:aria-label "Neuer Kommentar"}
-         :InputProps {:endAdornment (inputs/button {:type :submit} "Absenden")}}))))
+         :InputProps {:endAdornment (inputs/icon-button {:type        :submit
+                                                         :aria-label= "Absenden"}
+                                      (react/createElement Send))}}))))
 
 (def ui-new-comment-line (comp/computed-factory NewCommentLine))
 
