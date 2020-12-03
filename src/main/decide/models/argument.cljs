@@ -2,7 +2,7 @@
   (:require
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]))
 
-(def add-statement `add-statement)
+(def add-argument `add-argument)
 
 (defsc Statement [_ _]
   {:query [::id ::content ::author]})

@@ -34,7 +34,7 @@
    ::pc/output [::content {::author [:user/id]}]}
   (d/pull db [::content {::author [:user/id]}] [::id id]))
 
-(defmutation add-statement [{:keys [conn AUTH/user-id] :as env} {:keys [temp-id content proposal/id]}]
+(defmutation add-argument [{:keys [conn AUTH/user-id] :as env} {:keys [temp-id content proposal/id]}]
   {::pc/output [::id]}
   (let [real-id (d.core/squuid)
         statement {:db/id "temp"
@@ -53,4 +53,4 @@
    ::pc/output [{::proposal/arguments [::id]}]}
   (d/pull db [{::proposal/arguments [::id]}] [:proposal/id id]))
 
-(def resolvers [add-statement resolve-argument resolve-arguments])
+(def resolvers [add-argument resolve-argument resolve-arguments])

@@ -109,7 +109,7 @@
           :append (conj (comp/get-ident ProposalPage {:proposal/id id}) ::proposal/arguments)))))
   (remote [env]
     (-> env
-      (m/with-server-side-mutation argument/add-statement)
+      (m/with-server-side-mutation argument/add-argument)
       (m/returning ArgumentRow))))
 
 (defsc NewCommentLine [this _ {:proposal/keys [id]}]
