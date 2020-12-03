@@ -87,7 +87,7 @@
                    :ui/password-error
 
                    fs/form-config-join]
-   :ident         (fn [] [:page/id :signup])
+   :ident         (fn [] [:SCREEN :sign-up-in])
    :route-segment ["signup"]
    :form-fields   #{:user/email :user/password}
    :initial-state {:user/email        ""
@@ -154,7 +154,7 @@
 
                    :user/password
                    :ui/password-error]
-   :ident         (fn [] [:page/id :login])
+   :ident         (fn [] [:SCREEN :sign-up-in])
    :route-segment ["login"]
    :initial-state {:user/email        ""
                    :ui/email-error    nil

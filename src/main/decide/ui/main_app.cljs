@@ -39,7 +39,7 @@
 (defsc MainApp [this {:keys [ui/content-router ui/app-bar]}]
   {:query         [{:ui/content-router (comp/get-query ContentRouter)}
                    {:ui/app-bar (comp/get-query appbar/AppBar)}]
-   :ident         (fn [] [:page/id :main-app])
+   :ident         (fn [] [:SCREEN :main-app])
    :initial-state (fn [_] {:ui/content-router (comp/get-initial-state ContentRouter)
                            :ui/app-bar        (comp/get-initial-state appbar/AppBar)})
    :route-segment ["app"]

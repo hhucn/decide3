@@ -87,7 +87,7 @@
 
 (defsc SettingsPage [_this {:ui/keys [new-password-form]}]
   {:query         [{:ui/new-password-form (comp/get-query NewPasswordForm)}]
-   :ident         (fn [] [:page/id :settings])
+   :ident         (fn [] [:SCREEN :settings])
    :route-segment ["settings"]
    :initial-state (fn [_] {:ui/new-password-form (comp/get-initial-state NewPasswordForm)})}
   (layout/container
