@@ -17,8 +17,8 @@
   (log/info "Application starting.")
   (app/set-root! SPA root/Root {:initialize-state? true})
   (routing/start-history! SPA)
-  (routing/start!)
   (dr/initialize! SPA)
+  (routing/start!)
   (app/mount! SPA root/Root "decide"
     {:initialize-state? false
      :hydrate           false}))
