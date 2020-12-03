@@ -5,9 +5,7 @@
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
     [com.wsscode.pathom.core :as p]
     [datahike.api :as d]
-    [decide.models.opinion :as opinion]
-    [decide.models.statement :as statement]
-    [taoensso.timbre :as log])
+    [decide.models.opinion :as opinion])
   (:import (java.util Date)))
 
 (def schema
@@ -40,10 +38,6 @@
 
    {:db/ident       :proposal/parents
     :db/doc         "≥0 parent proposals from which the proposal is derived."
-    :db/cardinality :db.cardinality/many
-    :db/valueType   :db.type/ref}
-
-   {:db/ident       ::comments
     :db/cardinality :db.cardinality/many
     :db/valueType   :db.type/ref}])
 
@@ -132,9 +126,4 @@
    (for [id (d/q '[:find [?id ...] :where [_ :proposal/id ?id]] db)]
      {:proposal/id id})})
 
-(defresolver resolve-comments [{:keys [db]} {:proposal/keys [id]}]
-  {::pc/input  #{:proposal/id}
-   ::pc/output [{::comments [::statement/id]}]}
-  (d/pull db [{::comments [::statement/id]}] [:proposal/id id]))
-
-(def resolvers [add-proposal resolve-proposal all-proposal-ids resolve-proposal-opinions add-opinion resolve-personal-opinion resolve-comments])
+(def resolvers [add-proposal resolve-proposal all-proposal-ids resolve-proposal-opinions add-opinion resolve-personal-opinion])

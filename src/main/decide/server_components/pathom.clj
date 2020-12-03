@@ -5,13 +5,12 @@
     [com.wsscode.pathom.connect :as pc]
     [com.wsscode.pathom.core :as p]
     [datahike.api :as d]
+    [decide.models.argument :as argument]
     [decide.models.proposal :as proposal]
-    [decide.models.statement :as statement]
     [decide.models.user :as user]
     [decide.server-components.config :refer [config]]
     [decide.server-components.database :refer [conn]]
-    [mount.core :refer [defstate]]
-    [taoensso.timbre :as log]))
+    [mount.core :refer [defstate]]))
 
 (defn- remove-keys-from-map-values [m & ks]
   (->> m
@@ -101,4 +100,4 @@
     [index-explorer
      user/resolvers
      proposal/resolvers
-     statement/resolvers]))
+     argument/resolvers]))

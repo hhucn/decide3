@@ -1,15 +1,20 @@
 (ns decide.server-components.database
   (:require
-    [mount.core :refer [defstate args]]
-    [decide.server-components.config :refer [config]]
-    [taoensso.timbre :as log]
     [datahike.api :as d]
-    [decide.models.user :as user]
-    [decide.models.proposal :as proposal]
+    [decide.models.argument :as argument]
     [decide.models.opinion :as opinion]
-    [decide.models.statement :as statement]))
+    [decide.models.proposal :as proposal]
+    [decide.models.user :as user]
+    [decide.server-components.config :refer [config]]
+    [mount.core :refer [defstate args]]
+    [taoensso.timbre :as log]))
 
-(def schema (into [] cat [user/schema proposal/schema opinion/schema statement/schema]))
+(def schema
+  (into [] cat
+    [user/schema
+     proposal/schema
+     opinion/schema
+     argument/schema]))
 
 (defn test-database [config]
   (d/delete-database config)

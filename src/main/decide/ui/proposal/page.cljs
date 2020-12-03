@@ -1,11 +1,15 @@
 (ns decide.ui.proposal.page
   (:require
+    [com.fulcrologic.fulcro.algorithms.merge :as mrg]
+    [com.fulcrologic.fulcro.algorithms.normalized-state :as norm]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
     [com.fulcrologic.fulcro.data-fetch :as df]
+    [decide.models.proposal :as proposal]
+    [decide.models.argument :as argument]
     [decide.models.user :as user]
     [decide.routing :as routing]
     [decide.utils :as utils]
@@ -22,7 +26,11 @@
     ["@material-ui/core/styles" :refer (withStyles useTheme)]
     ["React" :as react]
     [com.fulcrologic.fulcro.dom :as dom]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [com.fulcrologic.fulcro.dom.events :as evt]
+    [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]))
+
+(declare ProposalPage)
 
 (defsc Parent [this {:proposal/keys [id title]}]
   {:query [:proposal/id :proposal/title]
@@ -75,11 +83,67 @@
       (dd/typography {:variant "h6" :color "textSecondary" :component "h3"} title)
       children)))
 
-(defsc ProposalPage [this {:proposal/keys [id title body parents original-author] :as props}]
+(defsc ArgumentAuthor [_ {::user/keys [display-name]}]
+  {:query [:user/id ::user/display-name]
+   :ident :user/id}
+  (dom/span display-name))
+
+(def ui-argument-author (comp/factory ArgumentAuthor))
+
+(defsc ArgumentRow [_ {::argument/keys [content author]}]
+  {:query [::argument/id ::argument/content {::argument/author (comp/get-query ArgumentAuthor)}]
+   :ident ::argument/id}
+  (dd/list-item {}
+    (dd/list-item-text {:primary   content
+                        :secondary (comp/fragment "Von " (ui-argument-author author))})))
+
+(def ui-comment-row (comp/computed-factory ArgumentRow {:keyfn ::argument/id}))
+
+(defmutation add-argument [{:keys [temp-id content proposal/id]}]
+  (action [{:keys [state]}]
+    (let [new-comment-data {::argument/id      temp-id
+                            ::argument/content content}]
+      (norm/swap!-> state
+        (mrg/merge-component ArgumentRow new-comment-data)
+        (targeting/integrate-ident* (comp/get-ident ArgumentRow new-comment-data)
+          :append (conj (comp/get-ident ProposalPage {:proposal/id id}) ::proposal/arguments)))))
+  (remote [env]
+    (-> env
+      (m/with-server-side-mutation argument/add-statement)
+      (m/returning ArgumentRow))))
+
+(defsc NewCommentLine [this _ {:proposal/keys [id]}]
+  {:use-hooks? true}
+  (let [[new-argument set-new-argument] (hooks/use-state "")
+        submit (hooks/use-callback
+                 (fn [e]
+                   (evt/prevent-default! e)
+                   (comp/transact! this [(add-argument {:proposal/id id
+                                                        :temp-id     (tempid/tempid)
+                                                        :content     new-argument})])
+                   (set-new-argument ""))
+                 [new-argument])]
+    (layout/grid {:container true
+                  :component "form"
+                  :onSubmit  submit}
+      (inputs/textfield
+        {:fullWidth  true
+         :label      "Neuer Kommentar"
+         :value      new-argument
+         :onChange   #(set-new-argument (evt/target-value %))
+         :inputProps {:aria-label "Neuer Kommentar"}
+         :InputProps {:endAdornment (inputs/button {:type :submit} "Absenden")}}))))
+
+(def ui-new-comment-line (comp/computed-factory NewCommentLine))
+
+(defsc ProposalPage [this {:proposal/keys  [id title body parents original-author]
+                           ::proposal/keys [arguments]
+                           :as             props}]
   {:query         [:proposal/id :proposal/title :proposal/body
                    {:proposal/parents (comp/get-query Parent)}
                    :proposal/pro-votes :proposal/con-votes
-                   {:proposal/original-author [:user/id ::user/display-name]}]
+                   {:proposal/original-author [:user/id ::user/display-name]}
+                   {::proposal/arguments (comp/get-query ArgumentRow)}]
    :ident         :proposal/id
    :route-segment ["proposal" :proposal-id]
    :will-enter    (fn will-enter-proposal-page
@@ -118,4 +182,10 @@
       (proposal-section "Meinungen"
         (vote-scale props))
 
-      (proposal-section "Argumente"))))
+      (proposal-section "Kommentare"
+        (layout/box {:mb 1}
+          (if-not (empty? arguments)
+            (dd/list {:dense true}
+              (map ui-comment-row arguments))
+            (dd/typography {:variant :body2 :color :textSecondary} "Bisher gibt es noch keinen Kommentar")))
+        (ui-new-comment-line {} {:proposal/id id})))))
