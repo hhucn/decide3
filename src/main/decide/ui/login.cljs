@@ -29,15 +29,14 @@
 (defmutation sign-up [{:user/keys [_email _password]}]
   (action [_] true)
   (ok-action [{:keys [component result] :as env}]
-    (log/info result)
-    (let [{:keys [errors]} (get-in env [:result :body `sign-up])]
+    (let [{:keys [errors]} (get-in env [:result :body `user/sign-up])]
       (if (empty? errors)
         (do
           (reset-password-field! component)
           (redirect-to-main-list! component))
         (cond
           (contains? errors :email-in-use)
-          (m/set-string! component :ui/email-error :value "E-Mail already in use!")))))
+          (m/set-string! component :ui/email-error :value "Email already in use!")))))
   (remote [env]
     (-> env
       (m/with-server-side-mutation `user/sign-up)
@@ -47,16 +46,17 @@
   (action [_] true)
   (ok-action [{:keys [component] :as env}]
     (let [{:keys [errors]}
-          (get-in env [:result :body `sign-in])]
+          (get-in env [:result :body `user/sign-in])]
       (if (empty? errors)
         (do
           (reset-password-field! component)
           (redirect-to-main-list! component))
         (when errors
-          (or
-            (contains? errors :account-does-not-exist)
-            (contains? errors :invalid-credentials))
-          (m/set-string!! component :ui/password-error :value "E-Mail or password is wrong.")))))
+          (cond
+            (or
+              (contains? errors :account-does-not-exist)
+              (contains? errors :invalid-credentials))
+            (m/set-string!! component :ui/password-error :value "Email or password is wrong."))))))
   (remote [env]
     (-> env
       (m/with-server-side-mutation `user/sign-in)
@@ -114,10 +114,10 @@
                            :value      email
                            :error      (boolean email-error)
                            :helperText email-error
-                           :inputProps {:aria-label   "E-Mail"
+                           :inputProps {:aria-label   "Email"
                                         :autoComplete :email}
                            :onChange   (fn [e]
-                                         (m/set-value!! this :ui/email-error nil)
+                                         (when email-error (m/set-value!! this :ui/email-error nil))
                                          (m/set-string!! this :user/email :event e))}))
         (layout/grid {:item true :xs 12}
           (wide-textfield {:label      "Password"
@@ -128,23 +128,23 @@
                            :inputProps {:aria-label   "Password"
                                         :autoComplete :new-password}
                            :onChange   (fn [e]
-                                         (m/set-value!! this :ui/password-error nil)
+                                         (when password-error (m/set-value!! this :ui/password-error nil))
                                          (m/set-string!! this :user/password :event e))}))
         (layout/grid {:item true :xs 12}
           (inputs/button {:variant   :contained
                           :color     :primary
                           :type      :submit
                           :fullWidth true}
-            "Sign up"))
-        (layout/grid {:item true}))
-      (layout/grid
-        {:container true
-         :justify   :flex-end}
-        (layout/grid {:item true}
-          (navigation/link
-            (routing/with-route this (dr/path-to LoginPage)
-              {:variant :body2})
-            "Already have an account? Sign In"))))))
+            "Sign up")))
+      (layout/box {:mt 2 :clone true}
+        (layout/grid
+          {:container true
+           :justify   :flex-end}
+          (layout/grid {:item true}
+            (navigation/link
+              (routing/with-route this (dr/path-to LoginPage)
+                {:variant :body2})
+              "Already have an account? Sign In")))))))
 
 
 (defsc LoginPage [this {:user/keys [email password]
@@ -185,7 +185,7 @@
                                         :autoComplete :email}
                            :value      email
                            :onChange   (fn [e]
-                                         (m/set-value!! this :ui/email-error nil)
+                                         (when email-error (m/set-value!! this :ui/email-error nil))
                                          (m/set-string!! this :user/email :event e))}))
         (layout/grid {:item true :xs 12}
           (wide-textfield {:label      "Password"
@@ -196,7 +196,7 @@
                                         :autoComplete :current-password}
                            :value      password
                            :onChange   (fn [e]
-                                         (m/set-value!! this :ui/password-error nil)
+                                         (when password-error (m/set-value!! this :ui/password-error nil))
                                          (m/set-string!! this :user/password :event e))}))
         (layout/grid {:item true :xs 12}
           (inputs/button {:variant   :contained
