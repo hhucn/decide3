@@ -29,7 +29,8 @@
     [com.fulcrologic.fulcro.dom :as dom]
     [taoensso.timbre :as log]
     [com.fulcrologic.fulcro.dom.events :as evt]
-    [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]))
+    [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
+    [com.fulcrologic.fulcro.application :as app]))
 
 (declare ProposalPage)
 
@@ -129,13 +130,13 @@
                   :onSubmit  submit}
       (inputs/textfield
         {:fullWidth  true
-         :label      "Neuer Kommentar"
+         :label      "Neuer Argument"
          :value      new-argument
          :onChange   #(set-new-argument (evt/target-value %))
-         :inputProps {:aria-label "Neuer Kommentar"}
-         :InputProps {:endAdornment (inputs/icon-button {:type        :submit
-                                                         :aria-label= "Absenden"}
-                                      (react/createElement Send))}}))))
+         :inputProps {:aria-label "Neuer Argument"}
+         :InputProps {:endAdornment (inputs/icon-button {:type       :submit
+                                                         :aria-label "Absenden"}
+                                      (comp/create-element Send nil nil))}}))))
 
 (def ui-new-comment-line (comp/computed-factory NewCommentLine))
 
@@ -150,44 +151,50 @@
    :route-segment ["proposal" :proposal-id]
    :will-enter    (fn will-enter-proposal-page
                     [app {:keys [proposal-id]}]
-                    (dr/route-deferred [::proposal/id proposal-id]
-                      #(df/load! app [::proposal/id proposal-id] ProposalPage
-                         {:post-mutation        `dr/target-ready
-                          :post-mutation-params {:target (comp/get-ident ProposalPage {::proposal/id proposal-id})}})))
+                    (if (get-in (app/current-state app) [::proposal/id proposal-id])
+                      (do
+                        (df/load! app [::proposal/id proposal-id] ProposalPage) ; just to refresh
+                        (dr/route-immediate [::proposal/id proposal-id]))
+                      (dr/route-deferred [::proposal/id proposal-id]
+                        #(df/load! app [::proposal/id proposal-id] ProposalPage
+                           {:post-mutation        `dr/target-ready
+                            :post-mutation-params {:target (comp/get-ident ProposalPage {::proposal/id proposal-id})}}))))
    :use-hooks?    true}
-  (feedback/dialog
-    {:open       true
-     :fullScreen (utils/<=-breakpoint? "xs")
-     :fullWidth  true
-     :maxWidth   "md"
-     :onClose    #(js/window.history.back)}
+  (let [[open? set-open] (hooks/use-state true)]
+    (feedback/dialog
+      {:open       open?
+       :fullScreen (utils/<=-breakpoint? "xs")
+       :fullWidth  true
+       :maxWidth   "md"
+       :onClose    #(set-open false)
+       :onExiting  #(js/window.history.back)}
 
-    (surfaces/toolbar {:variant "dense"}
-      (inputs/icon-button
-        {:edge       :start
-         :color      :inherit
-         :aria-label "back"
-         :onClick    #(js/window.history.back)}
-        (react/createElement Close))
-      (feedback/dialog-title {} title))
-    (feedback/dialog-content {}
-      (dd/typography {:variant   "body1"
-                      :paragraph true}
-        body)
+      (surfaces/toolbar {:variant "dense"}
+        (inputs/icon-button
+          {:edge       :start
+           :color      :inherit
+           :aria-label "back"
+           :onClick    #(set-open false)}
+          (comp/create-element Close nil nil))
+        (feedback/dialog-title {} title))
+      (feedback/dialog-content {}
+        (dd/typography {:variant   "body1"
+                        :paragraph true}
+          body)
 
-      (when-not (empty? parents)
-        (proposal-section
-          (str "Dieser Vorschlag basiert auf " (count parents) " weiteren Vorschlägen")
-          (dd/list {:dense false}
-            (map ui-parent parents))))
+        (when-not (empty? parents)
+          (proposal-section
+            (str "Dieser Vorschlag basiert auf " (count parents) " weiteren Vorschlägen")
+            (dd/list {:dense false}
+              (map ui-parent parents))))
 
-      (proposal-section "Meinungen"
-        (vote-scale props))
+        (proposal-section "Meinungen"
+          (vote-scale props))
 
-      (proposal-section "Kommentare"
-        (layout/box {:mb 1}
-          (if-not (empty? arguments)
-            (dd/list {:dense true}
-              (map ui-comment-row arguments))
-            (dd/typography {:variant :body2 :color :textSecondary} "Bisher gibt es noch keinen Kommentar")))
-        (ui-new-comment-line {} {::proposal/id id})))))
+        (proposal-section "Argumente"
+          (layout/box {:mb 1}
+            (if-not (empty? arguments)
+              (dd/list {:dense true}
+                (map ui-comment-row arguments))
+              (dd/typography {:variant :body2 :color :textSecondary} "Bisher gibt es noch keinen Argument")))
+          (ui-new-comment-line {} {::proposal/id id}))))))
