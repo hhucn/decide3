@@ -130,10 +130,11 @@
                   :onSubmit  submit}
       (inputs/textfield
         {:fullWidth  true
-         :label      "Neuer Argument"
+         :label      "Neues Argument"
+         :variant    :outlined
          :value      new-argument
          :onChange   #(set-new-argument (evt/target-value %))
-         :inputProps {:aria-label "Neuer Argument"}
+         :inputProps {:aria-label "Neues Argument"}
          :InputProps {:endAdornment (inputs/icon-button {:type       :submit
                                                          :aria-label "Absenden"}
                                       (comp/create-element Send nil nil))}}))))
@@ -196,5 +197,5 @@
             (if-not (empty? arguments)
               (dd/list {:dense true}
                 (map ui-comment-row arguments))
-              (dd/typography {:variant :body2 :color :textSecondary} "Bisher gibt es noch keinen Argument")))
+              (dd/typography {:variant :body2 :color :textSecondary} "Bisher gibt es noch keine Argumente.")))
           (ui-new-comment-line {} {::proposal/id id}))))))
