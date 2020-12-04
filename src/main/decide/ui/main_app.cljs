@@ -7,7 +7,7 @@
     [decide.ui.components.appbar :as appbar]
     [decide.ui.pages.settings :as settings]
     [decide.ui.proposal.main-proposal-list :as main-proposal-list]
-    [decide.ui.proposal.page :as proposal-page]
+    [decide.ui.proposal.detail-page :as proposal-page]
     [material-ui.data-display :as dd]
     [material-ui.layout :as layout]
     [material-ui.surfaces :as surfaces]

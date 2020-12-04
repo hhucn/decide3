@@ -1,4 +1,4 @@
-(ns decide.ui.proposal.page
+(ns decide.ui.proposal.detail-page
   (:require
     [com.fulcrologic.fulcro.algorithms.merge :as mrg]
     [com.fulcrologic.fulcro.algorithms.normalized-state :as norm]
