@@ -11,9 +11,9 @@
 
 (def dark-theme (merge
                   shared
-                  {:palette {:type    "dark"
-                             :primary {:main "#48a9e6"}
-                             :secondary {:main "#b3006b"}}}))
+                  {:palette {:type      "dark"
+                             :primary   {:main "#68b9e9"}
+                             :secondary {:main "#f261a7"}}}))
 
 (def compiled-themes
   {:dark  (create-mui-theme dark-theme)
