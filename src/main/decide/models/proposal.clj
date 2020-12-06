@@ -5,6 +5,8 @@
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
     [com.wsscode.pathom.core :as p]
     [datahike.api :as d]
+    [datahike.core :as d.core]
+    [decide.models.argument :as argument]
     [decide.models.authorization :as auth])
   (:import (java.util Date)))
 
@@ -39,6 +41,10 @@
    {:db/ident       ::parents
     :db/doc         "≥0 parent proposals from which the proposal is derived."
     :db/cardinality :db.cardinality/many
+    :db/valueType   :db.type/ref}
+
+   {:db/ident       ::arguments
+    :db/cardinality :db.cardinality/many
     :db/valueType   :db.type/ref}])
 
 (s/def ::id (s/and string? (complement str/blank?)))
@@ -49,8 +55,10 @@
   (str (rand-int 1000)))
 
 ;;; region API
-(defmutation add [{:keys [conn AUTH/user-id] :as env} {::keys [id title body parents]}]
-  {::pc/output    [::id]
+(defmutation add [{:keys [conn AUTH/user-id] :as env} {::keys [id title body parents arguments]
+                                                       :or    {parents [] arguments []}}]
+  {::pc/params    [::id ::title ::body ::parents ::arguments]
+   ::pc/output    [::id]
    ::pc/transform auth/check-logged-in}
   (let [real-id (new-proposal-id)
         proposal {::id              real-id
@@ -59,6 +67,7 @@
                   ::parents         (for [parent parents
                                           :let [id (::id parent)]]
                                       [::id id])
+                  ::arguments       (vec arguments)               ; TODO check if arguments exist and belog to parents
                   ::original-author [:user/id user-id]
                   ::created         (Date.)}
         tx-report (d/transact conn [proposal])]
@@ -91,4 +100,31 @@
      {::id id})})
 ;;; endregion
 
-(def resolvers [add resolve-proposal resolve-all-proposal-ids])
+;;; region Arguments
+(defmutation add-argument
+  [{:keys [conn AUTH/user-id] :as env} {::keys [id]
+                                        :keys  [temp-id content]}]
+  {::pc/params    [::id :temp-id :content]
+   ::pc/output    [::argument/id]
+   ::pc/transform auth/check-logged-in}
+  (let [real-id (d.core/squuid)
+        statement {:db/id             "temp"
+                   ::argument/id      real-id
+                   ::argument/content content
+                   ::argument/author  [:user/id user-id]}
+        tx-report (d/transact conn
+                    [statement
+                     [:db/add [::id id] ::arguments "temp"]])]
+    {:tempids      {temp-id real-id}
+     ::p/env       (assoc env :db (:db-after tx-report))
+     ::argument/id real-id}))
+
+(defresolver resolve-arguments [{:keys [db]} {::keys [id]}]
+  {::pc/input  #{::id}
+   ::pc/output [{::arguments [::argument/id]}]}
+  (d/pull db [{::arguments [::argument/id]}] [::id id]))
+;;; endregion
+
+(def resolvers
+  [add resolve-proposal resolve-all-proposal-ids
+   add-argument resolve-arguments])
