@@ -12,6 +12,7 @@
     [decide.models.argument :as argument]
     [decide.models.user :as user]
     [decide.routing :as routing]
+    [decide.ui.proposal.NewProposal :as new-proposal]
     [decide.utils :as utils]
     [material-ui.data-display :as dd]
     [material-ui.feedback :as feedback]
@@ -22,6 +23,8 @@
     ["@material-ui/icons/ThumbUpAltTwoTone" :default ThumbUpAltTwoTone]
     ["@material-ui/icons/ThumbDownAltTwoTone" :default ThumbDownAltTwoTone]
     ["@material-ui/icons/Close" :default Close]
+    ["@material-ui/icons/MergeType" :default MergeType]
+    ["@material-ui/icons/CallSplit" :default CallSplit]
     ["@material-ui/core/LinearProgress" :default LinearProgress]
     ["@material-ui/icons/Send" :default Send]
     ["@material-ui/core/styles" :refer (withStyles useTheme)]
@@ -111,7 +114,7 @@
           :append (conj (comp/get-ident ProposalPage {::proposal/id id}) ::proposal/arguments)))))
   (remote [env]
     (-> env
-      (m/with-server-side-mutation argument/add-argument)
+      (m/with-server-side-mutation proposal/add-argument)
       (m/returning ArgumentRow))))
 
 (defsc NewCommentLine [this _ {::proposal/keys [id]}]
@@ -182,6 +185,14 @@
         (dd/typography {:variant   "body1"
                         :paragraph true}
           body)
+        (inputs/button
+          {:color     :primary
+           :variant   :outlined
+           ;:size      :large
+           :onClick   #(comp/transact!! this [(new-proposal/show-new-proposal-form-dialog {:parents [(comp/get-ident this)]})])
+           :startIcon (layout/box {:clone true :css {:transform "rotate(.5turn)"}} (comp/create-element CallSplit nil nil))
+           :endIcon   (layout/box {:clone true :css {:transform "rotate(.5turn)"}} (comp/create-element MergeType nil nil))}
+          "Fork / Merge")
 
         (when-not (empty? parents)
           (proposal-section
