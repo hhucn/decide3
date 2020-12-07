@@ -16,7 +16,6 @@
     [material-ui.surfaces :as surfaces]
     ["@material-ui/icons/ThumbUpAltTwoTone" :default ThumbUpAltTwoTone]
     ["@material-ui/icons/ThumbDownAltTwoTone" :default ThumbDownAltTwoTone]
-    ["React" :as react]
     [com.fulcrologic.fulcro.dom :as dom]
     [taoensso.timbre :as log]
     [decide.models.proposal :as model]))
@@ -86,14 +85,14 @@
                           :variant   :text
                           :onClick   #(comp/transact! this [(opinion/add {::proposal/id id
                                                                           :opinion      (if (pos? opinion) 0 +1)})])
-                          :startIcon (react/createElement ThumbUpAltTwoTone)}
+                          :startIcon (comp/create-element ThumbUpAltTwoTone nil nil)}
             "Zustimmen")
           (inputs/button {:size      :small
                           :color     (if (neg? opinion) "primary" "default")
                           :variant   :text
                           :onClick   #(comp/transact! this [(opinion/add {::proposal/id id
                                                                           :opinion      (if (neg? opinion) 0 -1)})])
-                          :startIcon (react/createElement ThumbDownAltTwoTone)}
+                          :startIcon (comp/create-element ThumbDownAltTwoTone nil nil)}
             "Ablehnen")
           (layout/box {:clone true
                        :style {:marginLeft "auto"}}

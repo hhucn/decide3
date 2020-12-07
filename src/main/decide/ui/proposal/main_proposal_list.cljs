@@ -10,8 +10,7 @@
     [material-ui.data-display :as dd]
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
-    ["@material-ui/icons/Add" :default AddIcon]
-    ["React" :as react]))
+    ["@material-ui/icons/Add" :default AddIcon]))
 
 (defn add-proposal-fab [props]
   (layout/box
@@ -25,7 +24,7 @@
          :color      "secondary"
          :variant    (if (utils/>=-breakpoint? "sm") "extended" "round")}
         props)
-      (react/createElement AddIcon)
+      (comp/create-element AddIcon nil nil)
       (when (utils/>=-breakpoint? "sm")
         (layout/box {:ml 1}
           "Neuer Vorschlag")))))

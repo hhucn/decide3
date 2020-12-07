@@ -28,7 +28,6 @@
     ["@material-ui/core/LinearProgress" :default LinearProgress]
     ["@material-ui/icons/Send" :default Send]
     ["@material-ui/core/styles" :refer (withStyles useTheme)]
-    ["React" :as react]
     [com.fulcrologic.fulcro.dom :as dom]
     [taoensso.timbre :as log]
     [com.fulcrologic.fulcro.dom.events :as evt]
@@ -171,7 +170,7 @@
        :fullWidth  true
        :maxWidth   "md"
        :onClose    #(set-open false)
-       :onExiting  #(js/window.history.back)}
+       :onExiting  #(js/window.history.back)}               ; TODO don't do this
 
       (surfaces/toolbar {:variant "dense"}
         (inputs/icon-button
