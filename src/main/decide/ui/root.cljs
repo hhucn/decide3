@@ -1,6 +1,7 @@
 (ns decide.ui.root
   (:require
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.dom :as dom]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr :refer [defrouter]]
@@ -17,7 +18,8 @@
 
 (defrouter PageRouter [_this {:keys [current-state]}]
   {:router-targets [login/LoginPage todo-app/MainApp login/SignUpPage]}
-  (when-not current-state splash/splash))
+  (when-not current-state
+    (dom/div {:dangerouslySetInnerHTML {:__html splash/splash}})))
 
 (def ui-page-router (comp/factory PageRouter))
 
