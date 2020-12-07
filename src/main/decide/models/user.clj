@@ -127,8 +127,7 @@
 
 (defresolver current-session-resolver [env _]
   {::pc/output [{::current-session [:session/valid? :user/id]}]}
-  (let [{:keys [session/valid? user/id] :as session} (get-in env [:ring/request :session])]
-    (log/debug "Resolve Session for: " session)
+  (let [{:keys [session/valid? user/id]} (get-in env [:ring/request :session])]
     (if valid?
       {::current-session {:session/valid? true :user/id id}}
       {::current-session {:session/valid? false}})))
