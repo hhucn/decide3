@@ -1,14 +1,17 @@
 (ns decide.ui.proposal.NewProposal
   (:require
+    [clojure.tools.reader.edn :as edn]
+    [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
     [com.fulcrologic.fulcro.algorithms.merge :as mrg]
+    [com.fulcrologic.fulcro.algorithms.normalized-state :as norm]
     [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-    [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
+    [com.fulcrologic.fulcro.data-fetch :as df]
     [com.fulcrologic.fulcro.dom :as dom]
     [com.fulcrologic.fulcro.dom.events :as evt]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
-    [clojure.tools.reader.edn :as edn]
+    [decide.models.argument :as argument]
     [decide.models.proposal :as proposal]
     [decide.utils :as utils]
     [material-ui.data-display :as dd]
@@ -18,56 +21,108 @@
     [material-ui.navigation :as navigation]
     ["@material-ui/icons/RemoveCircleOutline" :default RemoveIcon]))
 
-(defsc Parent [_this {::proposal/keys [id title]} {:keys [onDelete]}]
-  {:query [::proposal/id ::proposal/title]}
+
+(def form-ident [:component :new-proposal])
+
+(defsc Argument [this {::argument/keys       [content]
+                       :ui.new-proposal/keys [checked?]
+                       :or                   {checked? false}}]
+  {:query [::argument/id ::argument/content :ui.new-proposal/checked?]
+   :ident ::argument/id}
   (dd/list-item {}
-    (dd/list-item-avatar {} (dom/span (str "#" id)))
+    (dd/list-item-icon {}
+      (inputs/checkbox
+        {:checked checked?
+         :onClick #(m/toggle! this :ui.new-proposal/checked?)}))
+    (dd/list-item-text {} content)))
+
+(def ui-argument (comp/computed-factory Argument {:keyfn ::argument/id}))
+
+(defsc ParentArgumentSection [this {::proposal/keys [id title arguments]}]
+  {:query [::proposal/id ::proposal/title
+           {::proposal/arguments (comp/get-query Argument)}]
+   :ident ::proposal/id}
+  (when-not (empty? arguments)
+    (dd/list
+      {:dense     true
+       :subheader (dd/list-subheader {} title)}
+      (map ui-argument arguments))))
+
+(def ui-parent-argument-section (comp/computed-factory ParentArgumentSection {:keyfn ::proposal/id}))
+
+(defn load-parents-with-arguments! [app-or-comp & parent-idents]
+  (run!
+    #(df/load! app-or-comp % ParentArgumentSection
+       {:parallel true
+        :focus    [::proposal/arguments]})
+    parent-idents))
+
+(defsc ParentListItem [_this {::proposal/keys [id title]} {:keys [onDelete]}]
+  {:query [::proposal/id ::proposal/title
+           {::proposal/arguments (comp/get-query Argument)}]}
+  (dd/list-item {}
+    (dd/list-item-icon {} (dom/span (str "#" id)))
     (dd/list-item-text {} (str title))
     (dd/list-item-secondary-action {}
       (inputs/icon-button
-        {:onClick    onDelete
-         :aria-label "Elternteil entfernen"}
+        {:onClick onDelete
+         :title   "Elternteil entfernen"}
         (comp/create-element RemoveIcon #js {:color "error"} nil)))))
 
-(def ui-parent (comp/computed-factory Parent {:keyfn ::proposal/id}))
+(def ui-parent-list-item (comp/computed-factory ParentListItem {:keyfn ::proposal/id}))
 
 ;;; region Mutations
 (defmutation add-parent [{:keys [parent/ident]}]
-  (action [{:keys [state ref]}]
-    (swap! state targeting/integrate-ident* ident :append (conj ref :ui/parents))))
+  (action [{:keys [app state ref]}]
+    (swap! state targeting/integrate-ident* ident :append (conj ref :ui/parents))
+    (load-parents-with-arguments! app ident)))
+
+(defn- remove-checked-from-all-arguments [state]
+  (update state ::argument/id #(into {} (map (fn [[k v]] [k (dissoc v :ui.new-proposal/checked?)])) %)))
 
 (defmutation remove-parent [{:keys [parent/ident]}]
   (action [{:keys [state ref]}]
-    (swap! state mrg/remove-ident* ident (conj ref :ui/parents))))
+    (norm/swap!-> state
+      (mrg/remove-ident* ident (conj ref :ui/parents))
+      remove-checked-from-all-arguments)))
 
 (defn- id-in-parents? [parents id]
   ((set (map ::proposal/id parents)) id))
 
 (defmutation show-new-proposal-form-dialog [{:keys [title body parents]
                                              :or   {title "" body "" parents []}}]
-  (action [{:keys [state]}]
-    (swap! state update-in [:component :new-proposal]
+  (action [{:keys [app state]}]
+    (swap! state update-in form-ident
       assoc
       :ui/open? true
       :ui/title title
       :ui/body body
-      :ui/parents parents)))
+      :ui/parents parents)
+    (apply load-parents-with-arguments! app parents)))
 
 (defmutation reset-form [_]
   (action [{:keys [state]}]
-    (swap! state update-in [:component :new-proposal]
-      assoc
-      :ui/title ""
-      :ui/body ""
-      :ui/parents [])))
+    (norm/swap!-> state
+      (update-in form-ident
+        assoc
+        :ui/title ""
+        :ui/body ""
+        :ui/parents [])
+      remove-checked-from-all-arguments)))
 ;;; endregion
+
+(defn get-argument-idents-from-proposal [{::proposal/keys [arguments]}]
+  (->> arguments
+    (filter :ui.new-proposal/checked?)
+    (map (partial comp/get-ident Argument))))
+
 
 (defsc NewProposalFormDialog [this {:ui/keys [open? title body parents] :keys [all-proposals]}]
   {:query         [:ui/open?
                    :ui/title :ui/body
-                   {:ui/parents (comp/get-query Parent)}
-                   {[:all-proposals '_] (comp/get-query Parent)}]
-   :ident         (fn [] [:component :new-proposal])
+                   {:ui/parents (comp/get-query ParentListItem)}
+                   {[:all-proposals '_] (comp/get-query ParentListItem)}]
+   :ident         (fn [] form-ident)
    :initial-state #:ui{:open?   false
                        :title   ""
                        :body    ""
@@ -87,10 +142,11 @@
                                  (evt/prevent-default! e)
                                  (comp/transact! this
                                    [(proposal/add
-                                      {::proposal/id      (tempid/tempid)
-                                       ::proposal/title   title
-                                       ::proposal/body    body
-                                       ::proposal/parents (mapv #(select-keys % [::proposal/id]) parents)})])
+                                      {::proposal/id        (tempid/tempid)
+                                       ::proposal/title     title
+                                       ::proposal/body      body
+                                       ::proposal/parents   (mapv #(select-keys % [::proposal/id]) parents)
+                                       ::proposal/arguments (vec (mapcat get-argument-idents-from-proposal parents))})])
                                  (close-dialog))}}
       (feedback/dialog-title {} "Neuer Vorschlag")
       (let [change-title (hooks/use-callback (partial m/set-string! this :ui/title :event))
@@ -108,7 +164,7 @@
             (dd/list {}
               (for [{::proposal/keys [id] :as props} parents
                     :let [delete-parent #(comp/transact! this [(remove-parent {:parent/ident [::proposal/id id]})])]]
-                (ui-parent props
+                (ui-parent-list-item props
                   {:onDelete delete-parent}))
               (inputs/textfield {:label     "Eltern hinzufügen"
                                  :variant   "filled"
@@ -130,10 +186,16 @@
              :multiline    true
              :rows         7
              :value        body
-             :onChange     change-body})))
+             :onChange     change-body})
+
+          (when-not (empty? parents)
+            (layout/box {:border 0 :borderColor "grey.700"}
+              (dd/typography {:component "h3"} "Welche Argumente sind immer noch relevant?")
+              (map ui-parent-argument-section parents)))))
+
       (feedback/dialog-actions {}
         (inputs/button {:color "primary" :onClick close-dialog} "Abbrechen")
         (inputs/button {:color "primary"
                         :type  "submit"} "Absenden")))))
 
-(def ui-new-proposal-form2 (comp/computed-factory NewProposalFormDialog))
+(def ui-new-proposal-form (comp/computed-factory NewProposalFormDialog))

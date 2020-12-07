@@ -29,3 +29,5 @@
   (action [{:keys [app]}]
     (mrg/merge-component! app Proposal params :append [:all-proposals]))
   (remote [env] (m/returning env Proposal)))
+
+(def add-argument `add-argument)

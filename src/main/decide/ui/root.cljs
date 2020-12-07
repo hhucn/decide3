@@ -46,4 +46,4 @@
   (styles/theme-provider {:theme (themes/get-mui-theme theme)}
     (mutils/css-baseline {})
     (ui-page-router page-router)
-    (new-proposal/ui-new-proposal-form2 new-proposal-dialog)))
+    (new-proposal/ui-new-proposal-form new-proposal-dialog)))
