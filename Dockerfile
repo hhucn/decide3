@@ -9,10 +9,11 @@ RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - &&\
     apt install -y yarn
 
 COPY package.json deps.edn yarn.lock ./
-RUN yarn install
+RUN yarn install --non-interactive --frozen-lockfile
 
 COPY . .
-RUN clojure -Spom && clojure -X:depstar uberjar :aot true :jar decide.jar :main-class decide.server-main
+RUN npx shadow-cljs release :main && \
+    clojure -Spom && clojure -X:depstar uberjar :aot true :jar decide.jar :main-class decide.server-main
 
 FROM openjdk:14-jdk-slim
 COPY src/main/config/prod.edn /config/production.edn
