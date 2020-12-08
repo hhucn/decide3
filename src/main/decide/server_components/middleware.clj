@@ -60,7 +60,18 @@
       [:head
        [:title "decide"]
        [:meta {:charset "utf-8"}]
+       [:meta {:name "viewport" :content "width=device-width, initial-scale=1, maximum-scale=5"}]
+
+       [:meta {:name "mobile-web-app-capable" :content "yes"}]
+       [:meta {:name "apple-mobile-web-app-capable" :content "yes"}]
+       [:meta {:name "application-name" :content "decide"}]
+       [:meta {:name "apple-mobile-web-app-title" :content "decide"}]
+       [:meta {:name "theme-color" :content styles/primary}]
+       [:meta {:name "msapplication-navbutton-color" :content styles/primary}]
+       [:meta {:name "apple-mobile-web-app-status-bar-style" :content "default"}]
+
        initial-state-script
+
        [:link {:href "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" :rel "stylesheet"}]
        [:script (str "var fulcro_network_csrf_token = '" csrf-token "';")]
        [:style (garden/css styles/body styles/splashscreen styles/sizing styles/address)]]

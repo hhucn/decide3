@@ -1,6 +1,7 @@
 (ns decide.ui.theming.styles)
 
 (def hhu-blue "#006AB3")
+(def primary hhu-blue)
 
 (def sizing
   [:body :html {:height "100%"}])
