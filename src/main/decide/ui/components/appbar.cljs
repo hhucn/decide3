@@ -21,10 +21,11 @@
 (defsc AppBar
   [this
    {::app/keys [active-remotes]
-    :keys      [ui/nav-open? ui/account-menu-open?]}]
+    :keys      [ui/nav-open? ui/account-menu-open? ui/theme]}]
   {:query          [[::app/active-remotes '_]
                     :ui/nav-open?
-                    :ui/account-menu-open?]
+                    :ui/account-menu-open?
+                    [:ui/theme '_]]
    :ident          (fn [] [:component :app-bar])
    :initial-state  {:ui/nav-open?          false
                     :ui/account-menu-open? false}
@@ -32,6 +33,7 @@
   (let [loading? (#{:remote} active-remotes)]
     (surfaces/app-bar
       {:position  "sticky"
+       :color     (if (= :dark theme) "inherit" "primary")
        :elevation 0}
       (surfaces/toolbar {}
         (inputs/icon-button
