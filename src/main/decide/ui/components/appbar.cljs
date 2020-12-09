@@ -13,7 +13,8 @@
     [com.fulcrologic.fulcro.mutations :as m]
     ["@material-ui/icons/AccountCircle" :default AccountCircleIcon]
     ["react" :as React]
-    [material-ui.navigation :as navigation]))
+    [material-ui.navigation :as navigation]
+    [com.fulcrologic.fulcro.react.hooks :as hooks]))
 
 (defmutation logout [params]
   (action [env] true))
@@ -29,8 +30,9 @@
    :ident          (fn [] [:component :app-bar])
    :initial-state  {:ui/nav-open?          false
                     :ui/account-menu-open? false}
-   :initLocalState (fn initLocalState [this _] {:menu-ref (React/createRef)})}
-  (let [loading? (#{:remote} active-remotes)]
+   :use-hooks?     true}
+  (let [menu-ref (hooks/use-ref)
+        loading? (#{:remote} active-remotes)]
     (surfaces/app-bar
       {:position  "sticky"
        :color     (if (= :dark theme) "inherit" "primary")
@@ -44,7 +46,7 @@
           (icons/menu {}))
         (dd/typography
           {:component :h1
-           :variant   :h4
+           :variant   :h6
            :color     "inherit"}
           "decide")
 
@@ -52,7 +54,7 @@
         (layout/box {:flexGrow 1})
 
         (inputs/icon-button
-          {:ref           (comp/get-state this :menu-ref)
+          {:ref           menu-ref
            :edge          "end"
            :aria-label    "account of current user"
            :aria-controls "menuId"
@@ -62,7 +64,7 @@
           (React/createElement AccountCircleIcon))
         (navigation/menu
           {:keepMounted        true
-           :anchorEl           #(.-current (comp/get-state this :menu-ref))
+           :anchorEl           (.-current menu-ref)
            :getContentAnchorEl nil
            :anchorOrigin       {:vertical   "center"
                                 :horizontal "left"}
