@@ -13,21 +13,22 @@
     ["@material-ui/icons/Add" :default AddIcon]))
 
 (defn add-proposal-fab [props]
-  (layout/box
-    {:position "fixed"
-     :bottom   "16px"
-     :right    "16px"}
-    (inputs/fab
-      (merge
-        {:aria-label "Neuer Vorschlag"
-         :title      "Neuer Vorschlag"
-         :color      "secondary"
-         :variant    (if (utils/>=-breakpoint? "sm") "extended" "round")}
-        props)
-      (comp/create-element AddIcon nil nil)
-      (when (utils/>=-breakpoint? "sm")
-        (layout/box {:ml 1}
-          "Neuer Vorschlag")))))
+  (let [extended? (utils/>=-breakpoint? "sm")]
+    (layout/box
+      {:position "fixed"
+       :bottom   "16px"
+       :right    "16px"}
+      (inputs/fab
+        (merge
+          {:aria-label "Neuer Vorschlag"
+           :title      "Neuer Vorschlag"
+           :color      "secondary"
+           :variant    (if extended? "extended" "round")}
+          props)
+        (comp/create-element AddIcon nil nil)
+        (when extended?
+          (layout/box {:ml 1}
+            "Neuer Vorschlag"))))))
 
 (defn empty-proposal-list-message []
   (layout/box {:p 2 :mx "auto"}
