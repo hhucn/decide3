@@ -4,8 +4,9 @@
             [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
             [com.fulcrologic.fulcro.algorithms.form-state :as fs]
             [com.fulcrologic.rad.authorization :as auth]
+            [decide.models.process :as process]
             [decide.models.user :as user]
-            [decide.ui.main-app :as todo-app]
+            [decide.ui.process.core :as process-ui]
             [decide.ui.proposal.main-proposal-list :as main-proposal-list]
             [material-ui.surfaces :as surfaces]
             [com.fulcrologic.fulcro.dom :as dom]
@@ -24,7 +25,8 @@
   (m/set-string! component :user/password :value ""))
 
 (defn redirect-to-main-list! [component]
-  (comp/transact! component [(routing/route-to {:path (dr/path-to todo-app/MainApp main-proposal-list/MainProposalList)})]))
+  (log/info "redirect to" (dr/path-to main-proposal-list/MainProposalList {::process/slug "test-decision"}))
+  (comp/transact!! component [(routing/route-to {:path (dr/path-to main-proposal-list/MainProposalList {::process/slug "test-decision"})})]))
 
 (defmutation sign-up [{:user/keys [_email _password]}]
   (action [_] true)
@@ -49,6 +51,7 @@
           (get-in env [:result :body `user/sign-in])]
       (if (empty? errors)
         (do
+          (log/info "Login: ok")
           (reset-password-field! component)
           (redirect-to-main-list! component))
         (when errors

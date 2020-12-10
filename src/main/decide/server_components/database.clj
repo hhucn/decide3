@@ -3,6 +3,7 @@
     [datahike.api :as d]
     [decide.models.argument :as argument]
     [decide.models.opinion :as opinion]
+    [decide.models.process :as process]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
     [decide.server-components.config :refer [config]]
@@ -12,9 +13,13 @@
 (def schema
   (into [] cat
     [user/schema
+     process/schema
      proposal/schema
      opinion/schema
      argument/schema]))
+
+(def dev-db
+  [{::process/slug "test-decision"}])
 
 (defn test-database [config]
   (d/delete-database config)
@@ -22,10 +27,23 @@
     (assoc config :initial-tx schema))
   (d/connect config))
 
+(def orphaned-proposals
+  '[:find [?e ...]
+    :where
+    [?e :decide.models.proposal/id]
+    (not [_ :decide.models.process/proposals ?e])])
+
+(defn add-orphan-proposals-to-process [conn]
+  (let [es (d/q orphaned-proposals @conn)]
+    (d/transact conn
+      (mapv #(vector :db/add [::process/slug "test-decision"] ::process/proposals %) es))))
+
+
 (defstate conn
   :start
   (let [db-config (:db config)
-        _ (when (:db/reset? db-config)
+        reset? (:db/reset? db-config)
+        _ (when reset?
             (log/info "Reset Database")
             (d/delete-database db-config))
         db-exists? (d/database-exists? db-config)]
@@ -40,6 +58,7 @@
       (log/info "Transacting schema...")
       (try
         (d/transact conn schema)
+        (when reset? (d/transact conn dev-db))
         (catch Exception e (println e)))
 
       conn))

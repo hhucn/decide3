@@ -1,9 +1,7 @@
 (ns decide.models.proposal
   (:require
-    [com.fulcrologic.fulcro.algorithms.merge :as mrg]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.data-fetch :as df]
-    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [decide.models.user :as user]))
 
 (defsc Author [_ _]
@@ -19,15 +17,10 @@
              ::created
              ::opinion
              {::parents '...}                               ; this is a recursion
-             {::original-author (comp/get-query Author)}])  ; TODO replace join with real model
+             {::original-author (comp/get-query Author)}])
    :ident ::id})
 
 (defn load-all! [app-or-comp]
   (df/load! app-or-comp :all-proposals Proposal))
-
-(defmutation add [{::keys [_id _title _body _parents] :as params}]
-  (action [{:keys [app]}]
-    (mrg/merge-component! app Proposal params :append [:all-proposals]))
-  (remote [env] (m/returning env Proposal)))
 
 (def add-argument `add-argument)

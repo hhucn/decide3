@@ -6,7 +6,6 @@
                [com.fulcrologic.fulcro.algorithms.merge :as mrg]
                [com.fulcrologic.fulcro.algorithms.timbre-support :refer [console-appender prefix-output-fn]]
                [decide.ui.login :as login]
-               [decide.ui.main-app :as todo-app]
                [decide.routing :as routing]])
     [decide.models.user :as user]
     [taoensso.timbre :as log]

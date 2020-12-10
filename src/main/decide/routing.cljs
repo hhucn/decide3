@@ -53,6 +53,7 @@
   (pushy/set-token! @history (path->url path)))
 
 (defn start-history! [app]
+  (log/info "Start history!")
   (reset! history
     (pushy/pushy
       (fn [path]

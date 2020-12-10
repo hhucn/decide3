@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="workspaces" type="js.build_tools.npm">
     <package-json value="$PROJECT_DIR$/package.json" />
@@ -10,3 +11,4 @@
     <method v="2" />
   </configuration>
 </component>
+

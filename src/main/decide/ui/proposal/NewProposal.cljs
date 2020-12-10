@@ -12,6 +12,7 @@
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [decide.models.argument :as argument]
+    [decide.models.process :as process]
     [decide.models.proposal :as proposal]
     [decide.utils :as utils]
     [material-ui.data-display :as dd]
@@ -19,10 +20,10 @@
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
     [material-ui.navigation :as navigation]
-    ["@material-ui/icons/RemoveCircleOutline" :default RemoveIcon]))
+    ["@material-ui/icons/RemoveCircleOutline" :default RemoveIcon]
+    [taoensso.timbre :as log]))
 
 
-(def form-ident [:component :new-proposal])
 
 (defsc Argument [this {::argument/keys       [content]
                        :ui.new-proposal/keys [checked?]
@@ -89,10 +90,10 @@
 (defn- id-in-parents? [parents id]
   ((set (map ::proposal/id parents)) id))
 
-(defmutation show-new-proposal-form-dialog [{:keys [title body parents]
-                                             :or   {title "" body "" parents []}}]
+(defmutation show [{:keys [id title body parents]
+                    :or   {title "" body "" parents []}}]
   (action [{:keys [app state]}]
-    (swap! state update-in form-ident
+    (swap! state update-in [::process/slug id]
       assoc
       :ui/open? true
       :ui/title title
@@ -101,9 +102,9 @@
     (apply load-parents-with-arguments! app parents)))
 
 (defmutation reset-form [_]
-  (action [{:keys [state]}]
+  (action [{:keys [state ref]}]
     (norm/swap!-> state
-      (update-in form-ident
+      (update-in ref
         assoc
         :ui/title ""
         :ui/body ""
@@ -117,19 +118,25 @@
     (map (partial comp/get-ident Argument))))
 
 
-(defsc NewProposalFormDialog [this {:ui/keys [open? title body parents] :keys [all-proposals]}]
-  {:query         [:ui/open?
+(defsc NewProposalFormDialog [this {:ui/keys       [open? title body parents]
+                                    ::process/keys [slug proposals] :as props}]
+  {:query         [::process/slug
+                   :ui/open?
                    :ui/title :ui/body
                    {:ui/parents (comp/get-query ParentListItem)}
-                   {[:all-proposals '_] (comp/get-query ParentListItem)}]
-   :ident         (fn [] form-ident)
-   :initial-state #:ui{:open?   false
-                       :title   ""
-                       :body    ""
-                       :parents []}
+                   {::process/proposals (comp/get-query ParentListItem)}]
+   :ident         ::process/slug
+   :initial-state (fn [{:keys [id]}]
+                    (merge
+                      #:ui{:open?   false
+                           :title   ""
+                           :body    ""
+                           :parents []}
+                      {::process/slug id}))
    :use-hooks?    true}
   (let [close-dialog (hooks/use-callback #(m/set-value! this :ui/open? false))
         reset-form (hooks/use-callback #(comp/transact! this [(reset-form {})] {:compressible? true}))]
+    (log/info props)
     (feedback/dialog
       {:open       open?
        :fullWidth  true
@@ -141,8 +148,9 @@
                     :onSubmit  (fn submit-new-proposal-form [e]
                                  (evt/prevent-default! e)
                                  (comp/transact! this
-                                   [(proposal/add
-                                      {::proposal/id        (tempid/tempid)
+                                   [(process/add-proposal
+                                      {::process/slug       slug
+                                       ::proposal/id        (tempid/tempid)
                                        ::proposal/title     title
                                        ::proposal/body      body
                                        ::proposal/parents   (mapv #(select-keys % [::proposal/id]) parents)
@@ -173,7 +181,7 @@
                                  :value     ""
                                  :fullWidth true
                                  :onChange  #(comp/transact! this [(add-parent {:parent/ident (edn/read-string (evt/target-value %))})])}
-                (for [{::proposal/keys [id title]} all-proposals
+                (for [{::proposal/keys [id title]} proposals
                       :when (not (id-in-parents? parents id))]
                   (navigation/menu-item {:key id :value (str [::proposal/id id])}
                     (str "#" id " " title))))))

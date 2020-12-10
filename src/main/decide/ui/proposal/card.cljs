@@ -7,8 +7,10 @@
     [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
     [decide.models.user :as user]
     [decide.models.opinion :as opinion]
+    [decide.models.process :as process]
     [decide.models.proposal :as proposal]
     [decide.routing :as routing]
+    [decide.ui.proposal.detail-page :as detail-page]
     [decide.ui.common.time :as time]
     [material-ui.data-display :as dd]
     [material-ui.inputs :as inputs]
@@ -46,7 +48,8 @@
       (when (instance? js/Date created)
         (time-part created)))))
 
-(defsc Proposal [this {::proposal/keys [id title body opinion created original-author] :as props}]
+(defsc Proposal [this {::proposal/keys [id title body opinion created original-author] :as props}
+                 {::process/keys [slug]}]
   {:query         (fn []
                     [::proposal/id ::proposal/title ::proposal/body
                      ::proposal/pro-votes ::proposal/con-votes
@@ -62,7 +65,8 @@
                      ::proposal/pro-votes 0
                      ::proposal/con-votes 0})
    :use-hooks?    true}
-  (let [proposal-href (hooks/use-memo #(routing/path->url ["app" "proposal" id]))]
+  (let [proposal-href (hooks/use-memo #(routing/path->url (dr/path-to detail-page/ProposalPage {::process/slug slug
+                                                                                                ::proposal/id  id})))]
     (layout/box {:width "100%" :clone true}
       (surfaces/card
         {:variant :outlined}

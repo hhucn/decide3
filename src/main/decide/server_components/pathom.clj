@@ -7,6 +7,7 @@
     [datahike.api :as d]
     [decide.models.argument :as argument]
     [decide.models.opinion :as opinion]
+    [decide.models.process :as process]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
     [decide.server-components.config :refer [config]]
@@ -100,6 +101,7 @@
               :db           (d/db conn)}))))]
     [index-explorer
      user/resolvers
+     process/resolvers
      proposal/resolvers
      argument/resolvers
      opinion/resolvers]))

@@ -8,6 +8,7 @@
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
     [com.fulcrologic.fulcro.data-fetch :as df]
+    [decide.models.process :as process]
     [decide.models.proposal :as proposal]
     [decide.models.argument :as argument]
     [decide.models.user :as user]
@@ -36,17 +37,13 @@
 
 (declare ProposalPage)
 
-(defsc Parent [this {::proposal/keys [id title]}]
+(defsc Parent [_this {::proposal/keys [id title]}]
   {:query [::proposal/id ::proposal/title]
    :ident ::proposal/id}
   (dd/list-item
     {:button    true
      :component "a"
-     :href      (routing/path->url
-                  (dr/path-to
-                    (comp/registry-key->class 'decide.ui.main-app/MainApp)
-                    (comp/registry-key->class `ProposalPage)
-                    id))}
+     :href      id}
     (dd/list-item-avatar {} (str "#" id))
     (dd/list-item-text {} (str title))))
 
@@ -143,25 +140,28 @@
 
 (def ui-new-comment-line (comp/computed-factory NewCommentLine))
 
-(defsc ProposalPage [this {::proposal/keys [id title body parents original-author arguments]
+(defsc ProposalPage [this {::proposal/keys [id title body parents original-author process arguments]
                            :as             props}]
   {:query         [::proposal/id ::proposal/title ::proposal/body
+                   ::proposal/process
                    {::proposal/parents (comp/get-query Parent)}
                    ::proposal/pro-votes ::proposal/con-votes
                    {::proposal/original-author [:user/id ::user/display-name]}
                    {::proposal/arguments (comp/get-query ArgumentRow)}]
    :ident         ::proposal/id
-   :route-segment ["proposal" :proposal-id]
+   :route-segment ["decision" ::process/slug "proposal" ::proposal/id]
    :will-enter    (fn will-enter-proposal-page
-                    [app {:keys [proposal-id]}]
-                    (if (get-in (app/current-state app) [::proposal/id proposal-id])
-                      (do
-                        (df/load! app [::proposal/id proposal-id] ProposalPage) ; just to refresh
-                        (dr/route-immediate [::proposal/id proposal-id]))
-                      (dr/route-deferred [::proposal/id proposal-id]
-                        #(df/load! app [::proposal/id proposal-id] ProposalPage
-                           {:post-mutation        `dr/target-ready
-                            :post-mutation-params {:target (comp/get-ident ProposalPage {::proposal/id proposal-id})}}))))
+                    [app {::proposal/keys [id]}]
+                    (log/info "Will enter" 'ProposalPage)
+                    (let [ident (comp/get-ident ProposalPage {::proposal/id id})]
+                      (if (get-in (app/current-state app) ident)
+                        (do
+                          (df/load! app ident ProposalPage) ; just to refresh
+                          (dr/route-immediate ident))
+                        (dr/route-deferred ident
+                          #(df/load! app ident ProposalPage
+                             {:post-mutation        `dr/target-ready
+                              :post-mutation-params {:target ident}})))))
    :use-hooks?    true}
   (let [[open? set-open] (hooks/use-state true)]
     (feedback/dialog
@@ -187,8 +187,8 @@
         (inputs/button
           {:color     :primary
            :variant   :outlined
-           ;:size      :large
-           :onClick   #(comp/transact!! this [(new-proposal/show-new-proposal-form-dialog {:parents [(comp/get-ident this)]})])
+           :onClick   #(comp/transact!! this [(new-proposal/show {:id      process
+                                                                  :parents [(comp/get-ident this)]})])
            :startIcon (layout/box {:clone true :css {:transform "rotate(.5turn)"}} (comp/create-element CallSplit nil nil))
            :endIcon   (layout/box {:clone true :css {:transform "rotate(.5turn)"}} (comp/create-element MergeType nil nil))}
           "Fork / Merge")
