@@ -5,11 +5,12 @@
     [com.wsscode.pathom.core :as p]
     [datahike.api :as d]
     [datahike.core :as d.core]
+    [decide.models.authorization :as auth]
     [decide.models.proposal :as proposal]
-    [ghostwheel.core :refer [>defn =>]]
-    [decide.models.authorization :as auth]))
+    [decide.models.user :as user]
+    [ghostwheel.core :refer [>defn =>]]))
 
-(def schema [{:db/ident       :user/opinions
+(def schema [{:db/ident       ::user/opinions
               :db/cardinality :db.cardinality/many
               :db/valueType   :db.type/ref
               :db/isComponent true}
@@ -26,50 +27,63 @@
 
 (s/def ::value #{-1 0 +1})
 
-(>defn set-opinion! [conn user-id proposal-id opinion-value]
-  [d.core/conn? :user/id ::proposal/id ::value => map?]
-  (d/transact conn
-    [[:db/add [::proposal/id proposal-id] ::proposal/opinions "temp"]
-     [:db/add [:user/id user-id] :user/opinions "temp"]
-     {:db/id  "temp"
-      ::value opinion-value}]))
+(>defn get-opinion [db user-ident proposal-ident]
+  [d.core/db? ::user/ident ::proposal/ident => nat-int?]
+  (d/q '[:find ?opinion .
+         :in $ ?user ?proposal
+         :where
+         [?user ::user/opinions ?opinion]
+         [?proposal ::proposal/opinions ?opinion]]
+    db
+    user-ident
+    proposal-ident))
 
-(defn pull-personal-opinion [db proposal user]
-  (d/q
-    '[:find ?value .
-      :in $ ?proposal ?user
-      :where
-      [?proposal ::proposal/opinions ?opinions]
-      [?user :user/opinions ?opinions]
-      [?opinions ::value ?value]]
-    db proposal user))
+(>defn set-opinion! [conn user-ident proposal-ident opinion-value]
+  [d.core/conn? any? any? ::value => map?]
+  (if-let [opinion-id (get-opinion @conn user-ident proposal-ident)]
+    (d/transact conn
+      [{:db/id  opinion-id
+        ::value opinion-value}])
+    (d/transact conn
+      [[:db/add proposal-ident ::proposal/opinions "temp"]
+       [:db/add user-ident ::user/opinions "temp"]
+       {:db/id  "temp"
+        ::value opinion-value}])))
+
+(defn get-values-for-proposal [db proposal-ident]
+  (merge
+    {1 0, -1 0}                                             ; default values
+    (d/q
+      '[:find (clojure.core/frequencies ?values) .
+        :in $ ?proposal
+        :where
+        [?proposal ::proposal/opinions ?opinions]
+        [?opinions ::value ?values]]
+      db proposal-ident)))
 
 (defmutation add [{:keys [conn AUTH/user-id] :as env} {::proposal/keys [id]
                                                        :keys           [opinion]}]
   {::pc/params    [::proposal/id :opinion]
    ::pc/transform auth/check-logged-in}
-  (let [tx-report (set-opinion! conn user-id id opinion)]
+  (let [tx-report (set-opinion! conn
+                    [:user/id user-id]
+                    [::proposal/id id]
+                    opinion)]
     {::p/env (assoc env :db (:db-after tx-report))}))
 
 (defresolver resolve-personal-opinion [{:keys [db AUTH/user-id]} {::proposal/keys [id]}]
   {::pc/input  #{::proposal/id}
-   ::pc/output [::opinion]}
-  (let [opinion-value
-        (pull-personal-opinion db [::proposal/id id] [:user/id user-id])]
-    {::proposal/opinion (or opinion-value 0)}))
+   ::pc/output [::proposal/opinion]}
+  (if-let [opinion (get-opinion db [:user/id user-id] [::proposal/id id])]
+    (let [{::keys [value]} (d/pull db [[::value :default 0]] opinion)]
+      {::proposal/opinion value})
+    {::proposal/opinion 0}))
+
 
 (defresolver resolve-proposal-opinions [{:keys [db]} {::proposal/keys [id]}]
   {::pc/input  #{::proposal/id}
    ::pc/output [::proposal/pro-votes ::proposal/con-votes]}
-  (let [opinions
-        (d/q
-          '[:find (clojure.core/frequencies ?values) .
-            :in $ ?id
-            :where
-            [?e ::proposal/id ?id]
-            [?e ::proposal/opinions ?opinions]
-            [?opinions ::value ?values]]
-          db id)]
+  (let [opinions (get-values-for-proposal db [::proposal/id id])]
     {::proposal/pro-votes (get opinions 1 0)
      ::proposal/con-votes (get opinions -1 0)}))
 
