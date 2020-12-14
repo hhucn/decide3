@@ -51,6 +51,8 @@
 (s/def ::title (s/and string? (complement str/blank?)))
 (s/def ::body string?)
 
+(s/def ::ident (s/tuple #{::id} ::id))
+
 (defn new-proposal-id []
   (str (rand-int 1000)))
 

@@ -34,6 +34,7 @@
               :db/valueType   :db.type/string}])
 
 (s/def :user/id uuid?)
+(s/def ::ident (s/tuple #{:user/id} :user/id))
 (s/def :user/email string?)
 (s/def :user/password string?)
 (s/def ::display-name string?)
