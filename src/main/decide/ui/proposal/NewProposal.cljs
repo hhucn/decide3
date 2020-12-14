@@ -20,8 +20,7 @@
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
     [material-ui.navigation :as navigation]
-    ["@material-ui/icons/RemoveCircleOutline" :default RemoveIcon]
-    [taoensso.timbre :as log]))
+    ["@material-ui/icons/RemoveCircleOutline" :default RemoveIcon]))
 
 
 
@@ -136,7 +135,6 @@
    :use-hooks?    true}
   (let [close-dialog (hooks/use-callback #(m/set-value! this :ui/open? false))
         reset-form (hooks/use-callback #(comp/transact! this [(reset-form {})] {:compressible? true}))]
-    (log/info props)
     (feedback/dialog
       {:open       open?
        :fullWidth  true
