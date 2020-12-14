@@ -38,6 +38,8 @@
     (d/transact conn
       (mapv #(vector :db/add [::process/slug "test-decision"] ::process/proposals %) es))))
 
+(defn transact-schema [conn]
+  (d/transact conn schema))
 
 (defstate conn
   :start
@@ -57,7 +59,7 @@
     (let [conn (d/connect db-config)]
       (log/info "Transacting schema...")
       (try
-        (d/transact conn schema)
+        (transact-schema conn)
         (when reset? (d/transact conn dev-db))
         (catch Exception e (println e)))
 
