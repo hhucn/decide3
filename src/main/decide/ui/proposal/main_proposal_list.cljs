@@ -4,7 +4,7 @@
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [decide.models.proposal :as proposal]
     [decide.ui.proposal.card :as proposal-card]
-    [decide.ui.proposal.NewProposal :as new-proposal]
+    [decide.ui.proposal.new-proposal :as new-proposal]
     [decide.utils :as utils]
     [material-ui.data-display :as dd]
     [material-ui.inputs :as inputs]

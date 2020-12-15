@@ -1,4 +1,4 @@
-(ns decide.ui.proposal.NewProposal
+(ns decide.ui.proposal.new-proposal
   (:require
     [clojure.tools.reader.edn :as edn]
     [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]

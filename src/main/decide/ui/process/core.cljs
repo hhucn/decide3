@@ -7,7 +7,7 @@
     [material-ui.layout :as layout]
     [material-ui.surfaces :as surfaces]
 
-    [decide.ui.proposal.NewProposal :as new-proposal]))
+    [decide.ui.proposal.new-proposal :as new-proposal]))
 
 
 (defsc Process [this {:keys [ui/new-proposal-dialog]}]

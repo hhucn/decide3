@@ -13,7 +13,7 @@
     [decide.models.argument :as argument]
     [decide.models.user :as user]
     [decide.routing :as routing]
-    [decide.ui.proposal.NewProposal :as new-proposal]
+    [decide.ui.proposal.new-proposal :as new-proposal]
     [decide.utils :as utils]
     [material-ui.data-display :as dd]
     [material-ui.feedback :as feedback]
