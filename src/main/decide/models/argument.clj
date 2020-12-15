@@ -1,5 +1,7 @@
 (ns decide.models.argument
   (:require
+    [clojure.spec.alpha :as s]
+    [clojure.string :as str]
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
     [datahike.api :as d]))
 
@@ -21,9 +23,11 @@
     ; :db/fulltext    true
     :db/cardinality :db.cardinality/one}])
 
+(s/def ::id uuid?)
+(s/def ::content (s/and string? (complement str/blank?)))
 
 (defresolver resolve-argument [{:keys [db]} {::keys [id]}]
-  {::pc/input #{::id}
+  {::pc/input  #{::id}
    ::pc/output [::content {::author [:user/id]}]}
   (d/pull db [::content {::author [:user/id]}] [::id id]))
 
