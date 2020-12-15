@@ -17,7 +17,7 @@
            clj-commons/pushy                                  {:mvn/version "0.3.10"}
            io.replikativ/datahike                             {:mvn/version "0.3.2"}
            com.github.mrebbinghaus/fulcro-material-ui-wrapper {:git/url "https://github.com/MrEbbinghaus/fulcro-material-ui-wrapper"
-                                                               :sha     "59d86b7c5fb2230883d679ed02139258540a0cb3"}
+                                                               :sha     "247cedc7798f702b06b8c5f8698627aab17664bc"}
 
            buddy/buddy                                        {:mvn/version "2.0.0"}
 
