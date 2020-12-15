@@ -4,8 +4,7 @@
     [com.wsscode.pathom.core :as p]
     [datahike.api :as d]
     [decide.models.authorization :as auth]
-    [decide.models.proposal :as proposal]
-    [taoensso.timbre :as log]))
+    [decide.models.proposal :as proposal]))
 
 (def schema
   [{:db/ident       ::slug
@@ -38,9 +37,9 @@
     {::proposals []}))
 
 (defresolver resolve-proposal-process [{:keys [db]} {::proposal/keys [id]}]
-  {::pc/input #{::proposal/id}
-   ::pc/output [::proposal/process]}
-  (let [{:keys []} (log/spy :info (d/pull db [{::_proposals [::slug]}] [::proposal/id id]))]))
+  {::pc/input  #{::proposal/id}
+   ::pc/output [::slug]}
+  (::_proposals (d/pull db [{::_proposals [::slug]}] [::proposal/id id])))
 
 (defmutation add-proposal [{:keys [conn AUTH/user-id] :as env}
                            {::proposal/keys [id title body parents arguments]

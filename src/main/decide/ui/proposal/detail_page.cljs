@@ -84,15 +84,15 @@
       (dd/typography {:variant "h6" :color "textSecondary" :component "h3"} title)
       children)))
 
-(defsc ArgumentAuthor [_ {::user/keys [display-name]}]
+(defsc Author [_ {::user/keys [display-name]}]
   {:query [:user/id ::user/display-name]
    :ident :user/id}
   (dom/span display-name))
 
-(def ui-argument-author (comp/factory ArgumentAuthor))
+(def ui-argument-author (comp/factory Author))
 
 (defsc ArgumentRow [_ {::argument/keys [content author]}]
-  {:query [::argument/id ::argument/content {::argument/author (comp/get-query ArgumentAuthor)}]
+  {:query [::argument/id ::argument/content {::argument/author (comp/get-query Author)}]
    :ident ::argument/id}
   (dd/list-item {}
     (dd/list-item-text {:primary   content
@@ -140,19 +140,19 @@
 
 (def ui-new-comment-line (comp/computed-factory NewCommentLine))
 
-(defsc ProposalPage [this {::proposal/keys [id title body parents original-author process arguments]
+(defsc ProposalPage [this {::proposal/keys [id title body parents arguments]
+                           ::process/keys  [slug]
                            :as             props}]
   {:query         [::proposal/id ::proposal/title ::proposal/body
-                   ::proposal/process
+                   ::process/slug
                    {::proposal/parents (comp/get-query Parent)}
                    ::proposal/pro-votes ::proposal/con-votes
-                   {::proposal/original-author [:user/id ::user/display-name]}
+                   {::proposal/original-author (comp/get-query Author)}
                    {::proposal/arguments (comp/get-query ArgumentRow)}]
    :ident         ::proposal/id
    :route-segment ["decision" ::process/slug "proposal" ::proposal/id]
    :will-enter    (fn will-enter-proposal-page
                     [app {::proposal/keys [id]}]
-                    (log/info "Will enter" 'ProposalPage)
                     (let [ident (comp/get-ident ProposalPage {::proposal/id id})]
                       (if (get-in (app/current-state app) ident)
                         (do
@@ -187,7 +187,7 @@
         (inputs/button
           {:color     :primary
            :variant   :outlined
-           :onClick   #(comp/transact!! this [(new-proposal/show {:id      process
+           :onClick   #(comp/transact!! this [(new-proposal/show {:id      slug
                                                                   :parents [(comp/get-ident this)]})])
            :startIcon (layout/box {:clone true :css {:transform "rotate(.5turn)"}} (comp/create-element CallSplit nil nil))
            :endIcon   (layout/box {:clone true :css {:transform "rotate(.5turn)"}} (comp/create-element MergeType nil nil))}
