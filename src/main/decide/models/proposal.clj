@@ -7,7 +7,9 @@
     [datahike.api :as d]
     [datahike.core :as d.core]
     [decide.models.argument :as argument]
-    [decide.models.authorization :as auth])
+    [decide.models.authorization :as auth]
+    [ghostwheel.core :refer [>defn => | <-]]
+    [taoensso.timbre :as log])
   (:import (java.util Date)))
 
 (def schema
@@ -50,11 +52,22 @@
 (s/def ::id (s/and string? (complement str/blank?)))
 (s/def ::title (s/and string? (complement str/blank?)))
 (s/def ::body string?)
+(s/def ::created inst?)
+(s/def ::arguments (s/coll-of (s/keys
+                                :req [::argument/id]
+                                :opt [::argument/content])
+                     :distinct true))
 
 (s/def ::ident (s/tuple #{::id} ::id))
 
-(defn new-proposal-id []
+(>defn new-proposal-id []
+  [=> string?]
   (str (rand-int 1000)))
+
+(>defn get-arguments [db proposal-ident]
+  [d.core/db? ::ident => (s/keys :req [::arguments])]
+  (or (d/pull db [{::arguments [::argument/id]}] proposal-ident)
+    {::arguments []}))
 
 ;;; region API
 
@@ -140,7 +153,7 @@
 (defresolver resolve-arguments [{:keys [db]} {::keys [id]}]
   {::pc/input  #{::id}
    ::pc/output [{::arguments [::argument/id]}]}
-  (d/pull db [{::arguments [::argument/id]}] [::id id]))
+  (get-arguments db [::id id]))
 ;;; endregion
 
 (def resolvers
