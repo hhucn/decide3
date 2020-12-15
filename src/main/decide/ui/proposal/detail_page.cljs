@@ -154,14 +154,10 @@
    :will-enter    (fn will-enter-proposal-page
                     [app {::proposal/keys [id]}]
                     (let [ident (comp/get-ident ProposalPage {::proposal/id id})]
-                      (if (get-in (app/current-state app) ident)
-                        (do
-                          (df/load! app ident ProposalPage) ; just to refresh
-                          (dr/route-immediate ident))
-                        (dr/route-deferred ident
-                          #(df/load! app ident ProposalPage
-                             {:post-mutation        `dr/target-ready
-                              :post-mutation-params {:target ident}})))))
+                      (dr/route-deferred ident
+                        #(df/load! app ident ProposalPage
+                           {:post-mutation        `dr/target-ready
+                            :post-mutation-params {:target ident}}))))
    :use-hooks?    true}
   (let [[open? set-open] (hooks/use-state true)]
     (feedback/dialog
@@ -184,14 +180,14 @@
         (dd/typography {:variant   "body1"
                         :paragraph true}
           body)
-        (inputs/button
-          {:color     :primary
-           :variant   :outlined
-           :onClick   #(comp/transact!! this [(new-proposal/show {:id      slug
-                                                                  :parents [(comp/get-ident this)]})])
-           :startIcon (layout/box {:clone true :css {:transform "rotate(.5turn)"}} (comp/create-element CallSplit nil nil))
-           :endIcon   (layout/box {:clone true :css {:transform "rotate(.5turn)"}} (comp/create-element MergeType nil nil))}
-          "Fork / Merge")
+        #_(inputs/button
+            {:color     :primary
+             :variant   :outlined
+             :onClick   #(comp/transact!! this [(new-proposal/show {:id      slug
+                                                                    :parents [(comp/get-ident this)]})])
+             :startIcon (layout/box {:clone true :css {:transform "rotate(.5turn)"}} (comp/create-element CallSplit nil nil))
+             :endIcon   (layout/box {:clone true :css {:transform "rotate(.5turn)"}} (comp/create-element MergeType nil nil))}
+            "Fork / Merge")
 
         (when-not (empty? parents)
           (proposal-section
