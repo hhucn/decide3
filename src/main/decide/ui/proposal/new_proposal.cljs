@@ -116,6 +116,33 @@
     (filter :ui.new-proposal/checked?)
     (map (partial comp/get-ident Argument))))
 
+(defn- parent-selection [*this {:ui/keys       [parents]
+                                ::process/keys [proposals]}]
+  ; TODO this is ugly ui-wise
+  (layout/box {:my 1}
+    (dd/typography {:component "h3"} "Eltern")
+    (dd/list {}
+      (for [{::proposal/keys [id] :as props} parents
+            :let [delete-parent #(comp/transact! *this [(remove-parent {:parent/ident [::proposal/id id]})])]]
+        (ui-parent-list-item props
+          {:onDelete delete-parent}))
+      (inputs/textfield {:label     "Eltern hinzufügen"
+                         :variant   "filled"
+                         :margin    "normal"
+                         :select    true
+                         :value     ""
+                         :fullWidth true
+                         :onChange  #(comp/transact! *this [(add-parent {:parent/ident (edn/read-string (evt/target-value %))})])}
+        (for [{::proposal/keys [id title]} proposals
+              :when (not (id-in-parents? parents id))
+              :let [proposa-ident [::proposal/id id]]]
+          (navigation/menu-item {:key id :value (str proposa-ident)}
+            (str "#" id " " title)))))))
+
+(defn- argument-selection [*this {:ui/keys [parents]}]
+  (layout/box {:border 0 :borderColor "grey.700"}
+    (dd/typography {:component "h3"} "Welche Argumente sind immer noch relevant?")
+    (map ui-parent-argument-section parents)))
 
 (defsc NewProposalFormDialog [this {:ui/keys       [open? title body parents]
                                     ::process/keys [slug proposals] :as props}]
@@ -158,6 +185,8 @@
       (let [change-title (hooks/use-callback (partial m/set-string! this :ui/title :event))
             change-body (hooks/use-callback (partial m/set-string! this :ui/body :event))]
         (feedback/dialog-content {}
+
+          ;; Title
           (inputs/textfield
             {:label        "Titel"
              :variant      "filled"
@@ -165,24 +194,10 @@
              :autoComplete "off"
              :value        title
              :onChange     change-title})
-          (layout/box {:my 1}
-            (dd/typography {:component "h3"} "Eltern")
-            (dd/list {}
-              (for [{::proposal/keys [id] :as props} parents
-                    :let [delete-parent #(comp/transact! this [(remove-parent {:parent/ident [::proposal/id id]})])]]
-                (ui-parent-list-item props
-                  {:onDelete delete-parent}))
-              (inputs/textfield {:label     "Eltern hinzufügen"
-                                 :variant   "filled"
-                                 :margin    "normal"
-                                 :select    true
-                                 :value     ""
-                                 :fullWidth true
-                                 :onChange  #(comp/transact! this [(add-parent {:parent/ident (edn/read-string (evt/target-value %))})])}
-                (for [{::proposal/keys [id title]} proposals
-                      :when (not (id-in-parents? parents id))]
-                  (navigation/menu-item {:key id :value (str [::proposal/id id])}
-                    (str "#" id " " title))))))
+
+          (parent-selection this props)
+
+          ;; Body
           (inputs/textfield
             {:label        "Details"
              :variant      "filled"
@@ -194,10 +209,9 @@
              :value        body
              :onChange     change-body})
 
+          ;; Argument selection
           (when-not (empty? parents)
-            (layout/box {:border 0 :borderColor "grey.700"}
-              (dd/typography {:component "h3"} "Welche Argumente sind immer noch relevant?")
-              (map ui-parent-argument-section parents)))))
+            (argument-selection this props))))
 
       (feedback/dialog-actions {}
         (inputs/button {:color "primary" :onClick close-dialog} "Abbrechen")
