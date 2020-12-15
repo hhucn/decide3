@@ -83,29 +83,6 @@
    ::original-author user-ident
    ::created         (Date.)})
 
-(defmutation add [{:keys [conn AUTH/user-id] :as env} {::keys [id title body parents arguments process]
-                                                       :or    {parents [] arguments []}}]
-  {::pc/params    [::id ::title ::body ::parents ::arguments]
-   ::pc/output    [::id]
-   ::pc/transform auth/check-logged-in}
-  (let [real-id (new-proposal-id)
-        proposal {:db/id            "temp"
-                  ::id              real-id
-                  ::title           title
-                  ::body            body
-                  ::parents         (for [parent parents
-                                          :let [id (::id parent)]]
-                                      [::id id])
-                  ::arguments       (vec arguments)         ; TODO check if arguments exist and belog to parents
-                  ::original-author [:user/id user-id]
-                  ::created         (Date.)}
-        tx-report (d/transact conn
-                    [proposal
-                     [:db/add process :decide.models.process/proposals "temp"]])]
-    {:tempids {id real-id}
-     ::p/env  (assoc env :db (:db-after tx-report))
-     ::id     real-id}))
-
 (defresolver resolve-proposal [{:keys [db]} {::keys [id]}]
   {::pc/input  #{::id}
    ::pc/output [::id ::title ::body ::created
@@ -157,5 +134,5 @@
 ;;; endregion
 
 (def resolvers
-  [add resolve-proposal resolve-all-proposal-ids
+  [resolve-proposal resolve-all-proposal-ids
    add-argument resolve-arguments])
