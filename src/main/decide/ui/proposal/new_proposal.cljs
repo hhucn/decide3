@@ -40,7 +40,7 @@
 
 (def ui-argument (comp/computed-factory Argument {:keyfn ::argument/id}))
 
-(defsc ParentArgumentSection [this {::proposal/keys [id title arguments]}]
+(defsc ParentArgumentSection [this {::proposal/keys [title arguments]}]
   {:query [::proposal/id ::proposal/title
            {::proposal/arguments (comp/get-query Argument)}]
    :ident ::proposal/id}
@@ -53,16 +53,19 @@
 (def ui-parent-argument-section (comp/computed-factory ParentArgumentSection {:keyfn ::proposal/id}))
 
 
-(defsc ParentListItem [_this {::proposal/keys [id title]} {:keys [onDelete]}]
-  {:query [::proposal/id ::proposal/title
-           {::proposal/arguments (comp/get-query Argument)}]}
+(defsc ParentListItem [_this {::proposal/keys [nice-id title]} {:keys [onDelete]}]
+  {:query [::proposal/id
+           ::proposal/nice-id
+           ::proposal/title
+           {::proposal/arguments (comp/get-query Argument)}]
+   :ident ::proposal/id}
   (dd/list-item {}
-    (dd/list-item-icon {} (dom/span (str "#" id)))
+    (dd/list-item-icon {} (dom/span (str "#" nice-id)))
     (dd/list-item-text {} (str title))
     (dd/list-item-secondary-action {}
       (inputs/icon-button
         {:onClick onDelete
-         :title   "Elternteil entfernen"}
+         :title "Elternteil entfernen"}
         (comp/create-element RemoveIcon #js {:color "error"} nil)))))
 
 (def ui-parent-list-item (comp/computed-factory ParentListItem {:keyfn ::proposal/id}))

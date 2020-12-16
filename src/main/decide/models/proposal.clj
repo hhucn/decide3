@@ -13,43 +13,48 @@
   (:import (java.util Date)))
 
 (def schema
-  [{:db/ident       ::id
+  [{:db/ident ::id
     :db/cardinality :db.cardinality/one
-    :db/unique      :db.unique/identity
-    :db/valueType   :db.type/string}
+    :db/unique :db.unique/identity
+    :db/valueType :db.type/uuid}
 
-   {:db/ident       ::title
-    :db/doc         "The short catchy title of a proposal."
+   {:db/ident ::nice-id
     :db/cardinality :db.cardinality/one
-    ; :db/fulltext    true
-    :db/valueType   :db.type/string}
+    :db/valueType :db.type/long}
 
-   {:db/ident       ::body
-    :db/doc         "A descriptive body of the proposal."
+   {:db/ident ::title
+    :db/doc "The short catchy title of a proposal."
     :db/cardinality :db.cardinality/one
     ; :db/fulltext    true
-    :db/valueType   :db.type/string}
+    :db/valueType :db.type/string}
 
-   {:db/ident       ::created
-    :db/doc         "When the proposal was created."
+   {:db/ident ::body
+    :db/doc "A descriptive body of the proposal."
     :db/cardinality :db.cardinality/one
-    :db/valueType   :db.type/instant}
+    ; :db/fulltext    true
+    :db/valueType :db.type/string}
 
-   {:db/ident       ::original-author
-    :db/doc         "The user who proposed the proposal."
+   {:db/ident ::created
+    :db/doc "When the proposal was created."
     :db/cardinality :db.cardinality/one
-    :db/valueType   :db.type/ref}
+    :db/valueType :db.type/instant}
 
-   {:db/ident       ::parents
-    :db/doc         "≥0 parent proposals from which the proposal is derived."
+   {:db/ident ::original-author
+    :db/doc "The user who proposed the proposal."
+    :db/cardinality :db.cardinality/one
+    :db/valueType :db.type/ref}
+
+   {:db/ident ::parents
+    :db/doc "≥0 parent proposals from which the proposal is derived."
     :db/cardinality :db.cardinality/many
-    :db/valueType   :db.type/ref}
+    :db/valueType :db.type/ref}
 
-   {:db/ident       ::arguments
+   {:db/ident ::arguments
     :db/cardinality :db.cardinality/many
-    :db/valueType   :db.type/ref}])
+    :db/valueType :db.type/ref}])
 
-(s/def ::id (s/and string? (complement str/blank?)))
+(s/def ::id uuid?)
+(s/def ::nice-id pos-int?)
 (s/def ::title (s/and string? (complement str/blank?)))
 (s/def ::body string?)
 (s/def ::created inst?)
@@ -60,10 +65,6 @@
 
 (s/def ::ident (s/tuple #{::id} ::id))
 
-(>defn new-proposal-id []
-  [=> string?]
-  (str (rand-int 1000)))
-
 (>defn get-arguments [db proposal-ident]
   [d.core/db? ::ident => (s/keys :req [::arguments])]
   (or (d/pull db [{::arguments [::argument/id]}] proposal-ident)
@@ -71,33 +72,39 @@
 
 ;;; region API
 
-(defn tx-data-add [{::keys [id title body parents argument-idents user-ident]}]
-  {:db/id            (str id)
-   ::id              id
-   ::title           title
-   ::body            body
-   ::parents         (for [parent parents
-                           :let [id (::id parent)]]
-                       [::id id])
-   ::arguments       argument-idents                  ; TODO check if arguments exist and belog to parents
+(defn tx-data-add [{::keys [id nice-id title body parents argument-idents user-ident]}]
+  {:db/id (str id)
+   ::id id
+   ::title title
+   ::nice-id nice-id
+   ::body body
+   ::parents (for [parent parents
+                   :let [id (::id parent)]]
+               [::id id])
+   ::arguments argument-idents                              ; TODO check if arguments exist and belog to parents
    ::original-author user-ident
-   ::created         (Date.)})
+   ::created (Date.)})
 
 (defresolver resolve-proposal [{:keys [db]} {::keys [id]}]
-  {::pc/input  #{::id}
-   ::pc/output [::id ::title ::body ::created
+  {::pc/input #{::id}
+   ::pc/output [::id
+                ::nice-id
+                ::title ::body ::created
                 {::parents [::id]}
                 {::original-author [:user/id]}]}
-  (let [{::keys [id title body created parents original-author]}
-        (d/pull db [::id ::title ::body ::created
+  (let [{::keys [id nice-id title body created parents original-author]}
+        (d/pull db [::id
+                    ::nice-id
+                    ::title ::body ::created
                     {::parents [::id]}
                     {::original-author [:user/id]}]
           [::id id])]
-    {::id              id
-     ::title           title
-     ::body            body
-     ::created         created
-     ::parents         (or parents [])
+    {::id id
+     ::nice-id nice-id
+     ::title title
+     ::body body
+     ::created created
+     ::parents (or parents [])
      ::original-author original-author}))
 
 (defresolver resolve-all-proposal-ids [{:keys [db]} _]

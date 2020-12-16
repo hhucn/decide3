@@ -33,7 +33,8 @@
     [taoensso.timbre :as log]
     [com.fulcrologic.fulcro.dom.events :as evt]
     [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
-    [com.fulcrologic.fulcro.application :as app]))
+    [com.fulcrologic.fulcro.application :as app]
+    [clojure.tools.reader.edn :as edn]))
 
 (declare ProposalPage)
 
@@ -140,40 +141,40 @@
 
 (def ui-new-comment-line (comp/computed-factory NewCommentLine))
 
-(defsc ProposalPage [this {::proposal/keys [id title body parents arguments]
-                           ::process/keys  [slug]
-                           :as             props}]
-  {:query         [::proposal/id ::proposal/title ::proposal/body
-                   ::process/slug
-                   {::proposal/parents (comp/get-query Parent)}
-                   ::proposal/pro-votes ::proposal/con-votes
-                   {::proposal/original-author (comp/get-query Author)}
-                   {::proposal/arguments (comp/get-query ArgumentRow)}]
-   :ident         ::proposal/id
+(defsc ProposalPage
+  [this {::proposal/keys [id title body parents arguments] :as props}]
+  {:query [::proposal/id
+           ::proposal/title ::proposal/body
+           {::proposal/parents (comp/get-query Parent)}
+           ::proposal/pro-votes ::proposal/con-votes
+           {::proposal/original-author (comp/get-query Author)}
+           {::proposal/arguments (comp/get-query ArgumentRow)}]
+   :ident ::proposal/id
+   :use-hooks? true
    :route-segment ["decision" ::process/slug "proposal" ::proposal/id]
-   :will-enter    (fn will-enter-proposal-page
-                    [app {::proposal/keys [id]}]
-                    (let [ident (comp/get-ident ProposalPage {::proposal/id id})]
-                      (dr/route-deferred ident
-                        #(df/load! app ident ProposalPage
-                           {:post-mutation        `dr/target-ready
-                            :post-mutation-params {:target ident}}))))
-   :use-hooks?    true}
+   :will-enter
+   (fn will-enter-proposal-page
+     [app {::proposal/keys [id]}]
+     (let [ident (comp/get-ident ProposalPage {::proposal/id (uuid id)})]
+       (dr/route-deferred ident
+         #(df/load! app ident ProposalPage
+            {:post-mutation `dr/target-ready
+             :post-mutation-params {:target ident}}))))}
   (let [[open? set-open] (hooks/use-state true)]
     (feedback/dialog
-      {:open       open?
+      {:open open?
        :fullScreen (utils/<=-breakpoint? "xs")
-       :fullWidth  true
-       :maxWidth   "md"
-       :onClose    #(set-open false)
-       :onExiting  #(js/window.history.back)}               ; TODO don't do this
+       :fullWidth true
+       :maxWidth "md"
+       :onClose #(set-open false)
+       :onExiting #(js/window.history.back)}                ; TODO don't do this
 
       (surfaces/toolbar {:variant "dense"}
         (inputs/icon-button
-          {:edge       :start
-           :color      :inherit
+          {:edge :start
+           :color :inherit
            :aria-label "back"
-           :onClick    #(set-open false)}
+           :onClick #(set-open false)}
           (comp/create-element Close nil nil))
         (feedback/dialog-title {} title))
       (feedback/dialog-content {}

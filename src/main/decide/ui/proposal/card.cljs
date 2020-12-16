@@ -19,8 +19,7 @@
     ["@material-ui/icons/ThumbUpAltTwoTone" :default ThumbUpAltTwoTone]
     ["@material-ui/icons/ThumbDownAltTwoTone" :default ThumbDownAltTwoTone]
     [com.fulcrologic.fulcro.dom :as dom]
-    [taoensso.timbre :as log]
-    [decide.models.proposal :as model]))
+    [taoensso.timbre :as log]))
 
 (defn id-part [proposal-id]
   (dom/data {:className "proposal-id"
@@ -38,42 +37,44 @@
                  :title    created}
         (time/nice-string created)))))
 
-(defn subheader [{::proposal/keys [id created original-author]}]
+(defn subheader [{::proposal/keys [nice-id created original-author]}]
   (let [author-name (::user/display-name original-author)]
     (comp/fragment
-      (id-part id)
+      (id-part nice-id)
       " · "
       (when author-name
         (author-part author-name))
       (when (instance? js/Date created)
         (time-part created)))))
 
-(defsc Proposal [this {::proposal/keys [id title body opinion created original-author] :as props}
+(defsc Proposal [this {::proposal/keys [id nice-id title body opinion created original-author] :as props}
                  {::process/keys [slug]}]
-  {:query         (fn []
-                    [::proposal/id ::proposal/title ::proposal/body
-                     ::proposal/pro-votes ::proposal/con-votes
-                     ::proposal/created
-                     ::proposal/opinion
-                     {::proposal/parents '...}
-                     {::proposal/original-author (comp/get-query proposal/Author)}])
-   :ident         ::proposal/id
+  {:query (fn []
+            [::proposal/id
+             ::proposal/nice-id
+             ::proposal/title ::proposal/body
+             ::proposal/pro-votes ::proposal/con-votes
+             ::proposal/created
+             ::proposal/opinion
+             {::proposal/parents '...}
+             {::proposal/original-author (comp/get-query proposal/Author)}])
+   :ident ::proposal/id
    :initial-state (fn [{:keys [id title body]}]
-                    {::proposal/id        id
-                     ::proposal/title     title
-                     ::proposal/body      body
+                    {::proposal/id id
+                     ::proposal/title title
+                     ::proposal/body body
                      ::proposal/pro-votes 0
                      ::proposal/con-votes 0})
-   :use-hooks?    true}
+   :use-hooks? true}
   (let [proposal-href (hooks/use-memo #(routing/path->url (dr/path-to detail-page/ProposalPage {::process/slug slug
-                                                                                                ::proposal/id  id})))]
+                                                                                                ::proposal/id id})))]
     (layout/box {:width "100%" :clone true}
       (surfaces/card
         {:variant :outlined}
 
         (layout/box {:pb 0 :clone true}
           (surfaces/card-header
-            {:title     title
+            {:title title
              :subheader (subheader props)}))
         (surfaces/card-content {}
           (dd/typography
