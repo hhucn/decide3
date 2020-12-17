@@ -7,7 +7,7 @@
 
 == How to get started
 
-You can start as many components of the project you like. When you just want to play with components in CLJS without the backend I recommend to only start the workspaces compiler.
+You can start as many components of the project you like.When you just want to play with components in CLJS without the backend I recommend to only start the workspaces compiler.
 
 ```Shell
 yarn install
@@ -21,7 +21,7 @@ npm run client/main
 # There you can kick of the compilation of the other targets.
 
 # Start the backend:
-clojure -A:dev -Dtrace -Dghostwheel.enabled=true
+clojure -A:dev -Dtrace -Dguardrails.enabled=true
 Clojure 1.10.1
 # The ns is defined in src/dev/user
 user=> (start)
@@ -53,7 +53,7 @@ When you import this project into Cursive/IntelliJ the jobs above are already av
 
 == Development Mode
 
-Shadow-cljs handles the client-side development build. The file
+Shadow-cljs handles the client-side development build.The file
 `src/main/app/client.cljs` contains the code to start and refresh
 the client for hot code reload.
 
@@ -76,7 +76,7 @@ shadow-cljs - nREPL server started on port 9000
 then *navigate to the server URL* (shown in this example as http://localhost:9630) and
 use the *Builds* menu to enable/disable whichever builds you want watched/running.
 
-Shadow-cljs will also start a web server for any builds that configure one. This
+Shadow-cljs will also start a web server for any builds that configure one.This
 template configures one for workspaces, and one for tests:
 
 - Workspaces (MUST RUN SERVER): http://localhost:3000/wslive.html
@@ -114,7 +114,7 @@ Start a LOCAL clj nREPL in IntelliJ (using IntelliJ's classpath with
 the `dev` alias selected in the Clojure Deps tab), or from the command line:
 
 ```bash
-$ clj -A:dev -J-Dtrace -J-Dghostwheel.enabled=true
+$ clj -A:dev -J-Dtrace -J-Dguardrails.enabled=true
 user=> (start)
 user=> (stop)
 ...
@@ -122,14 +122,11 @@ user=> (restart) ; stop, reload server code, and go again
 user=> (tools-ns/refresh) ; retry code reload if hot server reload fails
 ```
 
-The `-J-Dtrace` adds a JVM argument that will enable performance tracing for Fulcro Inspect's network tab so you can
-see how your resolvers and mutations are performing.
+The `-J-Dtrace` adds a JVM argument that will enable performance tracing for Fulcro Inspect's network tab so you can see how your resolvers and mutations are performing.
 
-The `-J-Dghostwheel.enabled=true` turns on ghostwheel instrumentation of ghostwheel spec'd functions, which is a wrapper
-of Clojure spec that makes instrumentation and production-time elision (for performance and size) much easier.
+The `-J-Dguardrails.enabled=true` turns on guardrails instrumentation of guardrails spec'd functions, which is a wrapper of Clojure spec that makes instrumentation and production-time elision (for performance and size) much easier.
 
-NOTE: For real development, please use an editor that has REPL integration, like Cursive (recommended) or
-Spacemacs.
+NOTE: For real development, please use an editor that has REPL integration, like Cursive (recommended) or Spacemacs.
 
 The URL to work on your application is then
 http://localhost:3000.
@@ -139,15 +136,15 @@ Hot code reload, preloads, and such are all coded into the javascript.
 === Preloads
 
 There is a preload file that is used on the development build of the
-application `app.development-preload`. You can add code here that
+application `app.development-preload`.You can add code here that
 you want to execute before the application initializes in development
 mode.
 
 === Fulcro Inspect
 
 Fulcro inspect will preload on the development build of the main
-application and workspaces.  You must install the plugin in Chrome from the
-Chrome store (free) to access it.  It will add a Fulcro Inspect tab to the
+application and workspaces.You must install the plugin in Chrome from the
+Chrome store (free) to access it.It will add a Fulcro Inspect tab to the
 developer tools pane.
 
 == Tests

@@ -8,7 +8,7 @@
     [decide.models.authorization :as auth]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
-    [ghostwheel.core :refer [>defn =>]]))
+    [com.fulcrologic.guardrails.core :refer [>defn =>]]))
 
 (def schema [{:db/ident       ::user/opinions
               :db/cardinality :db.cardinality/many

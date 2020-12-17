@@ -8,7 +8,7 @@
     [datahike.core :as d.core]
     [decide.models.argument :as argument]
     [decide.models.authorization :as auth]
-    [ghostwheel.core :refer [>defn => | <-]]
+    [com.fulcrologic.guardrails.core :refer [>defn => | <-]]
     [taoensso.timbre :as log])
   (:import (java.util Date)))
 

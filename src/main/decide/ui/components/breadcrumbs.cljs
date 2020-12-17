@@ -3,7 +3,7 @@
     [cljs.spec.alpha :as s]
     [clojure.string :as str]
     [com.fulcrologic.fulcro.dom :as dom]
-    [ghostwheel.core :refer [>defn =>]]
+    [com.fulcrologic.guardrails.core :refer [>defn =>]]
     [material-ui.navigation :as navigation]
     [material-ui.layout :as layout]))
 

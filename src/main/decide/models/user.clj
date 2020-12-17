@@ -8,7 +8,7 @@
     [com.wsscode.pathom.core :as p]
     [datahike.api :as d]
     [datahike.core :as d.core]
-    [ghostwheel.core :refer [>defn >defn- => | ? <-]]
+    [com.fulcrologic.guardrails.core :refer [>defn >defn- => | ? <-]]
     [taoensso.timbre :as log]))
 
 (def schema [{:db/ident       :user/id

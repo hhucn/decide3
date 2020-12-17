@@ -1,6 +1,6 @@
 (ns decide.utils
   (:require
-    [ghostwheel.core :refer [>defn =>]]
+    [com.fulcrologic.guardrails.core :refer [>defn =>]]
     [cljs.spec.alpha :as s]
     ["@material-ui/core/styles" :refer (useTheme)]
     [material-ui.utils :as utils]))

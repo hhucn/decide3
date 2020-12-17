@@ -7,7 +7,7 @@
     [datahike.core :as d.core]
     [decide.models.authorization :as auth]
     [decide.models.proposal :as proposal]
-    [ghostwheel.core :refer [>defn => | <-]]
+    [com.fulcrologic.guardrails.core :refer [>defn => | <-]]
     [taoensso.timbre :as log]))
 
 (def schema

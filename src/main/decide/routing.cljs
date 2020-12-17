@@ -1,9 +1,9 @@
 (ns decide.routing
   (:require
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
-    [com.fulcrologic.guardrails.core :refer [>defn =>]]
     [com.fulcrologic.fulcro.application :as app]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+    [com.fulcrologic.guardrails.core :refer [>defn =>]]
     [taoensso.timbre :as log]
     [clojure.string :refer [split]]
     [cljs.spec.alpha :as s]
