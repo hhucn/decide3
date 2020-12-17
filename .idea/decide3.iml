@@ -26,7 +26,7 @@
     <orderEntry type="library" name="Deps: org.clojure/data.json:1.0.0" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/clojure:1.10.1" level="project" />
     <orderEntry type="library" name="Deps: thheller/shadow-cljsjs:0.0.21" level="project" />
-    <orderEntry type="library" name="Deps: com.wsscode/pathom:2.2.31" level="project" />
+    <orderEntry type="library" name="Deps: com.wsscode/pathom:2.3.0" level="project" />
     <orderEntry type="library" name="Deps: javax.activation/javax.activation-api:1.2.0" level="project" />
     <orderEntry type="library" name="Deps: com.ibm.icu/icu4j:66.1" level="project" />
     <orderEntry type="library" name="Deps: commons-codec:1.14" level="project" />
@@ -35,6 +35,7 @@
     <orderEntry type="library" name="Deps: com.bhauman/cljs-test-display:0.1.1" level="project" />
     <orderEntry type="library" name="Deps: com.fulcrologic/fulcro-rad:1.0.8" level="project" />
     <orderEntry type="library" name="Deps: com.fulcrologic/guardrails:0.0.12" level="project" />
+    <orderEntry type="library" name="Deps: com.wsscode/async:1.0.13" level="project" />
     <orderEntry type="library" name="Deps: com.google.errorprone/error_prone_annotations:2.3.1" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/core.specs.alpha:0.2.44" level="project" />
     <orderEntry type="library" name="Deps: org.bouncycastle/bcpkix-jdk15on:1.58" level="project" />
@@ -76,7 +77,6 @@
     <orderEntry type="library" name="Deps: cljsjs/js-joda:1.10.1-0" level="project" />
     <orderEntry type="library" name="Deps: com.yahoo.platform.yui/yuicompressor:2.4.8" level="project" />
     <orderEntry type="library" name="Deps: cljsjs/highlight:9.12.0-2" level="project" />
-    <orderEntry type="library" name="Deps: spec-coerce:1.0.0-alpha6" level="project" />
     <orderEntry type="library" name="Deps: commons-io:2.6" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/data.fressian:0.2.1" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/tools.namespace:1.1.0" level="project" />

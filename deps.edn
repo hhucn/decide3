@@ -4,7 +4,7 @@
         bk/ring-gzip {:mvn/version "0.3.0"}
         com.taoensso/timbre {:mvn/version "5.1.0"}
         com.taoensso/tufte {:mvn/version "2.2.0"}
-        com.wsscode/pathom {:mvn/version "2.2.31"}
+        com.wsscode/pathom {:mvn/version "2.3.0"}
         com.fulcrologic/fulcro {:mvn/version "3.4.9"}
         com.fulcrologic/fulcro-rad {:mvn/version "1.0.8"}
         com.fulcrologic/fulcro-garden-css {:mvn/version "3.0.8"}
