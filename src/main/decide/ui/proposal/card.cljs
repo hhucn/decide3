@@ -5,6 +5,7 @@
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
+    [decide.models.argument :as argument]
     [decide.models.user :as user]
     [decide.models.opinion :as opinion]
     [decide.models.process :as process]
@@ -17,8 +18,9 @@
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
     [material-ui.surfaces :as surfaces]
-    ["@material-ui/icons/ThumbUpAltTwoTone" :default ThumbUpAltTwoTone]
+    ["@material-ui/icons/CommentTwoTone" :default Comment]
     ["@material-ui/icons/ThumbDownAltTwoTone" :default ThumbDownAltTwoTone]
+    ["@material-ui/icons/ThumbUpAltTwoTone" :default ThumbUpAltTwoTone]
     [com.fulcrologic.fulcro.dom :as dom]
     [taoensso.timbre :as log]))
 
@@ -45,10 +47,15 @@
       " · "
       (when author-name
         (author-part author-name))
+      " · "
       (when (instance? js/Date created)
         (time-part created)))))
 
-(defsc Proposal [this {::proposal/keys [id nice-id title body opinion created original-author] :as props}
+(defsc Argument [_ _]
+  {:query [::argument/id]
+   :ident ::argument/id})
+
+(defsc Proposal [this {::proposal/keys [id nice-id title body opinion arguments created original-author] :as props}
                  {::process/keys [slug]}]
   {:query (fn []
             [::proposal/id
@@ -57,6 +64,7 @@
              ::proposal/pro-votes ::proposal/con-votes
              ::proposal/created
              ::proposal/opinion
+             {::proposal/arguments (comp/get-query Argument)}
              {::proposal/parents '...}
              {::proposal/original-author (comp/get-query proposal/Author)}])
    :ident ::proposal/id
@@ -80,28 +88,31 @@
         (surfaces/card-content {}
           (dd/typography
             {:component "p"
-             :variant   "body2"
-             :color     "textSecondary"
-             :style     {:whiteSpace "pre-line"}}
+             :variant "body2"
+             :color "textSecondary"
+             :style {:whiteSpace "pre-line"}}
             body))
 
         (surfaces/card-actions {}
           (inputs/button-group
             {:size :small
-             :variant :text}
+             :variant :text
+             :disableElevation true}
             (inputs/button {:color (if (pos? opinion) "primary" "default")
                             :onClick #(comp/transact! this [(opinion/add {::proposal/id id
                                                                           :opinion (if (pos? opinion) 0 +1)})])
                             :startIcon (comp/create-element ThumbUpAltTwoTone nil nil)}
               "Zustimmen")
             (inputs/button {:color (if (neg? opinion) "primary" "default")
+                            :aria-label "Ablehnen"
                             :onClick #(comp/transact! this [(opinion/add {::proposal/id id
                                                                           :opinion (if (neg? opinion) 0 -1)})])
                             :startIcon (comp/create-element ThumbDownAltTwoTone nil nil)}))
-          (layout/box {:clone true
-                       :style {:marginLeft "auto"}}
-            (inputs/button {:component "a"
-                            :color :primary
-                            :href proposal-href} "Mehr")))))))
+
+          (layout/box {:style {:marginLeft "auto"}})
+          (dd/typography {:variant :button} (count arguments) " Argumente")
+          (inputs/button {:component "a"
+                          :color :primary
+                          :href proposal-href} "Mehr"))))))
 
 (def ui-proposal (comp/computed-factory Proposal {:keyfn ::proposal/id}))
