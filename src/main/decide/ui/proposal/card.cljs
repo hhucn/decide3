@@ -12,6 +12,7 @@
     [decide.routing :as routing]
     [decide.ui.proposal.detail-page :as detail-page]
     [decide.ui.common.time :as time]
+    [decide.utils :as utils]
     [material-ui.data-display :as dd]
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
@@ -85,23 +86,22 @@
             body))
 
         (surfaces/card-actions {}
-          (inputs/button {:size      :small
-                          :color     (if (pos? opinion) "primary" "default")
-                          :variant   :text
-                          :onClick   #(comp/transact! this [(opinion/add {::proposal/id id
-                                                                          :opinion      (if (pos? opinion) 0 +1)})])
-                          :startIcon (comp/create-element ThumbUpAltTwoTone nil nil)}
-            "Zustimmen")
-          (inputs/button {:size      :small
-                          :color     (if (neg? opinion) "primary" "default")
-                          :variant   :text
-                          :onClick   #(comp/transact! this [(opinion/add {::proposal/id id
-                                                                          :opinion      (if (neg? opinion) 0 -1)})])
-                          :startIcon (comp/create-element ThumbDownAltTwoTone nil nil)}
-            "Ablehnen")
+          (inputs/button-group
+            {:size :small
+             :variant :text}
+            (inputs/button {:color (if (pos? opinion) "primary" "default")
+                            :onClick #(comp/transact! this [(opinion/add {::proposal/id id
+                                                                          :opinion (if (pos? opinion) 0 +1)})])
+                            :startIcon (comp/create-element ThumbUpAltTwoTone nil nil)}
+              "Zustimmen")
+            (inputs/button {:color (if (neg? opinion) "primary" "default")
+                            :onClick #(comp/transact! this [(opinion/add {::proposal/id id
+                                                                          :opinion (if (neg? opinion) 0 -1)})])
+                            :startIcon (comp/create-element ThumbDownAltTwoTone nil nil)}))
           (layout/box {:clone true
                        :style {:marginLeft "auto"}}
             (inputs/button {:component "a"
-                            :href      proposal-href} "Mehr")))))))
+                            :color :primary
+                            :href proposal-href} "Mehr")))))))
 
 (def ui-proposal (comp/computed-factory Proposal {:keyfn ::proposal/id}))
