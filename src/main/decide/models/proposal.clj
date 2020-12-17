@@ -70,6 +70,13 @@
   (or (d/pull db [{::arguments [::argument/id]}] proposal-ident)
     {::arguments []}))
 
+(>defn get-children [db proposal-ident]
+  [d.core/db? ::ident => (s/coll-of (s/keys :req [::id]) :distinct true)]
+  (get
+    (d/pull db [{::_parents [::id]}] proposal-ident)
+    ::_parents
+    []))
+
 ;;; region API
 
 (defn tx-data-add [{::keys [id nice-id title body parents argument-idents user-ident]}]
@@ -108,30 +115,35 @@
      ::original-author original-author}))
 
 (defresolver resolve-all-proposal-ids [{:keys [db]} _]
-  {::pc/input  #{}
+  {::pc/input #{}
    ::pc/output [{:all-proposals [::id]}]}
   {:all-proposals
    (for [id (d/q '[:find [?id ...] :where [_ ::id ?id]] db)]
      {::id id})})
+
+(defresolver resolve-children [{:keys [db]} {::keys [id]}]
+  {::pc/input #{::id}
+   ::pc/output [{::children [::id]}]}
+  {::children (get-children db [::id id])})
 ;;; endregion
 
 ;;; region Arguments
 (defmutation add-argument
   [{:keys [conn AUTH/user-id] :as env} {::keys [id]
-                                        :keys  [temp-id content]}]
-  {::pc/params    [::id :temp-id :content]
-   ::pc/output    [::argument/id]
+                                        :keys [temp-id content]}]
+  {::pc/params [::id :temp-id :content]
+   ::pc/output [::argument/id]
    ::pc/transform auth/check-logged-in}
   (let [real-id (d.core/squuid)
-        statement {:db/id             "temp"
-                   ::argument/id      real-id
+        statement {:db/id "temp"
+                   ::argument/id real-id
                    ::argument/content content
-                   ::argument/author  [:user/id user-id]}
+                   ::argument/author [:user/id user-id]}
         tx-report (d/transact conn
                     [statement
                      [:db/add [::id id] ::arguments "temp"]])]
-    {:tempids      {temp-id real-id}
-     ::p/env       (assoc env :db (:db-after tx-report))
+    {:tempids {temp-id real-id}
+     ::p/env (assoc env :db (:db-after tx-report))
      ::argument/id real-id}))
 
 (defresolver resolve-arguments [{:keys [db]} {::keys [id]}]
@@ -142,4 +154,4 @@
 
 (def resolvers
   [resolve-proposal resolve-all-proposal-ids
-   add-argument resolve-arguments])
+   add-argument resolve-arguments resolve-children])
