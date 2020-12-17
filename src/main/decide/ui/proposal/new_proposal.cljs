@@ -137,12 +137,13 @@
                          :select    true
                          :value     ""
                          :fullWidth true
-                         :onChange  #(comp/transact! *this [(add-parent {:parent/ident (edn/read-string (evt/target-value %))})])}
-        (for [{::proposal/keys [id title]} proposals
+                         :onChange  #(comp/transact! *this [(add-parent {:parent/ident (edn/read-string {:readers {'uuid uuid}}
+                                                                                         (evt/target-value %))})])}
+        (for [{::proposal/keys [id nice-id title]} proposals
               :when (not (id-in-parents? parents id))
               :let [proposal-ident [::proposal/id id]]]
           (navigation/menu-item {:key id :value (str proposal-ident)}
-            (str "#" id " " title)))))))
+            (str "#" nice-id " " title)))))))
 
 (defn- argument-selection [*this {:ui/keys [parents]}]
   (layout/box {:border 0 :borderColor "grey.700"}
