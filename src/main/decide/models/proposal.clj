@@ -92,27 +92,27 @@
    ::original-author user-ident
    ::created (Date.)})
 
-(defresolver resolve-proposal [{:keys [db]} {::keys [id]}]
+(defresolver resolve-proposal [{:keys [db]} input]
   {::pc/input #{::id}
    ::pc/output [::id
                 ::nice-id
                 ::title ::body ::created
-                {::parents [::id]}
-                {::original-author [:user/id]}]}
-  (let [{::keys [id nice-id title body created parents original-author]}
-        (d/pull db [::id
-                    ::nice-id
-                    ::title ::body ::created
-                    {::parents [::id]}
-                    {::original-author [:user/id]}]
-          [::id id])]
-    {::id id
-     ::nice-id nice-id
-     ::title title
-     ::body body
-     ::created created
-     ::parents (or parents [])
-     ::original-author original-author}))
+                {::original-author [:user/id]}]
+   ::pc/batch? true}
+  (let [batch? (sequential? input)]
+    (cond->> input
+      (not batch?) vector
+      :always (map #(find % ::id))
+      :always (d/pull-many db [::id
+                               ::nice-id
+                               ::title ::body ::created
+                               {::original-author [:user/id]}])
+      (not batch?) first)))
+
+(defresolver resolve-parents [{:keys [db]} {::keys [id]}]
+  {::pc/input #{::id}
+   ::pc/output [{::parents [::id]}]}
+  (or (d/pull db [{::parents [::id]}] [::id id]) {::parents []}))
 
 (defresolver resolve-all-proposal-ids [{:keys [db]} _]
   {::pc/input #{}
@@ -154,4 +154,4 @@
 
 (def resolvers
   [resolve-proposal resolve-all-proposal-ids
-   add-argument resolve-arguments resolve-children])
+   add-argument resolve-arguments resolve-parents resolve-children])
