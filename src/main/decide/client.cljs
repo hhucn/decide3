@@ -1,12 +1,13 @@
 (ns decide.client
   (:require
+    [com.fulcrologic.fulcro.algorithms.timbre-support :refer [console-appender prefix-output-fn]]
     [com.fulcrologic.fulcro.application :as app]
-    [taoensso.timbre :as log]
-    [decide.application :refer [SPA]]
-    [decide.ui.root :as root]
     [com.fulcrologic.fulcro.components :as comp]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
-    [decide.routing :as routing]))
+    [decide.application :refer [SPA]]
+    [decide.routing :as routing]
+    [decide.ui.root :as root]
+    [taoensso.timbre :as log]))
 
 (defn ^:export refresh []
   (log/info "Hot code Remount")
@@ -14,6 +15,8 @@
   (app/mount! SPA root/Root "decide" {:initialize-state? false}))
 
 (defn ^:export init []
+  (log/merge-config! {:output-fn prefix-output-fn
+                      :appenders {:console (console-appender)}})
   (log/info "Application starting.")
   (app/set-root! SPA root/Root {:initialize-state? true})
   (routing/start-history! SPA)
@@ -21,4 +24,4 @@
   (routing/start!)
   (app/mount! SPA root/Root "decide"
     {:initialize-state? false
-     :hydrate           false}))
+     :hydrate false}))
