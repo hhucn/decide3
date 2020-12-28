@@ -19,24 +19,34 @@
      argument/schema]))
 
 (def dev-db
-  [{::process/slug "test-decision"}])
+  [{:db/id "Björn"
+    :decide.models.user/display-name "Björn",
+    :user/email "Björn",
+    :user/id #uuid"5fdc7ae8-cb19-4119-b5fe-77cc05f9e7d8",
+    :user/password "bcrypt+sha512$5406d40a90d89f1b82d39846b9c2641a$12$ae6f8aad0ed8cf758337492393fc8279ea7d2ac81df7533c"} ; Björn
+   {::process/slug "test-decision"
+    ::process/latest-id 2,
+    ::process/proposals
+    [{:db/id "Wasserspender"
+      ::proposal/body "Wasser ist gesund für Studenten.",
+      ::proposal/created #inst"2020-12-18T09:58:15.232-00:00",
+      ::proposal/id #uuid"5fdc7d37-107b-4484-ab85-2911be84c39e",
+      ::proposal/nice-id 1,
+      ::proposal/original-author "Björn",
+      ::proposal/title "Wir sollten einen Wasserspender aufstellen"}
+     {::proposal/body "Wasser ist gesund für Studenten, aber wir sollten auch auf \"Qualität\" achten.",
+      ::proposal/created #inst"2020-12-18T10:10:28.182-00:00",
+      ::proposal/id #uuid"5fdc8014-bd58-43f6-990f-713741c81d9f",
+      ::proposal/nice-id 2,
+      ::proposal/original-author "Björn",
+      ::proposal/parents ["Wasserspender"],
+      ::proposal/title "Wir sollten einen goldenen Wasserspender aufstellen"}]}])
 
 (defn test-database [config]
   (d/delete-database config)
   (d/create-database
     (assoc config :initial-tx schema))
   (d/connect config))
-
-(def orphaned-proposals
-  '[:find [?e ...]
-    :where
-    [?e :decide.models.proposal/id]
-    (not [_ :decide.models.process/proposals ?e])])
-
-(defn add-orphan-proposals-to-process [conn]
-  (let [es (d/q orphaned-proposals @conn)]
-    (d/transact conn
-      (mapv #(vector :db/add [::process/slug "test-decision"] ::process/proposals %) es))))
 
 (defn transact-schema [conn]
   (d/transact conn schema))
