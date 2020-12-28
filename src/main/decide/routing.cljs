@@ -3,7 +3,8 @@
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [com.fulcrologic.fulcro.application :as app]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
-    [com.fulcrologic.guardrails.core :refer [>defn =>]]
+    [com.fulcrologic.rad.routing.html5-history :as hist5]
+    [com.fulcrologic.guardrails.core :refer [>defn >fn =>]]
     [taoensso.timbre :as log]
     [clojure.string :refer [split]]
     [cljs.spec.alpha :as s]
@@ -30,13 +31,20 @@
 
 (>defn path->url
   "Given a path vector of the form [\"gift\" \"123\" \"edit\"],
+  returns a url of the form \"gift/123/edit\"."
+  [path]
+  [::path => string?]
+  (str/join (interleave path (repeat "/"))))
+
+(>defn path->absolute-url
+  "Given a path vector of the form [\"gift\" \"123\" \"edit\"],
   returns a url of the form \"/gift/123/edit\"."
   [path]
   [::path => string?]
-  (str/join (interleave (repeat "/") path)))
+  (str "/" (path->url path)))
 
-(defn path-to->url [& targets-and-params]
-  (path->url (apply dr/path-to targets-and-params)))
+(defn path-to->absolute-url [& targets-and-params]
+  (path->absolute-url (apply dr/path-to targets-and-params)))
 
 (>defn routable-path?
   "True if there exists a router target for the given path."
@@ -50,17 +58,28 @@
 
 (>defn route-to! [path]
   [(s/coll-of string?) => nil?]
-  (pushy/set-token! @history (path->url path)))
+  (pushy/set-token! @history (path->absolute-url path)))
+
+(>defn extract-params [app path]
+  [app/fulcro-app? (s/coll-of string?) => map?]
+  (into {}
+    (filter #(keyword? (first %)))
+    (->
+      (app/root-class app)
+      (dr/resolve-path (dr/resolve-target app path) {})
+      (zipmap path))))
 
 (defn start-history! [app]
   (log/info "Start history!")
   (reset! history
     (pushy/pushy
-      (fn [path]
-        (if (routable-path? app path)
-          (dr/change-route! app path)
-          ;; change URL and dispatch again
-          (route-to! default-route)))                       ; 404 ?
+      (fn handle-path-change! [path]
+        (let [params (extract-params app path)]
+          (log/info "Path:" path " Params:" params)
+          (if (routable-path? app path)
+            (dr/change-route! app path params)
+            ;; change URL and dispatch again
+            (route-to! default-route))))                    ; 404 ?
       url->path)))
 
 (defn start! []
@@ -75,5 +94,5 @@
 
 (defn with-route [this path props]
   (merge
-    {:href (path->url path)}
+    {:href (path->absolute-url path)}
     props))

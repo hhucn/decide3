@@ -75,8 +75,8 @@
                      ::proposal/pro-votes 0
                      ::proposal/con-votes 0})
    :use-hooks? true}
-  (let [proposal-href (hooks/use-memo #(routing/path->url (dr/path-to detail-page/ProposalPage {::process/slug slug
-                                                                                                ::proposal/id (str id)})))]
+  (let [proposal-href (hooks/use-memo #(routing/path->absolute-url (dr/path-to detail-page/ProposalPage {::process/slug slug
+                                                                                                         ::proposal/id (str id)})))]
     (layout/box {:width "100%" :clone true}
       (surfaces/card
         {:variant :outlined}
