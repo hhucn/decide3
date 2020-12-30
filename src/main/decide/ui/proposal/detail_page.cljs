@@ -38,19 +38,16 @@
 
 (declare ProposalPage)
 
-(defsc Parent [_this {::proposal/keys [id title]}]
-  {:query [::proposal/id ::proposal/title]
-   :ident ::proposal/id}
-  (dd/list-item
-    {:button    true
-     :component "a"
-     :href      id}
-    (dd/list-item-avatar {} (str "#" id))
-    (dd/list-item-text {} (str title))))
 
-(def ui-parent (comp/computed-factory Parent {:keyfn ::proposal/id}))
 
-;; region Vote scale
+(defn section [title & children]
+  (comp/fragment
+    (dd/divider {:light true})
+    (apply layout/box {:mt 1 :mb 2}
+      (dd/typography {:variant "h6" :color "textSecondary" :component "h3"} title)
+      children)))
+
+;; region Opinion section
 (defn percent-of-pro-votes [pro-votes con-votes]
   (if (zero? pro-votes)
     0
@@ -61,30 +58,28 @@
     ((withStyles
        (fn [theme]
          (clj->js {:barColorPrimary {:backgroundColor (.. theme -palette -success -main)}
-                   :colorPrimary    {:backgroundColor (.. theme -palette -error -main)}})))
+                   :colorPrimary {:backgroundColor (.. theme -palette -error -main)}})))
      LinearProgress)))
 
-(defn vote-scale [{::proposal/keys [pro-votes con-votes]
-                   :or             {pro-votes 0 con-votes 0}}]
-  (layout/grid {:container  true
+(defsc OpinionSection [_ {::proposal/keys [pro-votes con-votes]
+                          :or {pro-votes 0 con-votes 0}}]
+  {:query [::proposal/id ::proposal/pro-votes ::proposal/con-votes]
+   :ident ::proposal/id}
+  (layout/grid {:container true
                 :alignItems :center
-                :justify    :space-between
-                :wrap       :nowrap}
+                :justify :space-between
+                :wrap :nowrap}
     (layout/grid {:item true :xs true :align :center} (str pro-votes))
     (layout/grid {:item true :xs 9}
       (vote-linear-progress
         {:variant "determinate"
-         :value   (percent-of-pro-votes pro-votes con-votes)}))
+         :value (percent-of-pro-votes pro-votes con-votes)}))
     (layout/grid {:item true :xs true :align :center} (str con-votes))))
+
+(def ui-opinion-section (comp/computed-factory OpinionSection {:keyfn ::proposal/id}))
 ;; endregion
 
-(defn proposal-section [title & children]
-  (comp/fragment
-    (dd/divider {:light true})
-    (apply layout/box {:mt 1 :mb 2}
-      (dd/typography {:variant "h6" :color "textSecondary" :component "h3"} title)
-      children)))
-
+;; region Argument section
 (defsc Author [_ {::user/keys [display-name]}]
   {:query [:user/id ::user/display-name]
    :ident :user/id}
@@ -99,56 +94,97 @@
     (dd/list-item-text {:primary   content
                         :secondary (comp/fragment "Von " (ui-argument-author author))})))
 
-(def ui-comment-row (comp/computed-factory ArgumentRow {:keyfn ::argument/id}))
+(def ui-argument-row (comp/computed-factory ArgumentRow {:keyfn ::argument/id}))
 
 (defmutation add-argument [{::proposal/keys [id]
                             :keys [temp-id content]}]
   (action [{:keys [state]}]
-    (let [new-comment-data {::argument/id      temp-id
-                            ::argument/content content}]
+    (let [new-argument-data {::argument/id temp-id
+                             ::argument/content content}]
       (norm/swap!-> state
-        (mrg/merge-component ArgumentRow new-comment-data
+        (mrg/merge-component ArgumentRow new-argument-data
           :append (conj (comp/get-ident ProposalPage {::proposal/id id}) ::proposal/arguments)))))
   (remote [env]
     (-> env
       (m/with-server-side-mutation proposal/add-argument)
       (m/returning ArgumentRow))))
 
-(defsc NewCommentLine [this _ {::proposal/keys [id]}]
+(defsc NewArgumentLine [this _ {::proposal/keys [id]}]
   {:use-hooks? true}
   (let [[new-argument set-new-argument] (hooks/use-state "")
         submit (hooks/use-callback
                  (fn [e]
                    (evt/prevent-default! e)
                    (comp/transact! this [(add-argument {::proposal/id id
-                                                        :temp-id      (tempid/tempid)
-                                                        :content      new-argument})])
+                                                        :temp-id (tempid/tempid)
+                                                        :content new-argument})])
                    (set-new-argument ""))
                  [new-argument])]
     (layout/grid {:container true
                   :component "form"
                   :onSubmit  submit}
       (inputs/textfield
-        {:fullWidth  true
-         :label      "Neues Argument"
-         :variant    :outlined
-         :value      new-argument
-         :onChange   #(set-new-argument (evt/target-value %))
+        {:fullWidth true
+         :label "Neues Argument"
+         :variant :outlined
+         :value new-argument
+         :onChange #(set-new-argument (evt/target-value %))
          :inputProps {:aria-label "Neues Argument"}
-         :InputProps {:endAdornment (inputs/icon-button {:type       :submit
+         :InputProps {:endAdornment (inputs/icon-button {:type :submit
                                                          :aria-label "Absenden"}
                                       (comp/create-element Send nil nil))}}))))
 
-(def ui-new-comment-line (comp/computed-factory NewCommentLine))
+(def ui-new-argument-line (comp/factory NewArgumentLine))
+
+(defsc ArgumentSection [_ {::proposal/keys [id arguments]}]
+  {:query [::proposal/id
+           {::proposal/arguments (comp/get-query ArgumentRow)}]
+   :ident ::proposal/id}
+  (comp/fragment
+    (layout/box {:mb 1}
+      (if-not (empty? arguments)
+        (dd/list {:dense true}
+          (map ui-argument-row arguments))
+        (dd/typography {:variant :body2 :color :textSecondary} "Bisher gibt es noch keine Argumente.")))
+
+    (ui-new-argument-line {} {::proposal/id id})))
+
+(def ui-argument-section (comp/factory ArgumentSection {:keyfn ::proposal/id}))
+;; endregion
+
+;; region Parent section
+(defsc Parent [_this {::proposal/keys [id title]}]
+  {:query [::proposal/id ::proposal/title]
+   :ident ::proposal/id}
+  (dd/list-item
+    {:button true
+     :component "a"
+     :href id}
+    (dd/list-item-avatar {} (str "#" id))
+    (dd/list-item-text {} (str title))))
+
+(def ui-parent (comp/computed-factory Parent {:keyfn ::proposal/id}))
+
+(defsc ParentSection [_ {::proposal/keys [parents]}]
+  {:query [::proposal/id {::proposal/parents (comp/get-query Parent)}]
+   :ident ::proposal/id}
+  (when-not (empty? parents)
+    (section
+      (str "Dieser Vorschlag basiert auf " (count parents) " weiteren Vorschlägen")
+      (dd/list {:dense false}
+        (map ui-parent parents)))))
+
+(def ui-parent-section (comp/factory ParentSection {:keyfn ::proposal/id}))
+;; endregion
 
 (defsc ProposalPage
-  [this {::proposal/keys [id title body parents arguments] :as props}]
+  [_this {::proposal/keys [title body]
+          :>/keys [parent-section argument-section opinion-section]}]
   {:query [::proposal/id
            ::proposal/title ::proposal/body
-           {::proposal/parents (comp/get-query Parent)}
-           ::proposal/pro-votes ::proposal/con-votes
-           {::proposal/original-author (comp/get-query Author)}
-           {::proposal/arguments (comp/get-query ArgumentRow)}]
+           {:>/parent-section (comp/get-query ParentSection)}
+           {:>/opinion-section (comp/get-query OpinionSection)}
+           {:>/argument-section (comp/get-query ArgumentSection)}]
    :ident ::proposal/id
    :use-hooks? true
    :route-segment ["decision" ::process/slug "proposal" ::proposal/id]
@@ -182,27 +218,15 @@
                         :paragraph true}
           body)
         #_(inputs/button
-            {:color     :primary
-             :variant   :outlined
-             :onClick   #(comp/transact!! this [(new-proposal/show {:id      slug
-                                                                    :parents [(comp/get-ident this)]})])
+            {:color :primary
+             :variant :outlined
+             :onClick #(comp/transact!! this [(new-proposal/show {:id slug
+                                                                  :parents [(comp/get-ident this)]})])
              :startIcon (layout/box {:clone true :css {:transform "rotate(.5turn)"}} (comp/create-element CallSplit nil nil))
-             :endIcon   (layout/box {:clone true :css {:transform "rotate(.5turn)"}} (comp/create-element MergeType nil nil))}
+             :endIcon (layout/box {:clone true :css {:transform "rotate(.5turn)"}} (comp/create-element MergeType nil nil))}
             "Fork / Merge")
 
-        (when-not (empty? parents)
-          (proposal-section
-            (str "Dieser Vorschlag basiert auf " (count parents) " weiteren Vorschlägen")
-            (dd/list {:dense false}
-              (map ui-parent parents))))
-
-        (proposal-section "Meinungen"
-          (vote-scale props))
-
-        (proposal-section "Argumente"
-          (layout/box {:mb 1}
-            (if-not (empty? arguments)
-              (dd/list {:dense true}
-                (map ui-comment-row arguments))
-              (dd/typography {:variant :body2 :color :textSecondary} "Bisher gibt es noch keine Argumente.")))
-          (ui-new-comment-line {} {::proposal/id id}))))))
+        ;; "Dieser Vorschlag basiert auf " (count parents) " weiteren Vorschlägen"
+        (ui-parent-section parent-section)
+        (section "Meinungen" (ui-opinion-section opinion-section))
+        (section "Argumente" (ui-argument-section argument-section))))))
