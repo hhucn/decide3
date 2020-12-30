@@ -4,12 +4,12 @@
                [com.fulcrologic.fulcro.algorithms.server-render :as ssr]
                [com.fulcrologic.fulcro.application :as app]
                [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
-               [decide.models.user :as user]
                [decide.routing :as routing]
                [decide.ui.login :as login]])
     [com.fulcrologic.fulcro.components :as comp]
     [com.fulcrologic.rad.application :as rad-app]
-    [com.fulcrologic.fulcro-css.css :as css]))
+    [com.fulcrologic.fulcro-css.css :as css]
+    [decide.models.user :as user]))
 
 (defn client-did-mount [app]
   #?(:cljs
