@@ -15,7 +15,7 @@
     [decide.models.argument :as argument]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
-    [decide.utils :as utils]
+    [decide.utils.breakpoint :as breakpoint]
     [material-ui.data-display :as dd]
     [material-ui.feedback :as feedback]
     [material-ui.inputs :as inputs]
@@ -198,12 +198,12 @@
         set-step (fn set-step [step-no] (m/set-integer!! this :ui/step :value step-no))
         next-step (hooks/use-callback (fn next-step [] (set-step (inc step))) [step])]
     (feedback/dialog
-      {:open       open?
-       :fullWidth  true
-       :fullScreen (utils/<=-breakpoint? "xs")
-       :maxWidth   "md"
-       :onClose    close-dialog
-       :onExit     reset-form
+      {:open open?
+       :fullWidth true
+       :fullScreen (breakpoint/<=? "xs")
+       :maxWidth "md"
+       :onClose close-dialog
+       :onExit reset-form
        :PaperProps {:component "form"
                     :onSubmit  (fn submit-new-proposal-form [e]
                                  (evt/prevent-default! e)

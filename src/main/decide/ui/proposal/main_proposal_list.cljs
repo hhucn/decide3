@@ -5,7 +5,7 @@
     [decide.models.proposal :as proposal]
     [decide.ui.proposal.card :as proposal-card]
     [decide.ui.proposal.new-proposal :as new-proposal]
-    [decide.utils :as utils]
+    [decide.utils.breakpoint :as breakpoint]
     [material-ui.data-display :as dd]
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
@@ -16,7 +16,7 @@
     [com.fulcrologic.fulcro.data-fetch :as df]))
 
 (defn add-proposal-fab [props]
-  (let [extended? (utils/>=-breakpoint? "sm")]
+  (let [extended? (breakpoint/>=? "sm")]
     (layout/box
       {:position "fixed"
        :bottom   "16px"

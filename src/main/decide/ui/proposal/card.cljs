@@ -13,7 +13,6 @@
     [decide.routing :as routing]
     [decide.ui.proposal.detail-page :as detail-page]
     [decide.ui.common.time :as time]
-    [decide.utils :as utils]
     [material-ui.data-display :as dd]
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
