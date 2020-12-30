@@ -39,7 +39,12 @@
                  :title    created}
         (time/nice-string created)))))
 
-(defn subheader [{::proposal/keys [nice-id created original-author]}]
+(defsc Subheader [_ {::proposal/keys [nice-id created original-author]}]
+  {:query [::proposal/id
+           ::proposal/nice-id
+           ::proposal/created
+           {::proposal/original-author (comp/get-query proposal/Author)}]
+   :ident ::proposal/id}
   (let [author-name (::user/display-name original-author)]
     (comp/fragment
       (id-part nice-id)
@@ -50,29 +55,26 @@
       (when (instance? js/Date created)
         (time-part created)))))
 
+(def ui-subheader (comp/factory Subheader (:keyfn ::proposal/id)))
+
 (defsc Argument [_ _]
   {:query [::argument/id]
    :ident ::argument/id})
 
-(defsc Proposal [this {::proposal/keys [id nice-id title body opinion arguments created original-author] :as props}
+(defsc Proposal [this {::proposal/keys [id title body opinion arguments]
+                       :>/keys [subheader]}
                  {::process/keys [slug]}]
   {:query (fn []
             [::proposal/id
-             ::proposal/nice-id
              ::proposal/title ::proposal/body
-             ::proposal/pro-votes ::proposal/con-votes
-             ::proposal/created
              ::proposal/opinion
              {::proposal/arguments (comp/get-query Argument)}
-             {::proposal/parents '...}
-             {::proposal/original-author (comp/get-query proposal/Author)}])
+             {:>/subheader (comp/get-query Subheader)}])
    :ident ::proposal/id
    :initial-state (fn [{:keys [id title body]}]
                     {::proposal/id id
                      ::proposal/title title
-                     ::proposal/body body
-                     ::proposal/pro-votes 0
-                     ::proposal/con-votes 0})
+                     ::proposal/body body})
    :use-hooks? true}
   (let [proposal-href (hooks/use-memo #(routing/path->absolute-url (dr/path-to detail-page/ProposalPage {::process/slug slug
                                                                                                          ::proposal/id (str id)})))]
@@ -83,7 +85,7 @@
         (layout/box {:pb 0 :clone true}
           (surfaces/card-header
             {:title title
-             :subheader (subheader props)}))
+             :subheader (ui-subheader subheader)}))
         (surfaces/card-content {}
           (dd/typography
             {:component "p"
