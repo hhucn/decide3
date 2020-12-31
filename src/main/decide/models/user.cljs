@@ -7,10 +7,10 @@
 (def sign-up)
 
 (defsc Session [_ _]
-  {:query         [:session/valid? :user/id]
-   :ident         (fn [] [:AUTH :current-session])
+  {:query [:session/valid? ::id]
+   :ident (fn [] [:AUTH :current-session])
    :initial-state {:session/valid? false
-                   :user/id        nil}})
+                   ::id nil}})
 
 
 (defmutation change-password [{:keys [old-password new-password]}]

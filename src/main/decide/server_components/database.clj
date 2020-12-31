@@ -20,10 +20,10 @@
 
 (def dev-db
   [{:db/id "Björn"
-    :decide.models.user/display-name "Björn",
-    :user/email "Björn",
-    :user/id #uuid"5fdc7ae8-cb19-4119-b5fe-77cc05f9e7d8",
-    :user/password "bcrypt+sha512$5406d40a90d89f1b82d39846b9c2641a$12$ae6f8aad0ed8cf758337492393fc8279ea7d2ac81df7533c"} ; Björn
+    ::user/display-name "Björn",
+    ::user/email "Björn",
+    ::user/id #uuid"5fdc7ae8-cb19-4119-b5fe-77cc05f9e7d8",
+    ::user/password "bcrypt+sha512$5406d40a90d89f1b82d39846b9c2641a$12$ae6f8aad0ed8cf758337492393fc8279ea7d2ac81df7533c"} ; Björn
    {::process/slug "test-decision"
     ::process/latest-id 2,
     ::process/proposals

@@ -97,7 +97,7 @@
                                                        :body body
                                                        :parents parents
                                                        :argument-idents arguments
-                                                       :user-ident [:user/id user-id]})
+                                                       :user-ident [:decide.models.user/id user-id]})
                      [:db/add [::slug slug] ::proposals (str real-id)]])]
     {:tempids {id real-id}
      ::p/env (assoc env :db (:db-after tx-report))

@@ -27,9 +27,9 @@
 (s/def ::content (s/and string? (complement str/blank?)))
 
 (defresolver resolve-argument [{:keys [db]} {::keys [id]}]
-  {::pc/input  #{::id}
-   ::pc/output [::content {::author [:user/id]}]}
-  (d/pull db [::content {::author [:user/id]}] [::id id]))
+  {::pc/input #{::id}
+   ::pc/output [::content {::author [:decide.models.user/id]}]}
+  (d/pull db [::content {::author [:decide.models.user/id]}] [::id id]))
 
 (def resolvers
   [resolve-argument])

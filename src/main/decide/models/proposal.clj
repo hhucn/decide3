@@ -97,7 +97,7 @@
    ::pc/output [::id
                 ::nice-id
                 ::title ::body ::created
-                {::original-author [:user/id]}]
+                {::original-author [:decide.models.user/id]}]
    ::pc/batch? true}
   (let [batch? (sequential? input)]
     (cond->> input
@@ -106,7 +106,7 @@
       :always (d/pull-many db [::id
                                ::nice-id
                                ::title ::body ::created
-                               {::original-author [:user/id]}])
+                               {::original-author [:decide.models.user/id]}])
       (not batch?) first)))
 
 (defresolver resolve-parents [{:keys [db]} {::keys [id]}]
@@ -138,7 +138,7 @@
         statement {:db/id "temp"
                    ::argument/id real-id
                    ::argument/content content
-                   ::argument/author [:user/id user-id]}
+                   ::argument/author [:decide.models.user/id user-id]}
         tx-report (d/transact conn
                     [statement
                      [:db/add [::id id] ::arguments "temp"]])]

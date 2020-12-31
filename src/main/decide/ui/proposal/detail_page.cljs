@@ -2,25 +2,25 @@
   (:require
     [com.fulcrologic.fulcro.algorithms.merge :as mrg]
     [com.fulcrologic.fulcro.algorithms.normalized-state :as norm]
-    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
-    [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
-    [com.fulcrologic.fulcro.react.hooks :as hooks]
+    [com.fulcrologic.fulcro.algorithms.react-interop :as interop]
     [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.data-fetch :as df]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.dom.events :as evt]
+    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+    [com.fulcrologic.fulcro.react.hooks :as hooks]
+    [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
+    [decide.models.argument :as argument]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
-    [decide.models.argument :as argument]
     [decide.models.user :as user]
-    [decide.routing :as routing]
-    [decide.ui.proposal.new-proposal :as new-proposal]
     [decide.utils.breakpoint :as breakpoint]
     [material-ui.data-display :as dd]
     [material-ui.feedback :as feedback]
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
     [material-ui.surfaces :as surfaces]
-    [com.fulcrologic.fulcro.algorithms.react-interop :as interop]
     ["@material-ui/icons/ThumbUpAltTwoTone" :default ThumbUpAltTwoTone]
     ["@material-ui/icons/ThumbDownAltTwoTone" :default ThumbDownAltTwoTone]
     ["@material-ui/icons/Close" :default Close]
@@ -28,13 +28,7 @@
     ["@material-ui/icons/CallSplit" :default CallSplit]
     ["@material-ui/core/LinearProgress" :default LinearProgress]
     ["@material-ui/icons/Send" :default Send]
-    ["@material-ui/core/styles" :refer (withStyles useTheme)]
-    [com.fulcrologic.fulcro.dom :as dom]
-    [taoensso.timbre :as log]
-    [com.fulcrologic.fulcro.dom.events :as evt]
-    [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
-    [com.fulcrologic.fulcro.application :as app]
-    [clojure.tools.reader.edn :as edn]))
+    ["@material-ui/core/styles" :refer [withStyles useTheme]]))
 
 (declare ProposalPage)
 
@@ -81,8 +75,8 @@
 
 ;; region Argument section
 (defsc Author [_ {::user/keys [display-name]}]
-  {:query [:user/id ::user/display-name]
-   :ident :user/id}
+  {:query [::user/id ::user/display-name]
+   :ident ::user/id}
   (dom/span display-name))
 
 (def ui-argument-author (comp/factory Author))

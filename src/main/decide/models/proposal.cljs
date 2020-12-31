@@ -5,8 +5,8 @@
     [decide.models.user :as user]))
 
 (defsc Author [_ _]
-  {:query [:user/id ::user/display-name]
-   :ident :user/id})
+  {:query [::user/id ::user/display-name]
+   :ident ::user/id})
 
 (defsc Proposal [_this _props]
   {:query (fn []

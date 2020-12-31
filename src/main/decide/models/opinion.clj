@@ -66,7 +66,7 @@
   {::pc/params    [::proposal/id :opinion]
    ::pc/transform auth/check-logged-in}
   (let [tx-report (set-opinion! conn
-                    [:user/id user-id]
+                    [::user/id user-id]
                     [::proposal/id id]
                     opinion)]
     {::p/env (assoc env :db (:db-after tx-report))}))
@@ -74,7 +74,7 @@
 (defresolver resolve-personal-opinion [{:keys [db AUTH/user-id]} {::proposal/keys [id]}]
   {::pc/input  #{::proposal/id}
    ::pc/output [::proposal/opinion]}
-  (if-let [opinion (get-opinion db [:user/id user-id] [::proposal/id id])]
+  (if-let [opinion (get-opinion db [::user/id user-id] [::proposal/id id])]
     (let [{::keys [value]} (d/pull db [[::value :default 0]] opinion)]
       {::proposal/opinion value})
     {::proposal/opinion 0}))

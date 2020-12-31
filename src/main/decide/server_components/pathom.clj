@@ -92,11 +92,9 @@
     [(p/env-plugin {:config config})
      (p/env-wrap-plugin
        (fn [env]
-         (let [session (get-in env [:ring/request :session])
-               {id     :user/id
-                valid? :session/valid?} session]
+         (let [user-id (get-in env [:ring/request :session])]
            (merge env
-             {:AUTH/user-id (when valid? id)
+             {:AUTH/user-id user-id
               :conn         conn
               :db           (d/db conn)}))))]
     [index-explorer
