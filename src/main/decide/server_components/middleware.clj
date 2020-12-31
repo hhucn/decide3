@@ -11,9 +11,9 @@
     [com.fulcrologic.fulcro.components :as comp]
     [com.fulcrologic.fulcro.dom-server :as dom]
     [com.fulcrologic.fulcro.algorithms.denormalize :as dn]
-    [com.fulcrologic.fulcro.algorithms.normalize :as norm]
     [ring.middleware.defaults :refer [wrap-defaults]]
     [ring.middleware.gzip :refer [wrap-gzip]]
+    [ring.middleware.session.cookie :refer [cookie-store]]
     [ring.util.response :refer [response file-response resource-response]]
     [ring.util.response :as resp]
     [hiccup.page :refer [html5 include-js include-css]]
@@ -143,7 +143,7 @@
 (defstate middleware
   :start
   (let [defaults-config (:ring.middleware/defaults-config config)
-        legal-origins   (get config :legal-origins #{"localhost"})]
+        legal-origins (get config :legal-origins #{"localhost"})]
     (-> not-found-handler
       (wrap-api "/api")
       wrap-transit-params
@@ -153,5 +153,6 @@
       ;; the defaults-config here (which comes from an EDN file, so it can't have
       ;; code initialized).
       ;; E.g. (wrap-defaults (assoc-in defaults-config [:session :store] (my-store)))
-      (wrap-defaults defaults-config)
+      (wrap-defaults (assoc defaults-config
+                       :session {:store (cookie-store)}))
       wrap-gzip)))

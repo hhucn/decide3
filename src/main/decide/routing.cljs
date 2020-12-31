@@ -75,7 +75,7 @@
     (pushy/pushy
       (fn handle-path-change! [path]
         (let [params (extract-params app path)]
-          (log/info "Path:" path " Params:" params)
+          (log/info "Redirecting: Path:" path " Params:" params)
           (if (routable-path? app path)
             (dr/change-route! app path params)
             ;; change URL and dispatch again
