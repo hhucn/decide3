@@ -1,5 +1,6 @@
 {:defn-macro nil
  :expound {:show-valid-values? true
            :print-specs? true}
+ :async? true
  :throw? false
  :emit-spec? true}
