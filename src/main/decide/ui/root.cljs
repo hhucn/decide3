@@ -7,8 +7,7 @@
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr :refer [defrouter]]
     [decide.ui.login :as login]
     [decide.ui.pages.splash :as splash]
-    [decide.ui.process.core :as process]
-    [decide.ui.proposal.core :as proposal-ui]
+    [decide.ui.snackbar :as snackbar]
     [decide.ui.theming.dark-mode :as dark-mode]
     [decide.ui.theming.themes :as themes]
     [material-ui.styles :as styles :refer [prefers-dark?]]
@@ -19,7 +18,7 @@
     [decide.ui.proposal.detail-page :as detail-page]))
 
 (defrouter PageRouter [_this {:keys [current-state]}]
-  {:router-targets [login/LoginPage process/Process login/SignUpPage proposal-list/MainProposalList detail-page/ProposalPage]}
+  {:router-targets [login/LoginPage login/SignUpPage proposal-list/MainProposalList detail-page/ProposalPage]}
   (when-not current-state
     (dom/div {:dangerouslySetInnerHTML {:__html splash/splash}})))
 
@@ -29,14 +28,16 @@
   (action [{:keys [state]}]
     (swap! state assoc :ui/theme theme)))
 
-(defsc Root [this {:keys [ui/theme ui/page-router ui/app-bar]}]
-  {:query      [:ui/theme
-                {:ui/app-bar (comp/get-query appbar/AppBar)}
-                {:ui/page-router (comp/get-query PageRouter)}]
+(defsc Root [this {:ui/keys [theme page-router app-bar snackbar-container]}]
+  {:query [:ui/theme
+           {:ui/app-bar (comp/get-query appbar/AppBar)}
+           {:ui/page-router (comp/get-query PageRouter)}
+           {:ui/snackbar-container (comp/get-query snackbar/SnackbarContainer)}]
    :initial-state
-               (fn [_] {:ui/page-router (comp/get-initial-state PageRouter)
-                        :ui/theme       (if (dark-mode/dark-mode?) :dark :light)
-                        :ui/app-bar     (comp/get-initial-state appbar/AppBar)})
+   (fn [_] {:ui/page-router (comp/get-initial-state PageRouter)
+            :ui/theme (if (dark-mode/dark-mode?) :dark :light)
+            :ui/app-bar (comp/get-initial-state appbar/AppBar)
+            :ui/snackbar-container (comp/get-initial-state snackbar/SnackbarContainer)})
    :use-hooks? true}
   (hooks/use-effect
     (fn []
@@ -48,4 +49,5 @@
   (styles/theme-provider {:theme (themes/get-mui-theme theme)}
     (mutils/css-baseline {})
     (appbar/ui-appbar app-bar {})
+    (snackbar/ui-snackbar-container snackbar-container)
     (ui-page-router page-router)))

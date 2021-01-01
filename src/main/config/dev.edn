@@ -1,16 +1,16 @@
-{:taoensso.timbre/logging-config    {:level :debug}
- :ring.middleware/defaults-config   {:security {:anti-forgery   false
-                                                :hsts           true
-                                                :ssl-redirect   false
-                                                :frame-options  :sameorigin
-                                                :xss-protection {:enable? false
-                                                                 :mode    :block}}}
- :com.fulcrologic.rad.pathom/config {:sensitive-keys #{:user/password}
-                                     :trace?         true
-                                     :log-requests?  true
+{:taoensso.timbre/logging-config {:level :debug}
+ :ring.middleware/defaults-config {:security {:anti-forgery false
+                                              :hsts true
+                                              :ssl-redirect false
+                                              :frame-options :sameorigin
+                                              :xss-protection {:enable? false
+                                                               :mode :block}}}
+ :com.fulcrologic.rad.pathom/config {:sensitive-keys #{:decide.models.user/password}
+                                     :trace? true
+                                     :log-requests? true
                                      :log-responses? true}
 
- :db                                {:name      "dev-db"
-                                     :db/reset? true
-                                     :store     {:backend :file
-                                                 :path    "/tmp/decide"}}}
+ :db {:name "dev-db"
+      :db/reset? true
+      :store {:backend :file
+              :path "/tmp/decide"}}}
