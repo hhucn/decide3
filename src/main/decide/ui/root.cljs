@@ -17,24 +17,24 @@
     [decide.ui.proposal.main-proposal-list :as proposal-list]
     [decide.ui.proposal.detail-page :as detail-page]))
 
-(defrouter PageRouter [_this {:keys [current-state]}]
+(defrouter RootRouter [_this {:keys [current-state]}]
   {:router-targets [login/LoginPage login/SignUpPage proposal-list/MainProposalList detail-page/ProposalPage]}
   (when-not current-state
     (dom/div {:dangerouslySetInnerHTML {:__html splash/splash}})))
 
-(def ui-page-router (comp/factory PageRouter))
+(def ui-root-router (comp/factory RootRouter))
 
 (defmutation set-theme [{:keys [theme]}]
   (action [{:keys [state]}]
     (swap! state assoc :ui/theme theme)))
 
-(defsc Root [this {:ui/keys [theme page-router app-bar snackbar-container]}]
+(defsc Root [this {:ui/keys [theme root-router app-bar snackbar-container]}]
   {:query [:ui/theme
            {:ui/app-bar (comp/get-query appbar/AppBar)}
-           {:ui/page-router (comp/get-query PageRouter)}
+           {:ui/root-router (comp/get-query RootRouter)}
            {:ui/snackbar-container (comp/get-query snackbar/SnackbarContainer)}]
    :initial-state
-   (fn [_] {:ui/page-router (comp/get-initial-state PageRouter)
+   (fn [_] {:ui/root-router (comp/get-initial-state RootRouter)
             :ui/theme (if (dark-mode/dark-mode?) :dark :light)
             :ui/app-bar (comp/get-initial-state appbar/AppBar)
             :ui/snackbar-container (comp/get-initial-state snackbar/SnackbarContainer)})
@@ -50,4 +50,4 @@
     (mutils/css-baseline {})
     (appbar/ui-appbar app-bar {})
     (snackbar/ui-snackbar-container snackbar-container)
-    (ui-page-router page-router)))
+    (ui-root-router root-router)))
