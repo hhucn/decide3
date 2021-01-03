@@ -1,4 +1,4 @@
-(ns decide.ui.snackbar
+(ns decide.ui.components.snackbar
   (:require
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.mutations :refer [defmutation]]
