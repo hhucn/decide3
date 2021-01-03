@@ -6,9 +6,7 @@
     [decide.application :refer [SPA]]
     [material-ui.feedback :as feedback]
     [material-ui.inputs :as inputs]
-    [taoensso.timbre :as log]
-    ["@material-ui/icons/Close" :default Close]
-    [material-ui.surfaces :as surfaces]))
+    ["@material-ui/icons/Close" :default Close]))
 
 (def ident [:component :snackbars])
 
@@ -84,7 +82,6 @@
    :initial-state {:next []}
    :use-hooks? true}
   (when current
-    (log/info (:id current) "current")
     (ui-snackbar current)))
 
 (def ui-snackbar-container (comp/factory SnackbarContainer))
