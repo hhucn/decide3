@@ -2,20 +2,20 @@
   (:require
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.dom :as dom]
-    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+    [com.fulcrologic.fulcro.mutations :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
-    [com.fulcrologic.fulcro.routing.dynamic-routing :as dr :refer [defrouter]]
+    [com.fulcrologic.fulcro.routing.dynamic-routing :refer [defrouter]]
+    [decide.ui.components.appbar :as appbar]
+    [decide.ui.components.snackbar :as snackbar]
     [decide.ui.login :as login]
     [decide.ui.pages.splash :as splash]
-    [decide.ui.snackbar :as snackbar]
+    [decide.ui.proposal.detail-page :as detail-page]
+    [decide.ui.proposal.main-proposal-list :as proposal-list]
     [decide.ui.theming.dark-mode :as dark-mode]
     [decide.ui.theming.themes :as themes]
     [material-ui.styles :as styles :refer [prefers-dark?]]
     [material-ui.utils :as mutils :refer [css-baseline]]
-    [taoensso.timbre :as log]
-    [decide.ui.components.appbar :as appbar]
-    [decide.ui.proposal.main-proposal-list :as proposal-list]
-    [decide.ui.proposal.detail-page :as detail-page]))
+    [taoensso.timbre :as log]))
 
 (defrouter RootRouter [_this {:keys [current-state]}]
   {:router-targets [login/LoginPage login/SignUpPage proposal-list/MainProposalList detail-page/ProposalPage]}
