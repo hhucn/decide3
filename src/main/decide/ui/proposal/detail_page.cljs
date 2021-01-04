@@ -147,14 +147,14 @@
 ;; endregion
 
 ;; region Parent section
-(defsc Parent [_this {::proposal/keys [id title]}]
-  {:query [::proposal/id ::proposal/title]
+(defsc Parent [_this {::proposal/keys [id nice-id title]}]
+  {:query [::proposal/id ::proposal/nice-id ::proposal/title]
    :ident ::proposal/id}
   (dd/list-item
     {:button true
      :component "a"
-     :href id}
-    (dd/list-item-avatar {} (str "#" id))
+     :href (str id)}
+    (dd/list-item-avatar {} (str "#" nice-id))
     (dd/list-item-text {} (str title))))
 
 (def ui-parent (comp/computed-factory Parent {:keyfn ::proposal/id}))
