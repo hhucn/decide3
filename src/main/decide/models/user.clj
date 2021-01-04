@@ -81,7 +81,7 @@
   {::pc/params [::email ::password]
    ::pc/output [:session/valid? ::id :signin/result :errors]}
   (if (email-in-db? db email)
-    (let [{:keys [id] :as user} (get-by-email db email [::id ::password])]
+    (let [{::keys [id] :as user} (get-by-email db email [::id ::password])]
       (if (password-valid? user password)
         (response-updating-session
           {:signin/result :success
@@ -89,7 +89,7 @@
            ::id id}
           id)
         {:signin/result :fail
-         :signin/errors #{:invalid-credentials}}))
+         :errors #{:invalid-credentials}}))
     {:signin/result :fail
      :errors #{:account-does-not-exist}}))
 
