@@ -2,14 +2,14 @@
   (:require
     [clojure.spec.alpha :as s]
     [clojure.string :as str]
+    [com.fulcrologic.guardrails.core :refer [>defn => | <-]]
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
     [com.wsscode.pathom.core :as p]
     [datahike.api :as d]
     [datahike.core :as d.core]
     [decide.models.argument :as argument]
     [decide.models.authorization :as auth]
-    [com.fulcrologic.guardrails.core :refer [>defn => | <-]]
-    [taoensso.timbre :as log])
+    [decide.models.user :as user])
   (:import (java.util Date)))
 
 (def schema
@@ -67,30 +67,33 @@
 
 (>defn get-arguments [db proposal-ident]
   [d.core/db? ::ident => (s/keys :req [::arguments])]
-  (or (d/pull db [{::arguments [::argument/id]}] proposal-ident)
+  (or
+    (d/pull db [{::arguments [::argument/id]}] proposal-ident)
     {::arguments []}))
 
 (>defn get-children [db proposal-ident]
   [d.core/db? ::ident => (s/coll-of (s/keys :req [::id]) :distinct true)]
-  (get
-    (d/pull db [{::_parents [::id]}] proposal-ident)
-    ::_parents
-    []))
+  (-> db
+    (d/pull [{::_parents [::id]}] proposal-ident)
+    (get ::_parents [])))
 
-;;; region API
-
-(defn tx-data-add [{::keys [id nice-id title body parents argument-idents user-ident]}]
-  {:db/id (str id)
-   ::id id
+(>defn tx-map [{user-ident ::user/ident
+                ::keys [id nice-id title body parents argument-idents]}]
+  [(s/keys :req [::title ::body ::nice-id ::user/ident]
+     :opt [::id ::parents])
+   => (s/keys :req [::id ::title ::nice-id ::body ::created])]
+  {::id (or id (d.core/squuid))
    ::title title
    ::nice-id nice-id
    ::body body
    ::parents (for [parent parents
                    :let [id (::id parent)]]
                [::id id])
-   ::arguments argument-idents                              ; TODO check if arguments exist and belog to parents
+   ::arguments (or argument-idents [])                      ; TODO check if arguments exist and belog to parents
    ::original-author user-ident
    ::created (Date.)})
+
+;;; region API
 
 (defresolver resolve-proposal [{:keys [db]} input]
   {::pc/input #{::id}
@@ -134,14 +137,13 @@
   {::pc/params [::id :temp-id :content]
    ::pc/output [::argument/id]
    ::pc/transform auth/check-logged-in}
-  (let [real-id (d.core/squuid)
-        statement {:db/id "temp"
-                   ::argument/id real-id
-                   ::argument/content content
-                   ::argument/author [:decide.models.user/id user-id]}
+  (let [{real-id ::argument/id :as argument}
+        (argument/tx-map
+          {::argument/content content
+           ::user/ident [::user/id user-id]})
         tx-report (d/transact conn
-                    [statement
-                     [:db/add [::id id] ::arguments "temp"]])]
+                    [(assoc argument :db/id "new-argument")
+                     [:db/add [::id id] ::arguments "new-argument"]])]
     {:tempids {temp-id real-id}
      ::p/env (assoc env :db (:db-after tx-report))
      ::argument/id real-id}))

@@ -84,24 +84,25 @@
 (defmutation add-proposal [{:keys [conn AUTH/user-id] :as env}
                            {::proposal/keys [id title body parents arguments]
                             ::keys [slug]
-                            :or    {parents [] arguments []}}]
-  {::pc/params    [::slug
-                   ::proposal/id ::proposal/title ::proposal/body ::proposal/parents ::proposal/arguments]
-   ::pc/output    [::proposal/id]
+                            :or {parents [] arguments []}}]
+  {::pc/params [::slug
+                ::proposal/id ::proposal/title ::proposal/body ::proposal/parents ::proposal/arguments]
+   ::pc/output [::proposal/id]
    ::pc/transform auth/check-logged-in}
-  (let [real-id (d.core/squuid)
+  (let [{real-id ::proposal/id :as new-proposal}
+        (proposal/tx-map #::proposal{:nice-id (new-nice-id! conn slug)
+                                     :title title
+                                     :body body
+                                     :parents parents
+                                     :argument-idents arguments
+                                     :user-ident [:decide.models.user/id user-id]})
         tx-report (d/transact conn
-                    [(proposal/tx-data-add #::proposal{:id real-id
-                                                       :nice-id (new-nice-id! conn slug)
-                                                       :title title
-                                                       :body body
-                                                       :parents parents
-                                                       :argument-idents arguments
-                                                       :user-ident [:decide.models.user/id user-id]})
-                     [:db/add [::slug slug] ::proposals (str real-id)]])]
-    {:tempids {id real-id}
-     ::p/env (assoc env :db (:db-after tx-report))
-     ::proposal/id real-id}))
+                    [(assoc new-proposal :db/id "new-proposal")
+                     [:db/add [::slug slug] ::proposals "new-proposal"]])]
+    {::proposal/id real-id
+     :tempids {id real-id}
+     ::p/env (assoc env :db (:db-after tx-report))}))
+
 
 (def resolvers
   [resolve-all-processes

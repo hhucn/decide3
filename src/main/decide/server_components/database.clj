@@ -19,8 +19,8 @@
      argument/schema]))
 
 (def dev-db
-  [(assoc (user/new {::user/email "Björn"
-                     ::user/password "Björn"})
+  [(assoc (user/tx-map {::user/email "Björn"
+                        ::user/password "Björn"})
      :db/id "Björn")
    {::process/slug "test-decision"
     ::process/latest-id 2,

@@ -70,7 +70,7 @@
   [(s/keys :req [::encrypted-password]) ::password => boolean?]
   (hs/check attempt password))
 
-(>defn new [{::keys [id email password display-name]}]
+(>defn tx-map [{::keys [id email password display-name]}]
   [(s/keys :req [::email ::password] :opt [::id ::display-name])
    => (s/keys :req [::id ::display-name ::email ::encrypted-password])]
   (let [id (or id (d.core/squuid))
@@ -109,7 +109,7 @@
    ::pc/output [:session/valid? ::id :signup/result]}
   (if (email-in-db? @conn email)
     {:errors #{:email-in-use}}
-    (let [{::keys [id] :as user} (new {::email email ::password password})
+    (let [{::keys [id] :as user} (tx-map {::email email ::password password})
           tx-report (d/transact conn [user])]
       (response-updating-session
         {:signup/result :success
