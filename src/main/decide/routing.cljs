@@ -34,7 +34,7 @@
   returns a url of the form \"gift/123/edit\"."
   [path]
   [::path => string?]
-  (str/join (interleave path (repeat "/"))))
+  (str/join (interpose "/" path)))
 
 (>defn path->absolute-url
   "Given a path vector of the form [\"gift\" \"123\" \"edit\"],
