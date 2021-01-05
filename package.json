@@ -10,7 +10,7 @@
         "highlight.js": "9.12.0",
         "react-grid-layout": "0.16.6",
         "react-transition-group": "^4.3.0",
-        "reakit": "^1.2.5"
+        "reakit": "^1.3.3"
     },
     "scripts": {
         "client/main": "shadow-cljs watch :main",
