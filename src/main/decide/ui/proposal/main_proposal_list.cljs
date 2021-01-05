@@ -60,15 +60,14 @@
    :use-hooks?    true}
   (let [open-new-proposal-dialog (hooks/use-callback #(comp/transact! this [(new-proposal/show {:id slug})]))]
     (comp/fragment
-      (layout/container {:maxWidth :md}
-        (dd/typography {:component "h2" :variant "h5"} title)
-        (if (empty? proposals)
-          (empty-proposal-list-message)
-          (layout/box {:pb 8 :clone true}                   ; to not cover up the FAB
-            (dd/list {}
-              (for [proposal proposals]
-                (dd/list-item {:disableGutters true :key (::proposal/id proposal)}
-                  (proposal-card/ui-proposal proposal {::process/slug slug})))))))
+      (layout/container {:maxWidth :xl}
+        (inputs/button {:href "." :variant "outlined"} title) ; TODO Remove
+        (dd/typography {:component "h1" :variant "h5" :href "."} title)
+        (layout/box {:pb 8 :clone true}
+          (layout/grid {:container true :spacing 2 :alignItems "stretch"}
+            (for [proposal proposals]
+              (layout/grid {:item true :xs 12 :md 6 :lg 4 :xl 3}
+                (proposal-card/ui-proposal proposal {::process/slug slug}))))))
 
       (add-proposal-fab {:onClick open-new-proposal-dialog})
       (new-proposal/ui-new-proposal-form new-proposal-dialog))))
