@@ -24,6 +24,7 @@
      :db/id "Björn")
    {::process/slug "test-decision"
     ::process/title "Meine Test Entscheidung"
+    ::process/description "Wir müssen irgendwas für die Uni entscheiden."
     ::process/latest-id 2,
     ::process/proposals
     [{:db/id "Wasserspender"

@@ -20,6 +20,10 @@
     :db/valueType :db.type/string
     :db/cardinality :db.cardinality/one}
 
+   {:db/ident ::description
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one}
+
    {:db/ident ::proposals
     :db/cardinality :db.cardinality/many
     :db/valueType :db.type/ref
@@ -60,8 +64,8 @@
 
 (defresolver resolve-process [{:keys [db]} {::keys [slug]}]
   {::pc/input #{::slug}
-   ::pc/output [::title]}
-  (d/pull db [::title] [::slug slug]))
+   ::pc/output [::title ::description]}
+  (d/pull db [::title ::description] [::slug slug]))
 
 (defresolver resolve-proposals [{:keys [db]} {::keys [slug]}]
   {::pc/input #{::slug}
