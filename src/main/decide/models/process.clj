@@ -102,9 +102,9 @@
         (proposal/tx-map #::proposal{:nice-id (new-nice-id! conn slug)
                                      :title title
                                      :body body
-                                     :parents parents
+                                     :parents (map #(find % ::id) parents)
                                      :argument-idents arguments
-                                     :user-ident [:decide.models.user/id user-id]})
+                                     :original-author [:decide.models.user/id user-id]})
         tx-report (d/transact conn
                     [(assoc new-proposal :db/id "new-proposal")
                      [:db/add [::slug slug] ::proposals "new-proposal"]])]

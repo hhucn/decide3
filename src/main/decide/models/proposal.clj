@@ -77,21 +77,21 @@
     (d/pull [{::_parents [::id]}] proposal-ident)
     (get ::_parents [])))
 
-(>defn tx-map [{user-ident ::user/ident
-                ::keys [id nice-id title body parents argument-idents]}]
-  [(s/keys :req [::title ::body ::nice-id ::user/ident]
-     :opt [::id ::parents])
+(>defn tx-map [{::keys [id nice-id title body parents argument-idents created original-author]
+                :or {parents []
+                     argument-idents []}}]
+  [(s/keys :req [::title ::body ::nice-id]
+     :opt [::id])
    => (s/keys :req [::id ::title ::nice-id ::body ::created])]
-  {::id (or id (d.core/squuid))
-   ::title title
-   ::nice-id nice-id
-   ::body body
-   ::parents (for [parent parents
-                   :let [id (::id parent)]]
-               [::id id])
-   ::arguments (or argument-idents [])                      ; TODO check if arguments exist and belog to parents
-   ::original-author user-ident
-   ::created (Date.)})
+  (let [created (or created (Date.))]
+    {::id (or id (d.core/squuid (inst-ms created)))
+     ::title title
+     ::nice-id nice-id
+     ::body body
+     ::parents parents
+     ::arguments argument-idents                     ; TODO check if arguments exist and belog to parents
+     ::original-author original-author
+     ::created created}))
 
 ;;; region API
 
