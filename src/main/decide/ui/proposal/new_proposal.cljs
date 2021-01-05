@@ -20,11 +20,13 @@
     [material-ui.feedback :as feedback]
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
+    [material-ui.layout.grid :as grid]
     [material-ui.navigation :as navigation]
     [material-ui.navigation.stepper :as stepper]
     ["@material-ui/icons/AddBoxOutlined" :default AddBox]
     ["@material-ui/icons/MergeType" :default MergeType]
     ["@material-ui/icons/RemoveCircleOutline" :default RemoveIcon]))
+
 
 (defsc Argument [this {::argument/keys [content]
                        :keys           [:ui/new-proposal-checked?]
@@ -230,18 +232,18 @@
             (stepper/step-content {}
               (dd/typography {:paragraph true}
                 "Möchtest du einen neuen Vorschlag hinzufügen, einen bestehenden erweitern oder Vorschläge zusammenführen?")
-              (layout/grid {:container true :spacing 2}
-                (layout/grid {:item true :sm 6 :xs 12}
+              (grid/container {:spacing 2}
+                (grid/item {:sm 6 :xs 12}
                   (button-card
-                    {:onClick   #(set-step 2)
+                    {:onClick #(set-step 2)
                      :startIcon (comp/create-element AddBox nil nil)}
                     "Neu"
                     (dd/typography {:variant "caption" :color "textSecondary"}
                       "Einen neuen Vorschlag erstellen, der nicht mit einem anderen verwandt ist.")))
 
-                (layout/grid {:item true :sm 6 :xs 12}
+                (grid/item {:sm 6 :xs 12}
                   (button-card
-                    {:onClick   #(set-step 1)
+                    {:onClick #(set-step 1)
                      :startIcon (layout/box {:clone true :css {:transform "rotate(.5turn)"}}
                                   (comp/create-element MergeType nil nil))}
                     "Ableiten / Zusammenführen"

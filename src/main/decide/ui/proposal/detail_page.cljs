@@ -15,31 +15,26 @@
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
-    [decide.utils.breakpoint :as breakpoint]
     [material-ui.data-display :as dd]
-    [material-ui.feedback :as feedback]
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
+    [material-ui.layout.grid :as grid]
     [material-ui.surfaces :as surfaces]
+    ["@material-ui/icons/ArrowBack" :default ArrowBack]
+    ["@material-ui/icons/CallSplit" :default CallSplit]
+    ["@material-ui/icons/MergeType" :default MergeType]
     ["@material-ui/icons/ThumbUpAltTwoTone" :default ThumbUpAltTwoTone]
     ["@material-ui/icons/ThumbDownAltTwoTone" :default ThumbDownAltTwoTone]
-    ["@material-ui/icons/Close" :default Close]
-    ["@material-ui/icons/MergeType" :default MergeType]
-    ["@material-ui/icons/CallSplit" :default CallSplit]
     ["@material-ui/core/LinearProgress" :default LinearProgress]
     ["@material-ui/icons/Send" :default Send]
     ["@material-ui/core/styles" :refer [withStyles useTheme]]))
 
 (declare ProposalPage)
 
-
-
 (defn section [title & children]
-  (comp/fragment
-    (dd/divider {:light true})
-    (apply layout/box {:mt 1 :mb 2}
-      (dd/typography {:variant "h6" :color "textSecondary" :component "h3"} title)
-      children)))
+  (apply layout/box {}
+    (dd/typography {:variant "h6" :color "textPrimary" :component "h2"} title)
+    children))
 
 ;; region Opinion section
 (defn percent-of-pro-votes [pro-votes con-votes]
@@ -59,16 +54,15 @@
                           :or {pro-votes 0 con-votes 0}}]
   {:query [::proposal/id ::proposal/pro-votes ::proposal/con-votes]
    :ident ::proposal/id}
-  (layout/grid {:container true
-                :alignItems :center
-                :justify :space-between
-                :wrap :nowrap}
-    (layout/grid {:item true :xs true :align :center} (str pro-votes))
-    (layout/grid {:item true :xs 9}
+  (grid/container {:alignItems :center
+                   :justify :space-between
+                   :wrap :nowrap}
+    (grid/item {:xs true :align :center} (str pro-votes))
+    (grid/item {:xs 9}
       (vote-linear-progress
-        {:variant "determinate"
+        {:variant :determinate
          :value (percent-of-pro-votes pro-votes con-votes)}))
-    (layout/grid {:item true :xs true :align :center} (str con-votes))))
+    (grid/item {:xs true :align :center} (str con-votes))))
 
 (def ui-opinion-section (comp/computed-factory OpinionSection {:keyfn ::proposal/id}))
 ;; endregion
@@ -114,9 +108,8 @@
                                                         :content new-argument})])
                    (set-new-argument ""))
                  [new-argument])]
-    (layout/grid {:container true
-                  :component "form"
-                  :onSubmit  submit}
+    (grid/container {:component :form
+                     :onSubmit submit}
       (inputs/textfield
         {:fullWidth true
          :label "Neues Argument"
@@ -165,7 +158,7 @@
   (when-not (empty? parents)
     (section
       (str "Dieser Vorschlag basiert auf " (count parents) " weiteren Vorschlägen")
-      (dd/list {:dense false}
+      (dd/list {:dense true}
         (map ui-parent parents)))))
 
 (def ui-parent-section (comp/factory ParentSection {:keyfn ::proposal/id}))
@@ -190,37 +183,33 @@
          #(df/load! app ident ProposalPage
             {:post-mutation `dr/target-ready
              :post-mutation-params {:target ident}}))))}
-  (let [[open? set-open] (hooks/use-state true)]
-    (feedback/dialog
-      {:open open?
-       :fullScreen (breakpoint/<=? "xs")
-       :fullWidth true
-       :maxWidth "md"
-       :onClose #(set-open false)
-       :onExiting #(js/window.history.back)}                ; TODO don't do this
-
-      (surfaces/toolbar {:variant "dense"}
+  (layout/container {}
+    (surfaces/paper {}
+      (layout/box {:p 2 :height "100vh"}
         (inputs/icon-button
           {:edge :start
            :color :inherit
            :aria-label "back"
-           :onClick #(set-open false)}
-          (comp/create-element Close nil nil))
-        (feedback/dialog-title {} title))
-      (feedback/dialog-content {}
-        (dd/typography {:variant   "body1"
-                        :paragraph true}
-          body)
-        #_(inputs/button
-            {:color :primary
-             :variant :outlined
-             :onClick #(comp/transact!! this [(new-proposal/show {:id slug
-                                                                  :parents [(comp/get-ident this)]})])
-             :startIcon (layout/box {:clone true :css {:transform "rotate(.5turn)"}} (comp/create-element CallSplit nil nil))
-             :endIcon (layout/box {:clone true :css {:transform "rotate(.5turn)"}} (comp/create-element MergeType nil nil))}
-            "Fork / Merge")
+           :onClick #(js/window.history.back)}
+          (comp/create-element ArrowBack nil nil))
+        (grid/container {:spacing 1}
+          (grid/item {:xs 12}
+            (dd/typography {:variant "h3" :component "h1" :gutterBottom true} title))
+          (grid/item {:xs 12 :md 6}
+            (section "Details" (dd/typography {:variant "body1"} body)))
+          ;; "Dieser Vorschlag basiert auf " (count parents) " weiteren Vorschlägen"
+          (grid/item {:xs 12 :md 6}
+            (ui-parent-section parent-section))
+          #_(grid/item {:xs 6}
+              (section "Meinungen" (ui-opinion-section opinion-section)))
+          (grid/item {:xs 12}
+            (section "Argumente" (ui-argument-section argument-section))))))))
 
-        ;; "Dieser Vorschlag basiert auf " (count parents) " weiteren Vorschlägen"
-        (ui-parent-section parent-section)
-        (section "Meinungen" (ui-opinion-section opinion-section))
-        (section "Argumente" (ui-argument-section argument-section))))))
+#_(inputs/button
+    {:color :primary
+     :variant :outlined
+     :onClick #(comp/transact!! this [(new-proposal/show {:id slug
+                                                          :parents [(comp/get-ident this)]})])
+     :startIcon (layout/box {:clone true :css {:transform "rotate(.5turn)"}} (comp/create-element CallSplit nil nil))
+     :endIcon (layout/box {:clone true :css {:transform "rotate(.5turn)"}} (comp/create-element MergeType nil nil))}
+    "Fork / Merge")

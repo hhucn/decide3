@@ -9,7 +9,8 @@
             [com.fulcrologic.fulcro.dom.events :as evt]
             [material-ui.inputs :as inputs]
             [material-ui.feedback :as feedback]
-            [material-ui.data-display :as dd]))
+            [material-ui.data-display :as dd]
+            [material-ui.layout.grid :as grid]))
 
 (defn wide-textfield
   "Outlined textfield on full width with normal margins. Takes the same props as `material-ui.inputs/textfield`"
@@ -92,11 +93,9 @@
    :initial-state (fn [_] {:ui/new-password-form (comp/get-initial-state NewPasswordForm)})}
   (layout/container
     {:maxWidth "lg"}
-    (layout/grid
+    (grid/container
       {:direction :column
-       :container true
-       :spacing   2
-       :justify   "flex-start"}
-      (layout/grid {:item true
-                    :xs   12}
+       :spacing 2
+       :justify "flex-start"}
+      (grid/item {:xs 12}
         (ui-new-password-form new-password-form)))))

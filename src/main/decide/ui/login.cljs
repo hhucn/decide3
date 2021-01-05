@@ -12,6 +12,7 @@
             [material-ui.data-display :as dd]
             [material-ui.utils :as mutils]
             [material-ui.inputs :as inputs]
+            [material-ui.layout.grid :as grid]
             [decide.routing :as routing]
             [material-ui.navigation :as navigation]
             [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
@@ -101,14 +102,13 @@
        :onSubmit (fn submit-sign-up [e]
                    (evt/prevent-default! e)
                    (comp/transact! this [(sign-up #:user{::user/email email ::user/password password})]))}
-      (layout/grid {:container true
-                    :spacing   2}
-        (layout/grid {:item true :xs 12}
+      (grid/container {:spacing 2}
+        (grid/item {:xs 12}
           (dd/typography
-            {:align   "center"
+            {:align "center"
              :variant "h5"}
             "Sign up"))
-        (layout/grid {:item true :xs 12}
+        (grid/item {:xs 12}
           (wide-textfield {:label "E-Mail"
                            :type :email
                            :value email
@@ -119,7 +119,7 @@
                            :onChange (fn [e]
                                        (when email-error (m/set-value!! this :ui/email-error nil))
                                        (m/set-string!! this ::user/email :event e))}))
-        (layout/grid {:item true :xs 12}
+        (grid/item {:xs 12}
           (wide-textfield {:label "Password"
                            :type :password
                            :value password
@@ -130,17 +130,17 @@
                            :onChange (fn [e]
                                        (when password-error (m/set-value!! this :ui/password-error nil))
                                        (m/set-string!! this ::user/password :event e))}))
-        (layout/grid {:item true :xs 12}
+        (grid/item {:xs 12}
           (inputs/button {:variant :contained
                           :color :primary
                           :type :submit
                           :fullWidth true}
             "Sign up")))
       (layout/box {:mt 2 :clone true}
-        (layout/grid
+        (grid/grid
           {:container true
-           :justify   :flex-end}
-          (layout/grid {:item true}
+           :justify :flex-end}
+          (grid/item {}
             (navigation/link
               (routing/with-route this (dr/path-to LoginPage)
                 {:variant :body2})
@@ -168,15 +168,15 @@
                    (evt/prevent-default! e)
                    (comp/transact! this [(sign-in #:user{::user/email email
                                                          ::user/password password})]))}
-      (layout/grid {:container true
-                    :spacing   2
-                    :direction "column"}
-        (layout/grid {:item true :xs 12}
+      (grid/container
+        {:spacing 2
+         :direction "column"}
+        (grid/item {:xs 12}
           (dd/typography
-            {:align   "center"
+            {:align "center"
              :variant "h5"}
             "Sign in"))
-        (layout/grid {:item true :xs 12}
+        (grid/item {:xs 12}
           (wide-textfield {:label "E-Mail"
                            :type :email
                            :error (boolean email-error)
@@ -187,7 +187,7 @@
                            :onChange (fn [e]
                                        (when email-error (m/set-value!! this :ui/email-error nil))
                                        (m/set-string!! this ::user/email :event e))}))
-        (layout/grid {:item true :xs 12}
+        (grid/item {:xs 12}
           (wide-textfield {:label "Password"
                            :type :password
                            :error (boolean password-error)
@@ -198,19 +198,18 @@
                            :onChange (fn [e]
                                        (when password-error (m/set-value!! this :ui/password-error nil))
                                        (m/set-string!! this ::user/password :event e))}))
-        (layout/grid {:item true :xs 12}
+        (grid/item {:xs 12}
           (inputs/button {:variant :contained
                           :color :primary
                           :type :submit
                           :fullWidth true}
             "Sign in"))))
     (layout/box {:mt 2 :clone true}
-      (layout/grid
-        {:container true
-         :justify   :space-between}
-        (layout/grid {:item true :xs true}
+      (grid/container
+        {:justify :space-between}
+        (grid/item {:xs true}
           (navigation/link {:variant :body2} "Forgot password?"))
-        (layout/grid {:item true}
+        (grid/item {}
           (navigation/link
             (routing/with-route this (dr/path-to SignUpPage)
               {:variant :body2})

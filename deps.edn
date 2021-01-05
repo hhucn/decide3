@@ -16,8 +16,9 @@
         org.clojure/core.async {:mvn/version "1.3.610"}
         clj-commons/pushy {:mvn/version "0.3.10"}
         io.replikativ/datahike {:mvn/version "0.3.3-SNAPSHOT"}
-        com.github.mrebbinghaus/fulcro-material-ui-wrapper {:git/url "https://github.com/MrEbbinghaus/fulcro-material-ui-wrapper"
-                                                            :sha "28c11abe3aca37a5d50b30f5ee7d1ca68399da30"}
+        com.github.mrebbinghaus/fulcro-material-ui-wrapper
+        {:git/url "https://github.com/MrEbbinghaus/fulcro-material-ui-wrapper"
+         :sha "43f3a53422471c991a55d8ec7c886d85f5261014"}
 
         buddy/buddy {:mvn/version "2.0.0"}
 

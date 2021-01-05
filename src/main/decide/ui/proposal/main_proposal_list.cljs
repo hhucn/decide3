@@ -9,11 +9,13 @@
     [material-ui.data-display :as dd]
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
+    [material-ui.layout.grid :as grid]
     ["@material-ui/icons/Add" :default AddIcon]
     [decide.models.process :as process]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [taoensso.timbre :as log]
     [com.fulcrologic.fulcro.data-fetch :as df]))
+
 
 (defn add-proposal-fab [props]
   (let [extended? (breakpoint/>=? "sm")]
@@ -64,9 +66,9 @@
         (inputs/button {:href "." :variant "outlined"} title) ; TODO Remove
         (dd/typography {:component "h1" :variant "h5" :href "."} title)
         (layout/box {:pb 8 :clone true}
-          (layout/grid {:container true :spacing 2 :alignItems "stretch"}
+          (grid/container {:spacing 2 :alignItems "stretch"}
             (for [proposal proposals]
-              (layout/grid {:item true :xs 12 :md 6 :lg 4 :xl 3}
+              (grid/item {:xs 12 :md 6 :lg 4 :xl 3}
                 (proposal-card/ui-proposal proposal {::process/slug slug}))))))
 
       (add-proposal-fab {:onClick open-new-proposal-dialog})
