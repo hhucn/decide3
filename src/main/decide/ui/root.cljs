@@ -9,6 +9,7 @@
     [decide.ui.components.snackbar :as snackbar]
     [decide.ui.login :as login]
     [decide.ui.pages.splash :as splash]
+    [decide.ui.process.core :as process-page]
     [decide.ui.proposal.detail-page :as detail-page]
     [decide.ui.proposal.main-proposal-list :as proposal-list]
     [decide.ui.theming.dark-mode :as dark-mode]
@@ -18,7 +19,7 @@
     [taoensso.timbre :as log]))
 
 (defrouter RootRouter [_this {:keys [current-state]}]
-  {:router-targets [login/LoginPage login/SignUpPage proposal-list/MainProposalList detail-page/ProposalPage]}
+  {:router-targets [login/LoginPage process-page/Process login/SignUpPage proposal-list/MainProposalList detail-page/ProposalPage]}
   (when-not current-state
     (dom/div {:dangerouslySetInnerHTML {:__html splash/splash}})))
 
