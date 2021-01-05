@@ -9,7 +9,8 @@
     [datahike.core :as d.core]
     [decide.models.argument :as argument]
     [decide.models.authorization :as auth]
-    [decide.models.user :as user])
+    [decide.models.user :as user]
+    [taoensso.timbre :as log])
   (:import (java.util Date)))
 
 (def schema
@@ -140,7 +141,7 @@
   (let [{real-id ::argument/id :as argument}
         (argument/tx-map
           {::argument/content content
-           ::user/ident [::user/id user-id]})
+           :author [::user/id user-id]})
         tx-report (d/transact conn
                     [(assoc argument :db/id "new-argument")
                      [:db/add [::id id] ::arguments "new-argument"]])]

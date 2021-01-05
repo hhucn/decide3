@@ -6,7 +6,6 @@
   (assoc mutation
     ::pc/mutate
     (fn [env params]
-      (let [session (get-in env [:ring/request :session])]
-        (if (:session/valid? session)
-          (-> env (assoc :AUTH/user-id (:decide.models.user/id session)) (mutate params))
-          (throw (ex-info "User is not logged in!" {})))))))
+      (if-let [user-id (get-in env [:ring/request :session])]
+        (-> env (assoc :AUTH/user-id user-id) (mutate params))
+        (throw (ex-info "User is not logged in!" {}))))))

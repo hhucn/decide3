@@ -108,8 +108,7 @@
                                                         :content new-argument})])
                    (set-new-argument ""))
                  [new-argument])]
-    (grid/container {:component :form
-                     :onSubmit submit}
+    (dom/form {:onSubmit submit}
       (inputs/textfield
         {:fullWidth true
          :label "Neues Argument"
@@ -121,7 +120,7 @@
                                                          :aria-label "Absenden"}
                                       (comp/create-element Send nil nil))}}))))
 
-(def ui-new-argument-line (comp/factory NewArgumentLine))
+(def ui-new-argument-line (comp/computed-factory NewArgumentLine))
 
 (defsc ArgumentSection [_ {::proposal/keys [id arguments]}]
   {:query [::proposal/id

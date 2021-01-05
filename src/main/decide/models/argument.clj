@@ -30,11 +30,11 @@
 (s/def ::ident (s/tuple #{::id} ::id))
 (s/def ::content (s/and string? (complement str/blank?)))
 
-(>defn tx-map [{:keys [::content user/ident]}]
-  [(s/keys :req [::content ::user/ident]) => (s/keys :req [::id ::content])]
+(>defn tx-map [{:keys [::content author]}]
+  [(s/keys :req [::content]) => (s/keys :req [::id ::content])]
   {::id (d.core/squuid)
    ::content content
-   ::author ident})
+   ::author author})
 
 (defresolver resolve-argument [{:keys [db]} {::keys [id]}]
   {::pc/input #{::id}

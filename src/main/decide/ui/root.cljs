@@ -14,6 +14,7 @@
     [decide.ui.proposal.main-proposal-list :as proposal-list]
     [decide.ui.theming.dark-mode :as dark-mode]
     [decide.ui.theming.themes :as themes]
+    [material-ui.layout :as layout]
     [material-ui.styles :as styles :refer [prefers-dark?]]
     [material-ui.utils :as mutils :refer [css-baseline]]
     [taoensso.timbre :as log]))
@@ -49,6 +50,7 @@
     [])
   (styles/theme-provider {:theme (themes/get-mui-theme theme)}
     (mutils/css-baseline {})
-    (appbar/ui-appbar app-bar {})
+    (layout/box {:mb 2}
+      (appbar/ui-appbar app-bar {}))
     (snackbar/ui-snackbar-container snackbar-container)
     (ui-root-router root-router)))

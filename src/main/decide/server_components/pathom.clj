@@ -12,7 +12,9 @@
     [decide.models.user :as user]
     [decide.server-components.config :refer [config]]
     [decide.server-components.database :refer [conn]]
-    [mount.core :refer [defstate]]))
+    [mount.core :refer [defstate]]
+    [taoensso.timbre :as log])
+  (:import (java.util UUID)))
 
 (defn- remove-keys-from-map-values [m & ks]
   (->> m
@@ -91,12 +93,11 @@
   (new-parser config
     [(p/env-plugin {:config config})
      (p/env-wrap-plugin
-       (fn [env]
-         (let [user-id (get-in env [:ring/request :session])]
-           (merge env
-             {:AUTH/user-id user-id
-              :conn         conn
-              :db           (d/db conn)}))))]
+       (fn env-wrapping [env]
+         (merge env
+           {:AUTH/user-id  (get-in env [:ring/request :session])
+            :conn conn
+            :db (d/db conn)})))]
     [index-explorer
      user/resolvers
      process/resolvers
