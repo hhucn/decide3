@@ -39,19 +39,20 @@
                     :color "textSecondary"}
       "Bisher gibt es keine Vorschläge.")))
 
-(defsc MainProposalList [this {::process/keys [slug proposals]
-                               :ui/keys       [new-proposal-dialog]}]
-  {:query         [::process/slug
-                   {::process/proposals (comp/get-query proposal-card/Proposal)}
-                   {:ui/new-proposal-dialog (comp/get-query new-proposal/NewProposalFormDialog)}]
-   :ident         ::process/slug
+(defsc MainProposalList [this {::process/keys [slug title proposals]
+                               :ui/keys [new-proposal-dialog]}]
+  {:query [::process/slug
+           ::process/title
+           {::process/proposals (comp/get-query proposal-card/Proposal)}
+           {:ui/new-proposal-dialog (comp/get-query new-proposal/NewProposalFormDialog)}]
+   :ident ::process/slug
    :route-segment ["decision" ::process/slug "proposals"]
-   :will-enter    (fn [app {::process/keys [slug]}]
-                    (let [ident (comp/get-ident MainProposalList {::process/slug slug})]
-                      (dr/route-deferred ident
-                        #(df/load! app ident MainProposalList
-                           {:post-mutation        `dr/target-ready
-                            :post-mutation-params {:target ident}}))))
+   :will-enter (fn [app {::process/keys [slug]}]
+                 (let [ident (comp/get-ident MainProposalList {::process/slug slug})]
+                   (dr/route-deferred ident
+                     #(df/load! app ident MainProposalList
+                        {:post-mutation        `dr/target-ready
+                         :post-mutation-params {:target ident}}))))
    :pre-merge     (fn [{:keys [data-tree]}]
                     (let [slug (::process/slug data-tree)]
                       (merge data-tree
@@ -60,7 +61,7 @@
   (let [open-new-proposal-dialog (hooks/use-callback #(comp/transact! this [(new-proposal/show {:id slug})]))]
     (comp/fragment
       (layout/container {:maxWidth :md}
-        (dd/typography {:component "h2" :variant "h5"} slug)
+        (dd/typography {:component "h2" :variant "h5"} title)
         (if (empty? proposals)
           (empty-proposal-list-message)
           (layout/box {:pb 8 :clone true}                   ; to not cover up the FAB

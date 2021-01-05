@@ -23,6 +23,7 @@
                         ::user/password "Björn"})
      :db/id "Björn")
    {::process/slug "test-decision"
+    ::process/title "Meine Test Entscheidung"
     ::process/latest-id 2,
     ::process/proposals
     [{:db/id "Wasserspender"

@@ -16,6 +16,10 @@
     :db/unique :db.unique/identity
     :db/cardinality :db.cardinality/one}
 
+   {:db/ident ::title
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one}
+
    {:db/ident ::proposals
     :db/cardinality :db.cardinality/many
     :db/valueType :db.type/ref
@@ -53,6 +57,11 @@
    ::pc/output [{:all-processes [::slug]}]}
   {:all-processes
    (map #(hash-map ::slug %) (get-all-process-slugs db))})
+
+(defresolver resolve-process [{:keys [db]} {::keys [slug]}]
+  {::pc/input #{::slug}
+   ::pc/output [::title]}
+  (d/pull db [::title] [::slug slug]))
 
 (defresolver resolve-proposals [{:keys [db]} {::keys [slug]}]
   {::pc/input #{::slug}
@@ -106,6 +115,8 @@
 
 (def resolvers
   [resolve-all-processes
+   resolve-process
+
    resolve-proposals
    resolve-proposal-process
    resolve-nice-proposal
