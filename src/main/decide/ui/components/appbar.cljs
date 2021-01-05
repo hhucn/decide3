@@ -37,12 +37,12 @@
        :color (appbar-theme-color theme)
        :elevation 0}
       (surfaces/toolbar {}
-        (inputs/icon-button
-          {:edge :start
-           :color :inherit
-           :aria-label "menu"
-           :onClick #(m/toggle! this :ui/nav-open?)}
-          (icons/menu {}))
+        #_(inputs/icon-button
+            {:edge :start
+             :color :inherit
+             :aria-label "menu"
+             :onClick #(m/toggle! this :ui/nav-open?)}
+            (icons/menu {}))
         (dd/typography
           {:component :span
            :variant :h5
