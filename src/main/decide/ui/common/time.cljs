@@ -29,4 +29,4 @@
     (cond
       (today? datetime) (str "heute um " hours ":" minutes " Uhr")
       (yesterday? datetime) (str "gestern um " hours ":" minutes " Uhr")
-      :else (str " am " date-string))))
+      :else (str " vom " date-string))))

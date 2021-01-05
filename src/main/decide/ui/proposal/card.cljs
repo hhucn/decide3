@@ -18,6 +18,7 @@
     [material-ui.layout :as layout]
     [material-ui.surfaces :as surfaces]
     ["@material-ui/icons/CommentTwoTone" :default Comment]
+    ["@material-ui/icons/MoreVert" :default MoreVert]
     ["@material-ui/icons/ThumbDownAltTwoTone" :default ThumbDownAltTwoTone]
     ["@material-ui/icons/ThumbUpAltTwoTone" :default ThumbUpAltTwoTone]
     [com.fulcrologic.fulcro.dom :as dom]
@@ -36,13 +37,18 @@
     (comp/fragment
       " "
       (dom/time {:dateTime iso-string
-                 :title    created}
+                 :title created}
         (time/nice-string created)))))
 
-(defsc Subheader [_ {::proposal/keys [nice-id created original-author]}]
+(defsc Parent [_ _]
+  {:query [::proposal/id]
+   :ident ::proposal/id})
+
+(defsc Subheader [_ {::proposal/keys [nice-id created parents original-author]}]
   {:query [::proposal/id
            ::proposal/nice-id
            ::proposal/created
+           {::proposal/parents (comp/get-query Parent)}
            {::proposal/original-author (comp/get-query proposal/Author)}]
    :ident ::proposal/id}
   (let [author-name (::user/display-name original-author)]
@@ -53,7 +59,12 @@
         (author-part author-name))
       " · "
       (when (instance? js/Date created)
-        (time-part created)))))
+        (time-part created))
+      " · "
+      (case (count parents)
+        0 "Original"
+        1 "Abgeleitet"
+        :else "Zusammenführung"))))
 
 (def ui-subheader (comp/factory Subheader (:keyfn ::proposal/id)))
 
@@ -85,7 +96,9 @@
         (layout/box {:pb 0 :clone true}
           (surfaces/card-header
             {:title title
-             :subheader (ui-subheader subheader)}))
+             :subheader (ui-subheader subheader)
+             :action (inputs/icon-button {:disabled true :size :small}
+                       (comp/create-element MoreVert nil nil))}))
         (surfaces/card-content {}
           (dd/typography
             {:component "p"
