@@ -2,76 +2,75 @@
   (:require
     [com.fulcrologic.fulcro.application :as app]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-    [com.fulcrologic.fulcro.mutations :refer [defmutation]]
+    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+    [com.fulcrologic.fulcro.react.hooks :as hooks]
     [material-ui.data-display :as dd]
     [material-ui.icons :as icons]
     [material-ui.inputs :as inputs]
+    [material-ui.layout :as layout]
+    [material-ui.navigation :as navigation]
     [material-ui.progress :as progress]
     [material-ui.surfaces :as surfaces]
-    [material-ui.layout :as layout]
     [material-ui.transitions :as transitions]
-    [com.fulcrologic.fulcro.mutations :as m]
-    ["@material-ui/icons/AccountCircle" :default AccountCircleIcon]
-    ["react" :as React]
-    [material-ui.navigation :as navigation]
-    [com.fulcrologic.fulcro.react.hooks :as hooks]))
+    ["@material-ui/icons/AccountCircle" :default AccountCircleIcon]))
 
-(defmutation logout [params]
-  (action [env] true))
+(def appbar-theme-color
+  {:light "primary"
+   :dark "inherit"})
 
 (defsc AppBar
   [this
    {::app/keys [active-remotes]
-    :keys      [ui/nav-open? ui/account-menu-open? ui/theme]}]
-  {:query          [[::app/active-remotes '_]
-                    :ui/nav-open?
-                    :ui/account-menu-open?
-                    [:ui/theme '_]]
-   :ident          (fn [] [:component :app-bar])
-   :initial-state  {:ui/nav-open?          false
-                    :ui/account-menu-open? false}
-   :use-hooks?     true}
+    :keys [ui/nav-open? ui/account-menu-open? ui/theme]}]
+  {:query [[::app/active-remotes '_]
+           :ui/nav-open?
+           :ui/account-menu-open?
+           [:ui/theme '_]]
+   :ident (fn [] [:component :app-bar])
+   :initial-state {:ui/nav-open? false
+                   :ui/account-menu-open? false}
+   :use-hooks? true}
   (let [menu-ref (hooks/use-ref)
         loading? (#{:remote} active-remotes)]
     (surfaces/app-bar
-      {:position  "sticky"
-       :color     (if (= :dark theme) "inherit" "primary")
+      {:position "sticky"
+       :color (appbar-theme-color theme)
        :elevation 0}
       (surfaces/toolbar {}
         (inputs/icon-button
-          {:edge       :start
-           :color      :inherit
+          {:edge :start
+           :color :inherit
            :aria-label "menu"
-           :onClick    #(m/toggle! this :ui/nav-open?)}
+           :onClick #(m/toggle! this :ui/nav-open?)}
           (icons/menu {}))
         (dd/typography
-          {:component :h1
-           :variant   :h6
-           :color     "inherit"}
+          {:component :span
+           :variant :h5
+           :color "inherit"}
           "decide")
 
         ; Spacer
         (layout/box {:flexGrow 1})
 
         (inputs/icon-button
-          {:ref           menu-ref
-           :edge          "end"
-           :aria-label    "account of current user"
+          {:ref menu-ref
+           :edge "end"
+           :aria-label "account of current user"
            :aria-controls "menuId"
            :aria-haspopup true
-           :onClick       #(m/set-value! this :ui/account-menu-open? true)
-           :color         "inherit"}
-          (React/createElement AccountCircleIcon))
+           :onClick #(m/set-value! this :ui/account-menu-open? true)
+           :color "inherit"}
+          (comp/create-element AccountCircleIcon nil nil))
         (navigation/menu
-          {:keepMounted        true
-           :anchorEl           (.-current menu-ref)
+          {:keepMounted true
+           :anchorEl (.-current menu-ref)
            :getContentAnchorEl nil
-           :anchorOrigin       {:vertical   "center"
-                                :horizontal "left"}
-           :transformOrigin    {:vertical   "top"
-                                :horizontal "center"}
-           :open               account-menu-open?
-           :onClose            #(m/set-value! this :ui/account-menu-open? false)}
+           :anchorOrigin {:vertical "bottom"
+                          :horizontal "left"}
+           :transformOrigin {:vertical "top"
+                             :horizontal "center"}
+           :open account-menu-open?
+           :onClose #(m/set-value! this :ui/account-menu-open? false)}
           (navigation/menu-item {} "Logout")))
 
       (layout/box {:height "4px"}
