@@ -87,46 +87,48 @@
                      ::proposal/title title
                      ::proposal/body body})
    :use-hooks? true}
-  (let [proposal-href (hooks/use-memo #(routing/path->absolute-url (dr/path-to detail-page/ProposalPage {::process/slug slug
-                                                                                                         ::proposal/id (str id)})))]
-    (layout/box {:width "100%" :clone true}
-      (surfaces/card
-        {:variant :outlined}
+  (let [proposal-href (hooks/use-memo
+                        #(routing/path->absolute-url
+                           (dr/path-to detail-page/ProposalPage {::process/slug slug
+                                                                 ::proposal/id (str id)}))
+                        [slug id])]
+    (surfaces/card
+      {:raised false}
 
-        (layout/box {:pb 0 :clone true}
-          (surfaces/card-header
-            {:title title
-             :subheader (ui-subheader subheader)
-             :action (inputs/icon-button {:disabled true :size :small}
-                       (comp/create-element MoreVert nil nil))}))
-        (surfaces/card-content {}
-          (dd/typography
-            {:component "p"
-             :variant "body2"
-             :color "textSecondary"
-             :style {:whiteSpace "pre-line"}}
-            body))
+      (surfaces/card-header
+        {:title title
+         :subheader (ui-subheader subheader)
+         :action (inputs/icon-button {:disabled true :size :small}
+                   (comp/create-element MoreVert nil nil))})
 
-        (surfaces/card-actions {}
-          (inputs/button-group
-            {:size :small
-             :variant :text
-             :disableElevation true}
-            (inputs/button {:color (if (pos? opinion) "primary" "default")
-                            :onClick #(comp/transact! this [(opinion/add {::proposal/id id
-                                                                          :opinion (if (pos? opinion) 0 +1)})])
-                            :startIcon (comp/create-element ThumbUpAltTwoTone nil nil)}
-              "Zustimmen")
-            (inputs/button {:color (if (neg? opinion) "primary" "default")
-                            :aria-label "Ablehnen"
-                            :onClick #(comp/transact! this [(opinion/add {::proposal/id id
-                                                                          :opinion (if (neg? opinion) 0 -1)})])
-                            :startIcon (comp/create-element ThumbDownAltTwoTone nil nil)}))
+      (surfaces/card-content {}
+        (dd/typography
+          {:component "p"
+           :variant "body2"
+           :color "textSecondary"
+           :style {:whiteSpace "pre-line"}}
+          body))
 
-          (layout/box {:style {:marginLeft "auto"}})
-          (dd/typography {:variant :button} (count arguments) " Argumente")
-          (inputs/button {:component "a"
-                          :color :primary
-                          :href proposal-href} "Mehr"))))))
+      (surfaces/card-actions {}
+        (inputs/button-group
+          {:size :small
+           :variant :text
+           :disableElevation true}
+          (inputs/button {:color (if (pos? opinion) "primary" "default")
+                          :onClick #(comp/transact! this [(opinion/add {::proposal/id id
+                                                                        :opinion (if (pos? opinion) 0 +1)})])
+                          :startIcon (comp/create-element ThumbUpAltTwoTone nil nil)}
+            "Zustimmen")
+          (inputs/button {:color (if (neg? opinion) "primary" "default")
+                          :aria-label "Ablehnen"
+                          :onClick #(comp/transact! this [(opinion/add {::proposal/id id
+                                                                        :opinion (if (neg? opinion) 0 -1)})])
+                          :startIcon (comp/create-element ThumbDownAltTwoTone nil nil)}))
+
+        (layout/box {:style {:marginLeft "auto"}})
+        (dd/typography {:variant :button} (count arguments) " Argumente")
+        (inputs/button {:component "a"
+                        :color :primary
+                        :href proposal-href} "Mehr")))))
 
 (def ui-proposal (comp/computed-factory Proposal {:keyfn ::proposal/id}))
