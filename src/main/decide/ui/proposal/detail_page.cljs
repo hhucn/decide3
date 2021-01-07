@@ -146,19 +146,30 @@
     {:button true
      :component "a"
      :href (str id)}
-    (dd/list-item-avatar {} (dd/typography {:color "textSecondary"} (str "#" nice-id))) ; TODO buggy
+    (dd/list-item-avatar {} (dd/typography {:color "textSecondary"} (str "#" nice-id)))
     (dd/list-item-text {} (str title))))
 
 (def ui-parent (comp/computed-factory Parent {:keyfn ::proposal/id}))
 
-(defsc ParentSection [_ {::proposal/keys [parents]}]
-  {:query [::proposal/id {::proposal/parents (comp/get-query Parent)}]
+(defsc ParentSection [_ {::proposal/keys [parents children]}]
+  {:query [::proposal/id
+           {::proposal/parents (comp/get-query Parent)}
+           {::proposal/children (comp/get-query Parent)}]
    :ident ::proposal/id}
-  (when-not (empty? parents)
-    (section
-      (str "Dieser Vorschlag basiert auf " (count parents) " weiteren Vorschlägen")
-      (dd/list {:dense true}
-        (map ui-parent parents)))))
+  (when-not (and (empty? parents) (empty? children))
+    (grid/item {:xs 12 :md 6 :component "section"}
+
+      (when-not (empty? parents)
+        (section
+          (str "Dieser Vorschlag basiert auf " (count parents) " weiteren Vorschlägen.")
+          (dd/list {:dense false}
+            (map ui-parent parents))))
+
+      (when-not (empty? children)
+        (section
+          (str "Dieser Vorschlag hat " (count children) " Abkömmling" (when (<= 2 (count children)) "e") ". ")
+          (dd/list {:dense false}
+            (map ui-parent children)))))))
 
 (def ui-parent-section (comp/factory ParentSection {:keyfn ::proposal/id}))
 ;; endregion
@@ -183,25 +194,25 @@
             {:post-mutation `dr/target-ready
              :post-mutation-params {:target ident}}))))}
   (layout/container {}
-    (surfaces/paper {}
-      (layout/box {:p 2 :height "100vh"}
+    (layout/box {:p 2 :clone true}
+      (surfaces/paper {:p 2}
         (inputs/icon-button
           {:edge :start
            :color :inherit
-           :aria-label "back"
+           :aria-label " back "
            :onClick #(js/window.history.back)}
           (comp/create-element ArrowBack nil nil))
-        (grid/container {:spacing 1}
+        (grid/container {:spacing 3 :component "main"}
           (grid/item {:xs 12}
-            (dd/typography {:variant "h3" :component "h1" :gutterBottom true} title))
-          (grid/item {:xs 12 :md 6}
-            (section "Details" (dd/typography {:variant "body1"} body)))
-          ;; "Dieser Vorschlag basiert auf " (count parents) " weiteren Vorschlägen"
-          (grid/item {:xs 12 :md 6}
-            (ui-parent-section parent-section))
+            (dd/typography {:variant "h3" :component "h1"} title))
+          (grid/item {:xs true :component "section"}
+            (section " Details " (dd/typography {:variant "body1"} body)))
+
+          ;; " Dieser Vorschlag basiert auf " (count parents) " weiteren Vorschlägen "
+          (ui-parent-section parent-section)
           #_(grid/item {:xs 6}
-              (section "Meinungen" (ui-opinion-section opinion-section)))
-          (grid/item {:xs 12}
+              (section " Meinungen " (ui-opinion-section opinion-section)))
+          (grid/item {:xs 12 :component "section"}
             (section "Argumente" (ui-argument-section argument-section))))))))
 
 #_(inputs/button
@@ -209,6 +220,6 @@
      :variant :outlined
      :onClick #(comp/transact!! this [(new-proposal/show {:id slug
                                                           :parents [(comp/get-ident this)]})])
-     :startIcon (layout/box {:clone true :css {:transform "rotate(.5turn)"}} (comp/create-element CallSplit nil nil))
-     :endIcon (layout/box {:clone true :css {:transform "rotate(.5turn)"}} (comp/create-element MergeType nil nil))}
-    "Fork / Merge")
+     :startIcon (layout/box {:clone true :css {:transform " rotate (.5turn) "}} (comp/create-element CallSplit nil nil))
+     :endIcon (layout/box {:clone true :css {:transform " rotate (.5turn) "}} (comp/create-element MergeType nil nil))}
+    " Fork / Merge ")
