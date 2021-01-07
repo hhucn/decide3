@@ -67,8 +67,8 @@
         (dd/typography {:component "h1" :variant "h5" :href "."} title)
         (layout/box {:pb 8 :clone true}
           (grid/container {:spacing 2 :alignItems "stretch"}
-            (for [proposal proposals]
-              (grid/item {:xs 12 :md 6 :lg 4 :xl 3}
+            (for [{id ::proposal/id :as proposal} proposals]
+              (grid/item {:xs 12 :md 6 :lg 4 :xl 3 :key id}
                 (proposal-card/ui-proposal proposal {::process/slug slug}))))))
 
       (add-proposal-fab {:onClick open-new-proposal-dialog})
