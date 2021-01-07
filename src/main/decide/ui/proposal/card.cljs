@@ -64,7 +64,7 @@
       (case (count parents)
         0 "Original"
         1 "Abgeleitet"
-        :else "Zusammenführung"))))
+        "Zusammenführung"))))
 
 (def ui-subheader (comp/factory Subheader (:keyfn ::proposal/id)))
 
