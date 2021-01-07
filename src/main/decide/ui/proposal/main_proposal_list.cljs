@@ -14,7 +14,8 @@
     [decide.models.process :as process]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [taoensso.timbre :as log]
-    [com.fulcrologic.fulcro.data-fetch :as df]))
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [material-ui.navigation :as navigation]))
 
 
 (defn add-proposal-fab [props]
@@ -63,8 +64,7 @@
   (let [open-new-proposal-dialog (hooks/use-callback #(comp/transact! this [(new-proposal/show {:id slug})]))]
     (comp/fragment
       (layout/container {:maxWidth :xl}
-        (inputs/button {:href "." :variant "outlined"} title) ; TODO Remove
-        (dd/typography {:component "h1" :variant "h5" :href "."} title)
+        (navigation/link {:href "."} (dd/typography {:component "h1" :variant "h5"} title))
         (layout/box {:pb 8 :clone true}
           (grid/container {:spacing 2 :alignItems "stretch"}
             (for [{id ::proposal/id :as proposal} proposals]
