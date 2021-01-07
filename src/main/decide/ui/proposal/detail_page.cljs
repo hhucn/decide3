@@ -146,7 +146,7 @@
     {:button true
      :component "a"
      :href (str id)}
-    (dd/list-item-avatar {} (str "#" nice-id))
+    (dd/list-item-avatar {} (dd/typography {:color "textSecondary"} (str "#" nice-id))) ; TODO buggy
     (dd/list-item-text {} (str title))))
 
 (def ui-parent (comp/computed-factory Parent {:keyfn ::proposal/id}))
