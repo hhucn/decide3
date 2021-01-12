@@ -53,13 +53,11 @@
 (defn get-values-for-proposal [db proposal-ident]
   (merge
     {1 0, -1 0}                                             ; default values
-    (d/q
-      '[:find (clojure.core/frequencies ?values) .
-        :in $ ?proposal
-        :where
-        [?proposal ::proposal/opinions ?opinions]
-        [?opinions ::value ?values]]
-      db proposal-ident)))
+    (->> proposal-ident
+      (d/pull db [{::proposal/opinions [::value]}])
+      ::proposal/opinions
+      (map :decide.models.opinion/value)
+      frequencies)))
 
 (defmutation add [{:keys [conn AUTH/user-id] :as env} {::proposal/keys [id]
                                                        :keys           [opinion]}]
