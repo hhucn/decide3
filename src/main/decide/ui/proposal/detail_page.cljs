@@ -198,24 +198,19 @@
   (layout/container {}
     (layout/box {:p 2 :clone true}
       (surfaces/paper {:p 2}
-        (inputs/icon-button
-          {:edge :start
-           :color :inherit
-           :aria-label " back "
-           :onClick #(js/window.history.back)}
-          (comp/create-element ArrowBack nil nil))
         (grid/container {:spacing 3 :component "main"}
           (grid/item {:xs 12}
             (dd/typography {:variant "h3" :component "h1"} title))
           (grid/item {:xs 12}
-            (inputs/button
-              {:color :primary
-               :variant :outlined
-               :onClick #(comp/transact!! this [(new-proposal/show {:id slug
-                                                                    :parents [(comp/get-ident this)]})])
-               :startIcon (layout/box {:clone true :css {:transform " rotate (.5turn) "}} (comp/create-element CallSplit nil nil))
-               :endIcon (layout/box {:clone true :css {:transform " rotate (.5turn) "}} (comp/create-element MergeType nil nil))}
-              " Fork / Merge "))
+            (surfaces/toolbar {:disableGutters true :variant :dense}
+              (inputs/button
+                {:color :primary
+                 :variant :outlined
+                 :onClick #(comp/transact!! this [(new-proposal/show {:id slug
+                                                                      :parents [(comp/get-ident this)]})])
+                 :startIcon (layout/box {:clone true :css {:transform " rotate (.5turn) "}} (comp/create-element CallSplit nil nil))
+                 :endIcon (layout/box {:clone true :css {:transform " rotate (.5turn) "}} (comp/create-element MergeType nil nil))}
+                " Fork / Merge ")))
           (grid/item {:xs true :component "section"}
             (section " Details " (dd/typography {:variant "body1"} body)))
 
