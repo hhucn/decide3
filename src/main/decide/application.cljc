@@ -16,12 +16,12 @@
      (let [{::user/keys [current-session]} (ssr/get-SSR-initial-state)
            logged-in? (get-in (app/current-state app) (into (comp/get-ident user/Session nil) [:session/valid?]))]
        (mrg/merge-component! app user/Session current-session :replace [:current-session])
-       (when-not logged-in?
-         (comp/transact! app [(routing/route-to {:path (dr/path-to login/LoginPage)})])))))
+       #_(when-not logged-in?
+           (comp/transact! app [(routing/route-to {:path (dr/path-to login/LoginPage)})])))))
 
 (defonce SPA
   (rad-app/fulcro-rad-app
-    {:client-did-mount client-did-mount
+    {;:client-did-mount client-did-mount
      :props-middleware (comp/wrap-update-extra-props
                          (fn [cls extra-props]
                            (merge extra-props (css/get-classnames cls))))}))

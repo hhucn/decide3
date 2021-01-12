@@ -12,8 +12,7 @@
 (defn ^:export refresh []
   (log/info "Hot code Remount")
   (comp/refresh-dynamic-queries! SPA)
-  (app/mount! SPA root/Root "decide" {:initialize-state? false
-                                      :disable-client-did-mount? true}))
+  (app/mount! SPA root/Root "decide" {:initialize-state? false}))
 
 (defn ^:export init []
   (log/merge-config! {:output-fn prefix-output-fn
@@ -22,6 +21,8 @@
   (app/set-root! SPA root/Root {:initialize-state? true})
   (routing/start-history! SPA)
   (dr/initialize! SPA)
+  #_(dr/change-route! SPA ["decision" "init" "proposal" :_/init])
+  (swap! (::app/state-atom SPA) update :process-context dissoc nil)
   (routing/start!)
   (app/mount! SPA root/Root "decide"
     {:initialize-state? false

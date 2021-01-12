@@ -27,7 +27,8 @@
     ["@material-ui/icons/ThumbDownAltTwoTone" :default ThumbDownAltTwoTone]
     ["@material-ui/core/LinearProgress" :default LinearProgress]
     ["@material-ui/icons/Send" :default Send]
-    ["@material-ui/core/styles" :refer [withStyles useTheme]]))
+    ["@material-ui/core/styles" :refer [withStyles useTheme]]
+    [decide.ui.proposal.new-proposal :as new-proposal]))
 
 (declare ProposalPage)
 
@@ -175,8 +176,9 @@
 ;; endregion
 
 (defsc ProposalPage
-  [_this {::proposal/keys [title body]
-          :>/keys [parent-section argument-section opinion-section]}]
+  [this {::proposal/keys [title body]
+         :>/keys [parent-section argument-section opinion-section]}
+   {:keys [slug]}]
   {:query [::proposal/id
            ::proposal/title ::proposal/body
            {:>/parent-section (comp/get-query ParentSection)}
@@ -184,7 +186,7 @@
            {:>/argument-section (comp/get-query ArgumentSection)}]
    :ident ::proposal/id
    :use-hooks? true
-   :route-segment ["decision" ::process/slug "proposal" ::proposal/id]
+   :route-segment ["proposal" ::proposal/id]
    :will-enter
    (fn will-enter-proposal-page
      [app {::proposal/keys [id]}]
@@ -205,6 +207,15 @@
         (grid/container {:spacing 3 :component "main"}
           (grid/item {:xs 12}
             (dd/typography {:variant "h3" :component "h1"} title))
+          (grid/item {:xs 12}
+            (inputs/button
+              {:color :primary
+               :variant :outlined
+               :onClick #(comp/transact!! this [(new-proposal/show {:id slug
+                                                                    :parents [(comp/get-ident this)]})])
+               :startIcon (layout/box {:clone true :css {:transform " rotate (.5turn) "}} (comp/create-element CallSplit nil nil))
+               :endIcon (layout/box {:clone true :css {:transform " rotate (.5turn) "}} (comp/create-element MergeType nil nil))}
+              " Fork / Merge "))
           (grid/item {:xs true :component "section"}
             (section " Details " (dd/typography {:variant "body1"} body)))
 
@@ -214,12 +225,3 @@
               (section " Meinungen " (ui-opinion-section opinion-section)))
           (grid/item {:xs 12 :component "section"}
             (section "Argumente" (ui-argument-section argument-section))))))))
-
-#_(inputs/button
-    {:color :primary
-     :variant :outlined
-     :onClick #(comp/transact!! this [(new-proposal/show {:id slug
-                                                          :parents [(comp/get-ident this)]})])
-     :startIcon (layout/box {:clone true :css {:transform " rotate (.5turn) "}} (comp/create-element CallSplit nil nil))
-     :endIcon (layout/box {:clone true :css {:transform " rotate (.5turn) "}} (comp/create-element MergeType nil nil))}
-    " Fork / Merge ")

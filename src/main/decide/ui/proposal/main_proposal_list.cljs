@@ -1,21 +1,17 @@
 (ns decide.ui.proposal.main-proposal-list
   (:require
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-    [com.fulcrologic.fulcro.react.hooks :as hooks]
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
+    [decide.models.process :as process]
     [decide.models.proposal :as proposal]
     [decide.ui.proposal.card :as proposal-card]
-    [decide.ui.proposal.new-proposal :as new-proposal]
     [decide.utils.breakpoint :as breakpoint]
     [material-ui.data-display :as dd]
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
     [material-ui.layout.grid :as grid]
-    ["@material-ui/icons/Add" :default AddIcon]
-    [decide.models.process :as process]
-    [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
-    [taoensso.timbre :as log]
-    [com.fulcrologic.fulcro.data-fetch :as df]
-    [material-ui.navigation :as navigation]))
+    ["@material-ui/icons/Add" :default AddIcon]))
 
 
 (defn add-proposal-fab [props]
@@ -42,17 +38,16 @@
                     :color "textSecondary"}
       "Bisher gibt es keine Vorschläge.")))
 
-(defsc MainProposalList [this {::process/keys [slug title proposals]
-                               :ui/keys [new-proposal-dialog]}]
+(defsc MainProposalList [this {::process/keys [slug proposals]} {:keys [show-new-proposal-dialog]}]
   {:query [::process/slug
            {::process/proposals (comp/get-query proposal-card/ProposalCard)}]
    :ident ::process/slug
-   :route-segment ["decision" ::process/slug "proposals"]
+   :route-segment ["proposals"]
    :will-enter (fn [app {::process/keys [slug]}]
                  (let [ident (comp/get-ident MainProposalList {::process/slug slug})]
                    (dr/route-deferred ident
                      #(df/load! app ident MainProposalList
-                        {:post-mutation        `dr/target-ready
+                        {:post-mutation `dr/target-ready
                          :post-mutation-params {:target ident}}))))
    :use-hooks? true}
   (comp/fragment
@@ -63,5 +58,4 @@
             (grid/item {:xs 12 :md 6 :lg 4 :xl 3 :key id}
               (proposal-card/ui-proposal-card proposal {::process/slug slug}))))))
 
-      (add-proposal-fab {:onClick open-new-proposal-dialog})
-      (new-proposal/ui-new-proposal-form new-proposal-dialog))))
+    (add-proposal-fab {:onClick show-new-proposal-dialog})))
