@@ -1,18 +1,18 @@
 (ns decide.ui.proposal.card
   (:require
-    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
-    [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
-    [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.react.hooks :as hooks]
+    [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [decide.models.argument :as argument]
-    [decide.models.user :as user]
     [decide.models.opinion :as opinion]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
+    [decide.models.user :as user]
     [decide.routing :as routing]
-    [decide.ui.proposal.detail-page :as detail-page]
     [decide.ui.common.time :as time]
+    [decide.ui.proposal.detail-page :as detail-page]
     [material-ui.data-display :as dd]
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
@@ -20,9 +20,7 @@
     ["@material-ui/icons/CommentTwoTone" :default Comment]
     ["@material-ui/icons/MoreVert" :default MoreVert]
     ["@material-ui/icons/ThumbDownAltTwoTone" :default ThumbDownAltTwoTone]
-    ["@material-ui/icons/ThumbUpAltTwoTone" :default ThumbUpAltTwoTone]
-    [com.fulcrologic.fulcro.dom :as dom]
-    [taoensso.timbre :as log]))
+    ["@material-ui/icons/ThumbUpAltTwoTone" :default ThumbUpAltTwoTone]))
 
 (defn id-part [proposal-id]
   (dom/data {:className "proposal-id"
@@ -60,11 +58,12 @@
       " · "
       (when (instance? js/Date created)
         (time-part created))
-      " · "
-      (case (count parents)
-        0 "Original"
-        1 "Abgeleitet"
-        "Zusammenführung"))))
+      (let [no-of-parents (count parents)]
+        (when (pos? no-of-parents)
+          (str " · "
+            (case no-of-parents
+              1 "Fork"
+              "Merge")))))))
 
 (def ui-subheader (comp/factory Subheader (:keyfn ::proposal/id)))
 
@@ -72,9 +71,9 @@
   {:query [::argument/id]
    :ident ::argument/id})
 
-(defsc Proposal [this {::proposal/keys [id title body opinion arguments]
-                       :>/keys [subheader]}
-                 {::process/keys [slug]}]
+(defsc ProposalCard [this {::proposal/keys [id title body opinion arguments]
+                           :>/keys [subheader]}
+                     {::process/keys [slug]}]
   {:query (fn []
             [::proposal/id
              ::proposal/title ::proposal/body
@@ -89,8 +88,7 @@
    :use-hooks? true}
   (let [proposal-href (hooks/use-memo
                         #(routing/path->absolute-url
-                           (dr/path-to detail-page/ProposalPage {::process/slug slug
-                                                                 ::proposal/id (str id)}))
+                           (dr/into-path ["decision" slug] detail-page/ProposalPage (str id)))
                         [slug id])]
     (surfaces/card
       {:raised false}
@@ -131,4 +129,4 @@
                         :color :primary
                         :href proposal-href} "Mehr")))))
 
-(def ui-proposal (comp/computed-factory Proposal {:keyfn ::proposal/id}))
+(def ui-proposal-card (comp/computed-factory ProposalCard {:keyfn ::proposal/id}))

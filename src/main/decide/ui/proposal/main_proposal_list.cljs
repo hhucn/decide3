@@ -45,9 +45,7 @@
 (defsc MainProposalList [this {::process/keys [slug title proposals]
                                :ui/keys [new-proposal-dialog]}]
   {:query [::process/slug
-           ::process/title
-           {::process/proposals (comp/get-query proposal-card/Proposal)}
-           {:ui/new-proposal-dialog (comp/get-query new-proposal/NewProposalFormDialog)}]
+           {::process/proposals (comp/get-query proposal-card/ProposalCard)}]
    :ident ::process/slug
    :route-segment ["decision" ::process/slug "proposals"]
    :will-enter (fn [app {::process/keys [slug]}]
@@ -56,20 +54,14 @@
                      #(df/load! app ident MainProposalList
                         {:post-mutation        `dr/target-ready
                          :post-mutation-params {:target ident}}))))
-   :pre-merge     (fn [{:keys [data-tree]}]
-                    (let [slug (::process/slug data-tree)]
-                      (merge data-tree
-                        {:ui/new-proposal-dialog (comp/get-initial-state new-proposal/NewProposalFormDialog {:id slug})})))
-   :use-hooks?    true}
-  (let [open-new-proposal-dialog (hooks/use-callback #(comp/transact! this [(new-proposal/show {:id slug})]))]
-    (comp/fragment
-      (layout/container {:maxWidth :xl}
-        (navigation/link {:href "."} (dd/typography {:component "h1" :variant "h5"} title))
-        (layout/box {:pb 8 :clone true}
-          (grid/container {:spacing 2 :alignItems "stretch"}
-            (for [{id ::proposal/id :as proposal} proposals]
-              (grid/item {:xs 12 :md 6 :lg 4 :xl 3 :key id}
-                (proposal-card/ui-proposal proposal {::process/slug slug}))))))
+   :use-hooks? true}
+  (comp/fragment
+    (layout/container {:maxWidth :xl}
+      (layout/box {:pb 8 :clone true}
+        (grid/container {:spacing 2 :alignItems "stretch"}
+          (for [{id ::proposal/id :as proposal} proposals]
+            (grid/item {:xs 12 :md 6 :lg 4 :xl 3 :key id}
+              (proposal-card/ui-proposal-card proposal {::process/slug slug}))))))
 
       (add-proposal-fab {:onClick open-new-proposal-dialog})
       (new-proposal/ui-new-proposal-form new-proposal-dialog))))
