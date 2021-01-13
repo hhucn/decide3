@@ -71,7 +71,7 @@
   {:query [::argument/id]
    :ident ::argument/id})
 
-(defsc ProposalCard [this {::proposal/keys [id title body opinion arguments]
+(defsc ProposalCard [this {::proposal/keys [id title body opinion arguments pro-votes]
                            :>/keys [subheader]}
                      {::process/keys [slug]}]
   {:query (fn []
@@ -79,6 +79,7 @@
              ::proposal/title ::proposal/body
              ::proposal/opinion
              {::proposal/arguments (comp/get-query Argument)}
+             ::proposal/pro-votes
              {:>/subheader (comp/get-query Subheader)}])
    :ident ::proposal/id
    :initial-state (fn [{:keys [id title body]}]
@@ -108,23 +109,26 @@
           body))
 
       (surfaces/card-actions {}
-        (inputs/button-group
-          {:size :small
-           :variant :text
-           :disableElevation true}
-          (inputs/button {:color (if (pos? opinion) "primary" "default")
-                          :onClick #(comp/transact! this [(opinion/add {::proposal/id id
-                                                                        :opinion (if (pos? opinion) 0 +1)})])
-                          :startIcon (comp/create-element ThumbUpAltTwoTone nil nil)}
-            "Zustimmen")
-          (inputs/button {:color (if (neg? opinion) "primary" "default")
-                          :aria-label "Ablehnen"
-                          :onClick #(comp/transact! this [(opinion/add {::proposal/id id
-                                                                        :opinion (if (neg? opinion) 0 -1)})])
-                          :startIcon (comp/create-element ThumbDownAltTwoTone nil nil)}))
+        (layout/box {:color "success.main"} (dd/typography {:variant :button} pro-votes))
+        (inputs/button {:color (if (pos? opinion) "primary" "default")
+                        :onClick #(comp/transact! this [(opinion/add {::proposal/id id
+                                                                      :opinion (if (pos? opinion) 0 +1)})])
+                        :startIcon (comp/create-element ThumbUpAltTwoTone nil nil)}
+          "Zustimmen")
+        #_(inputs/button-group
+            {:size :small
+             :variant :text
+             :disableElevation true}
+            (layout/box {:color "green"} (dd/typography {:variant :button :color "inherit"} pro-votes))
+            (inputs/button {:color (if (neg? opinion) "primary" "default")
+                            :aria-label "Ablehnen"
+                            :onClick #(comp/transact! this [(opinion/add {::proposal/id id
+                                                                          :opinion (if (neg? opinion) 0 -1)})])
+                            :startIcon (comp/create-element ThumbDownAltTwoTone nil nil)}))
 
         (layout/box {:style {:marginLeft "auto"}})
         (dd/typography {:variant :button} (count arguments) " Argumente")
+
         (inputs/button {:component "a"
                         :color :primary
                         :href proposal-href} "Mehr")))))
