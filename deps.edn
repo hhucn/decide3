@@ -8,7 +8,7 @@
         com.fulcrologic/fulcro {:mvn/version "3.4.12"}
         com.fulcrologic/fulcro-rad {:mvn/version "1.0.8"}
         com.fulcrologic/fulcro-garden-css {:mvn/version "3.0.8"}
-        com.fulcrologic/guardrails {:mvn/version "1.1.1"}
+        com.fulcrologic/guardrails {:mvn/version "1.1.2"}
         garden/garden {:mvn/version "1.3.10"}
         hiccup/hiccup {:mvn/version "1.0.5"}
         http-kit/http-kit {:mvn/version "2.5.0"}
@@ -18,7 +18,7 @@
         io.replikativ/datahike {:mvn/version "0.3.3-SNAPSHOT"}
         com.github.mrebbinghaus/fulcro-material-ui-wrapper
         {:git/url "https://github.com/MrEbbinghaus/fulcro-material-ui-wrapper"
-         :sha "43f3a53422471c991a55d8ec7c886d85f5261014"}
+         :sha "f3e473c95e522ee9471c390bf97e29afbc938e12"}
 
         buddy/buddy {:mvn/version "2.0.0"}
 
@@ -33,7 +33,7 @@
            :dev {:extra-paths ["src/test" "src/dev" "src/workspaces"]
                  :jvm-opts ["-XX:-OmitStackTraceInFastThrow"]
                  :extra-deps {org.clojure/clojurescript {:mvn/version "1.10.773"}
-                              thheller/shadow-cljs {:mvn/version "2.11.11"}
+                              thheller/shadow-cljs {:mvn/version "2.11.13"}
                               expound/expound {:mvn/version "0.8.7"}
                               fulcrologic/fulcro-spec {:mvn/version "3.1.9"}
                               binaryage/devtools {:mvn/version "1.0.2"}

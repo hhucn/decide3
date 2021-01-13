@@ -2,6 +2,7 @@
   (:require
     [clojure.spec.alpha :as s]
     [clojure.string :as str]
+    [clojure.set :as set]
     [com.fulcrologic.guardrails.core :refer [>defn => | <-]]
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
     [com.wsscode.pathom.core :as p]
@@ -129,6 +130,69 @@
   {::pc/input #{::id}
    ::pc/output [{::children [::id]}]}
   {::children (get-children db [::id id])})
+
+(>defn get-pro-voting-users [db proposal-lookup]
+  [d.core/db? any? => (s/coll-of pos-int? :kind set)]
+  (->> proposal-lookup
+    (d/q '[:find ?user
+           :in $ ?proposal
+           :where
+           [?proposal :decide.models.proposal/opinions ?opinion]
+           [?opinion :decide.models.opinion/value +1]
+           [?user :decide.models.user/opinions ?opinion]]
+      db)
+    (map first)
+    set))
+
+(>defn get-proposals-with-shared-opinion
+  "Returns a set of proposals that share at least one user who approved with both of them and the input proposal."
+  [db proposal-lookup]
+  [d.core/db? any? => (s/coll-of pos-int? :kind set)]
+  (->> proposal-lookup
+    (d/q '[:find [?other-uuid ...]
+           :in $ ?proposal
+           :where
+           ;; get all users who approved input proposal
+           [?proposal ::opinions ?opinion]
+           [?opinion :decide.models.opinion/value +1]
+           [?user :decide.models.user/opinions ?opinion]
+
+           ;; get all proposals the users also approved with
+           [?user :decide.models.user/opinions ?other-opinion]
+           [?other-opinion :decide.models.opinion/value +1]
+           [?other-proposal ::opinions ?other-opinion]
+
+           ;; remove input proposal from result
+           [?proposal ::id ?uuid]
+           [?other-proposal ::id ?other-uuid]
+           [(not= ?uuid ?other-uuid)]]
+      db)
+    set))
+
+(defn get-all-opinions-with-more-proposals [db])
+
+(defresolver resolve-similar [{:keys [db]} {::keys [id]}]
+  {::pc/input #{::id}
+   ::pc/output [{:similar [{:own-proposal [::id]}
+                           :own-uniques
+                           :common-uniques
+                           {:other-proposal [::id]}
+                           :other-uniques
+                           :sum-uniques]}]}
+  (let [own-approvers (get-pro-voting-users db [::id id])]
+    {:similar
+     (for [other-proposal-id (get-proposals-with-shared-opinion db [::id id])
+           :let [other-approvers (get-pro-voting-users db [::id other-proposal-id])
+                 own-uniques (count (set/difference own-approvers other-approvers))
+                 common-uniques (count (set/intersection own-approvers other-approvers))
+                 other-uniques (count (set/difference other-approvers own-approvers))]]
+       {:own-proposal {::id id}
+        :own-uniques own-uniques
+        :common-uniques common-uniques
+        :other-uniques (count (set/difference other-approvers own-approvers))
+        :other-proposal {::id other-proposal-id}
+        :sum-uniques (+ own-uniques common-uniques other-uniques)})}))
+
 ;;; endregion
 
 ;;; region Arguments
@@ -157,4 +221,4 @@
 
 (def resolvers
   [resolve-proposal resolve-all-proposal-ids
-   add-argument resolve-arguments resolve-parents resolve-children])
+   add-argument resolve-arguments resolve-parents resolve-children resolve-similar])

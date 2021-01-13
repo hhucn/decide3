@@ -12,15 +12,15 @@
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [decide.models.argument :as argument]
-    [decide.models.process :as process]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
+    [goog.string :as gstring]
     [material-ui.data-display :as dd]
+    [material-ui.data-display.table :as table]
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
     [material-ui.layout.grid :as grid]
     [material-ui.surfaces :as surfaces]
-    ["@material-ui/icons/ArrowBack" :default ArrowBack]
     ["@material-ui/icons/CallSplit" :default CallSplit]
     ["@material-ui/icons/MergeType" :default MergeType]
     ["@material-ui/icons/ThumbUpAltTwoTone" :default ThumbUpAltTwoTone]
@@ -31,6 +31,7 @@
     [decide.ui.proposal.new-proposal :as new-proposal]))
 
 (declare ProposalPage)
+(defn merge-icon [] (comp/create-element MergeType #js {:style #js {:transform "rotate (0.5turn)"}} nil))
 
 (defn section [title & children]
   (apply layout/box {}
@@ -175,15 +176,92 @@
 (def ui-parent-section (comp/factory ParentSection {:keyfn ::proposal/id}))
 ;; endregion
 
+;; region Similar section
+(defsc SimilarProposal [_ {::proposal/keys [title]}]
+  {:query [::proposal/id ::proposal/title]
+   :ident ::proposal/id}
+  (dom/span (str title)))
+(def ui-similar-proposal (comp/computed-factory SimilarProposal {:keyfn ::proposal/id}))
+
+(defn venn-diagramm [{:keys [own-uniques common-uniques other-uniques]}]
+  (let [radius 40
+        y-circle radius
+        x-left-circle radius
+        x-right-circle (+ x-left-circle radius (/ radius -6))
+        viewbox (str "-5 -5 " (+ x-right-circle radius 10) " " (+ y-circle radius 10))]
+    (dom/svg {:classes ["venn"] :height "50%" :viewBox viewbox :fill "currentColor" :stroke "currentColor"}
+      (dom/circle {:cx x-left-circle :cy y-circle :r radius :style {:fill "none"}})
+      (dom/circle {:cx x-right-circle :cy y-circle :r radius :style {:fill "none"}})
+      (dom/text
+        {:x (- x-left-circle (/ radius 2)) :y y-circle
+         :text-anchor "middle" :dominantBaseline "central"}
+        (str own-uniques))
+      (dom/text {:x (/ (+ x-right-circle x-left-circle) 2) :y y-circle
+                 :text-anchor "middle" :dominantBaseline "central"}
+        (str common-uniques))
+      (dom/text
+        {:x (+ x-right-circle (/ radius 2)) :y y-circle
+         :text-anchor "middle" :dominantBaseline "central"}
+        (str other-uniques)))))
+
+(defsc SimilarEntry [this {:keys [own-proposal sum-uniques own-uniques common-uniques other-proposal other-uniques] :as props} {:keys [show-add-dialog]}]
+  {:query [{:own-proposal (comp/get-query SimilarProposal)}
+           :own-uniques
+
+           :common-uniques
+           :sum-uniques
+
+           {:other-proposal (comp/get-query SimilarProposal)}
+           :other-uniques]}
+  (let [others-total (+ common-uniques other-uniques)
+        own-total (+ own-uniques common-uniques)]
+    (table/row {}
+      (table/cell {} (ui-similar-proposal other-proposal))
+      (table/cell {} (layout/box {}
+                       (dd/typography {:color "inherit"}
+                         (let [value (* (/ common-uniques sum-uniques) 100)]
+                           (gstring/format "%.0f%" value)))))
+      (table/cell {} (layout/box {:clone true :color "success.main"} (dd/typography {} (gstring/format "+ %.0f%" (- (* (/ sum-uniques own-total) 100) 100)))))
+      (table/cell {}
+        (inputs/button
+          {:variant :outlined
+           :size :small
+           :color :primary
+           :onClick #(show-add-dialog (comp/get-ident SimilarProposal other-proposal))}
+          "Merge"))
+      (table/cell {:align :center} (venn-diagramm props)))))
+
+(def ui-similarity-entry (comp/computed-factory SimilarEntry {:keyfn (comp :other-proposal ::proposal/id)}))
+
+(defsc SimilarSection [_ {:keys [similar]} {:keys [show-add-dialog]}]
+  {:query [::proposal/id
+           {:similar (comp/get-query SimilarEntry)}]
+   :ident ::proposal/id}
+  (table/table {:size :small}
+    (table/head {}
+      (table/row {}
+        (table/cell {} "Vorschlag")
+        (table/cell {} "Übereinstimmung")
+        (table/cell {} "Potentielle Stimmen")
+        (table/cell {})
+        (table/cell {} "Stimmen (eig./zsm./fremd)")))
+
+    (table/body {}
+      (map #(ui-similarity-entry % {:show-add-dialog show-add-dialog}) (sort-by (fn [{:keys [sum-uniques common-uniques]}] (/ common-uniques sum-uniques)) > similar)))))
+
+(def ui-similar-section (comp/computed-factory SimilarSection))
+;; endregion
+
 (defsc ProposalPage
   [this {::proposal/keys [title body]
-         :>/keys [parent-section argument-section opinion-section]}
+         :>/keys [parent-section argument-section opinion-section similar-section]}
    {:keys [slug]}]
   {:query [::proposal/id
            ::proposal/title ::proposal/body
            {:>/parent-section (comp/get-query ParentSection)}
            {:>/opinion-section (comp/get-query OpinionSection)}
-           {:>/argument-section (comp/get-query ArgumentSection)}]
+           {:>/argument-section (comp/get-query ArgumentSection)}
+           {:>/similar-section (comp/get-query SimilarSection)}]
    :ident ::proposal/id
    :use-hooks? true
    :route-segment ["proposal" ::proposal/id]
@@ -195,28 +273,34 @@
          #(df/load! app ident ProposalPage
             {:post-mutation `dr/target-ready
              :post-mutation-params {:target ident}}))))}
-  (layout/container {}
-    (layout/box {:p 2 :clone true}
-      (surfaces/paper {:p 2}
-        (grid/container {:spacing 3 :component "main"}
-          (grid/item {:xs 12}
-            (dd/typography {:variant "h3" :component "h1"} title))
-          (grid/item {:xs 12}
-            (surfaces/toolbar {:disableGutters true :variant :dense}
-              (inputs/button
-                {:color :primary
-                 :variant :outlined
-                 :onClick #(comp/transact!! this [(new-proposal/show {:id slug
-                                                                      :parents [(comp/get-ident this)]})])
-                 :startIcon (layout/box {:clone true :css {:transform " rotate (.5turn) "}} (comp/create-element CallSplit nil nil))
-                 :endIcon (layout/box {:clone true :css {:transform " rotate (.5turn) "}} (comp/create-element MergeType nil nil))}
-                " Fork / Merge ")))
-          (grid/item {:xs true :component "section"}
-            (section " Details " (dd/typography {:variant "body1"} body)))
+  (let [show-add-dialog (hooks/use-callback
+                          (fn [& idents] (comp/transact!! this [(new-proposal/show {:id slug
+                                                                                    :parents (apply vector (comp/get-ident this) idents)})]))
+                          [slug])]
+    (layout/container {}
+      (layout/box {:p 2 :clone true}
+        (surfaces/paper {:p 2}
+          (grid/container {:spacing 3 :component "main"}
+            (grid/item {:xs 12}
+              (dd/typography {:variant "h3" :component "h1"} title))
+            (grid/item {:xs 12}
+              (surfaces/toolbar {:disableGutters true :variant :dense}
+                (inputs/button
+                  {:color :primary
+                   :variant :outlined
+                   :onClick #(comp/transact!! this [(new-proposal/show {:id slug
+                                                                        :parents [(comp/get-ident this)]})])
+                   :startIcon (layout/box {:clone true :css {:transform "rotate (.5turn)"}} (comp/create-element CallSplit nil nil))
+                   :endIcon (layout/box {:clone true :css {:transform "rotate (.5turn)"}} (comp/create-element MergeType nil nil))}
+                  " Fork / Merge ")))
+            (grid/item {:xs true :component "section"}
+              (section " Details " (dd/typography {:variant "body1"} body)))
 
-          ;; " Dieser Vorschlag basiert auf " (count parents) " weiteren Vorschlägen "
-          (ui-parent-section parent-section)
-          #_(grid/item {:xs 6}
-              (section " Meinungen " (ui-opinion-section opinion-section)))
-          (grid/item {:xs 12 :component "section"}
-            (section "Argumente" (ui-argument-section argument-section))))))))
+            ;; " Dieser Vorschlag basiert auf " (count parents) " weiteren Vorschlägen "
+            (ui-parent-section parent-section)
+            #_(grid/item {:xs 6}
+                (section " Meinungen " (ui-opinion-section opinion-section)))
+            (grid/item {:xs 12 :component "section"}
+              (section "Argumente" (ui-argument-section argument-section)))
+            (grid/item {:xs 12 :component "section"}
+              (section "Ähnliche Vorschläge" (ui-similar-section similar-section {:show-add-dialog show-add-dialog})))))))))

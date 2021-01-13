@@ -10,7 +10,7 @@
         "highlight.js": "9.12.0",
         "react-grid-layout": "0.16.6",
         "react-transition-group": "^4.3.0",
-        "reakit": "^1.3.3"
+        "reakit": "^1.3.4"
     },
     "scripts": {
         "client/main": "shadow-cljs watch :main",
@@ -32,7 +32,7 @@
         "npm-run-all": "^4.1.5",
         "react": "^17.0.1",
         "react-dom": "^17.0.1",
-        "shadow-cljs": "^2.11.11"
+        "shadow-cljs": "^2.11.13"
     },
     "author": "ebbinghaus@hhu.de",
     "license": "MIT"

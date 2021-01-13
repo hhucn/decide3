@@ -8,13 +8,15 @@
                    shared
                    {:palette {:type "light"
                               :primary {:main styles/hhu-blue}
-                              :secondary {:main "#b3006b"}}}))
+                              :secondary {:main "#b3006b"}
+                              :success {:main "#008127"}}}))
 
 (def dark-theme (merge
                   shared
                   {:palette {:type "dark"
                              :primary {:main "#68b9e9"}
-                             :secondary {:main "#f261a7"}}}))
+                             :secondary {:main "#f490c1"}
+                             :success {:main "#6bca80"}}}))
 
 (defn responsive-font-theme [theme]
   (responsiveFontSizes (create-mui-theme theme)))
