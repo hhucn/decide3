@@ -207,14 +207,14 @@
       (dom/circle {:cx x-right-circle :cy y-circle :r radius :style {:fill "none"}})
       (dom/text
         {:x (- x-left-circle (/ radius 2)) :y y-circle
-         :text-anchor "middle" :dominantBaseline "central"}
+         :textAnchor "middle" :dominantBaseline "central"}
         (str own-uniques))
       (dom/text {:x (/ (+ x-right-circle x-left-circle) 2) :y y-circle
-                 :text-anchor "middle" :dominantBaseline "central"}
+                 :textAnchor "middle" :dominantBaseline "central"}
         (str common-uniques))
       (dom/text
         {:x (+ x-right-circle (/ radius 2)) :y y-circle
-         :text-anchor "middle" :dominantBaseline "central"}
+         :textAnchor "middle" :dominantBaseline "central"}
         (str other-uniques)))))
 
 (defsc SimilarEntry [this {:keys [own-proposal sum-uniques own-uniques common-uniques other-proposal other-uniques] :as props} {:keys [show-add-dialog]}]
@@ -244,7 +244,7 @@
           "Merge"))
       (table/cell {:align :center} (venn-diagramm props)))))
 
-(def ui-similarity-entry (comp/computed-factory SimilarEntry {:keyfn (comp :other-proposal ::proposal/id)}))
+(def ui-similarity-entry (comp/computed-factory SimilarEntry {:keyfn (comp ::proposal/id :other-proposal)}))
 
 (defsc SimilarSection [_ {:keys [similar]} {:keys [show-add-dialog]}]
   {:query [::proposal/id
