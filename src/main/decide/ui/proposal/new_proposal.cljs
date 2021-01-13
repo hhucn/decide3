@@ -17,6 +17,7 @@
     [decide.models.proposal :as proposal]
     [decide.utils.breakpoint :as breakpoint]
     [material-ui.data-display :as dd]
+    [material-ui.data-display.list :as list]
     [material-ui.feedback :as feedback]
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
@@ -28,17 +29,18 @@
     ["@material-ui/icons/RemoveCircleOutline" :default RemoveIcon]))
 
 
+
 (defsc Argument [this {::argument/keys [content]
-                       :keys           [:ui/new-proposal-checked?]
-                       :or             {new-proposal-checked? false}}]
+                       :keys [:ui/new-proposal-checked?]
+                       :or {new-proposal-checked? false}}]
   {:query [::argument/id ::argument/content :ui/new-proposal-checked?]
    :ident ::argument/id}
-  (dd/list-item {}
-    (dd/list-item-icon {}
+  (list/item {}
+    (list/item-icon {}
       (inputs/checkbox
         {:checked new-proposal-checked?
          :onClick #(m/toggle! this :ui/new-proposal-checked?)}))
-    (dd/list-item-text {} content)))
+    (list/item-text {} content)))
 
 (def ui-argument (comp/computed-factory Argument {:keyfn ::argument/id}))
 
@@ -47,9 +49,9 @@
            {::proposal/arguments (comp/get-query Argument)}]
    :ident ::proposal/id}
   (when-not (empty? arguments)
-    (dd/list
-      {:dense     true
-       :subheader (dd/list-subheader {} title)}
+    (list/list
+      {:dense true
+       :subheader (list/subheader {} title)}
       (map ui-argument arguments))))
 
 (def ui-parent-argument-section (comp/computed-factory ParentArgumentSection {:keyfn ::proposal/id}))
@@ -61,10 +63,10 @@
            ::proposal/title
            {::proposal/arguments (comp/get-query Argument)}]
    :ident ::proposal/id}
-  (dd/list-item {}
-    (dd/list-item-icon {} (dom/span (str "#" nice-id)))
-    (dd/list-item-text {} (str title))
-    (dd/list-item-secondary-action {}
+  (list/item {}
+    (list/item-icon {} (dom/span (str "#" nice-id)))
+    (list/item-text {} (str title))
+    (list/item-secondary-action {}
       (inputs/icon-button
         {:onClick onDelete
          :title "Elternteil entfernen"}
@@ -129,18 +131,18 @@
 (defn- parent-selection [*this {:ui/keys       [parents]
                                 ::process/keys [proposals]}]
   (layout/box {:my 1}
-    (dd/list {}
+    (list/list {}
       (for [{::proposal/keys [id] :as props} parents
             :let [delete-parent #(comp/transact! *this [(remove-parent {:parent/ident [::proposal/id id]})])]]
         (ui-parent-list-item props
           {:onDelete delete-parent}))
-      (inputs/textfield {:label     "Eltern hinzufügen"
-                         :margin    "normal"
-                         :select    true
-                         :value     ""
+      (inputs/textfield {:label "Eltern hinzufügen"
+                         :margin "normal"
+                         :select true
+                         :value ""
                          :fullWidth true
-                         :onChange  #(comp/transact! *this [(add-parent {:parent/ident (edn/read-string {:readers {'uuid uuid}}
-                                                                                         (evt/target-value %))})])}
+                         :onChange #(comp/transact! *this [(add-parent {:parent/ident (edn/read-string {:readers {'uuid uuid}}
+                                                                                        (evt/target-value %))})])}
         (for [{::proposal/keys [id nice-id title]} proposals
               :when (not (id-in-parents? parents id))
               :let [proposal-ident [::proposal/id id]]]
@@ -364,11 +366,11 @@
                         (str (count parents) " anderen Vorschlägen")
                         "einem anderem Vorschlag")
                       ":")
-                    (dd/list {:dense true :disablePadding true}
+                    (list/list {:dense true :disablePadding true}
                       (for [{::proposal/keys [id title]} parents]
-                        (dd/list-item {:key id}
-                          (dd/list-item-icon {} (dom/span (str "#" id)))
-                          (dd/list-item-text {} (str title))))))))
+                        (list/item {:key id}
+                          (list/item-icon {} (dom/span (str "#" id)))
+                          (list/item-text {} (str title))))))))
 
               (inputs/button {:color   "primary"
                               :type    "submit"

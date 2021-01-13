@@ -16,6 +16,7 @@
     [decide.models.user :as user]
     [goog.string :as gstring]
     [material-ui.data-display :as dd]
+    [material-ui.data-display.list :as list]
     [material-ui.data-display.table :as table]
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
@@ -80,12 +81,12 @@
 (defsc ArgumentRow [_ {::argument/keys [content author pro?]}]
   {:query [::argument/id ::argument/pro? ::argument/content {::argument/author (comp/get-query Author)}]
    :ident ::argument/id}
-  (dd/list-item {}
-    (dd/list-item-icon {}
+  (list/item {}
+    (list/item-icon {}
       (if pro? (layout/box {:color "success.main"} "Pro:")
                (layout/box {:color "error.main"} "Con:")))
-    (dd/list-item-text {:primary content
-                        :secondary (comp/fragment "Von " (ui-argument-author author))})))
+    (list/item-text {:primary content
+                     :secondary (comp/fragment "Von " (ui-argument-author author))})))
 
 (def ui-argument-row (comp/computed-factory ArgumentRow {:keyfn ::argument/id}))
 
@@ -143,7 +144,7 @@
   (comp/fragment
     (layout/box {:mb 1}
       (if-not (empty? arguments)
-        (dd/list {:dense true}
+        (list/list {:dense true}
           (map ui-argument-row arguments))
         (dd/typography {:variant :body2 :color :textSecondary} "Bisher gibt es noch keine Argumente.")))
 
@@ -156,12 +157,12 @@
 (defsc Parent [_this {::proposal/keys [id nice-id title]}]
   {:query [::proposal/id ::proposal/nice-id ::proposal/title]
    :ident ::proposal/id}
-  (dd/list-item
+  (list/item
     {:button true
      :component "a"
      :href (str id)}
-    (dd/list-item-avatar {} (dd/typography {:color "textSecondary"} (str "#" nice-id)))
-    (dd/list-item-text {} (str title))))
+    (list/item-avatar {} (dd/typography {:color "textSecondary"} (str "#" nice-id)))
+    (list/item-text {} (str title))))
 
 (def ui-parent (comp/computed-factory Parent {:keyfn ::proposal/id}))
 
@@ -176,13 +177,13 @@
       (when-not (empty? parents)
         (section
           (str "Dieser Vorschlag basiert auf " (count parents) " weiteren Vorschlägen.")
-          (dd/list {:dense false}
+          (list/list {:dense false}
             (map ui-parent parents))))
 
       (when-not (empty? children)
         (section
           (str "Dieser Vorschlag hat " (count children) " Abkömmling" (when (<= 2 (count children)) "e") ". ")
-          (dd/list {:dense false}
+          (list/list {:dense false}
             (map ui-parent children)))))))
 
 (def ui-parent-section (comp/factory ParentSection {:keyfn ::proposal/id}))

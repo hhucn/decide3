@@ -6,13 +6,15 @@
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
     [material-ui.data-display :as dd]
+    [material-ui.data-display.list :as list]
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]))
+
 
 (defsc TopEntry [_this {::proposal/keys [id title]}]
   {:query [::proposal/id ::proposal/title ::proposal/pro-votes]
    :ident ::proposal/id}
-  (dd/list-item {} (str title)))
+  (list/item {} (str title)))
 (def ui-top-entry (comp/factory TopEntry {:keyfn ::proposal/id}))
 
 (defsc ProcessHome [_this {::process/keys [slug description proposals]}]
@@ -36,6 +38,6 @@
        :href (str "/decision/" slug "/proposals")}
       "Zeige alle Vorschläge")
     (dd/typography {} "Die besten zwei Vorschläge:")
-    (dd/list {}
+    (list/list {}
       (let [top-2-proposals (take 2 (sort-by ::proposal/pro-votes > proposals))]
         (map ui-top-entry top-2-proposals)))))
