@@ -25,25 +25,26 @@
     ; :db/fulltext    true
     :db/cardinality :db.cardinality/one}
 
-   {:db/ident ::pro?
-    :db/valueType :db.type/boolean
+   {:db/ident ::type
+    :db/valueType :db.type/keyword
     :db/cardinality :db.cardinality/one}])
 
 (s/def ::id uuid?)
 (s/def ::ident (s/tuple #{::id} ::id))
 (s/def ::content (s/and string? (complement str/blank?)))
+(s/def ::type #{:pro :contra})
 
-(>defn tx-map [{:keys [::content author ::pro?]}]
-  [(s/keys :req [::content]) => (s/keys :req [::id ::content])]
+(>defn tx-map [{:keys [::content author ::type]}]
+  [(s/keys :req [::content ::type]) => (s/keys :req [::id ::content])]
   {::id (d.core/squuid)
    ::content content
    ::author author
-   ::pro? pro?})
+   ::type type})
 
 (defresolver resolve-argument [{:keys [db]} {::keys [id]}]
   {::pc/input #{::id}
-   ::pc/output [::content ::pro? {::author [:decide.models.user/id]}]}
-  (d/pull db [::content ::pro? {::author [:decide.models.user/id]}] [::id id]))
+   ::pc/output [::content ::type {::author [:decide.models.user/id]}]}
+  (d/pull db [::content ::type {::author [:decide.models.user/id]}] [::id id]))
 
 (def resolvers
   [resolve-argument])

@@ -78,23 +78,26 @@
 
 (def ui-argument-author (comp/factory Author))
 
-(defsc ArgumentRow [_ {::argument/keys [content author pro?]}]
-  {:query [::argument/id ::argument/pro? ::argument/content {::argument/author (comp/get-query Author)}]
+(defsc ArgumentRow [_ {::argument/keys [content author type]}]
+  {:query [::argument/id ::argument/type ::argument/content {::argument/author (comp/get-query Author)}]
    :ident ::argument/id}
   (list/item {}
     (list/item-icon {}
-      (if pro? (layout/box {:color "success.main"} "Pro:")
-               (layout/box {:color "error.main"} "Con:")))
+      (case type
+        :pro (layout/box {:color "success.main"} "Pro:")
+        :contra (layout/box {:color "error.main"} "Con:")))
     (list/item-text {:primary content
                      :secondary (comp/fragment "Von " (ui-argument-author author))})))
 
 (def ui-argument-row (comp/computed-factory ArgumentRow {:keyfn ::argument/id}))
 
 (defmutation add-argument [{::proposal/keys [id]
-                            :keys [temp-id content]}]
+                            :keys [temp-id content type author-id]}]
   (action [{:keys [state]}]
     (let [new-argument-data {::argument/id temp-id
-                             ::argument/content content}]
+                             ::argument/content content
+                             ::argument/type type
+                             ::argument/author {::user/id author-id}}]
       (norm/swap!-> state
         (mrg/merge-component ArgumentRow new-argument-data
           :append (conj (comp/get-ident ProposalPage {::proposal/id id}) ::proposal/arguments)))))
@@ -106,17 +109,18 @@
 (defsc NewArgumentLine [this _ {::proposal/keys [id]}]
   {:use-hooks? true}
   (let [[new-argument set-new-argument] (hooks/use-state "")
-        [pro? set-pro] (hooks/use-state true)
-        toggle-pro (hooks/use-callback #(set-pro (not pro?)) [pro?])
+        [type set-type] (hooks/use-state :pro)
+        toggle-type (hooks/use-callback #(set-type ({:pro :contra
+                                                     :contra :pro} type)) [type])
         submit (hooks/use-callback
                  (fn [e]
                    (evt/prevent-default! e)
                    (comp/transact! this [(add-argument {::proposal/id id
                                                         :temp-id (tempid/tempid)
                                                         :content new-argument
-                                                        :pro? pro?})])
+                                                        :type type})])
                    (set-new-argument ""))
-                 [new-argument pro?])]
+                 [new-argument type])]
     (dom/form {:onSubmit submit}
       (inputs/textfield
         {:fullWidth true
@@ -127,10 +131,10 @@
          :inputProps {:aria-label "Neues Argument"}
          :InputProps {:startAdornment
                       (comp/fragment
-                        (layout/box {:color "success.main" :display (when-not pro? "none")}
-                          (inputs/button {:color :inherit :onClick toggle-pro} "Dafür"))
-                        (layout/box {:color "error.main" :display (when pro? "none")}
-                          (inputs/button {:color :inherit :onClick toggle-pro} "Dagegen")))
+                        (layout/box {:color "success.main" :display (when (not= :pro type) "none")}
+                          (inputs/button {:color :inherit :onClick toggle-type} "Dafür"))
+                        (layout/box {:color "error.main" :display (when (not= :contra type) "none")}
+                          (inputs/button {:color :inherit :onClick toggle-type} "Dagegen")))
                       :endAdornment (inputs/icon-button {:type :submit
                                                          :aria-label "Absenden"}
                                       (comp/create-element Send nil nil))}}))))

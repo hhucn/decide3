@@ -197,14 +197,14 @@
 ;;; region Arguments
 (defmutation add-argument
   [{:keys [conn AUTH/user-id] :as env} {::keys [id]
-                                        :keys [temp-id content pro?]}]
-  {::pc/params [::id :temp-id :content]
+                                        :keys [temp-id content type]}]
+  {::pc/params [::id :temp-id :content :type]
    ::pc/output [::argument/id]
    ::pc/transform auth/check-logged-in}
   (let [{real-id ::argument/id :as argument}
         (argument/tx-map
           {::argument/content content
-           ::argument/pro? pro?
+           ::argument/type type
            :author [::user/id user-id]})
         tx-report (d/transact conn
                     [(assoc argument :db/id "new-argument")
