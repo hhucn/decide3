@@ -77,11 +77,14 @@
 
 (def ui-argument-author (comp/factory Author))
 
-(defsc ArgumentRow [_ {::argument/keys [content author]}]
-  {:query [::argument/id ::argument/content {::argument/author (comp/get-query Author)}]
+(defsc ArgumentRow [_ {::argument/keys [content author pro?]}]
+  {:query [::argument/id ::argument/pro? ::argument/content {::argument/author (comp/get-query Author)}]
    :ident ::argument/id}
   (dd/list-item {}
-    (dd/list-item-text {:primary   content
+    (dd/list-item-icon {}
+      (if pro? (layout/box {:color "success.main"} "Pro:")
+               (layout/box {:color "error.main"} "Con:")))
+    (dd/list-item-text {:primary content
                         :secondary (comp/fragment "Von " (ui-argument-author author))})))
 
 (def ui-argument-row (comp/computed-factory ArgumentRow {:keyfn ::argument/id}))
@@ -102,14 +105,17 @@
 (defsc NewArgumentLine [this _ {::proposal/keys [id]}]
   {:use-hooks? true}
   (let [[new-argument set-new-argument] (hooks/use-state "")
+        [pro? set-pro] (hooks/use-state true)
+        toggle-pro (hooks/use-callback #(set-pro (not pro?)) [pro?])
         submit (hooks/use-callback
                  (fn [e]
                    (evt/prevent-default! e)
                    (comp/transact! this [(add-argument {::proposal/id id
                                                         :temp-id (tempid/tempid)
-                                                        :content new-argument})])
+                                                        :content new-argument
+                                                        :pro? pro?})])
                    (set-new-argument ""))
-                 [new-argument])]
+                 [new-argument pro?])]
     (dom/form {:onSubmit submit}
       (inputs/textfield
         {:fullWidth true
@@ -118,7 +124,13 @@
          :value new-argument
          :onChange #(set-new-argument (evt/target-value %))
          :inputProps {:aria-label "Neues Argument"}
-         :InputProps {:endAdornment (inputs/icon-button {:type :submit
+         :InputProps {:startAdornment
+                      (comp/fragment
+                        (layout/box {:color "success.main" :display (when-not pro? "none")}
+                          (inputs/button {:color :inherit :onClick toggle-pro} "Dafür"))
+                        (layout/box {:color "error.main" :display (when pro? "none")}
+                          (inputs/button {:color :inherit :onClick toggle-pro} "Dagegen")))
+                      :endAdornment (inputs/icon-button {:type :submit
                                                          :aria-label "Absenden"}
                                       (comp/create-element Send nil nil))}}))))
 
