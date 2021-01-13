@@ -1,59 +1,41 @@
 (ns decide.ui.process.core
   (:require
+    [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
+    [com.fulcrologic.fulcro.algorithms.merge :as mrg]
+    [com.fulcrologic.fulcro.application :as app]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.data-fetch :as df]
+    [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr :refer [defrouter]]
-    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [decide.models.process :as process]
-    [decide.ui.proposal.main-proposal-list :as proposal.main-list]
+    [decide.ui.process.home :as process.home]
     [decide.ui.proposal.detail-page :as proposal.detail-page]
+    [decide.ui.proposal.main-proposal-list :as proposal.main-list]
+    [decide.ui.proposal.new-proposal :as new-proposal]
     [material-ui.data-display :as dd]
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
-    [taoensso.timbre :as log]
-    [decide.ui.proposal.new-proposal :as new-proposal]
-    [com.fulcrologic.fulcro.dom :as dom]
-    [com.fulcrologic.fulcro.application :as app]
-    [com.fulcrologic.fulcro.algorithms.merge :as mrg]
-    [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
-    [com.fulcrologic.fulcro.react.hooks :as hooks]))
-
-(defsc ProcessHome [this {::process/keys [slug title description] :as props}]
-  {:query [::process/slug ::process/title ::process/description]
-   :ident ::process/slug
-   :route-segment ["home"]
-   :will-enter
-   (fn will-enter-process-home [app {::process/keys [slug]}]
-     (let [ident (comp/get-ident ProcessHome {::process/slug slug})]
-       (dr/route-deferred ident
-         (fn []
-           (df/load! app ident ProcessHome
-             {:post-mutation `dr/target-ready
-              :post-mutation-params {:target ident}})))))}
-  (layout/container {}
-    #_(dd/typography {:component "h1" :variant "h2"} title)
-    (dd/typography {:paragraph true} description)
-    (inputs/button
-      {:color "primary"
-       :variant "contained"
-       :href (str "/decision/" slug "/proposals")}
-      "Zeige alle Vorschläge")
-    (dom/code (str props))))
+    [material-ui.surfaces :as surfaces]))
 
 (defrouter ProcessRouter [_this _]
-  {:router-targets [ProcessHome proposal.main-list/MainProposalList proposal.detail-page/ProposalPage]})
+  {:router-targets [process.home/ProcessHome proposal.main-list/MainProposalList proposal.detail-page/ProposalPage]})
 
 (def ui-process-router (comp/computed-factory ProcessRouter))
 
 (defsc ProcessHeader [_ {::process/keys [slug title]}]
   {:query [::process/slug ::process/title ::process/description]
    :ident ::process/slug}
-  (layout/box {}
+  (layout/container {:maxWidth :xl}
     (dd/typography {:component "h1" :variant "h2"} title)
-    (inputs/button
-      {:color "secondary"
-       :href (str "/decision/" slug "/home")}
-      "Home")))
+    (surfaces/toolbar {:variant :regular}
+      (inputs/button
+        {:color "secondary"
+         :href (str "/decision/" slug "/home")}
+        "Home")
+      (inputs/button
+        {:color :secondary
+         :href (str "/decision/" slug "/proposals")}
+        "Alle Vorschläge"))))
 
 (def ui-process-info (comp/factory ProcessHeader))
 
@@ -92,8 +74,7 @@
   (let [show-new-proposal-dialog (hooks/use-callback #(comp/transact! this [(new-proposal/show {:id slug})]))]
     (comp/fragment
       (when process-header
-        (layout/container {}
-          (ui-process-info process-header)))
+        (ui-process-info process-header))
       (ui-process-router process-router
         {:slug slug
          :show-new-proposal-dialog show-new-proposal-dialog})
