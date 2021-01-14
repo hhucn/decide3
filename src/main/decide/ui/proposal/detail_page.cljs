@@ -108,23 +108,32 @@
       (m/with-server-side-mutation proposal/add-argument)
       (m/returning ArgumentRow))))
 
-(defsc NewArgumentLine [this _ {::proposal/keys [id]}]
+(defn type-toggle [{:keys [color type selected-type label] :as props}]
+  (layout/box {:color color :display (when (not= selected-type type) "none")}
+    (inputs/button (merge props {:color :inherit} label))))
+
+(defn submit-new-argument-button [props]
+  (inputs/icon-button
+    (merge props
+      {:type :submit
+       :aria-label "Absenden"})
+    (comp/create-element Send nil nil)))
+
+(defsc NewArgumentLine [this _ {:keys [add-argument!]}]
   {:use-hooks? true}
   (let [user-id (get-in (app/current-state this) [:AUTH :current-session ::user/id])
         logged-in? (not (boolean user-id))
-        [new-argument set-new-argument] (hooks/use-state "")
-        [type set-type] (hooks/use-state :pro)
-        toggle-type (hooks/use-callback #(set-type ({:pro :contra
-                                                     :contra :pro} type)) [type])
+        [new-argument set-new-argument!] (hooks/use-state "")
+        [type set-type!] (hooks/use-state :pro)
+        toggle-type! (hooks/use-callback #(set-type! ({:pro :contra
+                                                       :contra :pro} type)) [type])
         submit (hooks/use-callback
                  (fn [e]
                    (evt/prevent-default! e)
-                   (comp/transact! this [(add-argument {::proposal/id id
-                                                        :temp-id (tempid/tempid)
-                                                        :content new-argument
-                                                        :type type
-                                                        :author-id user-id})])
-                   (set-new-argument ""))
+                   (add-argument! {::argument/content new-argument
+                                   ::argument/type type
+                                   :author-id user-id})
+                   (set-new-argument! ""))
                  [new-argument type])]
     (dom/form {:onSubmit submit
                :disabled (not (boolean user-id))}
@@ -133,24 +142,32 @@
          :label "Neues Argument"
          :variant :outlined
          :value new-argument
-         :onChange #(set-new-argument (evt/target-value %))
+         :onChange #(set-new-argument! (evt/target-value %))
          :disabled (not logged-in?)
          :placeholder (when (not logged-in?) "Einloggen um Argumente hinzuzufügen.")
          :inputProps {:aria-label "Neues Argument"}
          :InputProps {:startAdornment
                       (comp/fragment
-                        (layout/box {:color "success.main" :display (when (not= :pro type) "none")}
-                          (inputs/button {:color :inherit :onClick toggle-type :disabled (not logged-in?)} "Dafür"))
-                        (layout/box {:color "error.main" :display (when (not= :contra type) "none")}
-                          (inputs/button {:color :inherit :onClick toggle-type :disabled (not logged-in?)} "Dagegen")))
-                      :endAdornment (inputs/icon-button {:type :submit
-                                                         :disabled (not logged-in?)
-                                                         :aria-label "Absenden"}
-                                      (comp/create-element Send nil nil))}}))))
+                        (type-toggle
+                          {:label "Dafür"
+                           :type :pro
+                           :color "success.main"
+                           :onClick toggle-type!
+                           :disabled (not logged-in?)
+                           :selected-type type})
+                        (type-toggle
+                          {:label "Dagegen"
+                           :type :contra
+                           :color "error.main"
+                           :onClick toggle-type!
+                           :disabled (not logged-in?)
+                           :selected-type type}))
+                      :endAdornment (submit-new-argument-button {:disabled (not logged-in?)})}}))))
+
 
 (def ui-new-argument-line (comp/computed-factory NewArgumentLine))
 
-(defsc ArgumentSection [_ {::proposal/keys [id arguments]}]
+(defsc ArgumentSection [this {::proposal/keys [id arguments]}]
   {:query [::proposal/id
            {::proposal/arguments (comp/get-query ArgumentRow)}]
    :ident ::proposal/id}
@@ -162,7 +179,14 @@
         (dd/typography {:variant :body2 :color :textSecondary
                         :paragraph true} "Bisher gibt es noch keine Argumente.")))
 
-    (ui-new-argument-line {} {::proposal/id id})))
+    (ui-new-argument-line {}
+      {:add-argument! (fn [{::argument/keys [content type]
+                            :keys [user-id]}]
+                        (comp/transact! this [(add-argument {::proposal/id id
+                                                             :temp-id (tempid/tempid)
+                                                             :content content
+                                                             :type type
+                                                             :author-id user-id})]))})))
 
 (def ui-argument-section (comp/factory ArgumentSection {:keyfn ::proposal/id}))
 ;; endregion
