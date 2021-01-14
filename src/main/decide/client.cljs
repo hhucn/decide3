@@ -3,8 +3,10 @@
     [com.fulcrologic.fulcro.algorithms.timbre-support :refer [console-appender prefix-output-fn]]
     [com.fulcrologic.fulcro.application :as app]
     [com.fulcrologic.fulcro.components :as comp]
+    [com.fulcrologic.fulcro.data-fetch :as df]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [decide.application :refer [SPA]]
+    [decide.models.user :as user]
     [decide.routing :as routing]
     [decide.ui.root :as root]
     [taoensso.timbre :as log]))
@@ -21,8 +23,10 @@
   (app/set-root! SPA root/Root {:initialize-state? true})
   (routing/start-history! SPA)
   (dr/initialize! SPA)
-  #_(dr/change-route! SPA ["decision" "init" "proposal" :_/init])
+
+  (df/load! SPA ::user/current-session user/Session)
   (swap! (::app/state-atom SPA) update :process-context dissoc nil)
+
   (routing/start!)
   (app/mount! SPA root/Root "decide"
     {:initialize-state? false

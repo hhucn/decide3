@@ -97,7 +97,7 @@
           {:signin/result :success
            :session/valid? true
            ::id id}
-          id)
+          {::id id})
         {:signin/result :fail
          :errors #{:invalid-credentials}}))
     {:signin/result :fail
@@ -124,12 +124,13 @@
     {:session/valid? false}
     nil))
 
-(defresolver current-session-resolver [env]
+(defresolver current-session-resolver [env _]
   {::pc/output [{::current-session [:session/valid? ::id]}]}
-  (let [{:keys [session/valid? decide.models.user/id]} (get-in env [:ring/request :session])]
-    (if valid?
-      {::current-session {:session/valid? true ::id id}}
-      {::current-session {:session/valid? false}})))
+  {::current-session
+   (let [{:keys [decide.models.user/id]} (get-in env [:ring/request :session])]
+     (if id
+       {:session/valid? true ::id id}
+       {:session/valid? false}))})
 
 (defmutation change-password [{:keys [db conn AUTH/user-id]} {:keys [old-password new-password]}]
   {::pc/params [:old-password :new-password]
