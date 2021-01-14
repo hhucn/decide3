@@ -125,6 +125,30 @@
    (for [id (d/q '[:find [?id ...] :where [_ ::id ?id]] db)]
      {::id id})})
 
+(def voters-query
+  '[:find [?user ...]
+    :in $ ?proposal
+    :where
+    [?proposal :decide.models.proposal/opinions ?opinion]
+    [?opinion :decide.models.opinion/value +1]
+    [?user :decide.models.user/opinions ?opinion]])
+
+(defn get-migration-rate [db parent-id child-id]
+  [::id ::id => number?]
+  (let [parent-voters (set (d/q voters-query db [::id parent-id]))
+        child-voters (set (d/q voters-query db [::id child-id]))]
+    (float
+      (/ (count (set/intersection parent-voters child-voters))
+        (count parent-voters)))))
+
+(defresolver resolve-relationships [{:keys [db]} {::keys [id]}]
+  {::pc/output [{:child-relations [{:proposal [::id]}
+                                   :migration-rate]}]}
+  {:child-relations
+   (for [{child-id ::id :as child} (get-children db [::id id])]
+     {:proposal child
+      :migration-rate (get-migration-rate db id child-id)})})
+
 (defresolver resolve-children [{:keys [db]} {::keys [id]}]
   {::pc/input #{::id}
    ::pc/output [{::children [::id]}]}
@@ -221,4 +245,6 @@
 
 (def resolvers
   [resolve-proposal resolve-all-proposal-ids
+
+   resolve-relationships
    add-argument resolve-arguments resolve-parents resolve-children resolve-similar])

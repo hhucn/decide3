@@ -170,12 +170,27 @@
 
 (def ui-parent (comp/computed-factory Parent {:keyfn ::proposal/id}))
 
-(defsc ParentSection [_ {::proposal/keys [parents children]}]
+(defsc Relationship [_this {:keys [migration-rate]
+                            {::proposal/keys [id nice-id title]} :proposal}]
+  {:query [:migration-rate
+           {:proposal (comp/get-query Parent)}]}
+  (list/item
+    {:button true
+     :component "a"
+     :href (str id)}
+    (list/item-avatar {} (dd/typography {:color "textSecondary"} (str "#" nice-id)))
+    (list/item-text {} (str title))
+    (list/item-secondary-action {} (when migration-rate (dd/typography {} (gstring/format "%.0f%" (* migration-rate 100)))))))
+
+(def ui-relationship (comp/computed-factory Relationship {:keyfn (comp ::proposal/id :proposal)}))
+
+(defsc ParentSection [_ {::proposal/keys [parents]
+                         :keys [child-relations]}]
   {:query [::proposal/id
            {::proposal/parents (comp/get-query Parent)}
-           {::proposal/children (comp/get-query Parent)}]
+           {:child-relations (comp/get-query Relationship)}]
    :ident ::proposal/id}
-  (when-not (and (empty? parents) (empty? children))
+  (when-not (and (empty? parents) (empty? child-relations))
     (grid/item {:xs 12 :md 6 :component "section"}
 
       (when-not (empty? parents)
@@ -184,11 +199,11 @@
           (list/list {:dense false}
             (map ui-parent parents))))
 
-      (when-not (empty? children)
+      (when-not (empty? child-relations)
         (section
-          (str "Dieser Vorschlag hat " (count children) " Abkömmling" (when (<= 2 (count children)) "e") ". ")
+          (str "Dieser Vorschlag hat " (count child-relations) " Abkömmling" (when (<= 2 (count child-relations)) "e") ". ")
           (list/list {:dense false}
-            (map ui-parent children)))))))
+            (map ui-relationship child-relations)))))))
 
 (def ui-parent-section (comp/factory ParentSection {:keyfn ::proposal/id}))
 ;; endregion
@@ -221,9 +236,8 @@
          :textAnchor "middle" :dominantBaseline "central"}
         (str other-uniques)))))
 
-(defsc SimilarEntry [this {:keys [own-proposal sum-uniques own-uniques common-uniques other-proposal other-uniques] :as props} {:keys [show-add-dialog]}]
-  {:query [{:own-proposal (comp/get-query SimilarProposal)}
-           :own-uniques
+(defsc SimilarEntry [this {:keys [sum-uniques own-uniques common-uniques other-proposal other-uniques] :as props} {:keys [show-add-dialog]}]
+  {:query [:own-uniques
 
            :common-uniques
            :sum-uniques
