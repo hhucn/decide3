@@ -29,7 +29,9 @@
     ["@material-ui/core/LinearProgress" :default LinearProgress]
     ["@material-ui/icons/Send" :default Send]
     ["@material-ui/core/styles" :refer [withStyles useTheme]]
-    [decide.ui.proposal.new-proposal :as new-proposal]))
+    [decide.ui.proposal.new-proposal :as new-proposal]
+    [taoensso.timbre :as log]
+    [com.fulcrologic.fulcro.application :as app]))
 
 (declare ProposalPage)
 (defn merge-icon [] (comp/create-element MergeType #js {:style #js {:transform "rotate (0.5turn)"}} nil))
@@ -108,7 +110,9 @@
 
 (defsc NewArgumentLine [this _ {::proposal/keys [id]}]
   {:use-hooks? true}
-  (let [[new-argument set-new-argument] (hooks/use-state "")
+  (let [user-id (get-in (app/current-state this) [:AUTH :current-session ::user/id])
+        logged-in? (not (boolean user-id))
+        [new-argument set-new-argument] (hooks/use-state "")
         [type set-type] (hooks/use-state :pro)
         toggle-type (hooks/use-callback #(set-type ({:pro :contra
                                                      :contra :pro} type)) [type])
@@ -118,24 +122,29 @@
                    (comp/transact! this [(add-argument {::proposal/id id
                                                         :temp-id (tempid/tempid)
                                                         :content new-argument
-                                                        :type type})])
+                                                        :type type
+                                                        :author-id user-id})])
                    (set-new-argument ""))
                  [new-argument type])]
-    (dom/form {:onSubmit submit}
+    (dom/form {:onSubmit submit
+               :disabled (not (boolean user-id))}
       (inputs/textfield
         {:fullWidth true
          :label "Neues Argument"
          :variant :outlined
          :value new-argument
          :onChange #(set-new-argument (evt/target-value %))
+         :disabled (not logged-in?)
+         :placeholder (when (not logged-in?) "Einloggen um Argumente hinzuzufügen.")
          :inputProps {:aria-label "Neues Argument"}
          :InputProps {:startAdornment
                       (comp/fragment
                         (layout/box {:color "success.main" :display (when (not= :pro type) "none")}
-                          (inputs/button {:color :inherit :onClick toggle-type} "Dafür"))
+                          (inputs/button {:color :inherit :onClick toggle-type :disabled (not logged-in?)} "Dafür"))
                         (layout/box {:color "error.main" :display (when (not= :contra type) "none")}
-                          (inputs/button {:color :inherit :onClick toggle-type} "Dagegen")))
+                          (inputs/button {:color :inherit :onClick toggle-type :disabled (not logged-in?)} "Dagegen")))
                       :endAdornment (inputs/icon-button {:type :submit
+                                                         :disabled (not logged-in?)
                                                          :aria-label "Absenden"}
                                       (comp/create-element Send nil nil))}}))))
 
@@ -150,7 +159,8 @@
       (if-not (empty? arguments)
         (list/list {:dense true}
           (map ui-argument-row arguments))
-        (dd/typography {:variant :body2 :color :textSecondary} "Bisher gibt es noch keine Argumente.")))
+        (dd/typography {:variant :body2 :color :textSecondary
+                        :paragraph true} "Bisher gibt es noch keine Argumente.")))
 
     (ui-new-argument-line {} {::proposal/id id})))
 
