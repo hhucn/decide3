@@ -10,6 +10,7 @@
     [decide.ui.login :as login]
     [decide.ui.pages.splash :as splash]
     [decide.ui.process.core :as process-page]
+    [decide.ui.session :as session]
     [decide.ui.theming.dark-mode :as dark-mode]
     [decide.ui.theming.themes :as themes]
     [material-ui.layout :as layout]
@@ -28,8 +29,10 @@
   (action [{:keys [state]}]
     (swap! state assoc :ui/theme theme)))
 
-(defsc Root [this {:ui/keys [theme root-router app-bar snackbar-container]}]
+(defsc Root [this {:ui/keys [theme root-router app-bar snackbar-container]
+                   :keys [AUTH]}]
   {:query [:ui/theme
+           :AUTH
            {:ui/app-bar (comp/get-query appbar/AppBar)}
            {:ui/root-router (comp/get-query RootRouter)}
            {:ui/snackbar-container (comp/get-query snackbar/SnackbarContainer)}]
@@ -39,16 +42,16 @@
             :ui/app-bar (comp/get-initial-state appbar/AppBar)
             :ui/snackbar-container (comp/get-initial-state snackbar/SnackbarContainer)})
    :use-hooks? true}
-  (hooks/use-effect
+  (hooks/use-lifecycle
     (fn []
       (log/debug "Register dark-mode listener")
       (dark-mode/register-dark-mode-listener #(let [new-theme (if (.-matches %) :dark :light)]
                                                 (comp/transact! (comp/any->app this)
-                                                  [(set-theme {:theme new-theme})]))))
-    [])
-  (styles/theme-provider {:theme (themes/get-mui-theme theme)}
-    (mutils/css-baseline {})
-    (layout/box {:mb 2}
-      (appbar/ui-appbar app-bar {}))
-    (snackbar/ui-snackbar-container snackbar-container)
-    (ui-root-router root-router)))
+                                                  [(set-theme {:theme new-theme})])))))
+  (js/React.createElement (.-Provider session/context) #js {:value (:current-session AUTH nil)}
+    (styles/theme-provider {:theme (themes/get-mui-theme theme)}
+      (mutils/css-baseline {})
+      (layout/box {:mb 2}
+        (appbar/ui-appbar app-bar {}))
+      (snackbar/ui-snackbar-container snackbar-container)
+      (ui-root-router root-router))))

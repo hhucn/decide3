@@ -14,6 +14,7 @@
     [decide.models.argument :as argument]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
+    [decide.ui.session :as session]
     [goog.string :as gstring]
     [material-ui.data-display :as dd]
     [material-ui.data-display.list :as list]
@@ -29,9 +30,7 @@
     ["@material-ui/core/LinearProgress" :default LinearProgress]
     ["@material-ui/icons/Send" :default Send]
     ["@material-ui/core/styles" :refer [withStyles useTheme]]
-    [decide.ui.proposal.new-proposal :as new-proposal]
-    [taoensso.timbre :as log]
-    [com.fulcrologic.fulcro.application :as app]))
+    [decide.ui.proposal.new-proposal :as new-proposal]))
 
 (declare ProposalPage)
 (defn merge-icon [] (comp/create-element MergeType #js {:style #js {:transform "rotate (0.5turn)"}} nil))
@@ -119,10 +118,10 @@
        :aria-label "Absenden"})
     (comp/create-element Send nil nil)))
 
-(defsc NewArgumentLine [this _ {:keys [add-argument!]}]
+(defsc NewArgumentLine [_ _ {:keys [add-argument!]}]
   {:use-hooks? true}
-  (let [user-id (get-in (app/current-state this) [:AUTH :current-session ::user/id])
-        logged-in? (not (boolean user-id))
+  (let [{::user/keys [id]} (hooks/use-context session/context)
+        logged-in? (not (boolean id))
         [new-argument set-new-argument!] (hooks/use-state "")
         [type set-type!] (hooks/use-state :pro)
         toggle-type! (hooks/use-callback #(set-type! ({:pro :contra
@@ -132,11 +131,11 @@
                    (evt/prevent-default! e)
                    (add-argument! {::argument/content new-argument
                                    ::argument/type type
-                                   :author-id user-id})
+                                   :author-id id})
                    (set-new-argument! ""))
                  [new-argument type])]
     (dom/form {:onSubmit submit
-               :disabled (not (boolean user-id))}
+               :disabled (not logged-in?)}
       (inputs/textfield
         {:fullWidth true
          :label "Neues Argument"
@@ -306,7 +305,7 @@
     (table/head {}
       (table/row {}
         (table/cell {} "Vorschlag")
-        (table/cell {} "Übereinstimmung")
+        (table/cell {} "Übereinstimmung der Wähler")
         (table/cell {} "Potentielle Stimmen")
         (table/cell {})
         (table/cell {} "Stimmen (eig./zsm./fremd)")))
