@@ -13,29 +13,18 @@
     [decide.ui.proposal.main-proposal-list :as proposal.main-list]
     [decide.ui.proposal.new-proposal :as new-proposal]
     [material-ui.data-display :as dd]
-    [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
-    [material-ui.surfaces :as surfaces]))
+    [material-ui.navigation.tabs :as tabs]))
 
 (defrouter ProcessRouter [_this _]
   {:router-targets [process.home/ProcessHome proposal.main-list/MainProposalList proposal.detail-page/ProposalPage]})
 
 (def ui-process-router (comp/computed-factory ProcessRouter))
 
-(defsc ProcessHeader [_ {::process/keys [slug title]}]
-  {:query [::process/slug ::process/title ::process/description]
+(defsc ProcessHeader [_ {::process/keys [title]}]
+  {:query [::process/slug ::process/title]
    :ident ::process/slug}
-  (layout/container {:maxWidth :xl}
-    (dd/typography {:component "h1" :variant "h2"} title)
-    (surfaces/toolbar {:variant :regular}
-      (inputs/button
-        {:color "secondary"
-         :href (str "/decision/" slug "/home")}
-        "Home")
-      (inputs/button
-        {:color :secondary
-         :href (str "/decision/" slug "/proposals")}
-        "Alle Vorschläge"))))
+  (dd/typography {:component "h1" :variant "h2"} title))
 
 (def ui-process-info (comp/factory ProcessHeader))
 
@@ -61,20 +50,24 @@
                          (mrg/merge-component! app ProcessContext (comp/get-initial-state ProcessContext {:slug slug}))
                          (df/load! app [::process/slug slug] ProcessHeader
                            {:target (targeting/replace-at (conj ident :process-header))})
-                         (dr/target-ready! app ident)
-                         #_(df/load! app ident ProcessContext
-                             {:post-mutation `dr/target-ready
-                              :post-mutation-params {:target ident}}))))))
-   #_:pre-merge #_(fn pre-merge-process [{:keys [data-tree]}]
-                    (log/info "Pre-merge process")
-                    (let [slug (::process/slug data-tree)]
-                      (merge data-tree
-                        (comp/get-initial-state ProcessContext {:slug slug}))))
+                         (dr/target-ready! app ident))))))
    :use-hooks? true}
   (let [show-new-proposal-dialog (hooks/use-callback #(comp/transact! this [(new-proposal/show {:id slug})]))]
     (comp/fragment
-      (when process-header
-        (ui-process-info process-header))
+      (layout/container {:maxWidth :xl}
+        (when process-header
+          (ui-process-info process-header))
+        (let [current-target (case (first (drop 2 (dr/current-route this)))
+                               "home" 0
+                               "proposals" 1
+                               false)]
+          (tabs/tabs {:value current-target
+                      :indicatorColor "secondary"
+                      :textColor "secondary"}
+            (tabs/tab {:label "Home"
+                       :href (str "/decision/" slug "/home")})
+            (tabs/tab {:label "Alle Vorschläge"
+                       :href (str "/decision/" slug "/proposals")}))))
       (ui-process-router process-router
         {:slug slug
          :show-new-proposal-dialog show-new-proposal-dialog})

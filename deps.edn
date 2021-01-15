@@ -18,7 +18,7 @@
         io.replikativ/datahike {:mvn/version "0.3.3-SNAPSHOT"}
         com.github.mrebbinghaus/fulcro-material-ui-wrapper
         {:git/url "https://github.com/MrEbbinghaus/fulcro-material-ui-wrapper"
-         :sha "21c577671f8b930beec878114565925ff2895843"}
+         :sha "6ce8be44fd8856e262f16e62047f119d5881b8b5"}
 
         buddy/buddy {:mvn/version "2.0.0"}
 

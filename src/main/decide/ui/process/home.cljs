@@ -1,5 +1,6 @@
 (ns decide.ui.process.home
   (:require
+    [com.fulcrologic.fulcro.application :as app]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.data-fetch :as df]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr :refer [defrouter]]
@@ -7,11 +8,10 @@
     [decide.models.proposal :as proposal]
     [material-ui.data-display :as dd]
     [material-ui.data-display.list :as list]
-    [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]))
 
 
-(defsc TopEntry [_this {::proposal/keys [id title]}]
+(defsc TopEntry [_this {::proposal/keys [title]}]
   {:query [::proposal/id ::proposal/title ::proposal/pro-votes]
    :ident ::proposal/id}
   (list/item {} (str title)))
@@ -27,16 +27,15 @@
      (let [ident (comp/get-ident ProcessHome {::process/slug slug})]
        (dr/route-deferred ident
          (fn []
-           (df/load! app ident ProcessHome
-             {:post-mutation `dr/target-ready
-              :post-mutation-params {:target ident}})))))}
+           (if (get-in (app/current-state app) ident)
+             (do
+               (dr/target-ready! app ident)
+               (df/load! app ident ProcessHome))
+             (df/load! app ident ProcessHome
+               {:post-mutation `dr/target-ready
+                :post-mutation-params {:target ident}}))))))}
   (layout/container {:maxWidth :xl}
     (dd/typography {:paragraph true} description)
-    (inputs/button
-      {:color "primary"
-       :variant "contained"
-       :href (str "/decision/" slug "/proposals")}
-      "Zeige alle Vorschläge")
     (dd/typography {} "Die besten zwei Vorschläge:")
     (list/list {}
       (let [top-2-proposals (take 2 (sort-by ::proposal/pro-votes > proposals))]
