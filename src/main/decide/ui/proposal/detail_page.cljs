@@ -110,7 +110,7 @@
 
 (defn type-toggle [{:keys [color type selected-type label] :as props}]
   (layout/box {:color color :display (when (not= selected-type type) "none")}
-    (inputs/button (merge props {:color :inherit} label))))
+    (inputs/button (merge props {:color :inherit}) label)))
 
 (defn submit-new-argument-button [props]
   (inputs/icon-button
