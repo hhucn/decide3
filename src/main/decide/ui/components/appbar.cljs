@@ -31,7 +31,9 @@
                    :ui/account-menu-open? false}
    :use-hooks? true}
   (let [menu-ref (hooks/use-ref)
-        loading? (#{:remote} active-remotes)]
+        loading? (#{:remote} active-remotes)
+        [easteregg-count set-easteregg-count!] (hooks/use-state 0)
+        show-easteregg? (pos? (mod easteregg-count 5))]
     (surfaces/app-bar
       {:position "sticky"
        :color (appbar-theme-color theme)
@@ -46,8 +48,11 @@
         (dd/typography
           {:component :span
            :variant :h5
-           :color "inherit"}
-          "decide")
+           :color "inherit"
+           :onClick #(set-easteregg-count! (inc easteregg-count))}
+          (if show-easteregg?
+            "decide"
+            "d-cider 🍾"))
 
         ; Spacer
         (layout/box {:flexGrow 1})
