@@ -33,7 +33,7 @@
   (let [menu-ref (hooks/use-ref)
         loading? (#{:remote} active-remotes)
         [easteregg-count set-easteregg-count!] (hooks/use-state 0)
-        show-easteregg? (pos? (mod easteregg-count 5))]
+        show-easteregg? (and (zero? (mod easteregg-count 5)) (pos? easteregg-count))]
     (surfaces/app-bar
       {:position "sticky"
        :color (appbar-theme-color theme)
@@ -51,8 +51,8 @@
            :color "inherit"
            :onClick #(set-easteregg-count! (inc easteregg-count))}
           (if show-easteregg?
-            "decide"
-            "d-cider 🍾"))
+            "d-cider 🍾"
+            "decide"))
 
         ; Spacer
         (layout/box {:flexGrow 1})
