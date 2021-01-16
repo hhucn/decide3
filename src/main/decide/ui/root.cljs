@@ -6,6 +6,7 @@
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :refer [defrouter]]
     [decide.ui.components.appbar :as appbar]
+    [decide.ui.components.nav-drawer :as nav-drawer]
     [decide.ui.components.snackbar :as snackbar]
     [decide.ui.login :as login]
     [decide.ui.pages.splash :as splash]
@@ -29,18 +30,20 @@
   (action [{:keys [state]}]
     (swap! state assoc :ui/theme theme)))
 
-(defsc Root [this {:ui/keys [theme root-router app-bar snackbar-container]
+(defsc Root [this {:ui/keys [theme root-router app-bar snackbar-container navdrawer]
                    :keys [AUTH]}]
   {:query [:ui/theme
            :AUTH
            {:ui/app-bar (comp/get-query appbar/AppBar)}
            {:ui/root-router (comp/get-query RootRouter)}
-           {:ui/snackbar-container (comp/get-query snackbar/SnackbarContainer)}]
+           {:ui/snackbar-container (comp/get-query snackbar/SnackbarContainer)}
+           {:ui/navdrawer (comp/get-query nav-drawer/NavDrawer)}]
    :initial-state
    (fn [_] {:ui/root-router (comp/get-initial-state RootRouter)
             :ui/theme (if (dark-mode/dark-mode?) :dark :light)
             :ui/app-bar (comp/get-initial-state appbar/AppBar)
-            :ui/snackbar-container (comp/get-initial-state snackbar/SnackbarContainer)})
+            :ui/snackbar-container (comp/get-initial-state snackbar/SnackbarContainer)
+            :ui/navdrawer (comp/get-initial-state nav-drawer/NavDrawer)})
    :use-hooks? true}
   (hooks/use-lifecycle
     (fn []
@@ -52,6 +55,7 @@
     (styles/theme-provider {:theme (themes/get-mui-theme theme)}
       (mutils/css-baseline {})
       (layout/box {:mb 2}
-        (appbar/ui-appbar app-bar {}))
+        (appbar/ui-appbar app-bar #_{:menu-onClick nav-drawer/toggle-navdrawer!}))
       (snackbar/ui-snackbar-container snackbar-container)
+      (nav-drawer/ui-navdrawer navdrawer)
       (ui-root-router root-router))))

@@ -9,7 +9,8 @@
     [material-ui.navigation :as navigation]
     [material-ui.surfaces :as surfaces]
     [material-ui.transitions :as transitions]
-    ["@material-ui/icons/AccountCircle" :default AccountCircleIcon]))
+    ["@material-ui/icons/AccountCircle" :default AccountCircleIcon]
+    ["@material-ui/icons/Menu" :default Menu]))
 
 (def appbar-theme-color
   {:light "primary"
@@ -17,7 +18,8 @@
 
 (defsc AppBar
   [this
-   {:keys [ui/nav-open? ui/account-menu-open? ui/theme]}]
+   {:keys [ui/nav-open? ui/account-menu-open? ui/theme]}
+   {:keys [menu-onClick]}]
   {:query [:ui/nav-open?
            :ui/account-menu-open?
            [:ui/theme '_]]
@@ -33,12 +35,13 @@
        :color (appbar-theme-color theme)
        :elevation 0}
       (surfaces/toolbar {}
-        #_(inputs/icon-button
+        (when menu-onClick
+          (inputs/icon-button
             {:edge :start
              :color :inherit
              :aria-label "menu"
-             :onClick #(m/toggle! this :ui/nav-open?)}
-            (icons/menu {}))
+             :onClick menu-onClick}
+            (js/React.createElement Menu nil nil)))
         (dd/typography
           {:component :span
            :variant :h5
