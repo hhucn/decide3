@@ -13,6 +13,7 @@
     [decide.routing :as routing]
     [decide.ui.common.time :as time]
     [decide.ui.proposal.detail-page :as detail-page]
+    [decide.ui.session :as session]
     [material-ui.data-display :as dd]
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
@@ -24,7 +25,7 @@
 
 (defn id-part [proposal-id]
   (dom/data {:className "proposal-id"
-             :value     proposal-id}
+             :value proposal-id}
     (str "#" (if (tempid/tempid? proposal-id) "?" proposal-id))))
 
 (defn author-part [author-name]
@@ -87,7 +88,8 @@
                      ::proposal/title title
                      ::proposal/body body})
    :use-hooks? true}
-  (let [proposal-href (hooks/use-memo
+  (let [logged-in? (not (boolean (hooks/use-context session/context)))
+        proposal-href (hooks/use-memo
                         #(routing/path->absolute-url
                            (dr/into-path ["decision" slug] detail-page/ProposalPage (str id)))
                         [slug id])]
@@ -111,6 +113,7 @@
       (surfaces/card-actions {}
         (layout/box {:color "success.main"} (dd/typography {:variant :button} pro-votes))
         (inputs/button {:color (if (pos? opinion) "primary" "default")
+                        :disabled (not logged-in?)
                         :onClick #(comp/transact! this [(opinion/add {::proposal/id id
                                                                       :opinion (if (pos? opinion) 0 +1)})])
                         :startIcon (comp/create-element ThumbUpAltTwoTone nil nil)}
