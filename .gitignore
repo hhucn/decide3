@@ -207,3 +207,4 @@ typings/
 js/
 .shadow-cljs/
 *.css
+report.html
