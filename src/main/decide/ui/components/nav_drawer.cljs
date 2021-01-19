@@ -34,7 +34,8 @@
     (nav/drawer
       {:open open?
        :onClose on-close}
-      (layout/box {:width 250}
+      (layout/box {:width 250
+                   :height "100vh"}
         (layout/box {:display :flex
                      :width "100%"
                      :justifyContent "flex-end"
@@ -43,9 +44,6 @@
             (js/React.createElement ChevronLeftIcon nil nil)))
         (dd/divider {:light false})
         (comp/children this)
-        (list/list {}
-          (for [id (range 20)]
-            (list/item {:key id} id)))
         (layout/box
           {:width 250
            :bottom 0
