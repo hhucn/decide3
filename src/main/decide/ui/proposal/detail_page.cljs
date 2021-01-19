@@ -338,7 +338,7 @@
             {:post-mutation `dr/target-ready
              :post-mutation-params {:target ident}}))))}
   (let [show-add-dialog (hooks/use-callback
-                          (fn [& idents] (comp/transact!! this [(new-proposal/show {:id slug
+                          (fn [& idents] (comp/transact!! this [(new-proposal/show {:slug slug
                                                                                     :parents (apply vector (comp/get-ident this) idents)})]))
                           [slug])]
     (layout/container {}
@@ -352,7 +352,7 @@
                 (inputs/button
                   {:color :primary
                    :variant :outlined
-                   :onClick #(comp/transact!! this [(new-proposal/show {:id slug
+                   :onClick #(comp/transact!! this [(new-proposal/show {:slug slug
                                                                         :parents [(comp/get-ident this)]})])
                    :startIcon (layout/box {:clone true :css {:transform "rotate (.5turn)"}} (comp/create-element CallSplit nil nil))
                    :endIcon (layout/box {:clone true :css {:transform "rotate (.5turn)"}} (comp/create-element MergeType nil nil))}

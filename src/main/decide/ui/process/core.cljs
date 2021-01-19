@@ -38,7 +38,7 @@
    (fn [{:keys [slug]}]
      {::process/slug slug
       :ui/process-router (comp/get-initial-state ProcessRouter)
-      :ui/new-proposal-dialog (comp/get-initial-state new-proposal/NewProposalFormDialog {:id slug})})
+      :ui/new-proposal-dialog (comp/get-initial-state new-proposal/NewProposalFormDialog {:slug slug})})
    :ident [:process-context ::process/slug]
    :route-segment ["decision" ::process/slug]
    :will-enter (fn [app {slug ::process/slug}]
@@ -52,7 +52,7 @@
                            {:target (targeting/replace-at (conj ident :process-header))})
                          (dr/target-ready! app ident))))))
    :use-hooks? true}
-  (let [show-new-proposal-dialog (hooks/use-callback #(comp/transact! this [(new-proposal/show {:id slug})]))]
+  (let [show-new-proposal-dialog (hooks/use-callback #(comp/transact! this [(new-proposal/show {:slug slug})]))]
     (comp/fragment
       (layout/container {:maxWidth :xl}
         (when process-header
