@@ -157,12 +157,14 @@
         parent-argument-sections
         (dd/typography {:variant "subtitle1" :color "textSecondary"} "Die Eltern dieses Vorschlags habe keine Argumente.")))))
 
-(defn button-card [opts & children]
+(defn button-card
+  "A very large, multiline button."
+  [opts & children]
   (inputs/button
     (merge
-      {:style     {:height "100%"}
-       :size      "large"
-       :variant   "outlined"
+      {:style {:height "100%"}
+       :size "large"
+       :variant "outlined"
        :fullWidth true}
       opts)
     (apply layout/box {:display "flex" :flexDirection "column"} children)))
@@ -367,9 +369,9 @@
                         "einem anderem Vorschlag")
                       ":")
                     (list/list {:dense true :disablePadding true}
-                      (for [{::proposal/keys [id title]} parents]
-                        (list/item {:key id}
-                          (list/item-icon {} (dom/span (str "#" id)))
+                      (for [{::proposal/keys [nice-id title]} parents]
+                        (list/item {:key nice-id}
+                          (list/item-icon {} (dom/span (str "#" nice-id)))
                           (list/item-text {} (str title))))))))
 
               (inputs/button {:color   "primary"
