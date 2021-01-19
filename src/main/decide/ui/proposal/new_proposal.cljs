@@ -29,17 +29,22 @@
     ["@material-ui/icons/RemoveCircleOutline" :default RemoveIcon]))
 
 
-
-(defsc Argument [this {::argument/keys [content]
+;;region Argument Step
+(defsc Argument [this {::argument/keys [content type]
                        :keys [:ui/new-proposal-checked?]
                        :or {new-proposal-checked? false}}]
-  {:query [::argument/id ::argument/content :ui/new-proposal-checked?]
+  {:query [::argument/id ::argument/content ::argument/type :ui/new-proposal-checked?]
    :ident ::argument/id}
   (list/item {}
     (list/item-icon {}
       (inputs/checkbox
-        {:checked new-proposal-checked?
+        {:edge :start
+         :checked new-proposal-checked?
          :onClick #(m/toggle! this :ui/new-proposal-checked?)}))
+    (list/item-icon {}
+      (case type
+        :pro (layout/box {:color "success.main"} "Pro:")
+        :contra (layout/box {:color "error.main"} "Con:")))
     (list/item-text {} content)))
 
 (def ui-argument (comp/computed-factory Argument {:keyfn ::argument/id}))
@@ -55,7 +60,7 @@
       (map ui-argument arguments))))
 
 (def ui-parent-argument-section (comp/computed-factory ParentArgumentSection {:keyfn ::proposal/id}))
-
+;; endregion
 
 (defsc ParentListItem [_this {::proposal/keys [nice-id title]} {:keys [onDelete]}]
   {:query [::proposal/id
@@ -132,10 +137,13 @@
                                 ::process/keys [proposals]}]
   (layout/box {:my 1}
     (list/list {}
+      ;; already selected parents
       (for [{::proposal/keys [id] :as props} parents
             :let [delete-parent #(comp/transact! *this [(remove-parent {:parent/ident [::proposal/id id]})])]]
         (ui-parent-list-item props
           {:onDelete delete-parent}))
+
+      ;; select parent element
       (inputs/textfield {:label "Eltern hinzufügen"
                          :margin "normal"
                          :select true
@@ -169,40 +177,57 @@
       opts)
     (apply layout/box {:display "flex" :flexDirection "column"} children)))
 
+
+;; region Final Step
 (defn- section [& children]
   (apply dd/typography {:variant "overline" :component "h3"} children))
 
 (defn- quoted-body [& children]
   (apply dd/typography
-    {:variant   "body1"
+    {:variant "body1"
      :paragraph true
-     :style     {:borderLeft  "solid 1px black"
-                 :paddingLeft "1em"
-                 :whiteSpace  "pre-line"}}
+     :style {:borderLeft "solid 1px black"
+             :paddingLeft "1em"
+             :whiteSpace "pre-line"}}
     children))
+;; endregion
 
-(defsc NewProposalFormDialog [this {:ui/keys       [open? title body parents step]
+
+(defmutation goto-step [{:keys [step]}]
+  (action [{:keys [ref state]}]
+    (swap! state update-in ref assoc :ui/step
+      (case step
+        :type 0
+        :parents 1
+        :details 2
+        :arguments 3
+        :final 4))))
+
+(defmutation next-step [_]
+  (action [{:keys [ref state]}]
+    (swap! state update-in ref update :ui/step inc)))
+
+(defsc NewProposalFormDialog [this {:ui/keys [open? title body parents step]
                                     ::process/keys [slug proposals] :as props}]
-  {:query         [::process/slug
-                   :ui/open?
-                   :ui/title :ui/body
-                   {:ui/parents (comp/get-query ParentListItem)}
-                   {::process/proposals (comp/get-query ParentListItem)}
-                   :ui/step]
-   :ident         ::process/slug
+  {:query [::process/slug
+           :ui/open?
+           :ui/title :ui/body
+           {:ui/parents (comp/get-query ParentListItem)}
+           {::process/proposals (comp/get-query ParentListItem)}
+           :ui/step]
+   :ident ::process/slug
    :initial-state (fn [{:keys [id]}]
                     (merge
-                      #:ui{:open?   false
-                           :title   ""
-                           :body    ""
+                      #:ui{:open? false
+                           :title ""
+                           :body ""
                            :parents []
-                           :step    0}
+                           :step 0}
                       {::process/slug id}))
-   :use-hooks?    true}
+   :use-hooks? true}
   (let [close-dialog (hooks/use-callback #(m/set-value! this :ui/open? false))
         reset-form (hooks/use-callback #(comp/transact! this [(reset-form {})] {:compressible? true}))
-        set-step (fn set-step [step-no] (m/set-integer!! this :ui/step :value step-no))
-        next-step (hooks/use-callback (fn next-step [] (set-step (inc step))) [step])]
+        next-step (hooks/use-callback #(comp/transact! this [(next-step {})]) [])]
     (feedback/dialog
       {:open open?
        :fullWidth true
@@ -232,14 +257,16 @@
           ;; region Typ Step
           (stepper/step
             {:completed (pos? step)}
-            (stepper/step-button {:onClick #(set-step 0)} "Typ")
+            (stepper/step-button
+              {:onClick #(comp/transact! this [(goto-step {:step :type})])}
+              "Typ")
             (stepper/step-content {}
               (dd/typography {:paragraph true}
                 "Möchtest du einen neuen Vorschlag hinzufügen, einen bestehenden erweitern oder Vorschläge zusammenführen?")
               (grid/container {:spacing 2}
                 (grid/item {:sm 6 :xs 12}
                   (button-card
-                    {:onClick #(set-step 2)
+                    {:onClick #(comp/transact! this [(goto-step {:step :details})])
                      :startIcon (comp/create-element AddBox nil nil)}
                     "Neu"
                     (dd/typography {:variant "caption" :color "textSecondary"}
@@ -247,7 +274,7 @@
 
                 (grid/item {:sm 6 :xs 12}
                   (button-card
-                    {:onClick #(set-step 1)
+                    {:onClick #(comp/transact! this [(goto-step {:step :parents})])
                      :startIcon (layout/box {:clone true :css {:transform "rotate(.5turn)"}}
                                   (comp/create-element MergeType nil nil))}
                     "Ableiten / Zusammenführen"
@@ -259,8 +286,8 @@
           (stepper/step
             {:completed (< 1 step)}
             (stepper/step-button
-              {:onClick  #(set-step 1)
-               :style    {:textAlign "start"}
+              {:onClick #(comp/transact! this [(goto-step {:step :parents})])
+               :style {:textAlign "start"}
                :optional (dd/typography {:variant "caption" :color "textSecondary"} "Optional")}
               "Eltern")
             (stepper/step-content {}
@@ -270,7 +297,7 @@
                 "Du kannst einen oder mehrere wählen.")
               (parent-selection this props)
               (inputs/button
-                {:color   "primary"
+                {:color "primary"
                  :onClick next-step}
                 "Weiter")))
           ;; endregion
@@ -285,8 +312,8 @@
               {:completed
                (and (< 2 step) (not error?))}
               (stepper/step-button
-                {:onClick  #(set-step 2)
-                 :style    {:textAlign "start"}             ; fix for text alignment in button
+                {:onClick #(comp/transact! this [(goto-step {:step :details})])
+                 :style {:textAlign "start"}                ; fix for text alignment in button
                  :optional (when (and (< 2 step) error?)
                              (dd/typography {:variant "caption" :color "error"}
                                "Titel oder Details dürfen nicht leer sein."))}
@@ -321,20 +348,19 @@
                    :onChange     change-body})
 
                 (inputs/button
-                  {:color    "primary"
+                  {:color "primary"
                    :disabled error?
-                   :onClick  #(set-step (if (empty? parents)
-                                          4 3))}
+                   :onClick #(comp/transact! this [(goto-step {:step (if (empty? parents) :final :arguments)})])}
                   "Weiter"))))
           ;; endregion
 
-          ;; region Parents Step
+          ;; region Arguments Step
           (stepper/step
             {:disabled  (empty? parents)
              :completed (< 3 step)}
             (stepper/step-button
-              {:onClick  #(set-step 3)
-               :style    {:textAlign "start"}
+              {:onClick #(comp/transact! this [(goto-step {:step :arguments})])
+               :style {:textAlign "start"}
                :optional (dd/typography {:variant "caption" :color "textSecondary"}
                            (if (empty? parents)
                              "Nur mit Eltern möglich."
@@ -343,14 +369,14 @@
             (stepper/step-content {}
               (argument-selection this props)
               (inputs/button
-                {:color   "primary"
+                {:color "primary"
                  :onClick next-step}
                 "Weiter")))
           ;; endregion
 
           (stepper/step {}
             (stepper/step-button
-              {:onClick #(set-step 4)}
+              {:onClick #(comp/transact! this [(goto-step {:step :final})])}
               "Übersicht")
             (stepper/step-content {}
               (layout/box {:mb 2}
