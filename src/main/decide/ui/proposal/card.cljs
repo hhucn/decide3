@@ -88,7 +88,7 @@
                      ::proposal/title title
                      ::proposal/body body})
    :use-hooks? true}
-  (let [logged-in? (not (boolean (hooks/use-context session/context)))
+  (let [logged-in? (session/logged-in? (hooks/use-context session/context))
         proposal-href (hooks/use-memo
                         #(routing/path->absolute-url
                            (dr/into-path ["decision" slug] detail-page/ProposalPage (str id)))

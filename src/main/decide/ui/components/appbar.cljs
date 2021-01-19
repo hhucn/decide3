@@ -3,14 +3,15 @@
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
+    [decide.ui.session :as session]
     [material-ui.data-display :as dd]
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
     [material-ui.navigation :as navigation]
     [material-ui.surfaces :as surfaces]
-    [material-ui.transitions :as transitions]
     ["@material-ui/icons/AccountCircle" :default AccountCircleIcon]
-    ["@material-ui/icons/Menu" :default Menu]))
+    ["@material-ui/icons/Menu" :default Menu]
+    [taoensso.timbre :as log]))
 
 (def appbar-theme-color
   {:light "primary"
@@ -18,16 +19,15 @@
 
 (defsc AppBar
   [this
-   {:keys [ui/nav-open? ui/account-menu-open? ui/theme]}
+   {:keys [ui/account-menu-open? ui/theme]}
    {:keys [menu-onClick]}]
-  {:query [:ui/nav-open?
-           :ui/account-menu-open?
+  {:query [:ui/account-menu-open?
            [:ui/theme '_]]
    :ident (fn [] [:component :app-bar])
-   :initial-state {:ui/nav-open? false
-                   :ui/account-menu-open? false}
+   :initial-state {:ui/account-menu-open? false}
    :use-hooks? true}
-  (let [menu-ref (hooks/use-ref)
+  (let [logged-in? (session/logged-in? (hooks/use-context session/context))
+        menu-ref (hooks/use-ref)
         [easteregg-count set-easteregg-count!] (hooks/use-state 0)
         show-easteregg? (and (zero? (mod easteregg-count 5)) (pos? easteregg-count))]
     (surfaces/app-bar
@@ -52,30 +52,37 @@
             "decide"))
 
         ; Spacer
-        (layout/box {:flexGrow 1})
+        (layout/box {:display :flex
+                     :flexGrow 1
+                     :flexDirection :row-reverse}
 
-        (inputs/icon-button
-          {:ref menu-ref
-           :edge "end"
-           :aria-label "account of current user"
-           :aria-controls "menuId"
-           :aria-haspopup true
-           :onClick #(m/set-value! this :ui/account-menu-open? true)
-           :color "inherit"}
-          (comp/create-element AccountCircleIcon nil nil))
-        (navigation/menu
-          {:keepMounted true
-           :anchorEl (.-current menu-ref)
-           :getContentAnchorEl nil
-           :anchorOrigin {:vertical "bottom"
-                          :horizontal "left"}
-           :transformOrigin {:vertical "top"
-                             :horizontal "center"}
-           :open account-menu-open?
-           :onClose #(m/set-value! this :ui/account-menu-open? false)}
-          (navigation/menu-item {} "Logout")))
+          (if-not logged-in?
+            (inputs/button
+              {:variant :outlined
+               :color :inherit
+               :href "/login"}
+              "Login")
 
-      (transitions/collapse {:in nav-open?}
-        (comp/children this)))))
+            (inputs/icon-button
+              {:ref menu-ref
+               :edge "end"
+               :aria-label "account of current user"
+               :aria-controls "menuId"
+               :aria-haspopup true
+               :onClick #(m/set-value! this :ui/account-menu-open? true)
+               :color "inherit"}
+              (comp/create-element AccountCircleIcon nil nil)))
+
+          (navigation/menu
+            {:keepMounted true
+             :anchorEl (.-current menu-ref)
+             :getContentAnchorEl nil
+             :anchorOrigin {:vertical "bottom"
+                            :horizontal "left"}
+             :transformOrigin {:vertical "top"
+                               :horizontal "center"}
+             :open account-menu-open?
+             :onClose #(m/set-value! this :ui/account-menu-open? false)}
+            (navigation/menu-item {} "Logout")))))))
 
 (def ui-appbar (comp/computed-factory AppBar))

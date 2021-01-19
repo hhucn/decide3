@@ -121,7 +121,7 @@
 (defsc NewArgumentLine [_ _ {:keys [add-argument!]}]
   {:use-hooks? true}
   (let [{::user/keys [id]} (hooks/use-context session/context)
-        logged-in? (not (boolean id))
+        logged-in? (boolean id)
         [new-argument set-new-argument!] (hooks/use-state "")
         [type set-type!] (hooks/use-state :pro)
         toggle-type! (hooks/use-callback #(set-type! ({:pro :contra
