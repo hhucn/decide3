@@ -8,7 +8,7 @@
     [material-ui.inputs :as inputs]
     ["@material-ui/icons/Close" :default Close]))
 
-(def ident [:component :snackbars])
+(def ident [:component/id ::Snackbar])
 
 (defn- -next-snackbar [snackbar-container]
   (assoc snackbar-container

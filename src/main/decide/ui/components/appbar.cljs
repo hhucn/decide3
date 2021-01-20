@@ -19,11 +19,11 @@
 
 (defsc AppBar
   [this
-   {:keys [ui/account-menu-open? ui/theme]}
+   {:keys [ui/account-menu-open? root/theme]}
    {:keys [menu-onClick]}]
   {:query [:ui/account-menu-open?
-           [:ui/theme '_]]
-   :ident (fn [] [:component :app-bar])
+           [:root/theme '_]]
+   :ident (fn [] [:component/id ::AppBar])
    :initial-state {:ui/account-menu-open? false}
    :use-hooks? true}
   (let [logged-in? (session/logged-in? (hooks/use-context session/context))

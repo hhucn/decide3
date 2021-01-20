@@ -13,7 +13,7 @@
     [taoensso.timbre :as log]
     [com.fulcrologic.fulcro.dom :as dom]))
 
-(def ident [:component :navdrawer])
+(def ident [:component/id ::NavDrawer])
 
 (defmutation toggle-open? [{:keys [open?]}]
   (action [{:keys [state]}]

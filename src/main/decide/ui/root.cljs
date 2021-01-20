@@ -37,23 +37,22 @@
 
 (defmutation set-theme [{:keys [theme]}]
   (action [{:keys [state]}]
-    (swap! state assoc :ui/theme theme)))
+    (swap! state assoc :root/theme theme)))
 
-(defsc Root [this {:ui/keys [theme root-router app-bar snackbar-container navdrawer]
-                   :keys [AUTH]}]
-  {:query [:ui/theme
-           :AUTH
-           {:ui/app-bar (comp/get-query appbar/AppBar)}
-           {:ui/root-router (comp/get-query RootRouter)}
-           {:ui/snackbar-container (comp/get-query snackbar/SnackbarContainer)}
-           {:ui/navdrawer (comp/get-query nav-drawer/NavDrawer)}
+(defsc Root [this {:root/keys [theme AUTH root-router app-bar snackbar-container navdrawer]}]
+  {:query [:root/theme
+           :root/AUTH
+           {:root/app-bar (comp/get-query appbar/AppBar)}
+           {:root/root-router (comp/get-query RootRouter)}
+           {:root/snackbar-container (comp/get-query snackbar/SnackbarContainer)}
+           {:root/navdrawer (comp/get-query nav-drawer/NavDrawer)}
            :all-processes]
    :initial-state
-   (fn [_] {:ui/root-router (comp/get-initial-state RootRouter)
-            :ui/theme (if (dark-mode/dark-mode?) :dark :light)
-            :ui/app-bar (comp/get-initial-state appbar/AppBar)
-            :ui/snackbar-container (comp/get-initial-state snackbar/SnackbarContainer)
-            :ui/navdrawer (comp/get-initial-state nav-drawer/NavDrawer)
+   (fn [_] {:root/root-router (comp/get-initial-state RootRouter)
+            :root/theme (if (dark-mode/dark-mode?) :dark :light)
+            :root/app-bar (comp/get-initial-state appbar/AppBar)
+            :root/snackbar-container (comp/get-initial-state snackbar/SnackbarContainer)
+            :root/navdrawer (comp/get-initial-state nav-drawer/NavDrawer)
             :all-processes []})
    :use-hooks? true}
   (hooks/use-lifecycle

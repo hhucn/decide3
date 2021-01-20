@@ -8,7 +8,7 @@
 
 (defsc Session [_ _]
   {:query [:session/valid? ::id]
-   :ident (fn [] [:AUTH :current-session])
+   :ident (fn [] [:root/AUTH :current-session])
    :initial-state {:session/valid? false
                    ::id nil}})
 
