@@ -6,5 +6,5 @@
 (defmutation add [{::proposal/keys [id]
                    :keys   [opinion]}]
   (action [{:keys [state]}]
-    (swap! state update-in [::proposal/id id] assoc ::proposal/opinion opinion))
+    (swap! state update-in [::proposal/id id] assoc ::proposal/my-opinion opinion))
   (remote [_] true))

@@ -15,7 +15,7 @@
              ::body
              ::pro-votes ::con-votes
              ::created
-             ::opinion
+             ::my-opinion
              {::parents '...}                               ; this is a recursion
              {::original-author (comp/get-query Author)}])
    :ident ::id})

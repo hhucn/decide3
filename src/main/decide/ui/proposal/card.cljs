@@ -72,14 +72,14 @@
   {:query [::argument/id]
    :ident ::argument/id})
 
-(defsc ProposalCard [this {::proposal/keys [id title body opinion arguments pro-votes]
+(defsc ProposalCard [this {::proposal/keys [id title body my-opinion arguments pro-votes]
                            :>/keys [subheader]
                            :keys [root/current-session]}
                      {::process/keys [slug]}]
   {:query (fn []
             [::proposal/id
              ::proposal/title ::proposal/body
-             ::proposal/opinion
+             ::proposal/my-opinion
              {::proposal/arguments (comp/get-query Argument)}
              ::proposal/pro-votes
              ::proposal/nice-id
@@ -117,10 +117,10 @@
 
       (surfaces/card-actions {}
         (layout/box {:color "success.main"} (dd/typography {:variant :button} pro-votes))
-        (inputs/button {:color (if (pos? opinion) "primary" "default")
+        (inputs/button {:color (if (pos? my-opinion) "primary" "default")
                         :disabled (not logged-in?)
                         :onClick #(comp/transact! this [(opinion/add {::proposal/id id
-                                                                      :opinion (if (pos? opinion) 0 +1)})])
+                                                                      :opinion (if (pos? my-opinion) 0 +1)})])
                         :startIcon (comp/create-element ThumbUpAltTwoTone nil nil)}
           "Zustimmen")
         #_(inputs/button-group
@@ -128,10 +128,10 @@
              :variant :text
              :disableElevation true}
             (layout/box {:color "green"} (dd/typography {:variant :button :color "inherit"} pro-votes))
-            (inputs/button {:color (if (neg? opinion) "primary" "default")
+            (inputs/button {:color (if (neg? my-opinion) "primary" "default")
                             :aria-label "Ablehnen"
                             :onClick #(comp/transact! this [(opinion/add {::proposal/id id
-                                                                          :opinion (if (neg? opinion) 0 -1)})])
+                                                                          :opinion (if (neg? my-opinion) 0 -1)})])
                             :startIcon (comp/create-element ThumbDownAltTwoTone nil nil)}))
 
         (layout/box {:style {:marginLeft "auto"}})

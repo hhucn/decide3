@@ -71,11 +71,11 @@
 
 (defresolver resolve-personal-opinion [{:keys [db AUTH/user-id]} {::proposal/keys [id]}]
   {::pc/input  #{::proposal/id}
-   ::pc/output [::proposal/opinion]}
+   ::pc/output [::proposal/my-opinion]}
   (if-let [opinion (get-opinion db [::user/id user-id] [::proposal/id id])]
     (let [{::keys [value]} (d/pull db [[::value :default 0]] opinion)]
-      {::proposal/opinion value})
-    {::proposal/opinion 0}))
+      {::proposal/my-opinion value})
+    {::proposal/my-opinion 0}))
 
 
 (defresolver resolve-proposal-opinions [{:keys [db]} {::proposal/keys [id]}]
