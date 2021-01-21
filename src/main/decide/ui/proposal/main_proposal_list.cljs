@@ -102,10 +102,10 @@
               (sort-selector selected-sort set-selected-sort!))))
         (grid/container {:spacing 2 :alignItems "stretch"}
           (for [{id ::proposal/id :as proposal} sorted-proposals]
-            (grid/item {:xs 12 :md 6 :lg 4 :xl 3 :key id :style {:flex-grow 1}}
+            (grid/item {:xs 12 :md 6 :lg 4 :xl 3 :key id :style {:flexGrow 1}}
               (proposal-card/ui-proposal-card proposal {::process/slug slug})))
-          (grid/item {:xs 12 :md 6 :lg 4 :xl 3 :style {:flex-grow 1
-                                                       :min-height "100px"}}
+          (grid/item {:xs 12 :md 6 :lg 4 :xl 3 :style {:flexGrow 1
+                                                       :minHeight "100px"}}
             (inputs/button {:style {:height "100%"
                                     :borderStyle "dashed"}
                             :fullWidth true
