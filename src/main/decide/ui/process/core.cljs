@@ -68,7 +68,7 @@
             (tabs/tabs {:value current-target
                         :indicatorColor "secondary"
                         :textColor "secondary"}
-              (tabs/tab {:label "Home"
+              (tabs/tab {:label "Übersicht"
                          :href (str "/decision/" slug "/home")})
               (tabs/tab {:label "Alle Vorschläge"
                          :href (str "/decision/" slug "/proposals")})))))

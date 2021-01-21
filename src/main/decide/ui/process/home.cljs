@@ -8,16 +8,41 @@
     [decide.models.proposal :as proposal]
     [material-ui.data-display :as dd]
     [material-ui.data-display.list :as list]
-    [material-ui.layout :as layout]))
+    [material-ui.layout :as layout]
+    [material-ui.surfaces :as surfaces]
+    [material-ui.inputs :as inputs]
+    [taoensso.timbre :as log]
+    [material-ui.layout.grid :as grid]))
 
-
-(defsc TopEntry [_this {::proposal/keys [title]}]
-  {:query [::proposal/id ::proposal/title ::proposal/pro-votes]
+(defsc TopEntry [_this {::proposal/keys [id title pro-votes my-opinion]
+                        :keys [root/current-session] :as props}]
+  {:query [::proposal/id ::proposal/title ::proposal/pro-votes ::proposal/my-opinion
+           [:root/current-session '_]]
    :ident ::proposal/id}
-  (list/item {} (str title)))
+  (list/item
+    {:button true
+     :component :a
+     :href (str "proposal/" id)}
+    (list/item-text {:primary title
+                     :secondary (str "Zustimmungen: " pro-votes)} title)
+    (when (get current-session :session/valid?)
+      (list/item-secondary-action {}
+        (if (pos? my-opinion)
+          (dd/typography {:color "success.main"} "Zugestimmt")
+          (inputs/button {:color :primary}
+
+            "Zustimmen"))))))
+
 (def ui-top-entry (comp/factory TopEntry {:keyfn ::proposal/id}))
 
-(defsc ProcessHome [_this {::process/keys [slug description proposals]}]
+(defn section-paper [props & children]
+  (layout/box (merge {:clone true :p 2} props)
+    (apply surfaces/paper {:variant :outlined} children)))
+
+(defn top-proposals [proposals]
+  (first (partition-by ::proposal/pro-votes (sort-by ::proposal/pro-votes > proposals))))
+
+(defsc ProcessHome [_this {::process/keys [description proposals]}]
   {:query [::process/slug ::process/description
            {::process/proposals (comp/get-query TopEntry)}]
    :ident ::process/slug
@@ -34,9 +59,26 @@
              (df/load! app ident ProcessHome
                {:post-mutation `dr/target-ready
                 :post-mutation-params {:target ident}}))))))}
-  (layout/container {:maxWidth :xl}
-    (dd/typography {:paragraph true} description)
-    (dd/typography {} "Die besten zwei Vorschläge:")
-    (list/list {}
-      (let [top-2-proposals (take 2 (sort-by ::proposal/pro-votes > proposals))]
-        (map ui-top-entry top-2-proposals)))))
+  (layout/box {:clone true :pt 2}
+    (layout/container {:maxWidth :lg :component :main}
+      ;; description section
+      (grid/container {:spacing 2}
+        (grid/item {:xs 12}
+          (section-paper {}
+            (dd/typography {:component :h2 :variant "h4" :paragraph true}
+              "Beschreibung")
+            (dd/typography {:variant "body1"}
+              description)))
+
+
+        (let [top-proposals (top-proposals proposals)]
+          (when-not (zero? (count top-proposals))
+            (grid/item {:xs 12}
+              (section-paper {:pb 0}
+                (dd/typography {:component :h2 :variant "h5"}
+                  (case (count top-proposals)
+                    0 "Es gibt keine Vorschläge!"
+                    1 "Der aktuell beste Vorschlag"
+                    "Die aktuell besten Vorschläge"))
+                (list/list {}
+                  (map ui-top-entry top-proposals))))))))))
