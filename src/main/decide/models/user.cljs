@@ -14,7 +14,6 @@
   {:query [:session/valid?
            {:user (comp/get-query User)}
            ::id]
-   ;:ident (fn [] [:root/AUTH :root/current-session])
    :initial-state {:session/valid? false}})
 
 

@@ -41,7 +41,8 @@
   (remote [env]
     (-> env
       (m/with-server-side-mutation `user/sign-up)
-      (m/returning user/Session))))
+      (m/returning user/Session)
+      (m/with-target [:root/current-session]))))
 
 (defmutation sign-in [{:user/keys [_email _password]}]
   (action [_] true)
@@ -62,7 +63,8 @@
   (remote [env]
     (-> env
       (m/with-server-side-mutation `user/sign-in)
-      (m/returning user/Session))))
+      (m/returning user/Session)
+      (m/with-target [:root/current-session]))))
 
 (defn wide-textfield
   "Outlined textfield on full width with normal margins. Takes the same props as `material-ui.inputs/textfield`"
