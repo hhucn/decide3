@@ -97,10 +97,12 @@
                            (dr/into-path ["decision" slug] detail-page/ProposalPage (str id)))
                         [slug id])]
     (surfaces/card
-      {:raised false}
+      {:raised false
+       :component :article}
 
       (surfaces/card-header
         {:title title
+         :titleTypographyProps {:component "h3"}
          :subheader (ui-subheader subheader)
          :action (inputs/icon-button {:disabled true :size :small}
                    (comp/create-element MoreVert nil nil))})

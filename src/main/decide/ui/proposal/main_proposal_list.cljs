@@ -12,6 +12,8 @@
     [decide.utils.breakpoint :as breakpoint]
     [material-ui.data-display :as dd]
     [material-ui.inputs :as inputs]
+    [material-ui.inputs.form :as form]
+    [material-ui.inputs.input :as input]
     [material-ui.layout :as layout]
     [material-ui.layout.grid :as grid]
     [material-ui.surfaces :as surfaces]
@@ -56,8 +58,19 @@
 (defmethod sort-proposals :default [_ proposals]
   (sort-proposals "old->new" proposals))
 
+(defn sort-selector [selected set-selected!]
+  (form/control {:size :small}
+    (input/label {:htmlFor "main-proposal-list-sort"} "Sortierung")
+    (inputs/native-select
+      {:value selected
+       :onChange (fn [e]
+                   (set-selected! (evt/target-value e)))
+       :inputProps {:id "main-proposal-list-sort"}}
+      (dom/option {:value "new->old"} "Neu → Alt")
+      (dom/option {:value "old->new"} "Alt → Neu")
+      (dom/option {:value "most-approvals"} "Zustimmungen ↓"))))
 
-(defsc MainProposalList [this {::process/keys [slug proposals]} {:keys [show-new-proposal-dialog]}]
+(defsc MainProposalList [_ {::process/keys [slug proposals]} {:keys [show-new-proposal-dialog]}]
   {:query [::process/slug
            {::process/proposals (comp/get-query proposal-card/ProposalCard)}]
    :ident ::process/slug
@@ -73,16 +86,19 @@
         sorted-proposals (sort-proposals selected-sort proposals)]
     (comp/fragment
       (layout/container {:maxWidth :xl}
-        (surfaces/toolbar {}
-          (dd/typography {} "Sortieren Nach:")
-          (inputs/native-select {:value selected-sort
-                                 :variant "outlined"
-                                 :onChange (fn [e]
-                                             (set-selected-sort! (evt/target-value e)))}
-            (dom/option {:value "new->old"} "Neu → Alt")
-            (dom/option {:value "old->new"} "Alt → Neu")
-            (dom/option {:value "most-approvals"} "Zustimmungen ↓")))
-        (layout/box {:pb 8 :clone true}
+        (layout/box {:my 1 :clone true}
+          (surfaces/toolbar {:disableGutters true :variant :dense}
+            (dd/typography {:variant :overline}
+              "Vorschläge: "
+              (count sorted-proposals))
+            (layout/box {:display :flex
+                         :component :menu
+                         :m 0
+                         :type :toolbar
+                         :flexGrow 1
+                         :flexDirection :row-reverse}
+              (sort-selector selected-sort set-selected-sort!))))
+        (layout/box {:pb 8 :clone true}                     ; to accommodate for the fab
           (grid/container {:spacing 2 :alignItems "stretch"}
             (for [{id ::proposal/id :as proposal} sorted-proposals]
               (grid/item {:xs 12 :md 6 :lg 4 :xl 3 :key id}

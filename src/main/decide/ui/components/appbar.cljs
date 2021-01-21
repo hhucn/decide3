@@ -34,7 +34,7 @@
     (surfaces/app-bar
       {:position "sticky"
        :color (appbar-theme-color theme)
-       :elevation 0}
+       :elevation (if (= :light theme) 2 0)}
       (surfaces/toolbar {}
         (when menu-onClick
           (inputs/icon-button

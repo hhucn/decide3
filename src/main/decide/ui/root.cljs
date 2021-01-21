@@ -65,8 +65,7 @@
                                                   [(set-theme {:theme new-theme})])))))
   (styles/theme-provider {:theme (themes/get-mui-theme theme)}
     (m.utils/css-baseline {})
-    (layout/box {:mb 2}
-      (appbar/ui-appbar app-bar {:menu-onClick nav-drawer/toggle-navdrawer!}))
+    (appbar/ui-appbar app-bar {:menu-onClick nav-drawer/toggle-navdrawer!})
     (snackbar/ui-snackbar-container snackbar-container)
 
     (nav-drawer/ui-navdrawer navdrawer nil

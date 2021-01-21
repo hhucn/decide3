@@ -14,7 +14,8 @@
     [decide.ui.proposal.new-proposal :as new-proposal]
     [material-ui.data-display :as dd]
     [material-ui.layout :as layout]
-    [material-ui.navigation.tabs :as tabs]))
+    [material-ui.navigation.tabs :as tabs]
+    [material-ui.surfaces :as surfaces]))
 
 (defrouter ProcessRouter [_this _]
   {:router-targets [process.home/ProcessHome proposal.main-list/MainProposalList proposal.detail-page/ProposalPage]})
@@ -24,7 +25,8 @@
 (defsc ProcessHeader [_ {::process/keys [title]}]
   {:query [::process/slug ::process/title]
    :ident ::process/slug}
-  (dd/typography {:component "h1" :variant "h2"} title))
+  (layout/box {:mx 2 :mb 2 :mt 0}
+    (dd/typography {:component "h1" :variant "h2"} title)))
 
 (def ui-process-info (comp/factory ProcessHeader))
 
@@ -54,20 +56,22 @@
    :use-hooks? true}
   (let [show-new-proposal-dialog (hooks/use-callback #(comp/transact! this [(new-proposal/show {:slug slug})]))]
     (comp/fragment
-      (layout/container {:maxWidth :xl}
-        (when process-header
-          (ui-process-info process-header))
-        (let [current-target (case (first (drop 2 (dr/current-route this)))
-                               "home" 0
-                               "proposals" 1
-                               false)]
-          (tabs/tabs {:value current-target
-                      :indicatorColor "secondary"
-                      :textColor "secondary"}
-            (tabs/tab {:label "Home"
-                       :href (str "/decision/" slug "/home")})
-            (tabs/tab {:label "Alle Vorschläge"
-                       :href (str "/decision/" slug "/proposals")}))))
+      (surfaces/paper
+        {:square true}
+        (layout/container {:maxWidth :xl :disableGutters true}
+          (when process-header
+            (ui-process-info process-header))
+          (let [current-target (case (first (drop 2 (dr/current-route this)))
+                                 "home" 0
+                                 "proposals" 1
+                                 false)]
+            (tabs/tabs {:value current-target
+                        :indicatorColor "secondary"
+                        :textColor "secondary"}
+              (tabs/tab {:label "Home"
+                         :href (str "/decision/" slug "/home")})
+              (tabs/tab {:label "Alle Vorschläge"
+                         :href (str "/decision/" slug "/proposals")})))))
       (ui-process-router process-router
         {:slug slug
          :show-new-proposal-dialog show-new-proposal-dialog})

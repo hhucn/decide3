@@ -346,9 +346,9 @@
                           (fn [& idents] (comp/transact!! this [(new-proposal/show {:slug slug
                                                                                     :parents (apply vector (comp/get-ident this) idents)})]))
                           [slug])]
-    (layout/container {}
-      (layout/box {:p 2 :clone true}
-        (surfaces/paper {:p 2}
+    (layout/container {:maxWidth :xl}
+      (layout/box {:my 2 :p 2 :clone true}
+        (surfaces/paper {}
           (grid/container {:spacing 3 :component "main"}
             (grid/item {:xs 12}
               (dd/typography {:variant "h3" :component "h1"} title))
