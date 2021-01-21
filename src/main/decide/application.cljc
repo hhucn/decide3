@@ -22,6 +22,7 @@
 (defonce SPA
   (rad-app/fulcro-rad-app
     {;:client-did-mount client-did-mount
+     :global-eql-transform (rad-app/global-eql-transform (rad-app/elision-predicate (conj rad-app/default-network-blacklist :root/current-session)))
      :props-middleware (comp/wrap-update-extra-props
                          (fn [cls extra-props]
                            (merge extra-props (css/get-classnames cls))))}))

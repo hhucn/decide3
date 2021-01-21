@@ -24,7 +24,7 @@
   (routing/start-history! SPA)
   (dr/initialize! SPA)
 
-  (df/load! SPA ::user/current-session user/Session)
+  (df/load! SPA ::user/current-session user/Session {:target [:root/current-session]})
   (swap! (::app/state-atom SPA) update :process-context dissoc nil)
 
   (routing/start!)

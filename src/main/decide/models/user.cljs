@@ -3,14 +3,19 @@
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]))
 
-(def sign-in)
-(def sign-up)
+(def sign-in `sign-in)
+(def sign-up `sign-up)
+
+(defsc User [_ _]
+  {:query [::id ::display-name]
+   :ident ::id})
 
 (defsc Session [_ _]
-  {:query [:session/valid? ::id]
-   :ident (fn [] [:root/AUTH :current-session])
-   :initial-state {:session/valid? false
-                   ::id nil}})
+  {:query [:session/valid?
+           {:user (comp/get-query User)}
+           ::id]
+   ;:ident (fn [] [:root/AUTH :root/current-session])
+   :initial-state {:session/valid? false}})
 
 
 (defmutation change-password [{:keys [old-password new-password]}]

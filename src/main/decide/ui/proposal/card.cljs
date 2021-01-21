@@ -73,7 +73,8 @@
    :ident ::argument/id})
 
 (defsc ProposalCard [this {::proposal/keys [id title body opinion arguments pro-votes]
-                           :>/keys [subheader]}
+                           :>/keys [subheader]
+                           :keys [root/current-session]}
                      {::process/keys [slug]}]
   {:query (fn []
             [::proposal/id
@@ -81,14 +82,15 @@
              ::proposal/opinion
              {::proposal/arguments (comp/get-query Argument)}
              ::proposal/pro-votes
-             {:>/subheader (comp/get-query Subheader)}])
+             {:>/subheader (comp/get-query Subheader)}
+             {[:root/current-session '_] (comp/get-query user/Session)}])
    :ident ::proposal/id
    :initial-state (fn [{:keys [id title body]}]
                     {::proposal/id id
                      ::proposal/title title
                      ::proposal/body body})
    :use-hooks? true}
-  (let [logged-in? (session/logged-in? (hooks/use-context session/context))
+  (let [logged-in? (get current-session :session/valid?)
         proposal-href (hooks/use-memo
                         #(routing/path->absolute-url
                            (dr/into-path ["decision" slug] detail-page/ProposalPage (str id)))

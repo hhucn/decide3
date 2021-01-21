@@ -118,10 +118,10 @@
        :aria-label "Absenden"})
     (comp/create-element Send nil nil)))
 
-(defsc NewArgumentLine [_ _ {:keys [add-argument!]}]
+(defsc NewArgumentLine [_ {:keys []} {:keys [root/current-session add-argument!]}]
   {:use-hooks? true}
-  (let [{::user/keys [id]} (hooks/use-context session/context)
-        logged-in? (boolean id)
+  (let [user-id (get-in current-session [:user ::user/id])
+        logged-in? (get current-session :session/valid?)
         [new-argument set-new-argument!] (hooks/use-state "")
         [type set-type!] (hooks/use-state :pro)
         toggle-type! (hooks/use-callback #(set-type! ({:pro :contra
@@ -131,7 +131,7 @@
                    (evt/prevent-default! e)
                    (add-argument! {::argument/content new-argument
                                    ::argument/type type
-                                   :author-id id})
+                                   :author-id user-id})
                    (set-new-argument! ""))
                  [new-argument type])]
     (dom/form {:onSubmit submit
@@ -166,9 +166,11 @@
 
 (def ui-new-argument-line (comp/computed-factory NewArgumentLine))
 
-(defsc ArgumentSection [this {::proposal/keys [id arguments]}]
+(defsc ArgumentSection [this {::proposal/keys [id arguments]
+                              :keys [root/current-session]}]
   {:query [::proposal/id
-           {::proposal/arguments (comp/get-query ArgumentRow)}]
+           {::proposal/arguments (comp/get-query ArgumentRow)}
+           {[:root/current-session '_] (comp/get-query user/Session)}]
    :ident ::proposal/id}
   (comp/fragment
     (layout/box {:mb 1}
@@ -179,7 +181,8 @@
                         :paragraph true} "Bisher gibt es noch keine Argumente.")))
 
     (ui-new-argument-line {}
-      {:add-argument! (fn [{::argument/keys [content type]
+      {:root/current-session current-session
+       :add-argument! (fn [{::argument/keys [content type]
                             :keys [user-id]}]
                         (comp/transact! this [(add-argument {::proposal/id id
                                                              :temp-id (tempid/tempid)

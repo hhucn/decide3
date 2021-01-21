@@ -145,7 +145,7 @@
                                      :body body
                                      :parents (map #(find % ::proposal/id) parents)
                                      :argument-idents arguments
-                                     :original-author (find user-id :decide.models.user/id)})
+                                     :original-author user-id})
         tx-report (d/transact conn
                     [(assoc new-proposal :db/id "new-proposal")
                      [:db/add [::slug slug] ::proposals "new-proposal"]])]

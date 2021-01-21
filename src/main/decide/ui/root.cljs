@@ -21,7 +21,8 @@
     [material-ui.layout :as layout]
     [material-ui.styles :as styles]
     [material-ui.utils :as m.utils]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [decide.models.user :as user]))
 
 (defrouter RootRouter [_this {:keys [current-state]}]
   {:router-targets [process.list/ProcessesPage
@@ -39,13 +40,13 @@
   (action [{:keys [state]}]
     (swap! state assoc :root/theme theme)))
 
-(defsc Root [this {:root/keys [theme AUTH root-router app-bar snackbar-container navdrawer]}]
+(defsc Root [this {:root/keys [theme root-router app-bar snackbar-container navdrawer]}]
   {:query [:root/theme
-           :root/AUTH
            {:root/app-bar (comp/get-query appbar/AppBar)}
            {:root/root-router (comp/get-query RootRouter)}
            {:root/snackbar-container (comp/get-query snackbar/SnackbarContainer)}
            {:root/navdrawer (comp/get-query nav-drawer/NavDrawer)}
+           {:root/current-session (comp/get-query user/Session)}
            :all-processes]
    :initial-state
    (fn [_] {:root/root-router (comp/get-initial-state RootRouter)
@@ -53,6 +54,7 @@
             :root/app-bar (comp/get-initial-state appbar/AppBar)
             :root/snackbar-container (comp/get-initial-state snackbar/SnackbarContainer)
             :root/navdrawer (comp/get-initial-state nav-drawer/NavDrawer)
+            :root/current-session (comp/get-initial-state user/Session)
             :all-processes []})
    :use-hooks? true}
   (hooks/use-lifecycle
@@ -61,22 +63,21 @@
       (dark-mode/register-dark-mode-listener #(let [new-theme (if (.-matches %) :dark :light)]
                                                 (comp/transact! (comp/any->app this)
                                                   [(set-theme {:theme new-theme})])))))
-  (js/React.createElement (.-Provider session/context) #js {:value (:current-session AUTH nil)}
-    (styles/theme-provider {:theme (themes/get-mui-theme theme)}
-      (m.utils/css-baseline {})
-      (layout/box {:mb 2}
-        (appbar/ui-appbar app-bar {:menu-onClick nav-drawer/toggle-navdrawer!}))
-      (snackbar/ui-snackbar-container snackbar-container)
+  (styles/theme-provider {:theme (themes/get-mui-theme theme)}
+    (m.utils/css-baseline {})
+    (layout/box {:mb 2}
+      (appbar/ui-appbar app-bar {:menu-onClick nav-drawer/toggle-navdrawer!}))
+    (snackbar/ui-snackbar-container snackbar-container)
 
-      (nav-drawer/ui-navdrawer navdrawer nil
-        (list/list {}
-          (list/item {:button true
-                      :component :a
-                      :href (r/path-to->absolute-url process.list/ProcessesPage)}
-            (list/item-text {} "Processes"))
-          (list/item {:button true
-                      :component :a
-                      :href (r/path-to->absolute-url settings/SettingsPage)}
-            (list/item-text {} "Settings"))))
+    (nav-drawer/ui-navdrawer navdrawer nil
+      (list/list {}
+        (list/item {:button true
+                    :component :a
+                    :href (r/path-to->absolute-url process.list/ProcessesPage)}
+          (list/item-text {} "Processes"))
+        (list/item {:button true
+                    :component :a
+                    :href (r/path-to->absolute-url settings/SettingsPage)}
+          (list/item-text {} "Settings"))))
 
-      (ui-root-router root-router))))
+    (ui-root-router root-router)))

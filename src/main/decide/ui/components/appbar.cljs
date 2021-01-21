@@ -3,15 +3,14 @@
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
-    [decide.ui.session :as session]
+    [decide.models.user :as user]
     [material-ui.data-display :as dd]
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
     [material-ui.navigation :as navigation]
     [material-ui.surfaces :as surfaces]
     ["@material-ui/icons/AccountCircle" :default AccountCircleIcon]
-    ["@material-ui/icons/Menu" :default Menu]
-    [taoensso.timbre :as log]))
+    ["@material-ui/icons/Menu" :default Menu]))
 
 (def appbar-theme-color
   {:light "primary"
@@ -19,14 +18,16 @@
 
 (defsc AppBar
   [this
-   {:keys [ui/account-menu-open? root/theme]}
+   {:keys [ui/account-menu-open? root/theme root/current-session]}
    {:keys [menu-onClick]}]
   {:query [:ui/account-menu-open?
-           [:root/theme '_]]
+           [:root/theme '_]
+           {[:root/current-session '_] (comp/get-query user/Session)}]
    :ident (fn [] [:component/id ::AppBar])
    :initial-state {:ui/account-menu-open? false}
    :use-hooks? true}
-  (let [logged-in? (session/logged-in? (hooks/use-context session/context))
+  (let [logged-in? (get current-session :session/valid?)
+        display-name (get-in current-session [:user ::user/display-name])
         menu-ref (hooks/use-ref)
         [easteregg-count set-easteregg-count!] (hooks/use-state 0)
         show-easteregg? (and (zero? (mod easteregg-count 5)) (pos? easteregg-count))]
@@ -54,6 +55,7 @@
         ; Spacer
         (layout/box {:display :flex
                      :flexGrow 1
+                     :alignItems :center
                      :flexDirection :row-reverse}
 
           (if-not logged-in?
@@ -63,15 +65,20 @@
                :href "/login"}
               "Login")
 
-            (inputs/icon-button
-              {:ref menu-ref
-               :edge "end"
-               :aria-label "account of current user"
-               :aria-controls "menuId"
-               :aria-haspopup true
-               :onClick #(m/set-value! this :ui/account-menu-open? true)
-               :color "inherit"}
-              (comp/create-element AccountCircleIcon nil nil)))
+            (comp/fragment
+
+              (inputs/icon-button
+                {:ref menu-ref
+                 :edge "end"
+                 :aria-label "account of current user"
+                 :aria-controls "menuId"
+                 :aria-haspopup true
+                 :onClick #(m/set-value! this :ui/account-menu-open? true)
+                 :color "inherit"}
+                (comp/create-element AccountCircleIcon nil nil))
+
+              (layout/box {:p 1}
+                (dd/typography {:color :inherit} display-name))))
 
           (navigation/menu
             {:keepMounted true

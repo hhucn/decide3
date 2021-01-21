@@ -89,15 +89,17 @@
 
 (defmutation sign-in [{:keys [db]} {::keys [email password]}]
   {::pc/params [::email ::password]
-   ::pc/output [:session/valid? ::id :signin/result :errors]}
+   ::pc/output [:session/valid? ::id {:user [::id]}
+                :signin/result :errors]}
   (if (email-in-db? db email)
     (let [{::keys [id] :as user} (get-by-email db email [::id ::password])]
       (if (password-valid? user password)
         (response-updating-session
           {:signin/result :success
            :session/valid? true
+           :user {::id id}
            ::id id}
-          {::id id})
+          id)
         {:signin/result :fail
          :errors #{:invalid-credentials}}))
     {:signin/result :fail
@@ -106,7 +108,9 @@
 ;; API
 (defmutation sign-up [{:keys [conn] :as env} {::keys [email password]}]
   {::pc/params [::email ::password]
-   ::pc/output [:session/valid? ::id :signup/result]}
+   ::pc/output [:session/valid?
+                {:user [::id]}
+                ::id :signup/result]}
   (if (email-in-db? @conn email)
     {:errors #{:email-in-use}}
     (let [{::keys [id] :as user} (tx-map {::email email ::password password})
@@ -114,6 +118,7 @@
       (response-updating-session
         {:signup/result :success
          ::id id
+         :user {::id id}
          :session/valid? true
          ::p/env (assoc env :db (:db-after tx-report))}
         id))))
@@ -125,11 +130,15 @@
     nil))
 
 (defresolver current-session-resolver [env _]
-  {::pc/output [{::current-session [:session/valid? ::id]}]}
+  {::pc/output [{::current-session [:session/valid?
+                                    {:user [::id]}
+                                    ::id]}]}
   {::current-session
    (let [{:keys [decide.models.user/id]} (get-in env [:ring/request :session])]
      (if id
-       {:session/valid? true ::id id}
+       {:session/valid? true
+        :user {::id id}
+        ::id id}
        {:session/valid? false}))})
 
 (defmutation change-password [{:keys [db conn AUTH/user-id]} {:keys [old-password new-password]}]
