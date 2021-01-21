@@ -70,9 +70,10 @@
       (dom/option {:value "old->new"} "Alt → Neu")
       (dom/option {:value "most-approvals"} "Zustimmungen ↓"))))
 
-(defsc MainProposalList [_ {::process/keys [slug proposals]} {:keys [show-new-proposal-dialog]}]
+(defsc MainProposalList [_ {::process/keys [slug proposals] :keys [root/current-session]} {:keys [show-new-proposal-dialog]}]
   {:query [::process/slug
-           {::process/proposals (comp/get-query proposal-card/ProposalCard)}]
+           {::process/proposals (comp/get-query proposal-card/ProposalCard)}
+           [:root/current-session '_]]
    :ident ::process/slug
    :route-segment ["proposals"]
    :will-enter (fn [app {::process/keys [slug]}]
@@ -82,7 +83,8 @@
                         {:post-mutation `dr/target-ready
                          :post-mutation-params {:target ident}}))))
    :use-hooks? true}
-  (let [[selected-sort set-selected-sort!] (hooks/use-state "new->old")
+  (let [logged-in? (get current-session :session/valid?)
+        [selected-sort set-selected-sort!] (hooks/use-state "new->old")
         sorted-proposals (sort-proposals selected-sort proposals)]
     (comp/fragment
       (layout/container {:maxWidth :xl}
@@ -98,10 +100,23 @@
                          :flexGrow 1
                          :flexDirection :row-reverse}
               (sort-selector selected-sort set-selected-sort!))))
-        (layout/box {:pb 8 :clone true}                     ; to accommodate for the fab
-          (grid/container {:spacing 2 :alignItems "stretch"}
-            (for [{id ::proposal/id :as proposal} sorted-proposals]
-              (grid/item {:xs 12 :md 6 :lg 4 :xl 3 :key id}
-                (proposal-card/ui-proposal-card proposal {::process/slug slug}))))))
-
-      (add-proposal-fab {:onClick show-new-proposal-dialog}))))
+        (grid/container {:spacing 2 :alignItems "stretch"}
+          (for [{id ::proposal/id :as proposal} sorted-proposals]
+            (grid/item {:xs 12 :md 6 :lg 4 :xl 3 :key id :style {:flex-grow 1}}
+              (proposal-card/ui-proposal-card proposal {::process/slug slug})))
+          (grid/item {:xs 12 :md 6 :lg 4 :xl 3 :style {:flex-grow 1
+                                                       :min-height "100px"}}
+            (inputs/button {:style {:height "100%"
+                                    :borderStyle "dashed"}
+                            :fullWidth true
+                            :size :large
+                            :disabled (not logged-in?)
+                            :variant :outlined
+                            :onClick show-new-proposal-dialog}
+              (layout/box {:color (when-not logged-in? "text.disabled") :mr 1 :component AddIcon})
+              (if logged-in?
+                "Neuer Vorschlag"
+                "Einloggen um einen neuen Vorschlag hinzuzufügen")))))
+      (layout/box {:pt 10}                                  ; prevent the fab from blocking content below
+        (add-proposal-fab {:onClick show-new-proposal-dialog
+                           :disabled (not logged-in?)})))))
