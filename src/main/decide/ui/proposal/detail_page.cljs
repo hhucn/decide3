@@ -30,7 +30,8 @@
     ["@material-ui/core/LinearProgress" :default LinearProgress]
     ["@material-ui/icons/Send" :default Send]
     ["@material-ui/core/styles" :refer [withStyles useTheme]]
-    [decide.ui.proposal.new-proposal :as new-proposal]))
+    [decide.ui.proposal.new-proposal :as new-proposal]
+    [clojure.string :as str]))
 
 (declare ProposalPage)
 (defn merge-icon [] (comp/create-element MergeType #js {:style #js {:transform "rotate (0.5turn)"}} nil))
@@ -129,10 +130,11 @@
         submit (hooks/use-callback
                  (fn [e]
                    (evt/prevent-default! e)
-                   (add-argument! {::argument/content new-argument
-                                   ::argument/type type
-                                   :author-id user-id})
-                   (set-new-argument! ""))
+                   (when-not (str/blank? new-argument)
+                     (add-argument! {::argument/content new-argument
+                                     ::argument/type type
+                                     :author-id user-id})
+                     (set-new-argument! "")))
                  [new-argument type])]
     (dom/form {:onSubmit submit
                :disabled (not logged-in?)}
