@@ -82,6 +82,7 @@
              ::proposal/opinion
              {::proposal/arguments (comp/get-query Argument)}
              ::proposal/pro-votes
+             ::proposal/nice-id
              {:>/subheader (comp/get-query Subheader)}
              {[:root/current-session '_] (comp/get-query user/Session)}])
    :ident ::proposal/id
