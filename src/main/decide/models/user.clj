@@ -123,7 +123,7 @@
          ::p/env (assoc env :db (:db-after tx-report))}
         id))))
 
-(defmutation sign-out []
+(defmutation sign-out [_ _]
   {::pc/output [:session/valid?]}
   (response-updating-session
     {:session/valid? false}

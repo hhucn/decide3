@@ -1,7 +1,8 @@
 (ns decide.models.user
   (:require
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]))
+    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+    [goog.net.cookies]))
 
 (def sign-in `sign-in)
 (def sign-up `sign-up)
@@ -16,6 +17,11 @@
            ::id]
    :initial-state {:session/valid? false}})
 
+(defmutation sign-out [_]
+  (action [{:keys [state]}]
+    (.clear goog.net.cookies)
+    (swap! state assoc :root/current-session {:session/valid? false}))
+  (remote [_] true))
 
 (defmutation change-password [{:keys [old-password new-password]}]
   (ok-action [{:keys [component] :as env}]

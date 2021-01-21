@@ -78,18 +78,19 @@
                 (comp/create-element AccountCircleIcon nil nil))
 
               (layout/box {:p 1}
-                (dd/typography {:color :inherit} display-name))))
+                (dd/typography {:color :inherit} display-name))
 
-          (navigation/menu
-            {:keepMounted true
-             :anchorEl (.-current menu-ref)
-             :getContentAnchorEl nil
-             :anchorOrigin {:vertical "bottom"
-                            :horizontal "left"}
-             :transformOrigin {:vertical "top"
-                               :horizontal "center"}
-             :open account-menu-open?
-             :onClose #(m/set-value! this :ui/account-menu-open? false)}
-            (navigation/menu-item {} "Logout")))))))
+              (navigation/menu
+                {:keepMounted true
+                 :anchorEl (.-current menu-ref)
+                 :getContentAnchorEl nil
+                 :anchorOrigin {:vertical "bottom"
+                                :horizontal "left"}
+                 :transformOrigin {:vertical "top"
+                                   :horizontal "center"}
+                 :open account-menu-open?
+                 :onClose #(m/set-value! this :ui/account-menu-open? false)}
+                (navigation/menu-item {:onClick #(comp/transact! this [(user/sign-out nil)])}
+                  "Logout")))))))))
 
 (def ui-appbar (comp/computed-factory AppBar))
