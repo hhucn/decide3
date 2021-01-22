@@ -1,0 +1,38 @@
+image: clojure:openjdk-15-tools-deps
+
+services:
+  - docker:stable-dind
+
+cache: &global_cache
+  key: ${CI_JOB_NAME}
+  paths:
+    - node_modules/
+    - .m2
+    - .yarn
+
+stages:
+  - build
+  - test
+  - build-images
+  - analysis
+  - deploy
+
+cljs-test:
+  image: circleci/clojure:openjdk-14-tools-deps-buster-node-browsers
+  stage: test
+  before_script:
+    - curl -o- -L https://yarnpkg.com/install.sh | bash
+    - export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
+    - yarn install --non-interactive --frozen-lockfile
+    - clojure -Sdeps '{:mvn/local-repo ".m2"}' -M:dev -m "shadow.cljs.devtools.cli" compile ci-tests
+  script:
+    - yarn karma start --single-run
+
+clj-test:
+  stage: test
+  cache:
+    key: ${CI_JOB_NAME}
+    paths:
+      - .m2
+  script:
+    - clojure -J-Dguardrails.enabled=true -Sdeps '{:mvn/local-repo ".m2"}' -M:dev:clj-tests
