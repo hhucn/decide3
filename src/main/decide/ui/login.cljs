@@ -3,6 +3,7 @@
             [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
             [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
             [com.fulcrologic.fulcro.algorithms.form-state :as fs]
+            [decide.models.authorization :as auth]
             [decide.models.process :as process]
             [decide.models.user :as user]
             [decide.ui.process.core :as process-ui]
@@ -29,8 +30,8 @@
 
 (defmutation sign-up [{:user/keys [_email _password]}]
   (action [_] true)
-  (ok-action [{:keys [component result] :as env}]
-    (let [{:keys [errors]} (get-in env [:result :body `user/sign-up])]
+  (ok-action [{:keys [component result]}]
+    (let [{:keys [errors]} (get-in result [:body `user/sign-up])]
       (if (empty? errors)
         (do
           (reset-password-field! component)
@@ -41,7 +42,7 @@
   (remote [env]
     (-> env
       (m/with-server-side-mutation `user/sign-up)
-      (m/returning user/Session)
+      (m/returning auth/Session)
       (m/with-target [:root/current-session]))))
 
 (defmutation sign-in [{:user/keys [_email _password]}]
@@ -63,7 +64,7 @@
   (remote [env]
     (-> env
       (m/with-server-side-mutation `user/sign-in)
-      (m/returning user/Session)
+      (m/returning auth/Session)
       (m/with-target [:root/current-session]))))
 
 (defn wide-textfield

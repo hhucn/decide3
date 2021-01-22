@@ -3,6 +3,7 @@
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
+    [decide.models.authorization :as auth]
     [decide.models.user :as user]
     [material-ui.data-display :as dd]
     [material-ui.inputs :as inputs]
@@ -18,11 +19,11 @@
 
 (defsc AppBar
   [this
-   {:keys [ui/account-menu-open? root/theme root/current-session]}
+   {:keys [ui/account-menu-open? ui/theme root/current-session]}
    {:keys [menu-onClick]}]
   {:query [:ui/account-menu-open?
-           [:root/theme '_]
-           {[:root/current-session '_] (comp/get-query user/Session)}]
+           [:ui/theme '_]
+           {[:root/current-session '_] (comp/get-query auth/Session)}]
    :ident (fn [] [:component/id ::AppBar])
    :initial-state {:ui/account-menu-open? false}
    :use-hooks? true}

@@ -11,6 +11,7 @@
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
+    [decide.models.authorization :as auth]
     [decide.models.argument :as argument]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
@@ -172,7 +173,7 @@
                               :keys [root/current-session]}]
   {:query [::proposal/id
            {::proposal/arguments (comp/get-query ArgumentRow)}
-           {[:root/current-session '_] (comp/get-query user/Session)}]
+           {[:root/current-session '_] (comp/get-query auth/Session)}]
    :ident ::proposal/id}
   (comp/fragment
     (layout/box {:mb 1}

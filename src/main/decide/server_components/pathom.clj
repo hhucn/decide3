@@ -13,7 +13,8 @@
     [decide.server-components.config :refer [config]]
     [decide.server-components.database :refer [conn]]
     [mount.core :refer [defstate]]
-    [taoensso.timbre :as log])
+    [taoensso.timbre :as log]
+    [decide.models.authorization :as auth])
   (:import (java.util UUID)))
 
 (defn- remove-keys-from-map-values [m & ks]
@@ -92,12 +93,12 @@
   :start
   (new-parser config
     [(p/env-plugin {:config config})
+     (p/env-wrap-plugin auth/session-wrapper)
      (p/env-wrap-plugin
-       (fn env-wrapping [env]
-         (merge env
-           {:AUTH/user-id  (get-in env [:ring/request :session])
-            :conn conn
-            :db (d/db conn)})))]
+       (fn db-wrapper [env]
+         (assoc env
+           :conn conn
+           :db (d/db conn))))]
     [index-explorer
      user/resolvers
      process/resolvers

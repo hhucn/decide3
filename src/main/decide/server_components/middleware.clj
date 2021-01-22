@@ -1,33 +1,32 @@
 (ns decide.server-components.middleware
   (:require
-    [decide.models.user :as user]
-    [decide.server-components.config :refer [config]]
-    [decide.server-components.pathom :refer [parser]]
-    [mount.core :refer [defstate]]
-    [com.fulcrologic.fulcro.server.api-middleware :refer [handle-api-request
-                                                          wrap-transit-params
-                                                          wrap-transit-response]]
+    [com.fulcrologic.fulcro.algorithms.denormalize :as dn]
     [com.fulcrologic.fulcro.algorithms.server-render :as ssr]
     [com.fulcrologic.fulcro.components :as comp]
     [com.fulcrologic.fulcro.dom-server :as dom]
-    [com.fulcrologic.fulcro.algorithms.denormalize :as dn]
+    [com.fulcrologic.fulcro.server.api-middleware :refer [handle-api-request
+                                                          wrap-transit-params
+                                                          wrap-transit-response]]
+    [decide.models.authorization :as auth]
+    [decide.server-components.config :refer [config]]
+    [decide.server-components.pathom :refer [parser]]
+    [decide.ui.pages.splash :as splash]
+    [decide.ui.theming.styles :as styles]
+    [garden.core :as garden]
+    [hiccup.page :refer [html5 include-js include-css]]
+    [mount.core :refer [defstate]]
     [ring.middleware.defaults :refer [wrap-defaults]]
     [ring.middleware.gzip :refer [wrap-gzip]]
     [ring.middleware.session.cookie :refer [cookie-store]]
-    [ring.util.response :refer [response file-response resource-response]]
-    [ring.util.response :as resp]
-    [hiccup.page :refer [html5 include-js include-css]]
-    [taoensso.timbre :as log]
-    [decide.application :refer [SPA]]
-    [decide.ui.pages.splash :as splash]
-    [garden.core :as garden]
-    [decide.ui.theming.styles :as styles]))
+    [ring.util.response :as resp :refer [response file-response resource-response]]
+    [taoensso.timbre :as log]))
+
 
 (def ^:private not-found-handler
   (fn [req]
-    {:status  404
+    {:status 404
      :headers {"Content-Type" "text/plain"}
-     :body    "NOPE"}))
+     :body "NOPE"}))
 
 
 (defn wrap-api [handler uri]
@@ -85,7 +84,7 @@
     (index csrf-token initial-state-script nil)))
 
 (defn index-with-credentials [csrf-token request]
-  (let [initial-state (ssr/build-initial-state (parser {:ring/request request} (comp/get-query user/Session)) user/Session)]
+  (let [initial-state (ssr/build-initial-state (parser {:ring/request request} (comp/get-query auth/Session)) auth/Session)]
     (index csrf-token (ssr/initial-state->script-tag initial-state)
       splash/splash)))
 

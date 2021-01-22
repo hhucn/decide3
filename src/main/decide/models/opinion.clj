@@ -28,7 +28,7 @@
 (s/def ::value #{-1 0 +1})
 
 (>defn get-opinion [db user-ident proposal-ident]
-  [d.core/db? ::user/ident ::proposal/ident => nat-int?]
+  [d.core/db? ::user/lookup ::proposal/ident => nat-int?]
   (d/q '[:find ?opinion .
          :in $ ?user ?proposal
          :where
@@ -39,7 +39,7 @@
     proposal-ident))
 
 (>defn set-opinion! [conn user-ident proposal-ident opinion-value]
-  [d.core/conn? any? any? ::value => map?]
+  [d.core/conn? ::user/lookup ::proposal/lookup ::value => map?]
   (if-let [opinion-id (get-opinion @conn user-ident proposal-ident)]
     (d/transact conn
       [{:db/id  opinion-id

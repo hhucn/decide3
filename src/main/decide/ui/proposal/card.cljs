@@ -13,7 +13,6 @@
     [decide.routing :as routing]
     [decide.ui.common.time :as time]
     [decide.ui.proposal.detail-page :as detail-page]
-    [decide.ui.session :as session]
     [material-ui.data-display :as dd]
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
@@ -73,8 +72,7 @@
    :ident ::argument/id})
 
 (defsc ProposalCard [this {::proposal/keys [id title body my-opinion arguments pro-votes]
-                           :>/keys [subheader]
-                           :keys [root/current-session]}
+                           :keys [root/current-session] :as props}
                      {::process/keys [slug]}]
   {:query (fn []
             [::proposal/id
@@ -83,8 +81,10 @@
              {::proposal/arguments (comp/get-query Argument)}
              ::proposal/pro-votes
              ::proposal/nice-id
-             {:>/subheader (comp/get-query Subheader)}
-             {[:root/current-session '_] (comp/get-query user/Session)}])
+             ::proposal/created
+             {::proposal/parents (comp/get-query Parent)}
+             {::proposal/original-author (comp/get-query proposal/Author)}
+             [:root/current-session '_]])
    :ident ::proposal/id
    :initial-state (fn [{:keys [id title body]}]
                     {::proposal/id id
@@ -103,7 +103,7 @@
       (surfaces/card-header
         {:title title
          :titleTypographyProps {:component "h3"}
-         :subheader (ui-subheader subheader)
+         :subheader (ui-subheader props)
          :action (inputs/icon-button {:disabled true :size :small}
                    (comp/create-element MoreVert nil nil))})
 

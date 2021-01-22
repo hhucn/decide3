@@ -1,5 +1,6 @@
 (ns decide.models.process
   (:require
+    [clojure.set :as set]
     [clojure.spec.alpha :as s]
     [clojure.string :as str]
     [com.fulcrologic.guardrails.core :refer [>defn => | <-]]
@@ -9,8 +10,7 @@
     [datahike.core :as d.core]
     [decide.models.authorization :as auth]
     [decide.models.proposal :as proposal]
-    [taoensso.timbre :as log]
-    [clojure.set :as set]))
+    [decide.models.user :as user]))
 
 (def schema
   [{:db/ident ::slug
@@ -110,10 +110,10 @@
   {::pc/params [::title ::slug ::description]
    ::pc/output [::slug]}
   (cond
-    user-id nil
-    (s/valid? ::slug title) nil
-    (s/valid? ::title title) nil
-    (s/valid? ::description description) nil
+    (not user-id) nil
+    (not (s/valid? ::slug title)) nil
+    (not (s/valid? ::title title)) nil
+    (not (s/valid? ::description description)) nil
     (slug-in-use? db slug) nil
     :else
     (let [tx-report (d/transact! conn [(tx-map {::slug slug ::title title ::description description})])]
@@ -132,14 +132,13 @@
    ::pc/output [::proposal/id]}
   (let [[slug nice-id] nice-ident]
     {::proposal/id
-     (log/spy :debug
-       (d/q '[:find ?id .
-              :in $ ?process ?nice-id
-              :where
-              [?process ::proposals ?proposal]
-              [?proposal ::proposal/nice-id ?nice-id]
-              [?proposal ::proposal/id ?id]]
-         db [::slug slug] nice-id))}))
+     (d/q '[:find ?id .
+            :in $ ?process ?nice-id
+            :where
+            [?process ::proposals ?proposal]
+            [?proposal ::proposal/nice-id ?nice-id]
+            [?proposal ::proposal/id ?id]]
+       db [::slug slug] nice-id)}))
 
 
 (defresolver resolve-proposal-process [{:keys [db]} {::proposal/keys [id]}]
@@ -161,7 +160,7 @@
                                      :body body
                                      :parents (map #(find % ::proposal/id) parents)
                                      :argument-idents arguments
-                                     :original-author user-id})
+                                     :original-author [::user/id user-id]})
         tx-report (d/transact conn
                     [(assoc new-proposal :db/id "new-proposal")
                      [:db/add [::slug slug] ::proposals "new-proposal"]])]
