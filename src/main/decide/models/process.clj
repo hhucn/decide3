@@ -9,7 +9,8 @@
     [datahike.core :as d.core]
     [decide.models.authorization :as auth]
     [decide.models.proposal :as proposal]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [clojure.set :as set]))
 
 (def schema
   [{:db/ident ::slug
@@ -41,6 +42,7 @@
 (s/def ::latest-id (s/and int? #(<= 0 %)))
 
 (s/def ::ident (s/tuple #{::slug} ::slug))
+(s/def ::lookup (s/or :ident ::ident :db/id pos-int?))
 
 (>defn get-all-slugs [db]
   [d.core/db? => (s/coll-of ::slug :distinct true)]
@@ -68,6 +70,17 @@
                   [?e :decide.models.process/slug ?slug]]
              db slug)))
 
+(>defn get-no-of-contributors [db slug]
+  [d.core/db? ::slug => (s/spec #(<= 0 %))]
+  (let [{::keys [proposals]} (d/pull db [{::proposals [:db/id]}] [::slug slug])
+        proposal-db-ids (map :db/id proposals)
+        commenter (apply set/union (map (partial proposal/get-users-who-made-an-argument db) proposal-db-ids))
+        authors (into #{}
+                  (map (comp :db/id ::proposal/original-author))
+                  (d/pull-many db [{::proposal/original-author [:db/id]}] proposal-db-ids))
+        voters (apply set/union (map (partial proposal/get-voters db) proposal-db-ids))]
+    (count (set/union commenter authors voters))))
+
 (>defn tx-map [{::keys [title slug description]}]
   [(s/keys :req [::title ::slug ::description]) => (s/keys :req [::title ::slug ::description ::latest-id])]
   {::slug slug
@@ -88,6 +101,9 @@
   {::pc/input #{::slug}
    ::pc/output [::title ::description]}
   (d/pull db [::title ::description] [::slug slug]))
+
+(defresolver resolve-no-of-contributors [{:keys [db]} {::keys [slug]}]
+  {::no-of-contributors (get-no-of-contributors db slug)})
 
 
 (defmutation add-process [{:keys [conn db AUTH/user-id] :as env} {::keys [title slug description]}]
@@ -157,6 +173,7 @@
 (def resolvers
   [resolve-all-processes
    resolve-process
+   resolve-no-of-contributors
    add-process
 
    resolve-proposals

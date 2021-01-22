@@ -1,17 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="CLJ" type="ClojureREPL" factoryName="Local" activateToolWindowBeforeRun="false" singleton="true">
     <module name="decide3" />
+    <setting name="displayName" value="CLJ" />
     <setting name="replType" value="NREPL" />
     <setting name="execution" value="DEPS" />
-    <setting name="jvmArgs" value="-Dtrace -Dghostwheel.enabled=true" />
+    <setting name="jvmArgs" value="-Dtrace -Dguardrails.enabled=true" />
     <setting name="parameters" value="" />
     <setting name="workingDir" value="$PROJECT_DIR$" />
     <setting name="profiles" value="" />
     <setting name="aliases" value="dev" />
     <setting name="fixLineNumbers" value="false" />
     <method v="2" />
-    <setting name="displayName" value="CLJ" />
   </configuration>
 </component>
-

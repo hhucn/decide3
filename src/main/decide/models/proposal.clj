@@ -10,7 +10,8 @@
     [datahike.core :as d.core]
     [decide.models.argument :as argument]
     [decide.models.authorization :as auth]
-    [decide.models.user :as user])
+    [decide.models.user :as user]
+    [taoensso.timbre :as log])
   (:import (java.util Date)))
 
 (def schema
@@ -65,12 +66,27 @@
                      :distinct true))
 
 (s/def ::ident (s/tuple #{::id} ::id))
+(s/def ::lookup (s/or :ident ::ident :db/id pos-int?))
 
 (>defn get-arguments [db proposal-ident]
   [d.core/db? ::ident => (s/keys :req [::arguments])]
   (or
     (d/pull db [{::arguments [::argument/id]}] proposal-ident)
     {::arguments []}))
+
+(>defn get-users-who-made-an-argument [db proposal-lookup]
+  [d.core/db? ::lookup => (s/coll-of pos-int? :kind set)]
+  (->> proposal-lookup
+    (d/pull db [{::arguments [{::argument/author [:db/id]}]}])
+    ::arguments
+    (into #{} (map (comp :db/id ::argument/author)))))
+
+(>defn get-voters [db proposal-lookup]
+  [d.core/db? ::lookup => (s/coll-of pos-int? :kind set)]
+  (->> proposal-lookup
+    (d/pull db [{::opinions [{::user/_opinions [:db/id]}]}])
+    ::opinions
+    (into #{} (map (comp :db/id ::user/_opinions)))))
 
 (>defn get-children [db proposal-ident]
   [d.core/db? ::ident => (s/coll-of (s/keys :req [::id]) :distinct true)]

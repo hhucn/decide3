@@ -70,9 +70,10 @@
       (dom/option {:value "old->new"} "Alt → Neu")
       (dom/option {:value "most-approvals"} "Zustimmungen ↓"))))
 
-(defsc MainProposalList [_ {::process/keys [slug proposals] :keys [root/current-session]} {:keys [show-new-proposal-dialog]}]
+(defsc MainProposalList [_ {::process/keys [slug proposals no-of-contributors] :keys [root/current-session]} {:keys [show-new-proposal-dialog]}]
   {:query [::process/slug
            {::process/proposals (comp/get-query proposal-card/ProposalCard)}
+           ::process/no-of-contributors
            [:root/current-session '_]]
    :ident ::process/slug
    :route-segment ["proposals"]
@@ -90,9 +91,14 @@
       (layout/container {:maxWidth :xl}
         (layout/box {:my 1 :clone true}
           (surfaces/toolbar {:disableGutters true :variant :dense}
-            (dd/typography {:variant :overline}
-              "Vorschläge: "
-              (count sorted-proposals))
+            (grid/container {:spacing 2}
+              (grid/item {}
+                (dd/typography {:variant :overline}
+                  "Vorschläge: "
+                  (count sorted-proposals)))
+              (grid/item {}
+                (dd/typography {:variant :overline}
+                  "Teilnehmer: " (str no-of-contributors))))
             (layout/box {:display :flex
                          :component :menu
                          :m 0
