@@ -7,8 +7,10 @@
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
     [decide.server-components.config :refer [config]]
+    [com.fulcrologic.guardrails.core :refer [>defn =>]]
     [mount.core :refer [defstate args]]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [datahike.core :as d.core]))
 
 (def schema
   (into [] cat
@@ -78,37 +80,48 @@
              {:db/id (str proposal "+" user)
               ::opinion/value 1}]))))))
 
-(defn test-database [config]
-  (d/delete-database config)
-  (d/create-database
-    (assoc config :initial-tx schema))
-  (d/connect config))
+#_(defn test-database [config]
+    (d/delete-database config)
+    (d/create-database
+      (assoc config :initial-tx schema))
+    (d/connect config))
 
-(defn transact-schema [conn]
+(>defn transact-schema! [conn]
+  [d.core/conn? => map?]
   (d/transact conn schema))
 
-(defstate conn
-  :start
-  (let [db-config (:db config)
-        reset? (:db/reset? db-config)
-        _ (when reset?
-            (log/info "Reset Database")
-            (d/delete-database db-config))
-        db-exists? (d/database-exists? db-config)]
+(defn ensure-database! [db-config]
+  (let [db-exists? (d/database-exists? db-config)]
     (log/info "Database exists?" db-exists?)
     (log/info "Create database connection with URI:" db-config)
     (when-not db-exists?
       (log/info "Database does not exist! Creating...")
-      (d/create-database db-config))
+      (d/create-database db-config))))
+
+
+(defn test-database [db-config]
+  (d/create-database)
+  (let [conn (d/connect)]
+    (transact-schema! conn)
+    (d/transact conn dev-db)
+    conn))
+
+(defstate conn
+  :start
+  (let [db-config (:db config)
+        reset? (:db/reset? db-config)]
+    (when reset?
+      (log/info "Reset Database")
+      (d/delete-database db-config))
+
+    (ensure-database! db-config)
 
     (log/info "Database exists. Connecting...")
     (let [conn (d/connect db-config)]
       (log/info "Transacting schema...")
       (try
-        (transact-schema conn)
-        (when reset? (d/transact conn dev-db))
+        (transact-schema! conn)
         (catch Exception e (println e)))
-
       conn))
   :stop
   (d/release conn))

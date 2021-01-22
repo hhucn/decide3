@@ -16,12 +16,9 @@
         "client/main": "shadow-cljs watch :main",
         "client/workspaces": "shadow-cljs watch :workspaces",
         "client/tests": "shadow-cljs watch :test",
-        "client/cljs": "shadow-cljs cljs-repl :main",
-        "client/clj": "shadow-cljs clj-repl",
-        "client/server": "shadow-cljs server",
-        "client/nodejs": "shadow-cljs node-repl",
-        "clj/watch-tests": "clojure -A:dev:clj-tests -J-Dguardrails.enabled=true --watch",
-        "server": "clojure -A:dev -J-Dtrace -J-Dguardrails.enabled=true",
+        "clj/watch-tests": "clj -J-Dguardrails.enabled=true -M:dev:clj-tests --watch",
+        "test": "clj -J-Dguardrails.enabled=true -M:dev:clj-tests",
+        "server": "clj -J-Dtrace -J-Dguardrails.enabled=true -M:dev",
         "start": "npx run-p client/server server"
     },
     "devDependencies": {

@@ -89,8 +89,7 @@
                          (conj tx :com.wsscode.pathom/trace)
                          tx)))))
 
-(defstate parser
-  :start
+(defn build-parser [config conn]
   (new-parser config
     [(p/env-plugin {:config config})
      (p/env-wrap-plugin auth/session-wrapper)
@@ -99,6 +98,24 @@
          (assoc env
            :conn conn
            :db (d/db conn))))]
+    [index-explorer
+     user/resolvers
+     process/resolvers
+     proposal/resolvers
+     argument/resolvers
+     opinion/resolvers]))
+
+(defstate parser
+  :start
+  (new-parser config
+    [(p/env-plugin {:config config})
+     (p/env-wrap-plugin auth/session-wrapper)
+     (p/env-wrap-plugin
+       (fn db-wrapper [env]
+         (merge
+           {:conn conn
+            :db (d/db conn)}
+           env)))]
     [index-explorer
      user/resolvers
      process/resolvers
