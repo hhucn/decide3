@@ -28,7 +28,7 @@
     (when (get current-session :session/valid?)
       (list/item-secondary-action {}
         (if (pos? my-opinion)
-          (dd/typography {:color "success.main"} "Zugestimmt")
+          (layout/box {:color "success.main"} (dd/typography {:color :inherit} "Zugestimmt"))
           (inputs/button {:color :primary}
 
             "Zustimmen"))))))
