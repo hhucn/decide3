@@ -75,14 +75,14 @@
      ::password (hash-password password)}))
 
 
-(defmutation sign-in [{:keys [db]} {::keys [email password]}]
+(defmutation sign-in [{:keys [db] :as env} {::keys [email password]}]
   {::pc/params [::email ::password]
    ::pc/output [:session/valid? ::id {:user [::id]}
                 :signin/result :errors]}
   (if (email-in-db? db email)
     (let [{::keys [id] :as user} (get-by-email db email [::id ::password])]
       (if (password-valid? user password)
-        (auth/wrap-session
+        (auth/wrap-session env
           {:signin/result :success
            :session/valid? true
            :user {::id id}
@@ -102,18 +102,16 @@
     {:errors #{:email-in-use}}
     (let [{::keys [id] :as user} (tx-map {::email email ::password password})
           tx-report (d/transact conn [user])]
-      (auth/wrap-session
+      (auth/wrap-session env
         {:signup/result :success
          ::id id
          :user {::id id}
          :session/valid? true
          ::p/env (assoc env :db (:db-after tx-report))}))))
 
-(defmutation sign-out [_ _]
+(defmutation sign-out [env _]
   {::pc/output [:session/valid?]}
-  (auth/response-updating-session
-    {:session/valid? false}
-    nil))
+  (auth/wrap-session env {:session/valid? false}))
 
 (defmutation change-password [{:keys [db conn AUTH/user-id]} {:keys [old-password new-password]}]
   {::pc/params [:old-password :new-password]

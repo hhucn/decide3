@@ -152,6 +152,5 @@
       ;; the defaults-config here (which comes from an EDN file, so it can't have
       ;; code initialized).
       ;; E.g. (wrap-defaults (assoc-in defaults-config [:session :store] (my-store)))
-      (wrap-defaults (assoc defaults-config
-                       :session {:store (cookie-store)}))
+      (wrap-defaults (assoc defaults-config :session {:store (cookie-store {:key (byte-array 16)})})) ;; TODO configure this, when operation gets out of demo phase
       wrap-gzip)))

@@ -22,9 +22,11 @@
 
 (def dev-db
   (concat
-    (for [name ["Björn" "Martin" "Christian" "Markus" "Jan" "Alexander" "Marc"]]
-      (assoc (user/tx-map {::user/email name
-                           ::user/password name})
+    (for [name ["Björn" "Martin" "Christian" "Markus" "Jan" "Alexander" "Marc"]
+          :let [id (d.core/squuid (Math/abs (.hashCode name)))]] ;; workaround for https://github.com/replikativ/datahike/issues/258
+      (assoc (user/tx-map (log/spy :debug {::user/id id
+                                           ::user/email name
+                                           ::user/password name}))
         :db/id name))
     [{::process/slug "test-decision"
       ::process/title "Meine Test-Entscheidung"
@@ -121,6 +123,7 @@
       (log/info "Transacting schema...")
       (try
         (transact-schema! conn)
+        (when reset? (d/transact conn dev-db))
         (catch Exception e (println e)))
       conn))
   :stop
