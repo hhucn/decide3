@@ -1,8 +1,8 @@
 (ns decide.models.proposal
   (:require
+    [clojure.set :as set]
     [clojure.spec.alpha :as s]
     [clojure.string :as str]
-    [clojure.set :as set]
     [com.fulcrologic.guardrails.core :refer [>defn => | <-]]
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
     [com.wsscode.pathom.core :as p]
@@ -10,8 +10,7 @@
     [datahike.core :as d.core]
     [decide.models.argument :as argument]
     [decide.models.authorization :as auth]
-    [decide.models.user :as user]
-    [taoensso.timbre :as log])
+    [decide.models.user :as user])
   (:import (java.util Date)))
 
 (def schema
@@ -117,7 +116,7 @@
    ::pc/output [::id
                 ::nice-id
                 ::title ::body ::created
-                {::original-author [:decide.models.user/id]}]
+                {::original-author [::user/id]}]
    ::pc/batch? true}
   (let [batch? (sequential? input)]
     (cond->> input
@@ -126,7 +125,7 @@
       :always (d/pull-many db [::id
                                ::nice-id
                                ::title ::body ::created
-                               {::original-author [:decide.models.user/id]}])
+                               {::original-author [::user/id]}])
       (not batch?) first)))
 
 (defresolver resolve-parents [{:keys [db]} {::keys [id]}]
@@ -145,9 +144,9 @@
   '[:find [?user ...]
     :in $ ?proposal
     :where
-    [?proposal :decide.models.proposal/opinions ?opinion]
+    [?proposal ::opinions ?opinion]
     [?opinion :decide.models.opinion/value +1]
-    [?user :decide.models.user/opinions ?opinion]])
+    [?user ::user/opinions ?opinion]])
 
 (defn get-migration-rate [db parent-id child-id]
   [::id ::id => number?]
@@ -176,9 +175,9 @@
     (d/q '[:find ?user
            :in $ ?proposal
            :where
-           [?proposal :decide.models.proposal/opinions ?opinion]
+           [?proposal ::opinions ?opinion]
            [?opinion :decide.models.opinion/value +1]
-           [?user :decide.models.user/opinions ?opinion]]
+           [?user ::user/opinions ?opinion]]
       db)
     (map first)
     set))
@@ -186,7 +185,7 @@
 (>defn get-proposals-with-shared-opinion
   "Returns a set of proposals that share at least one user who approved with both of them and the input proposal."
   [db proposal-lookup]
-  [d.core/db? any? => (s/coll-of pos-int? :kind set)]
+  [d.core/db? any? => (s/coll-of ::id :kind set)]
   (->> proposal-lookup
     (d/q '[:find [?other-uuid ...]
            :in $ ?proposal
@@ -194,10 +193,10 @@
            ;; get all users who approved input proposal
            [?proposal ::opinions ?opinion]
            [?opinion :decide.models.opinion/value +1]
-           [?user :decide.models.user/opinions ?opinion]
+           [?user ::user/opinions ?opinion]
 
            ;; get all proposals the users also approved with
-           [?user :decide.models.user/opinions ?other-opinion]
+           [?user ::user/opinions ?other-opinion]
            [?other-opinion :decide.models.opinion/value +1]
            [?other-proposal ::opinions ?other-opinion]
 
