@@ -119,7 +119,6 @@
            env)))]
     [index-explorer
      user/resolvers
-     auth/resolvers
      process/resolvers
      proposal/resolvers
      argument/resolvers

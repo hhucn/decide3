@@ -7,7 +7,7 @@
     [com.wsscode.pathom.core :as p]
     [datahike.api :as d]
     [datahike.core :as d.core]
-    [decide.models.authorization :as auth]))
+    [com.fulcrologic.fulcro.server.api-middleware :as fmw]))
 
 (def schema [{:db/ident ::id
               :db/doc "The id of a user"
@@ -35,13 +35,17 @@
 (s/def ::ident (s/tuple #{::id} ::id))
 (s/def ::lookup (s/or :ident ::ident :db/id pos-int?))
 (s/def ::email string?)
-(s/def ::password string?)
 (s/def ::encrypted-password string?)
+(s/def ::password (s/or :encrypted ::encrypted-password :raw string?))
 (s/def ::display-name string?)
 
 (>defn hash-password [password]
   [::password => ::encrypted-password]
   (hs/derive password))
+
+(>defn exists? [db user-id]
+  [d.core/db? ::id => boolean?]
+  (some? (d/q '[:find ?e . :in $ ?user-id :where [?e ::id ?user-id]] db user-id)))
 
 (>defn email-in-db?
   "True if email is already in the db."
@@ -61,12 +65,29 @@
    (d/pull db query [::email email])))
 
 (>defn password-valid? [{:keys [::password]} attempt]
-  [(s/keys :req [::encrypted-password]) ::password => boolean?]
+  [(s/keys :req [::password]) ::password => boolean?]
   (hs/check attempt password))
+
+(>defn response-updating-session
+  "Uses `mutation-response` as the actual return value for a mutation, but also stores the data into the (cookie-based) session."
+  [mutation-env mutation-response upsert-session]
+  [any? any? (s/keys :req-un [:decide.models.user/id]) => any?]
+  (let [existing-session (some-> mutation-env :ring/request :session)]
+    (fmw/augment-response
+      mutation-response
+      (fn [resp]
+        (let [new-session (merge existing-session upsert-session)]
+          (assoc resp :session new-session))))))
+
+
+(>defn wrap-session [env {:keys [decide.models.user/id] :as response}]
+  [map? (s/keys :opt [:decide.models.user/id]) => (s/keys :opt [:decide.models.user/id])]
+  (response-updating-session env response {:id id}))
+
 
 (>defn tx-map [{::keys [id email password display-name]}]
   [(s/keys :req [::email ::password] :opt [::id ::display-name])
-   => (s/keys :req [::id ::display-name ::email ::encrypted-password])]
+   => (s/keys :req [::id ::display-name ::email ::password])]
   (let [id (or id (d.core/squuid))
         display-name (or display-name email)]
     {::id id
@@ -82,7 +103,7 @@
   (if (email-in-db? db email)
     (let [{::keys [id] :as user} (get-by-email db email [::id ::password])]
       (if (password-valid? user password)
-        (auth/wrap-session env
+        (wrap-session env
           {:signin/result :success
            :session/valid? true
            :user {::id id}
@@ -102,7 +123,7 @@
     {:errors #{:email-in-use}}
     (let [{::keys [id] :as user} (tx-map {::email email ::password password})
           tx-report (d/transact conn [user])]
-      (auth/wrap-session env
+      (wrap-session env
         {:signup/result :success
          ::id id
          :user {::id id}
@@ -111,7 +132,7 @@
 
 (defmutation sign-out [env _]
   {::pc/output [:session/valid?]}
-  (auth/wrap-session env {:session/valid? false}))
+  (wrap-session env {:session/valid? false}))
 
 (defmutation change-password [{:keys [db conn AUTH/user-id]} {:keys [old-password new-password]}]
   {::pc/params [:old-password :new-password]
@@ -130,5 +151,22 @@
    ::pc/output [::display-name]}
   (d/pull db [::display-name] [::id id]))
 
+(>defn get-session-user-id [env]
+  [map? => ::id]
+  (get-in env [:ring/request :session :id]))
 
-(def resolvers [sign-up sign-in sign-out change-password resolve-public-infos])
+(defresolver current-session-resolver [{:keys [db] :as env} _]
+  {::pc/output [{::current-session
+                 [:session/valid?
+                  {:user [::id]}
+                  ::id]}]}
+  {::current-session
+   (let [id (get-session-user-id env)]
+     (if (exists? db id)
+       {:session/valid? true
+        :user {::id id}
+        ::id id}
+       {:session/valid? false}))})
+
+
+(def resolvers [sign-up sign-in sign-out change-password current-session-resolver resolve-public-infos])

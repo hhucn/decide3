@@ -1,14 +1,14 @@
 (ns decide.models.opinion
   (:require
     [clojure.spec.alpha :as s]
+    [com.fulcrologic.guardrails.core :refer [>defn =>]]
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
     [com.wsscode.pathom.core :as p]
     [datahike.api :as d]
     [datahike.core :as d.core]
     [decide.models.authorization :as auth]
     [decide.models.proposal :as proposal]
-    [decide.models.user :as user]
-    [com.fulcrologic.guardrails.core :refer [>defn =>]]))
+    [decide.models.user :as user]))
 
 (def schema [{:db/ident       ::user/opinions
               :db/cardinality :db.cardinality/many
@@ -28,7 +28,7 @@
 (s/def ::value #{-1 0 +1})
 
 (>defn get-opinion [db user-ident proposal-ident]
-  [d.core/db? ::user/lookup ::proposal/ident => nat-int?]
+  [d.core/db? ::user/lookup ::proposal/ident => (s/nilable nat-int?)]
   (d/q '[:find ?opinion .
          :in $ ?user ?proposal
          :where
