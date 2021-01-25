@@ -4,18 +4,18 @@
         bk/ring-gzip {:mvn/version "0.3.0"}
         com.taoensso/timbre {:mvn/version "5.1.0"}
         com.taoensso/tufte {:mvn/version "2.2.0"}
-        com.wsscode/pathom {:mvn/version "2.3.0"}
-        com.fulcrologic/fulcro {:mvn/version "3.4.12"}
+        com.wsscode/pathom {:mvn/version "2.3.1"}
+        com.fulcrologic/fulcro {:mvn/version "3.4.14"}
         com.fulcrologic/fulcro-rad {:mvn/version "1.0.8"}
         com.fulcrologic/fulcro-garden-css {:mvn/version "3.0.8"}
-        com.fulcrologic/guardrails {:mvn/version "1.1.2"}
+        com.fulcrologic/guardrails {:mvn/version "1.1.3"}
         garden/garden {:mvn/version "1.3.10"}
         hiccup/hiccup {:mvn/version "1.0.5"}
-        http-kit/http-kit {:mvn/version "2.5.0"}
+        http-kit/http-kit {:mvn/version "2.5.1"}
         mount/mount {:mvn/version "0.1.16"}
         org.clojure/core.async {:mvn/version "1.3.610"}
         clj-commons/pushy {:mvn/version "0.3.10"}
-        io.replikativ/datahike {:mvn/version "0.3.3-SNAPSHOT"}
+        io.replikativ/datahike {:mvn/version "0.3.3"}
         com.github.mrebbinghaus/fulcro-material-ui-wrapper
         {:git/url "https://github.com/MrEbbinghaus/fulcro-material-ui-wrapper"
          :sha "28d21ef79a5f9983d6504d0588282cefcd5b405a"}
@@ -33,7 +33,7 @@
            :dev {:extra-paths ["src/test" "src/dev" "src/workspaces"]
                  :jvm-opts ["-XX:-OmitStackTraceInFastThrow"]
                  :extra-deps {org.clojure/clojurescript {:mvn/version "1.10.773"}
-                              thheller/shadow-cljs {:mvn/version "2.11.13"}
+                              thheller/shadow-cljs {:mvn/version "2.11.14"}
                               expound/expound {:mvn/version "0.8.7"}
                               fulcrologic/fulcro-spec {:mvn/version "3.1.9"}
                               binaryage/devtools {:mvn/version "1.0.2"}
