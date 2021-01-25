@@ -11,13 +11,12 @@ RUN yarn install --non-interactive --frozen-lockfile
 RUN clj -Sdeps "{:mvn/local-repo \"$REPO\"}" -M:dev -e ":ok"
 
 COPY . .
-RUN clj -Sdeps "{:mvn/local-repo \"$REPO\"}" -M:dev -m "shadow.cljs.devtools.cli" release :main && \
-    clj -Sdeps "{:mvn/local-repo \"$REPO\"}" -X:deps mvn-pom \
-    clj -Sdeps "{:mvn/local-repo \"$REPO\"}" \
-    -X:depstar uberjar \
-    :aot true \
-    :jar decide.jar \
-    :main-class decide.server-main
+RUN echo "Compile CLJS..." && \
+    clj -Sdeps "{:mvn/local-repo \"$REPO\"}" -M:dev -m "shadow.cljs.devtools.cli" release :main && \
+    echo "Done. " && \
+    clj -Sdeps "{:mvn/local-repo \"$REPO\"}" -X:deps mvn-pom && \
+    echo "Compiling CLJ..." && \
+    clj -Sdeps "{:mvn/local-repo \"$REPO\"}" -X:depstar uberjar :aot true :jar decide.jar :main-class decide.server-main
 
 FROM openjdk:14-jdk-slim
 COPY src/main/config/prod.edn /config/production.edn
