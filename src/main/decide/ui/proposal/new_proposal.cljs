@@ -338,8 +338,8 @@
           ;; endregion
 
           ;; region Details Step
-          (let [change-title (hooks/use-callback (partial m/set-string! this :ui/title :event))
-                change-body (hooks/use-callback (partial m/set-string! this :ui/body :event))
+          (let [change-title (hooks/use-callback (partial m/set-string!! this :ui/title :event) [])
+                change-body (hooks/use-callback (partial m/set-string!! this :ui/body :event) [])
                 error? (or
                          (str/blank? title)
                          (str/blank? body))]
