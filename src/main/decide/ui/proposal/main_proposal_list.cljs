@@ -17,7 +17,10 @@
     [material-ui.layout :as layout]
     [material-ui.layout.grid :as grid]
     [material-ui.surfaces :as surfaces]
-    ["@material-ui/icons/Add" :default AddIcon]))
+    ["@material-ui/icons/Add" :default AddIcon]
+    [material-ui.navigation :as navigation]
+    [material-ui.data-display.list :as list]
+    [clojure.string :as str]))
 
 
 (defn add-proposal-fab [props]
@@ -70,6 +73,27 @@
       (dom/option {:value "old->new"} "Alt → Neu")
       (dom/option {:value "most-approvals"} "Zustimmungen ↓"))))
 
+(def filter-types
+  {"merges" "Merges"
+   "forks" "Forks"
+   "parents" "Parents"})
+
+(defn filter-selector [selected set-selected!]
+  (form/control {:size :small}
+    (input/label {:htmlFor "main-proposal-list-filter"} "Filter")
+    (inputs/select
+      {:multiple true
+       :autoWidth true
+       :value (to-array selected)
+       :style {:minWidth "150px"}
+       :onChange (fn [e] (set-selected! (set (evt/target-value e))))
+       :inputProps {:id "main-proposal-list-filter"}
+       :renderValue (fn [v] (str/join ", " (map filter-types (js->clj v))))}
+      (for [[value label] filter-types]
+        (navigation/menu-item {:key value :value value}
+          (inputs/checkbox {:checked (contains? selected value)})
+          (list/item-text {:primary label}))))))
+
 (defsc MainProposalList [_ {::process/keys [slug proposals no-of-contributors] :keys [root/current-session]} {:keys [show-new-proposal-dialog]}]
   {:query [::process/slug
            {::process/proposals (comp/get-query proposal-card/ProposalCard)}
@@ -86,6 +110,7 @@
    :use-hooks? true}
   (let [logged-in? (get current-session :session/valid?)
         [selected-sort set-selected-sort!] (hooks/use-state "new->old")
+        [selected-filters set-selected-filters!] (hooks/use-state #{})
         sorted-proposals (sort-proposals selected-sort proposals)]
     (comp/fragment
       (layout/container {:maxWidth :xl}
@@ -99,13 +124,10 @@
               (grid/item {}
                 (dd/typography {:variant :overline}
                   "Teilnehmer: " (str no-of-contributors))))
-            (layout/box {:display :flex
-                         :component :menu
-                         :m 0
-                         :type :toolbar
-                         :flexGrow 1
-                         :flexDirection :row-reverse}
-              (sort-selector selected-sort set-selected-sort!))))
+            (grid/container {:item true :spacing 2
+                             :justify "flex-end"}
+              (grid/item {} (filter-selector selected-filters set-selected-filters!))
+              (grid/item {} (sort-selector selected-sort set-selected-sort!)))))
         (grid/container {:spacing 2 :alignItems "stretch"}
           (for [{id ::proposal/id :as proposal} sorted-proposals]
             (grid/item {:xs 12 :md 6 :lg 4 :xl 3 :key id :style {:flexGrow 1}}
