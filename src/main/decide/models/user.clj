@@ -152,7 +152,7 @@
   (d/pull db [::display-name] [::id id]))
 
 (>defn get-session-user-id [env]
-  [map? => ::id]
+  [map? => (s/nilable ::id)]
   (get-in env [:ring/request :session :id]))
 
 (defresolver current-session-resolver [{:keys [db] :as env} _]
