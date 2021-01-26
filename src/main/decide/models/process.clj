@@ -10,8 +10,7 @@
     [datahike.core :as d.core]
     [decide.models.authorization :as auth]
     [decide.models.proposal :as proposal]
-    [decide.models.user :as user]
-    [taoensso.timbre :as log]))
+    [decide.models.user :as user]))
 
 (def schema
   [{:db/ident ::slug
@@ -31,6 +30,10 @@
     :db/cardinality :db.cardinality/many
     :db/valueType :db.type/ref
     :db/isComponent true}
+
+   {:db/ident ::participants
+    :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/many}
 
    {:db/ident ::latest-id
     :db/cardinality :db.cardinality/one
@@ -106,7 +109,7 @@
 (defresolver resolve-no-of-contributors [{:keys [db]} {::keys [slug]}]
   {::no-of-contributors (get-no-of-contributors db slug)})
 
-(defmutation add-process [{:keys [conn db AUTH/user-id] :as env} {::keys [title slug description] :as params}]
+(defmutation add-process [{:keys [conn db AUTH/user-id] :as env} {::keys [title slug description]}]
   {::pc/params [::title ::slug ::description]
    ::pc/output [::slug]}
   (cond
@@ -119,6 +122,30 @@
     (let [tx-report (d/transact conn [(tx-map {::slug slug ::title title ::description description})])]
       {::slug slug
        ::p/env (assoc env :db (:db-after tx-report))})))
+
+(>defn enter! [conn process-lookup user-lookup]
+  [d.core/conn? ::lookup ::user/lookup => map?]
+  (d/transact conn [[:db/add process-lookup ::participants user-lookup]]))
+
+(defmutation enter [{:keys [conn AUTH/user-id]} {user :user-id
+                                                 slug ::slug}]
+  {::pc/params [::slug :user-id]
+   ::pc/transform auth/check-logged-in}
+  (when (= user-id user)
+    (enter! conn [::slug slug] [::user/id user])
+    nil))
+
+(>defn get-number-of-participants [db slug]
+  [d.core/db? ::slug => nat-int?]
+  (-> db
+    (d/pull [::participants] [::slug slug])
+    ::participants
+    count))
+
+(defresolver resolve-no-of-participants [{:keys [db]} {::keys [slug]}]
+  {::pc/input #{::slug}
+   ::pc/output [::no-of-participants]}
+  {::no-of-participants (get-number-of-participants db slug)})
 
 (defresolver resolve-proposals [{:keys [db]} {::keys [slug]}]
   {::pc/input #{::slug}
@@ -174,6 +201,8 @@
    resolve-process
    resolve-no-of-contributors
    add-process
+   enter
+   resolve-no-of-participants
 
    resolve-proposals
    resolve-proposal-process
