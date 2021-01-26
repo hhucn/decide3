@@ -71,7 +71,7 @@
 (>defn response-updating-session
   "Uses `mutation-response` as the actual return value for a mutation, but also stores the data into the (cookie-based) session."
   [mutation-env mutation-response upsert-session]
-  [any? any? (s/keys :req-un [:decide.models.user/id]) => any?]
+  [any? any? map? => any?]
   (let [existing-session (some-> mutation-env :ring/request :session)]
     (fmw/augment-response
       mutation-response
@@ -132,7 +132,7 @@
 
 (defmutation sign-out [env _]
   {::pc/output [:session/valid?]}
-  (wrap-session env {:session/valid? false}))
+  (wrap-session env {:session/valid? false ::id nil}))
 
 (defmutation change-password [{:keys [db conn AUTH/user-id]} {:keys [old-password new-password]}]
   {::pc/params [:old-password :new-password]
@@ -162,11 +162,13 @@
                   ::id]}]}
   {::current-session
    (let [id (get-session-user-id env)]
-     (if (exists? db id)
-       {:session/valid? true
-        :user {::id id}
-        ::id id}
-       {:session/valid? false}))})
+     (wrap-session env
+       (if (exists? db id)
+         {:session/valid? true
+          :user {::id id}
+          ::id id}
+         {:session/valid? false
+          ::id nil})))})
 
 
 (def resolvers [sign-up sign-in sign-out change-password current-session-resolver resolve-public-infos])
