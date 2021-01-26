@@ -10,7 +10,8 @@
     [datahike.core :as d.core]
     [decide.models.authorization :as auth]
     [decide.models.proposal :as proposal]
-    [decide.models.user :as user]))
+    [decide.models.user :as user]
+    [taoensso.timbre :as log]))
 
 (def schema
   [{:db/ident ::slug
@@ -109,19 +110,21 @@
 (defresolver resolve-no-of-contributors [{:keys [db]} {::keys [slug]}]
   {::no-of-contributors (get-no-of-contributors db slug)})
 
-(defmutation add-process [{:keys [conn db AUTH/user-id] :as env} {::keys [title slug description]}]
+(defmutation add-process [{:keys [conn db AUTH/user-id] :as env} {::keys [title slug description] :as params}]
   {::pc/params [::title ::slug ::description]
    ::pc/output [::slug]}
-  (cond
-    (not user-id) nil
-    (not (s/valid? ::slug slug)) nil
-    (not (s/valid? ::title title)) nil
-    (not (s/valid? ::description description)) nil
-    (slug-in-use? db slug) nil
-    :else
-    (let [tx-report (d/transact conn [(tx-map {::slug slug ::title title ::description description})])]
-      {::slug slug
-       ::p/env (assoc env :db (:db-after tx-report))})))
+  (do
+    (log/debug params)
+    (cond
+      (not user-id) (throw (ex-info "User not logged in!" {}))
+      (not (s/valid? ::slug slug)) (throw (ex-info "Slug not valid" {:explain (s/explain ::slug slug)}))
+      (not (s/valid? ::title title)) (throw (ex-info "Slug not valid" {:explain (s/explain ::title slug)}))
+      (not (s/valid? ::description description)) nil
+      (slug-in-use? db slug) nil
+      :else
+      (let [tx-report (d/transact conn [(tx-map {::slug slug ::title title ::description description})])]
+        {::slug slug
+         ::p/env (assoc env :db (:db-after tx-report))}))))
 
 (>defn enter! [conn process-lookup user-lookup]
   [d.core/conn? ::lookup ::user/lookup => map?]
