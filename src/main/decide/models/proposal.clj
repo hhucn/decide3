@@ -93,6 +93,12 @@
     (d/pull [{::_parents [::id]}] proposal-ident)
     (get ::_parents [])))
 
+(>defn get-parents [db proposal-lookup]
+  [d.core/db? ::lookup => (s/coll-of (s/keys :req [::id]) :distinct true)]
+  (-> db
+    (d/pull [{::parents [::id]}] proposal-lookup)
+    (get ::parents [])))
+
 (>defn tx-map [{::keys [id nice-id title body parents argument-idents created original-author]
                 :or {parents []
                      argument-idents []}}]
@@ -156,13 +162,21 @@
       (/ (count (set/intersection parent-voters child-voters))
         (count parent-voters)))))
 
-(defresolver resolve-relationships [{:keys [db]} {::keys [id]}]
+(defresolver resolve-child-relations [{:keys [db]} {::keys [id]}]
   {::pc/output [{:child-relations [{:proposal [::id]}
                                    :migration-rate]}]}
   {:child-relations
    (for [{child-id ::id :as child} (get-children db [::id id])]
      {:proposal child
       :migration-rate (get-migration-rate db id child-id)})})
+
+(defresolver resolve-parent-relations [{:keys [db]} {::keys [id]}]
+  {::pc/output [{:parent-relations [{:proposal [::id]}
+                                    :migration-rate]}]}
+  {:parent-relations
+   (for [{parent-id ::id :as parent} (get-parents db [::id id])]
+     {:proposal parent
+      :migration-rate (get-migration-rate db parent-id id)})})
 
 (defresolver resolve-children [{:keys [db]} {::keys [id]}]
   {::pc/input #{::id}
@@ -261,5 +275,7 @@
 (def resolvers
   [resolve-proposal resolve-all-proposal-ids
 
-   resolve-relationships
+   resolve-child-relations
+   resolve-parent-relations
+
    add-argument resolve-arguments resolve-parents resolve-children resolve-similar])

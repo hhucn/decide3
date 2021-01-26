@@ -15,7 +15,6 @@
     [decide.models.argument :as argument]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
-    [decide.ui.session :as session]
     [goog.string :as gstring]
     [material-ui.data-display :as dd]
     [material-ui.data-display.list :as list]
@@ -35,7 +34,6 @@
     [clojure.string :as str]))
 
 (declare ProposalPage)
-(defn merge-icon [] (comp/create-element MergeType #js {:style #js {:transform "rotate (0.5turn)"}} nil))
 
 (defn section [title & children]
   (apply layout/box {}
@@ -223,24 +221,23 @@
 
 (def ui-relationship (comp/computed-factory Relationship {:keyfn (comp ::proposal/id :proposal)}))
 
-(defsc ParentSection [_ {::proposal/keys [parents]
-                         :keys [child-relations]}]
+(defsc ParentSection [_ {:keys [child-relations parent-relations]}]
   {:query [::proposal/id
-           {::proposal/parents (comp/get-query Parent)}
+           {:parent-relations (comp/get-query Relationship)}
            {:child-relations (comp/get-query Relationship)}]
    :ident ::proposal/id}
-  (when-not (and (empty? parents) (empty? child-relations))
+  (when-not (and (empty? parent-relations) (empty? child-relations))
     (grid/item {:xs 12 :md 6 :component "section"}
 
-      (when-not (empty? parents)
+      (when-not (empty? parent-relations)
         (section
-          (str "Dieser Vorschlag basiert auf " (count parents) " weiteren Vorschlägen.")
+          (str "Dieser Vorschlag basiert auf " (count parent-relations) " weiteren Vorschlägen.")
           (list/list {:dense false}
-            (map ui-parent parents))))
+            (map ui-relationship parent-relations))))
 
       (when-not (empty? child-relations)
         (section
-          (str "Dieser Vorschlag hat " (count child-relations) " Abkömmling" (when (<= 2 (count child-relations)) "e") ". ")
+          (str "Dieser Vorschlag hat " (count child-relations) " Abkömmling" (when (<= 2 (count child-relations)) "e") ".")
           (list/list {:dense false}
             (map ui-relationship child-relations)))))))
 
@@ -344,8 +341,8 @@
             {:post-mutation `dr/target-ready
              :post-mutation-params {:target ident}}))))}
   (let [show-add-dialog (hooks/use-callback
-                          (fn [& idents] (comp/transact!! this [(new-proposal/show {:slug slug
-                                                                                    :parents (apply vector (comp/get-ident this) idents)})]))
+                          (fn [& idents] (comp/transact! this [(new-proposal/show {:slug slug
+                                                                                   :parents (apply vector (comp/get-ident this) idents)})]))
                           [slug])]
     (layout/container {:maxWidth :xl}
       (layout/box {:my 2 :p 2 :clone true}
@@ -358,13 +355,13 @@
                 (inputs/button
                   {:color :primary
                    :variant :outlined
-                   :onClick #(comp/transact!! this [(new-proposal/show {:slug slug
-                                                                        :parents [(comp/get-ident this)]})])
-                   :startIcon (layout/box {:clone true :css {:transform "rotate (.5turn)"}} (comp/create-element CallSplit nil nil))
-                   :endIcon (layout/box {:clone true :css {:transform "rotate (.5turn)"}} (comp/create-element MergeType nil nil))}
-                  " Fork / Merge ")))
+                   :onClick #(comp/transact! this [(new-proposal/show {:slug slug
+                                                                       :parents [(comp/get-ident this)]})])
+                   :startIcon (layout/box {:css {:transform "rotate (.5turn)"} :component CallSplit})
+                   :endIcon (layout/box {:css {:transform "rotate (.5turn)"} :component MergeType})}
+                  "Fork / Merge")))
             (grid/item {:xs true :component "section"}
-              (section " Details " (dd/typography {:variant "body1"} body)))
+              (section "Details" (dd/typography {:variant "body1"} body)))
 
             ;; " Dieser Vorschlag basiert auf " (count parents) " weiteren Vorschlägen "
             (ui-parent-section parent-section)
