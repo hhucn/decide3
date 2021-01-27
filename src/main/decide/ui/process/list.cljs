@@ -28,8 +28,8 @@
       (dd/typography {:color :inherit} value)
       (layout/box {:m 1 :color :inherit :component icon-class}))))
 
-(defsc ProcessListEntry [_ {::process/keys [slug title description no-of-participants no-of-proposals]}]
-  {:query [::process/slug ::process/title ::process/description ::process/no-of-participants
+(defsc ProcessListEntry [_ {::process/keys [slug title description no-of-authors no-of-proposals]}]
+  {:query [::process/slug ::process/title ::process/description ::process/no-of-authors
            ::process/no-of-proposals]
    :ident ::process/slug}
   (list/item
@@ -47,7 +47,7 @@
                        :alignItems :center
                        :style {:width "auto"}}
         (icon-badge "Anzahl Vorschläge" no-of-proposals EmojiObjectsOutlinedIcon)
-        (icon-badge "Anzahl Teilnehmer" no-of-participants GroupIcon)))))
+        (icon-badge "Anzahl Teilnehmer" no-of-authors GroupIcon)))))
 
 
 (def ui-process-list-entry (comp/computed-factory ProcessListEntry {:keyfn ::process/slug}))

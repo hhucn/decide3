@@ -122,7 +122,7 @@
    ::pc/output [::id
                 ::nice-id
                 ::title ::body ::created
-                {::original-author [::user/id]}]
+                {::original-author [::user/id ::user/display-name]}]
    ::pc/batch? true}
   (let [batch? (sequential? input)]
     (cond->> input
@@ -131,7 +131,7 @@
       :always (d/pull-many db [::id
                                ::nice-id
                                ::title ::body ::created
-                               {::original-author [::user/id]}])
+                               {::original-author [::user/id ::user/display-name]}])
       (not batch?) first)))
 
 (defresolver resolve-parents [{:keys [db]} {::keys [id]}]

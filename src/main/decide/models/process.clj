@@ -107,6 +107,21 @@
    ::pc/output [::title ::description]}
   (d/pull db [::title ::description] [::slug slug]))
 
+(defresolver resolve-authors [{:keys [db]} {::keys [proposals]}]
+  {::pc/input #{::proposals}
+   ::pc/output [{::authors [::user/id]}
+                ::no-of-authors]}
+  (let [authors (vec
+                  (set
+                    (for [{::proposal/keys [id original-author]} proposals]
+                      (if-let [user-id (::user/id original-author)]
+                        {::user/id user-id}
+                        (-> db
+                          (d/pull [{::proposal/original-author [::user/id]}] [::proposal/id id])
+                          ::proposal/original-author)))))]
+    {::authors authors
+     ::no-of-authors (count authors)}))
+
 (defresolver resolve-no-of-contributors [{:keys [db]} {::keys [slug]}]
   {::no-of-contributors (get-no-of-contributors db slug)})
 
@@ -117,9 +132,9 @@
     (log/debug params)
     (cond
       (not user-id) (throw (ex-info "User not logged in!" {}))
-      (not (s/valid? ::slug slug)) (throw (ex-info "Slug not valid" {:explain (s/explain ::slug slug)}))
-      (not (s/valid? ::title title)) (throw (ex-info "Slug not valid" {:explain (s/explain ::title slug)}))
-      (not (s/valid? ::description description)) nil
+      (not (s/valid? ::slug slug)) (throw (ex-info "Slug not valid" {:explain (s/explain-data ::slug slug)}))
+      (not (s/valid? ::title title)) (throw (ex-info "Title not valid" {:explain (s/explain-data ::title title)}))
+      (not (s/valid? ::description description)) (throw (ex-info "Description not valid" {:explain (s/explain-data ::description description)}))
       (slug-in-use? db slug) nil
       :else
       (let [tx-report (d/transact conn [(tx-map {::slug slug ::title title ::description description})])]
@@ -210,6 +225,7 @@
    enter
    resolve-no-of-participants
    resolve-no-of-proposals
+   resolve-authors
 
    resolve-proposals
    resolve-proposal-process
