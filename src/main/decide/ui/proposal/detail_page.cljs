@@ -361,7 +361,7 @@
                    :endIcon (layout/box {:css {:transform "rotate (.5turn)"} :component MergeType})}
                   "Fork / Merge")))
             (grid/item {:xs true :component "section"}
-              (section "Details" (dd/typography {:variant "body1"} body)))
+              (section "Details" (dd/typography {:variant "body1" :style {:whiteSpace "pre-line"}} body)))
 
             ;; " Dieser Vorschlag basiert auf " (count parents) " weiteren Vorschlägen "
             (ui-parent-section parent-section)
