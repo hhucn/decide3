@@ -10,6 +10,7 @@
             [material-ui.layout :as layout]
             [material-ui.layout.grid :as grid]
             ["@material-ui/icons/Group" :default GroupIcon]
+            ["@material-ui/icons/EmojiObjectsOutlined" :default EmojiObjectsOutlinedIcon]
             [material-ui.feedback :as feedback]
             [material-ui.inputs :as inputs]
             [com.fulcrologic.fulcro.mutations :as m]
@@ -17,19 +18,36 @@
 
 (def page-ident [:PAGE :processes-list-page])
 
-(defsc ProcessListEntry [_ {::process/keys [slug title no-of-participants]}]
-  {:query [::process/slug ::process/title ::process/no-of-participants]
+(defn icon-badge [title value icon-class]
+  (grid/item {}
+    (layout/box {:display :flex
+                 :alignItems :center
+                 :title title
+                 :aria-label title
+                 :color "text.secondary"}
+      (dd/typography {:color :inherit} value)
+      (layout/box {:m 1 :color :inherit :component icon-class}))))
+
+(defsc ProcessListEntry [_ {::process/keys [slug title description no-of-participants no-of-proposals]}]
+  {:query [::process/slug ::process/title ::process/description ::process/no-of-participants
+           ::process/no-of-proposals]
    :ident ::process/slug}
   (list/item
     {:button true
      :component :a
      :href (str "/decision/" slug "/home")
      :divider true}
-    (list/item-text {} title)
-    (list/item-secondary-action {}
-      (layout/box {:display :inline-flex :title "Anzahl Teilnehmer" :aria-label "Anzahl Teilnehmer"}
-        (dd/typography {} no-of-participants)
-        (layout/box {:ml 1 :component GroupIcon})))))
+    (grid/container {:justify :space-between :spacing 1}
+      (grid/item {:xs 12 :sm "auto"}
+        (list/item-text {:primary title :secondary description}))
+      (grid/container {:item true
+                       :xs 12
+                       :sm "auto"
+                       :spacing 2
+                       :alignItems :center
+                       :style {:width "auto"}}
+        (icon-badge "Anzahl Vorschläge" no-of-proposals EmojiObjectsOutlinedIcon)
+        (icon-badge "Anzahl Teilnehmer" no-of-participants GroupIcon)))))
 
 
 (def ui-process-list-entry (comp/computed-factory ProcessListEntry {:keyfn ::process/slug}))
@@ -49,7 +67,7 @@
     #(df/load! this :all-processes ProcessListEntry {:marker :all-processes}))
   (let [loading? (#{:loading} (get-in props [[df/marker-table :all-processes] :status]))]
     (comp/fragment
-      (dd/typography {:component :h1 :variant :h2} "Aktive Entscheidungsprozesse")
+      (dd/typography {:component :h1 :variant :h2} "Aktive Entscheidungen")
       (list/list {}
         (map ui-process-list-entry all-processes))
       (when loading?
@@ -57,10 +75,6 @@
           "Loading..."
           (when (empty? all-processes) skeleton-list))))))
 (def ui-all-process-list (comp/factory AllProcessesList))
-
-(defn new-process-dialog [props & children]
-  (feedback/dialog props
-    children))
 
 
 (defsc ProcessesPage [this {:keys [all-processes-list root/current-session
@@ -71,7 +85,7 @@
            [:root/current-session '_]]
    :ident (fn [] page-ident)
    :initial-state (fn [_] {:all-processes-list (comp/get-initial-state AllProcessesList)
-                           :new-process-dialog-open? false
+                           :ui/new-process-dialog-open? false
                            :new-process-form (comp/get-initial-state new-process-form/NewProcessForm)})
    :route-segment ["decisions"]}
   (let [logged-in? (get current-session :session/valid? false)]

@@ -157,6 +157,9 @@
     (d/pull db [{::proposals [::proposal/id]}] [::slug slug])
     {::proposals []}))
 
+(defresolver resolve-no-of-proposals [_ {::keys [proposals]}]
+  {::no-of-proposals (count proposals)})
+
 (defresolver resolve-nice-proposal [{:keys [db]} {::proposal/keys [nice-ident]}]
   {::pc/input #{::proposal/nice-ident}
    ::pc/output [::proposal/id]}
@@ -206,6 +209,7 @@
    add-process
    enter
    resolve-no-of-participants
+   resolve-no-of-proposals
 
    resolve-proposals
    resolve-proposal-process
