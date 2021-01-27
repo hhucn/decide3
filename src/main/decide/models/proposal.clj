@@ -206,13 +206,15 @@
            :where
            ;; get all users who approved input proposal
            [?proposal ::opinions ?opinion]
+           [?process :decide.models.process/proposals ?proposal]
            [?opinion :decide.models.opinion/value +1]
            [?user ::user/opinions ?opinion]
 
            ;; get all proposals the users also approved with
+           [?process :decide.models.process/proposals ?other-proposal]
+           [?other-proposal ::opinions ?other-opinion]
            [?user ::user/opinions ?other-opinion]
            [?other-opinion :decide.models.opinion/value +1]
-           [?other-proposal ::opinions ?other-opinion]
 
            ;; remove input proposal from result
            [?proposal ::id ?uuid]
