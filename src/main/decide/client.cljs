@@ -7,6 +7,7 @@
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [decide.application :refer [SPA]]
     [decide.models.authorization :as auth]
+    [decide.models.user :as user]
     [decide.routing :as routing]
     [decide.ui.root :as root]
     [taoensso.timbre :as log]))
@@ -24,7 +25,7 @@
   (routing/start-history! SPA)
   (dr/initialize! SPA)
 
-  (df/load! SPA ::auth/current-session auth/Session {:target [:root/current-session]})
+  (df/load! SPA ::user/current-session auth/Session {:target [:root/current-session]})
   (swap! (::app/state-atom SPA) update :process-context dissoc nil)
 
   (routing/start!)
