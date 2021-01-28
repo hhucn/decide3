@@ -92,6 +92,9 @@
                                    :horizontal "center"}
                  :open account-menu-open?
                  :onClose #(m/set-value! this :ui/account-menu-open? false)}
+                (navigation/menu-item {:component :a
+                                       :href "/settings"}
+                  "Settings")
                 (navigation/menu-item {:onClick #(comp/transact! this [(user/sign-out nil)])}
                   "Logout")))))))))
 
