@@ -20,7 +20,8 @@
     ["@material-ui/icons/CommentTwoTone" :default Comment]
     ["@material-ui/icons/MoreVert" :default MoreVert]
     ["@material-ui/icons/ThumbDownAltTwoTone" :default ThumbDownAltTwoTone]
-    ["@material-ui/icons/ThumbUpAltTwoTone" :default ThumbUpAltTwoTone]))
+    ["@material-ui/icons/ThumbUpAltTwoTone" :default ThumbUpAltTwoTone]
+    [taoensso.timbre :as log]))
 
 (defn id-part [proposal-id]
   (dom/data {:className "proposal-id"
@@ -117,12 +118,16 @@
 
       (surfaces/card-actions {}
         (layout/box {:color "success.main"} (dd/typography {:variant :button} pro-votes))
-        (inputs/button {:color (if (pos? my-opinion) "primary" "default")
-                        :disabled (not logged-in?)
-                        :onClick #(comp/transact! this [(opinion/add {::proposal/id id
-                                                                      :opinion (if (pos? my-opinion) 0 +1)})])
-                        :startIcon (comp/create-element ThumbUpAltTwoTone nil nil)}
-          "Zustimmen")
+
+        (let [approved? (pos? my-opinion)]
+          (inputs/button
+            {:disabled (not logged-in?)
+             :color (if approved? "primary" "default")
+             :variant :text                                 ;(if approved? :contained :text)
+             :onClick #(comp/transact! this [(opinion/add {::proposal/id id
+                                                           :opinion (if approved? 0 +1)})])
+             :startIcon (comp/create-element ThumbUpAltTwoTone nil nil)}
+            (if-not approved? "Zustimmen" "Zugestimmt")))
         #_(inputs/button-group
             {:size :small
              :variant :text
@@ -134,11 +139,11 @@
                                                                           :opinion (if (neg? my-opinion) 0 -1)})])
                             :startIcon (comp/create-element ThumbDownAltTwoTone nil nil)}))
 
-        (layout/box {:style {:marginLeft "auto"}})
-        (dd/typography {:variant :button} (count arguments) " Argumente")
+        (layout/box {:style {:marginLeft "auto"}}
+          (dd/typography {:variant :button} (count arguments) " Argumente")
 
-        (inputs/button {:component "a"
-                        :color :primary
-                        :href proposal-href} "Mehr")))))
+          (inputs/button {:component "a"
+                          :color :primary
+                          :href proposal-href} "Mehr"))))))
 
 (def ui-proposal-card (comp/computed-factory ProposalCard {:keyfn ::proposal/id}))
