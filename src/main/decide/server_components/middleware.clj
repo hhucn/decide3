@@ -50,9 +50,9 @@
 ;; in a js var for use by the client.
 ;; ================================================================================
 (defn index
-  ([csrf-token] (index csrf-token nil nil))
-  ([csrf-token initial-state-script] (index csrf-token initial-state-script nil))
-  ([csrf-token initial-state-script initial-html]
+  ([csrf-token script-manifest] (index csrf-token script-manifest nil nil))
+  ([csrf-token script-manifest initial-state-script] (index csrf-token script-manifest initial-state-script nil))
+  ([csrf-token script-manifest initial-state-script initial-html]
 
    (html5
      [:html {:lang "de"}
@@ -76,16 +76,22 @@
        [:style (garden/css styles/body styles/splashscreen styles/sizing styles/address)]]
       [:body
        [:div#decide initial-html]
-       (include-js "/js/main/main.js")]])))
+       (for [{:keys [output-name] :as build} script-manifest
+             :when output-name]
+         (do
+           (log/debug build)
+           (include-js (str "/js/main/" output-name))))]])))
+
+; "?v=" js-hash
 
 (defn index-with-db [csrf-token normalized-db]
   (log/debug "Serving index.html")
   (let [initial-state-script (ssr/initial-state->script-tag normalized-db)]
     (index csrf-token initial-state-script nil)))
 
-(defn index-with-credentials [csrf-token request]
+(defn index-with-credentials [csrf-token script-manifest request]
   (let [initial-state (ssr/build-initial-state (parser {:ring/request request} (comp/get-query auth/Session)) auth/Session)]
-    (index csrf-token (ssr/initial-state->script-tag initial-state)
+    (index csrf-token script-manifest (ssr/initial-state->script-tag initial-state)
       splash/splash)))
 
 (defn ssr-html [csrf-token app normalized-db root-component-class]
@@ -121,7 +127,7 @@
       [:div#app]
       [:script {:src "workspaces/js/main.js"}]]]))
 
-(defn wrap-html-routes [ring-handler]
+(defn wrap-html-routes [ring-handler script-manifest]
   (fn [{:keys [uri anti-forgery-token] :as req}]
     (cond
       ;; See note above on the `wslive` function.
@@ -131,7 +137,7 @@
 
       (or (#{"/" "/index.html"} uri)
         (not (#{"/api" "/wslive.html"} uri)))
-      (-> (index-with-credentials anti-forgery-token req)
+      (-> (index-with-credentials anti-forgery-token script-manifest req)
         (resp/response)
         (resp/content-type "text/html"))
 
@@ -147,7 +153,7 @@
       (wrap-api "/api")
       wrap-transit-params
       wrap-transit-response
-      (wrap-html-routes)
+      (wrap-html-routes (:script-manifest config))
       ;; If you want to set something like session store, you'd do it against
       ;; the defaults-config here (which comes from an EDN file, so it can't have
       ;; code initialized).

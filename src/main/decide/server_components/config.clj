@@ -3,7 +3,9 @@
     [mount.core :refer [defstate args]]
     [com.fulcrologic.fulcro.server.config :refer [load-config!]]
     [taoensso.timbre :as log]
-    [clojure.pprint :as pprint]))
+    [clojure.pprint :as pprint]
+    [clojure.java.io :as io]
+    [clojure.edn :as edn]))
 
 (defn prettify-data [data]
   (if (string? data)
@@ -24,8 +26,10 @@
 
 (defstate config
   :start (let [{:keys [config] :or {config "config/dev.edn"}} (args)
-               configuration (load-config! {:config-path config})]
+               configuration (load-config! {:config-path config})
+               manifest (edn/read-string (slurp (io/resource "public/js/main/manifest.edn")))]
            (log/info "Loaded config" config)
            (configure-logging! configuration)
-           configuration))
+           (-> configuration
+             (assoc :script-manifest manifest))))
 

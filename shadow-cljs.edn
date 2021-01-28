@@ -4,14 +4,16 @@
                  :output-dir "resources/public/js/main"
                  :asset-path "/js/main"
 
+                 :module-hash-names true
                  :modules {:main {:init-fn decide.client/init
-                                  :entries [decide.client]}}
+                                  :entries [decide.client]
+                                  :depends-on #{:app}}
+                           :app {:entries [decide.application]}}
                  ;; guardrails enforcement only during dev
                  :dev {:compiler-options
                        {:external-config {:guardrails {}}
                         :closure-defines {'goog.DEBUG true}
                         #_:warnings #_{:redef false}}}
-                 ; :compiler-options {:strip-type-prefixes #{"cljs.pprint"}}
 
                  :devtools {:after-load decide.client/refresh
                             :preloads [com.fulcrologic.fulcro.inspect.websocket-preload
