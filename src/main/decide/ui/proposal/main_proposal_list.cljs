@@ -79,7 +79,7 @@
    "parents" "Parents"})
 
 (defn filter-selector [selected set-selected!]
-  (form/control {:size :small}
+  (form/control {:size :small :disabled true}
     (input/label {:htmlFor "main-proposal-list-filter"} "Filter")
     (inputs/select
       {:multiple true
