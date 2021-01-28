@@ -5,6 +5,7 @@
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [decide.models.authorization :as auth]
     [decide.models.user :as user]
+    [decide.ui.login :as login]
     [material-ui.data-display :as dd]
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
@@ -63,7 +64,7 @@
             (inputs/button
               {:variant :outlined
                :color :inherit
-               :href "/login"}
+               :onClick #(comp/transact! this [(login/toggle-modal {})] {:compressible? true})}
               "Login")
 
             (comp/fragment

@@ -1,24 +1,25 @@
 (ns decide.ui.login
-  (:require [material-ui.layout :as layout]
-            [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-            [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
-            [com.fulcrologic.fulcro.algorithms.form-state :as fs]
-            [decide.models.authorization :as auth]
-            [decide.models.process :as process]
-            [decide.models.user :as user]
-            [decide.ui.process.core :as process-ui]
-            [decide.ui.proposal.main-proposal-list :as main-proposal-list]
-            [material-ui.surfaces :as surfaces]
-            [com.fulcrologic.fulcro.dom :as dom]
-            [com.fulcrologic.fulcro.dom.events :as evt]
-            [material-ui.data-display :as dd]
-            [material-ui.utils :as mutils]
-            [material-ui.inputs :as inputs]
-            [material-ui.layout.grid :as grid]
-            [decide.routing :as routing]
-            [material-ui.navigation :as navigation]
-            [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
-            [taoensso.timbre :as log]))
+  (:require
+    [com.fulcrologic.fulcro.algorithms.form-state :as fs]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.dom.events :as evt]
+    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+    [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
+
+    [decide.models.authorization :as auth]
+    [decide.models.user :as user]
+    [decide.routing :as routing]
+    [decide.ui.process.list :as process-list]
+
+    [material-ui.data-display :as dd]
+    [material-ui.feedback :as feedback]
+    [material-ui.inputs :as inputs]
+    [material-ui.layout :as layout]
+    [material-ui.layout.grid :as grid]
+    [material-ui.navigation :as navigation]
+    [material-ui.surfaces :as surfaces]
+    [material-ui.utils :as mutils]))
 
 (declare LoginPage)
 
@@ -26,7 +27,13 @@
   (m/set-string! component ::user/password :value ""))
 
 (defn redirect-to-main-list! [component]
-  (comp/transact!! component [(routing/route-to {:path (dr/path-to process-ui/ProcessContext main-proposal-list/MainProposalList {::process/slug "test-decision"})})]))
+  (comp/transact! component [(routing/route-to {:path (dr/path-to process-list/AllProcessesList)})]))
+
+(def login-modal-ident [:component/id ::LoginDialog])
+
+(defmutation toggle-modal [_]
+  (action [{:keys [state]}]
+    (swap! state update-in login-modal-ident update :ui/open? not)))
 
 (defmutation sign-up [{:user/keys [_email _password]}]
   (action [_] true)
@@ -35,7 +42,7 @@
       (if (empty? errors)
         (do
           (reset-password-field! component)
-          (redirect-to-main-list! component))
+          (comp/transact! component [(toggle-modal {})]))
         (cond
           (contains? errors :email-in-use)
           (m/set-string! component :ui/email-error :value "Email already in use!")))))
@@ -52,9 +59,8 @@
           (get-in env [:result :body `user/sign-in])]
       (if (empty? errors)
         (do
-          (log/info "Login: ok")
           (reset-password-field! component)
-          (redirect-to-main-list! component))
+          (comp/transact! component [(toggle-modal {})]))
         (when errors
           (cond
             (or
@@ -218,3 +224,95 @@
             (routing/with-route this (dr/path-to SignUpPage)
               {:variant :body2})
             "Don't have an account? Sign Up"))))))
+
+(defsc LoginForm [this {:keys [::user/email ::user/password]
+                        :ui/keys [email-error password-error]}]
+  {:query [::user/email
+           :ui/email-error
+
+           ::user/password
+           :ui/password-error]
+   :ident (fn [] [:component/id ::LoginForm])
+   :initial-state
+   (fn [_] {::user/email ""
+            :ui/email-error nil
+
+            ::user/password ""
+            :ui/password-error nil})}
+  (comp/fragment
+    (dom/form
+      {:noValidate true
+       :onSubmit (fn submit-login [e]
+                   (evt/prevent-default! e)
+                   (comp/transact! this [(sign-in #:user{::user/email email
+                                                         ::user/password password})]))}
+      (grid/container
+        {:spacing 2
+         :direction "column"}
+        (grid/item {:xs 12}
+          (dd/typography
+            {:align "center"
+             :variant "h5"}
+            "Sign in"))
+        (grid/item {:xs 12}
+          (wide-textfield {:label "E-Mail"
+                           :type :email
+                           :error (boolean email-error)
+                           :helperText email-error
+                           :inputProps {:aria-label "E-Mail"
+                                        :autoComplete :email}
+                           :value email
+                           :onChange (fn [e]
+                                       (when email-error (m/set-value! this :ui/email-error nil))
+                                       (m/set-string!! this ::user/email :event e))}))
+        (grid/item {:xs 12}
+          (wide-textfield {:label "Password"
+                           :type :password
+                           :error (boolean password-error)
+                           :helperText password-error
+                           :inputProps {:aria-label "Password"
+                                        :autoComplete :current-password}
+                           :value password
+                           :onChange (fn [e]
+                                       (when password-error (m/set-value! this :ui/password-error nil))
+                                       (m/set-string!! this ::user/password :event e))}))
+        (grid/item {:xs 12}
+          (inputs/button {:variant :contained
+                          :color :primary
+                          :type :submit
+                          :fullWidth true}
+            "Sign in"))))
+    #_(layout/box {:mt 2 :clone true}
+        (grid/container
+          {:justify :space-between}
+          (grid/item {:xs true}
+            (navigation/link {:variant :body2} "Forgot password?"))
+          (grid/item {}
+            (navigation/link
+              (routing/with-route this (dr/path-to SignUpPage)
+                {:variant :body2})
+              "Don't have an account? Sign Up"))))))
+
+(def ui-login-form (comp/computed-factory LoginForm))
+
+(defsc LoginDialog [this {:keys [ui/open? ui/login-form]}]
+  {:query [:ui/open?
+           {:ui/login-form (comp/get-query LoginForm)}]
+   :ident (fn [] login-modal-ident)
+   :initial-state
+   (fn [_]
+     {:ui/open? true
+      :ui/login-form (comp/get-initial-state LoginForm)})}
+  (feedback/dialog
+    {:open open?
+     :maxWidth "md"
+     :onClose #(m/set-value! this :ui/open? false)}
+    #_(feedback/dialog-title {} "Sign in")
+    (feedback/dialog-content {}
+      (ui-login-form login-form {:onSubmit identity}))))
+
+(def ui-login-modal (comp/computed-factory LoginDialog))
+
+(comp/get-initial-state LoginDialog)
+
+

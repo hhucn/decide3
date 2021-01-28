@@ -16,7 +16,7 @@
 ; code from https://chrisodonnell.dev/posts/giftlist/routing/
 ; Thanks a lot!
 
-(def default-route ["login"])
+(def default-route ["decisions"])
 (def history (atom nil))
 (s/def ::path (s/coll-of string?))
 

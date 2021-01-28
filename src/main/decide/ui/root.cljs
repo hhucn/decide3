@@ -24,7 +24,6 @@
 
 (defrouter RootRouter [_this {:keys [current-state]}]
   {:router-targets [process.list/ProcessesPage
-                    login/LoginPage
                     process-page/ProcessContext
                     login/SignUpPage
                     settings/SettingsPage]}
@@ -39,8 +38,9 @@
     (swap! state assoc :ui/theme theme)))
 
 (defsc Root [this {:root/keys [root-router app-bar snackbar-container navdrawer]
-                   :keys [ui/theme]}]
+                   :keys [ui/theme ui/login-dialog]}]
   {:query [:ui/theme
+           {:ui/login-dialog (comp/get-query login/LoginDialog)}
            {:root/app-bar (comp/get-query appbar/AppBar)}
            {:root/root-router (comp/get-query RootRouter)}
            {:root/snackbar-container (comp/get-query snackbar/SnackbarContainer)}
@@ -49,6 +49,7 @@
            :all-processes]
    :initial-state
    (fn [_] {:root/root-router (comp/get-initial-state RootRouter)
+            :ui/login-dialog (comp/get-initial-state login/LoginDialog)
             :ui/theme (if (dark-mode/dark-mode?) :dark :light)
             :root/app-bar (comp/get-initial-state appbar/AppBar)
             :root/snackbar-container (comp/get-initial-state snackbar/SnackbarContainer)
@@ -77,5 +78,6 @@
                     :component :a
                     :href (r/path-to->absolute-url settings/SettingsPage)}
           (list/item-text {} "Settings"))))
+    (login/ui-login-modal login-dialog)
 
     (ui-root-router root-router)))
