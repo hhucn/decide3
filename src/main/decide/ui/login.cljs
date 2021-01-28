@@ -301,7 +301,7 @@
    :ident (fn [] login-modal-ident)
    :initial-state
    (fn [_]
-     {:ui/open? true
+     {:ui/open? false
       :ui/login-form (comp/get-initial-state LoginForm)})}
   (feedback/dialog
     {:open open?
