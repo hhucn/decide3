@@ -42,9 +42,9 @@
           (inputs/icon-button
             {:edge :start
              :color :inherit
-             :aria-label "menu"
+             :aria-label "navigation menu"
              :onClick menu-onClick}
-            (js/React.createElement Menu nil nil)))
+            (layout/box {:component Menu})))
         (dd/typography
           {:component :span
            :variant :h5
@@ -77,13 +77,14 @@
                  :aria-haspopup true
                  :onClick #(m/set-value! this :ui/account-menu-open? true)
                  :color "inherit"}
-                (comp/create-element AccountCircleIcon nil nil))
+                (layout/box {:component AccountCircleIcon}))
 
               (layout/box {:p 1}
                 (dd/typography {:color :inherit} display-name))
 
               (navigation/menu
                 {:keepMounted true
+                 :id "menuId"
                  :anchorEl (.-current menu-ref)
                  :getContentAnchorEl nil
                  :anchorOrigin {:vertical "bottom"
