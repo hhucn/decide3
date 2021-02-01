@@ -35,7 +35,12 @@
 
    {:db/ident ::roles
     :db/valueType :db.type/keyword
-    :db/cardinality :db.cardinality/many}])
+    :db/cardinality :db.cardinality/many}
+
+   {:db/ident :db/txUser
+    :db/doc "Ref tu user who authored the transaction. Useful for audits."
+    :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/one}])
 
 (s/def ::id uuid?)
 (s/def ::ident (s/tuple #{::id} ::id))
@@ -86,8 +91,7 @@
           (assoc resp :session new-session))))))
 
 
-(>defn wrap-session [env {:keys [decide.models.user/id] :as response}]
-  [map? (s/keys :opt [:decide.models.user/id]) => (s/keys :opt [:decide.models.user/id])]
+(defn wrap-session [env {:keys [decide.models.user/id] :as response}]
   (response-updating-session env response {:id id}))
 
 
@@ -128,7 +132,7 @@
   (if (email-in-db? @conn email)
     {:errors #{:email-in-use}}
     (let [{::keys [id] :as user} (tx-map {::email email ::password password})
-          tx-report (d/transact conn [user])]
+          tx-report (d/transact conn [user [:db/add "datomic.tx" :db/txUser [::id id]]])]
       (wrap-session env
         {:signup/result :success
          ::id id
@@ -148,7 +152,8 @@
                     (password-valid? old-password))]
     (if pw-valid?
       (do (d/transact! conn [{:db/id [::id user-id]
-                              ::password new-password}])
+                              ::password new-password}
+                             [:db/add "datomic.tx" :db/txUser [::id user-id]]])
           {})
       {:errors #{:invalid-credentials}})))
 

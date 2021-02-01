@@ -76,11 +76,9 @@
        [:style (garden/css styles/body styles/splashscreen styles/sizing styles/address)]]
       [:body
        [:div#decide initial-html]
-       (for [{:keys [output-name] :as build} script-manifest
+       (for [{:keys [output-name]} script-manifest
              :when output-name]
-         (do
-           (log/debug build)
-           (include-js (str "/js/main/" output-name))))]])))
+         (include-js (str "/js/main/" output-name)))]])))
 
 ; "?v=" js-hash
 

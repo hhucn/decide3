@@ -166,7 +166,8 @@
                  {::slug slug
                   ::title title
                   ::description description
-                  ::moderator-lookups [[::user/id moderator-id]]})])]
+                  ::moderator-lookups [[::user/id moderator-id]]})
+               [:db/add "datomic.tx" :db/txUser [::user/id user-id]]])]
         {::slug slug
          ::p/env (assoc env :db db-after)}))))
 
@@ -240,7 +241,8 @@
                                      :original-author [::user/id user-id]})
         tx-report (d/transact conn
                     [(assoc new-proposal :db/id "new-proposal")
-                     [:db/add [::slug slug] ::proposals "new-proposal"]])]
+                     [:db/add [::slug slug] ::proposals "new-proposal"]
+                     [:db/add "datomic.tx" :db/txUser [::user/id user-id]]])]
     {::proposal/id real-id
      :tempids {id real-id}
      ::p/env (assoc env :db (:db-after tx-report))}))

@@ -10,7 +10,8 @@
     [datahike.core :as d.core]
     [decide.models.argument :as argument]
     [decide.models.authorization :as auth]
-    [decide.models.user :as user])
+    [decide.models.user :as user]
+    [taoensso.timbre :as log])
   (:import (java.util Date)))
 
 (def schema
@@ -263,7 +264,8 @@
            :author [::user/id user-id]})
         tx-report (d/transact conn
                     [(assoc argument :db/id "new-argument")
-                     [:db/add [::id id] ::arguments "new-argument"]])]
+                     [:db/add [::id id] ::arguments "new-argument"]
+                     [:db/add "datomic.tx" :db/txUser [::user/id user-id]]])]
     {:tempids {temp-id real-id}
      ::p/env (assoc env :db (:db-after tx-report))
      ::argument/id real-id}))

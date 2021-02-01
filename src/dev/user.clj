@@ -21,6 +21,12 @@
       (d/pull-many db '[*])
       (sort-by :db/id))))
 
+(defn query-all-processes []
+  (let [db (d/db conn)]
+    (->> db
+      (d/q '[:find [(pull ?e [*]) ...]
+             :where [?e :decide.models.process/slug]]))))
+
 (defn start
   "Start the web server"
   [] (mount/start))
