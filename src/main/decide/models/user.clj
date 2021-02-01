@@ -2,34 +2,40 @@
   (:require
     [buddy.hashers :as hs]
     [clojure.spec.alpha :as s]
+    [com.fulcrologic.fulcro.server.api-middleware :as fmw]
     [com.fulcrologic.guardrails.core :refer [>defn >defn- => | ? <-]]
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
     [com.wsscode.pathom.core :as p]
     [datahike.api :as d]
-    [datahike.core :as d.core]
-    [com.fulcrologic.fulcro.server.api-middleware :as fmw]))
+    [datahike.core :as d.core]))
 
-(def schema [{:db/ident ::id
-              :db/doc "The id of a user"
-              :db/unique :db.unique/identity
-              :db/cardinality :db.cardinality/one
-              :db/valueType :db.type/uuid}
 
-             {:db/ident ::password
-              :db/doc "Password of a user"
-              :db/cardinality :db.cardinality/one
-              :db/valueType :db.type/string
-              :db/noHistory true}
+(def schema
+  [{:db/ident ::id
+    :db/doc "The id of a user"
+    :db/unique :db.unique/identity
+    :db/cardinality :db.cardinality/one
+    :db/valueType :db.type/uuid}
 
-             {:db/ident ::email
-              :db/unique :db.unique/identity
-              :db/cardinality :db.cardinality/one
-              :db/valueType :db.type/string}
+   {:db/ident ::password
+    :db/doc "Password of a user"
+    :db/cardinality :db.cardinality/one
+    :db/valueType :db.type/string
+    :db/noHistory true}
 
-             {:db/ident ::display-name
-              :db/doc "A (not unique) name to display for the public."
-              :db/cardinality :db.cardinality/one
-              :db/valueType :db.type/string}])
+   {:db/ident ::email
+    :db/unique :db.unique/identity
+    :db/cardinality :db.cardinality/one
+    :db/valueType :db.type/string}
+
+   {:db/ident ::display-name
+    :db/doc "A (not unique) name to display for the public."
+    :db/cardinality :db.cardinality/one
+    :db/valueType :db.type/string}
+
+   {:db/ident ::roles
+    :db/valueType :db.type/keyword
+    :db/cardinality :db.cardinality/many}])
 
 (s/def ::id uuid?)
 (s/def ::ident (s/tuple #{::id} ::id))

@@ -10,8 +10,7 @@
     [datahike.core :as d.core]
     [decide.models.authorization :as auth]
     [decide.models.proposal :as proposal]
-    [decide.models.user :as user]
-    [taoensso.timbre :as log]))
+    [decide.models.user :as user]))
 
 (def schema
   [{:db/ident ::slug
@@ -33,6 +32,10 @@
     :db/isComponent true}
 
    {:db/ident ::participants
+    :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/many}
+
+   {:db/ident ::moderators
     :db/valueType :db.type/ref
     :db/cardinality :db.cardinality/many}
 
@@ -86,11 +89,12 @@
         voters (apply set/union (map (partial proposal/get-voters db) proposal-db-ids))]
     (count (set/union commenter authors voters))))
 
-(>defn tx-map [{::keys [title slug description]}]
+(>defn tx-map [{::keys [title slug description moderator-lookups]}]
   [(s/keys :req [::title ::slug ::description]) => (s/keys :req [::title ::slug ::description ::latest-id])]
   {::slug slug
    ::title title
    ::description description
+   ::moderators moderator-lookups
    ::proposals []
    ::latest-id 0})
 
@@ -106,6 +110,17 @@
   {::pc/input #{::slug}
    ::pc/output [::title ::description]}
   (d/pull db [::title ::description] [::slug slug]))
+
+(defresolver resolve-process-moderators [{:keys [db]} {::keys [slug]}]
+  {::pc/input #{::slug}
+   ::pc/output [{::moderators [::user/id]}]}
+  (d/pull db [{::moderators [::user/id]}] [::slug slug]))
+
+(defresolver resolve-user-moderated-processes [{:keys [db]} {::user/keys [id]}]
+  {::pc/output [{::user/moderated-processes [::slug]}]}
+  (if (user/exists? db id)
+    (d/pull db [{::_moderators :as ::user/moderated-processes [::slug]}] [::user/id id])
+    (throw (ex-info "User does not exist" {::user/id id}))))
 
 (defresolver resolve-authors [{:keys [db]} {::keys [proposals]}]
   {::pc/input #{::proposals}
@@ -125,21 +140,35 @@
 (defresolver resolve-no-of-contributors [{:keys [db]} {::keys [slug]}]
   {::no-of-contributors (get-no-of-contributors db slug)})
 
-(defmutation add-process [{:keys [conn db AUTH/user-id] :as env} {::keys [title slug description] :as params}]
+(defmutation add-process [{:keys [conn db AUTH/user-id] :as env} {::keys [title slug description]}]
   {::pc/params [::title ::slug ::description]
    ::pc/output [::slug]}
-  (do
-    (log/debug params)
+  (let [moderator-id user-id]
     (cond
-      (not user-id) (throw (ex-info "User not logged in!" {}))
-      (not (s/valid? ::slug slug)) (throw (ex-info "Slug not valid" {:explain (s/explain-data ::slug slug)}))
-      (not (s/valid? ::title title)) (throw (ex-info "Title not valid" {:explain (s/explain-data ::title title)}))
-      (not (s/valid? ::description description)) (throw (ex-info "Description not valid" {:explain (s/explain-data ::description description)}))
-      (slug-in-use? db slug) nil
+      (not user-id)
+      (throw (ex-info "User not logged in!" {}))
+
+      (not (s/valid? ::slug slug))
+      (throw (ex-info "Slug not valid" {:explain (s/explain-data ::slug slug)}))
+
+      (not (s/valid? ::title title))
+      (throw (ex-info "Title not valid" {:explain (s/explain-data ::title title)}))
+
+      (not (s/valid? ::description description))
+      (throw (ex-info "Description not valid" {:explain (s/explain-data ::description description)}))
+
+      (slug-in-use? db slug) (throw (ex-info "Slug already in use" {:slug slug}))
+
       :else
-      (let [tx-report (d/transact conn [(tx-map {::slug slug ::title title ::description description})])]
+      (let [{:keys [db-after]}
+            (d/transact conn
+              [(tx-map
+                 {::slug slug
+                  ::title title
+                  ::description description
+                  ::moderator-lookups [[::user/id moderator-id]]})])]
         {::slug slug
-         ::p/env (assoc env :db (:db-after tx-report))}))))
+         ::p/env (assoc env :db db-after)}))))
 
 (>defn enter! [conn process-lookup user-lookup]
   [d.core/conn? ::lookup ::user/lookup => map?]
@@ -226,6 +255,9 @@
    resolve-no-of-participants
    resolve-no-of-proposals
    resolve-authors
+
+   resolve-user-moderated-processes
+   resolve-process-moderators
 
    resolve-proposals
    resolve-proposal-process
