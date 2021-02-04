@@ -90,6 +90,18 @@
           (when (empty? all-processes) skeleton-list))))))
 (def ui-all-process-list (comp/factory AllProcessesList))
 
+(defn new-process-dialog [comp {:keys [new-process-dialog-open? new-process-form]}]
+  (feedback/dialog
+    {:open new-process-dialog-open?
+     :onClose #(m/set-value! comp :ui/new-process-dialog-open? false)}
+    (feedback/dialog-title {} "Neuer Entscheidungsprozess")
+    (feedback/dialog-content {}
+      (new-process-form/ui-new-process-form new-process-form
+        {:onSubmit (fn [{::process/keys [title slug description]}]
+                     (comp/transact! comp [(process/add-process
+                                             {::process/title title
+                                              ::process/slug slug
+                                              ::process/description description})]))}))))
 
 (defsc ProcessesPage [this {:keys [all-processes-list root/current-session
                                    ui/new-process-dialog-open? new-process-form]}]
@@ -115,14 +127,5 @@
                         :onClick #(m/toggle! this :ui/new-process-dialog-open?)}
           "Neuen Entscheidungsprozess anlegen"))
 
-      (feedback/dialog
-        {:open new-process-dialog-open?
-         :onClose #(m/set-value! this :ui/new-process-dialog-open? false)}
-        (feedback/dialog-title {} "Neuer Entscheidungsprozess")
-        (feedback/dialog-content {}
-          (new-process-form/ui-new-process-form new-process-form
-            {:onSubmit (fn [{::process/keys [title slug description]}]
-                         (comp/transact! this [(process/add-process
-                                                 {::process/title title
-                                                  ::process/slug slug
-                                                  ::process/description description})]))}))))))
+      (new-process-dialog this {:new-process-dialog-open? new-process-dialog-open?
+                                :new-process-form new-process-form}))))
