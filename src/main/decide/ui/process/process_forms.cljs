@@ -1,13 +1,9 @@
-(ns decide.ui.process.new-process-form
+(ns decide.ui.process.process-forms
   (:require [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-            [com.fulcrologic.fulcro.data-fetch :as df]
             [com.fulcrologic.fulcro.react.hooks :as hooks]
             [decide.models.process :as process]
             [material-ui.data-display :as dd]
-            [material-ui.data-display.list :as list]
-            [material-ui.lab :refer [skeleton]]
             [material-ui.layout :as layout]
-            [material-ui.layout.grid :as grid]
             [material-ui.inputs :as inputs]
             [com.fulcrologic.fulcro.dom.events :as evt]
             [clojure.string :as str]
@@ -75,16 +71,61 @@
       (dd/typography {:paragraph false}
         "Worum soll es bei dem Entscheidungsprozess gehen?")
       (inputs/textfield
-        {:label        "Beschreibung"
-         :variant      "filled"
-         :margin       "normal"
-         :fullWidth    true
+        {:label "Beschreibung"
+         :variant "filled"
+         :margin "normal"
+         :fullWidth true
          :autoComplete "off"
-         :multiline    true
-         :rows         7
-         :value        description
-         :onChange     #(change-description (evt/target-value %))})
+         :multiline true
+         :rows 7
+         :value description
+         :onChange #(change-description (evt/target-value %))})
 
       (inputs/button {:color :primary :type "submit"} "Anlegen"))))
 
 (def ui-new-process-form (comp/computed-factory NewProcessForm))
+
+(defsc Process [_ _]
+  {:query [::process/slug ::process/title ::process/moderators ::process/description]
+   :ident ::process/slug})
+
+
+(defsc EditProcessForm [_ {{::process/keys [slug title moderators description]} :process} {:keys [onSubmit]}]
+  {:query [{:process (comp/get-query Process)}]
+   :initial-state (fn [{:keys [process]}]
+                    (when-not (::process/slug process)
+                      (log/error "Initial state for" `EditProcessForm "needs to have a " :process "with" ::process/slug ".")
+                      {:process process}))
+   :use-hooks? true}
+  (let [[title change-title] (hooks/use-state title)
+        [description change-description] (hooks/use-state description)]
+    (layout/box {:component :form
+                 :onSubmit (fn [e]
+                             (evt/prevent-default! e)
+                             (onSubmit {::process/title title
+                                        ::process/slug slug
+                                        ::process/description description}))}
+      (inputs/textfield
+        {:label "Titel"
+         :variant "filled"
+         :fullWidth true
+         :autoComplete "off"
+         :inputProps {:maxLength 140}
+         :value title
+         :onChange #(change-title (evt/target-value %))
+         :margin "normal"})
+
+      (inputs/textfield
+        {:label "Beschreibung"
+         :variant "filled"
+         :margin "normal"
+         :fullWidth true
+         :autoComplete "off"
+         :multiline true
+         :rows 7
+         :value description
+         :onChange #(change-description (evt/target-value %))})
+
+      (inputs/button {:color :primary :type "submit"} "Anlegen"))))
+
+(def ui-edit-process-form (comp/computed-factory EditProcessForm))

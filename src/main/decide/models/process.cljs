@@ -25,7 +25,20 @@
 
 
 (defmutation add-process [{::keys [slug title description]}]
+  (action [{:keys [app]}]
+    (mrg/merge-component! app Process
+      {::slug slug ::title title ::description description}))
   (remote [env]
     (-> env
       (m/returning Process)
       (m/with-target (targeting/append-to [:all-processes])))))
+
+(defmutation update-process [{::keys [slug] :as process}]
+  (action [{:keys [app]}]
+    (when slug
+      (mrg/merge-component! app Process
+        (select-keys process [::slug ::title ::description]))))
+  (remote [env]
+    (-> env
+      (m/returning Process))
+    false))
