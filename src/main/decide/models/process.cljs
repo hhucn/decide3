@@ -40,5 +40,4 @@
         (select-keys process [::slug ::title ::description]))))
   (remote [env]
     (-> env
-      (m/returning Process))
-    false))
+      (m/returning Process))))

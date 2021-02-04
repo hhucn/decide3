@@ -10,7 +10,8 @@
     [datahike.core :as d.core]
     [decide.models.authorization :as auth]
     [decide.models.proposal :as proposal]
-    [decide.models.user :as user]))
+    [decide.models.user :as user]
+    [taoensso.timbre :as log]))
 
 (def schema
   [{:db/ident ::slug
@@ -171,6 +172,45 @@
         {::slug slug
          ::p/env (assoc env :db db-after)}))))
 
+(>defn is-moderator? [db process-lookup user-id]
+  [d.core/db? ::lookup ::user/id => boolean?]
+  (contains?
+    (into #{} (map ::user/id)
+      (::moderators (d/pull db [{::moderators [::user/id]}] process-lookup)))
+    user-id))
+
+(defn update-process! [conn user-id {::keys [slug] :as process}]
+  [d.core/conn? ::user/id (s/keys :req [::slug] :opt [::title ::description])]
+  (let [db (d/db conn)]
+    (cond
+      (not user-id)
+      (throw (ex-info "User not logged in!" {}))
+
+      (not (slug-in-use? db slug))
+      (throw (ex-info "Slug not in use" {:slug slug}))
+
+      (not (s/valid? (s/keys :req [::slug] :opt [::title ::description]) process))
+      (throw (ex-info "Parameter not valid" {:explain (s/explain-data (s/keys :req [::slug] :opt [::title ::description]) process)}))
+
+      (not (is-moderator? db [::slug slug] user-id))
+      (throw (ex-info "User is not moderator of this process" {::user/id user-id ::slug slug}))
+
+      :else
+      (let [facts (for [[k v] (dissoc process ::slug)]
+                    [:db/add [::slug slug] k v])
+            {:keys [db-after]}
+            (d/transact conn
+              (conj facts [:db/add "datomic.tx" :db/txUser [::user/id user-id]]))]
+        db-after))))
+
+
+(defmutation update-process [{:keys [conn AUTH/user-id] :as env} {::keys [slug] :as process}]
+  {::pc/params [::title ::slug ::description]
+   ::pc/output [::slug]}
+  (let [db-after (update-process! conn user-id process)]
+    {::slug slug
+     ::p/env (assoc env :db db-after)}))
+
 (>defn enter! [conn process-lookup user-lookup]
   [d.core/conn? ::lookup ::user/lookup => map?]
   (d/transact conn [[:db/add process-lookup ::participants user-lookup]]))
@@ -253,6 +293,8 @@
    resolve-process
    resolve-no-of-contributors
    add-process
+   update-process
+
    enter
    resolve-no-of-participants
    resolve-no-of-proposals
