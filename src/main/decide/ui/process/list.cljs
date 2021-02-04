@@ -28,26 +28,27 @@
    :initial-state
    (fn [_]
      {:ui/open? false
-      :process-form (comp/get-initial-state process-forms/EditProcessForm)})}
+      :process-form nil})}
   (feedback/dialog
     {:open open?
      :onClose #(m/set-value! this :ui/open? false)}
     (feedback/dialog-title {} "Entscheidungsprozess bearbeiten")
     (feedback/dialog-content {}
-      (process-forms/ui-edit-process-form process-form
-        {:onSubmit
-         (fn [{::process/keys [title slug description]}]
-           (comp/transact! this [(process/update-process
-                                   {::process/title title
-                                    ::process/slug slug
-                                    ::process/description description})
-                                 (m/set-props {:ui/open? false})]))}))))
+      (feedback/dialog-content-text {}
+        (process-forms/ui-edit-process-form process-form
+          {:onSubmit
+           (fn [{::process/keys [title slug description]}]
+             (comp/transact! this [(process/update-process
+                                     {::process/title title
+                                      ::process/slug slug
+                                      ::process/description description})
+                                   (m/set-props {:ui/open? false})]))})))))
 
 (def ui-edit-process-dialog (comp/computed-factory EditProcessDialog))
 
 (defmutation show-edit-process-dialog [{:keys [process]}]
   (action [{:keys [app]}]
-    (when-not (::process/slug process)
+    (if-not (::process/slug process)
       (log/error "The" :process "passed to" `show-edit-process-dialog "must have the key" ::process/slug "!")
       (mrg/merge-component! app EditProcessDialog
         {:ui/open? true
@@ -157,12 +158,13 @@
      :onClose #(m/set-value! comp :ui/new-process-dialog-open? false)}
     (feedback/dialog-title {} "Neuer Entscheidungsprozess")
     (feedback/dialog-content {}
-      (process-forms/ui-new-process-form new-process-form
-        {:onSubmit (fn [{::process/keys [title slug description]}]
-                     (comp/transact! comp [(process/add-process
-                                             {::process/title title
-                                              ::process/slug slug
-                                              ::process/description description})]))}))))
+      (feedback/dialog-content-text {}
+        (process-forms/ui-new-process-form new-process-form
+          {:onSubmit (fn [{::process/keys [title slug description]}]
+                       (comp/transact! comp [(process/add-process
+                                               {::process/title title
+                                                ::process/slug slug
+                                                ::process/description description})]))})))))
 
 (defsc ProcessesPage [this {:keys [all-processes-list root/current-session
                                    ui/new-process-dialog-open?
