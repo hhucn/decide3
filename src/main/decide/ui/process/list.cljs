@@ -103,10 +103,14 @@
                    {:value title
                     :fullWidth true
                     :onChange #(m/set-string!! this ::process/title :event %)
-                    :onBlur submit-title})
+                    :onBlur submit-title
+                    :InputProps {:endAdornment (inputs/button {:onClick submit-title} "Save")}})
                  (layout/box {}
                    title
-                   (inputs/icon-button {:onClick #(set-edit-title? true)}
+                   (inputs/icon-button {:onClick #(set-edit-title? true)
+                                        :aria-label "Edit title"
+                                        :title "Edit title"
+                                        :size :small}
                      (layout/box {:component EditIcon :fontSize :small}))))})
             (surfaces/card-action-area {:href (str "/decision/" slug "/home")}
               (surfaces/card-content {} description))))
