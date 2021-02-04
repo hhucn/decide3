@@ -13,7 +13,7 @@
             ["@material-ui/icons/Group" :default GroupIcon]
             ["@material-ui/icons/EmojiObjectsOutlined" :default EmojiObjectsOutlinedIcon]
             ["@material-ui/icons/Edit" :default EditIcon]
-            [material-ui.feedback :as feedback]
+            [material-ui.feedback.dialog :as dialog]
             [material-ui.inputs :as inputs]
             [taoensso.timbre :as log]
             [material-ui.surfaces :as surfaces]
@@ -29,20 +29,19 @@
    (fn [_]
      {:ui/open? false
       :process-form nil})}
-  (feedback/dialog
+  (dialog/dialog
     {:open open?
      :onClose #(m/set-value! this :ui/open? false)}
-    (feedback/dialog-title {} "Entscheidungsprozess bearbeiten")
-    (feedback/dialog-content {}
-      (feedback/dialog-content-text {}
-        (process-forms/ui-edit-process-form process-form
-          {:onSubmit
-           (fn [{::process/keys [title slug description]}]
-             (comp/transact! this [(process/update-process
-                                     {::process/title title
-                                      ::process/slug slug
-                                      ::process/description description})
-                                   (m/set-props {:ui/open? false})]))})))))
+    (dialog/title {} "Entscheidungsprozess bearbeiten")
+    (dialog/content {}
+      (process-forms/ui-edit-process-form process-form
+        {:onSubmit
+         (fn [{::process/keys [title slug description]}]
+           (comp/transact! this [(process/update-process
+                                   {::process/title title
+                                    ::process/slug slug
+                                    ::process/description description})
+                                 (m/set-props {:ui/open? false})]))}))))
 
 (def ui-edit-process-dialog (comp/computed-factory EditProcessDialog))
 
@@ -153,18 +152,18 @@
 (def ui-all-process-list (comp/factory AllProcessesList))
 
 (defn new-process-dialog [comp {:keys [new-process-dialog-open? new-process-form]}]
-  (feedback/dialog
+  (dialog/dialog
     {:open new-process-dialog-open?
      :onClose #(m/set-value! comp :ui/new-process-dialog-open? false)}
-    (feedback/dialog-title {} "Neuer Entscheidungsprozess")
-    (feedback/dialog-content {}
-      (feedback/dialog-content-text {}
-        (process-forms/ui-new-process-form new-process-form
-          {:onSubmit (fn [{::process/keys [title slug description]}]
-                       (comp/transact! comp [(process/add-process
-                                               {::process/title title
-                                                ::process/slug slug
-                                                ::process/description description})]))})))))
+    (dialog/title {} "Neuer Entscheidungsprozess")
+    (dialog/content {}
+      (process-forms/ui-new-process-form new-process-form
+        {:onSubmit (fn [{::process/keys [title slug description end-time]}]
+                     (comp/transact! comp [(process/add-process
+                                             {::process/title title
+                                              ::process/slug slug
+                                              ::process/description description
+                                              ::process/end-time end-time})]))}))))
 
 (defsc ProcessesPage [this {:keys [all-processes-list root/current-session
                                    ui/new-process-dialog-open?
@@ -188,7 +187,7 @@
       (ui-all-process-list all-processes-list)
 
       (layout/box {:my 2 :clone true}
-        (inputs/button {:variant :contained
+        (inputs/button {:variant :text
                         :color :primary
                         :disabled (not logged-in?)
                         :fullWidth true

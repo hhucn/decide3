@@ -33,6 +33,8 @@
         [description change-description] (hooks/use-state "")
         [auto-slug? set-auto-slug] (hooks/use-state true)
         [slug change-slug] (hooks/use-state "")
+        [with-end? set-with-end?] (hooks/use-state false)
+        [end-time set-end-time] (hooks/use-state "")
         update-title (hooks/use-callback (fn [e] (let [value (evt/target-value e)]
                                                    (change-title value)
                                                    (set-auto-slug true))))]
@@ -41,7 +43,8 @@
                              (evt/prevent-default! e)
                              (onSubmit {::process/title title
                                         ::process/slug (slugify (if auto-slug? title slug))
-                                        ::process/description description}))}
+                                        ::process/description description
+                                        ::process/end-time (js/Date. end-time)}))}
       (dd/typography {:paragraph false}
         "Gib dem Entscheidungsprozess einen Titel:")
       (inputs/textfield
@@ -80,6 +83,20 @@
          :rows 7
          :value description
          :onChange #(change-description (evt/target-value %))})
+
+      (inputs/switch
+        {:checked with-end?
+         :onChange #(set-with-end? (not with-end?))})
+      (inputs/textfield
+        {:label "Ende"
+         :variant "filled"
+         :type "datetime-local"
+         :fullWidth true
+         :disabled (not with-end?)
+         :value end-time
+         :onChange #(set-end-time (log/spy :info (evt/target-value %)))
+         :InputLabelProps {:shrink true}})
+
 
       (inputs/button {:color :primary :type "submit"} "Anlegen"))))
 

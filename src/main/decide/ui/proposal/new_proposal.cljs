@@ -19,7 +19,7 @@
     [decide.utils.breakpoint :as breakpoint]
     [material-ui.data-display :as dd]
     [material-ui.data-display.list :as list]
-    [material-ui.feedback :as feedback]
+    [material-ui.feedback.dialog :as dialog]
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
     [material-ui.layout.grid :as grid]
@@ -285,7 +285,7 @@
   (let [close-dialog (hooks/use-callback #(m/set-value! this :ui/open? false) [])
         reset-form (hooks/use-callback #(comp/transact! this [(reset-form {})]) [])
         next-step (hooks/use-callback #(comp/transact! this [(next-step {})]) [])]
-    (feedback/dialog
+    (dialog/dialog
       {:open open?
        :fullWidth true
        :fullScreen (breakpoint/<=? "xs")
@@ -304,12 +304,12 @@
                                       ::proposal/parents (mapv #(select-keys % [::proposal/id]) parents)
                                       ::proposal/arguments (vec arguments)})])
                                 (close-dialog))}}
-      (feedback/dialog-title {} "Neuer Vorschlag")
-      (feedback/dialog-content {}
+      (dialog/title {} "Neuer Vorschlag")
+      (dialog/content {}
         (stepper/stepper
-          {:activeStep  step
+          {:activeStep step
            :orientation "vertical"
-           :nonLinear   true}
+           :nonLinear true}
 
           ;; region Typ Step
           (stepper/step
@@ -444,7 +444,7 @@
                 "Abschicken")))))
 
 
-      (feedback/dialog-actions {}
+      (dialog/actions {}
         (inputs/button {:onClick close-dialog} "Abbrechen")))))
 
 (def ui-new-proposal-form (comp/computed-factory NewProposalFormDialog))

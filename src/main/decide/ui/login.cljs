@@ -13,7 +13,7 @@
     [decide.ui.process.list :as process-list]
 
     [material-ui.data-display :as dd]
-    [material-ui.feedback :as feedback]
+    [material-ui.feedback.dialog :as dialog]
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
     [material-ui.layout.grid :as grid]
@@ -303,12 +303,12 @@
    (fn [_]
      {:ui/open? false
       :ui/login-form (comp/get-initial-state LoginForm)})}
-  (feedback/dialog
+  (dialog/dialog
     {:open open?
      :maxWidth "md"
      :onClose #(m/set-value! this :ui/open? false)}
-    #_(feedback/dialog-title {} "Sign in")
-    (feedback/dialog-content {}
+    #_(dialog/title {} "Sign in")
+    (dialog/content {}
       (ui-login-form login-form {:onSubmit identity}))))
 
 (def ui-login-modal (comp/computed-factory LoginDialog))
