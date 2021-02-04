@@ -3,6 +3,7 @@
             [com.fulcrologic.fulcro.data-fetch :as df]
             [com.fulcrologic.fulcro.react.hooks :as hooks]
             [decide.models.process :as process]
+            [decide.models.user :as user]
             [decide.ui.process.new-process-form :as new-process-form]
             [material-ui.data-display :as dd]
             [material-ui.data-display.list :as list]
@@ -11,52 +12,65 @@
             [material-ui.layout.grid :as grid]
             ["@material-ui/icons/Group" :default GroupIcon]
             ["@material-ui/icons/EmojiObjectsOutlined" :default EmojiObjectsOutlinedIcon]
+            ["@material-ui/icons/Edit" :default EditIcon]
             [material-ui.feedback :as feedback]
             [material-ui.inputs :as inputs]
             [com.fulcrologic.fulcro.mutations :as m]
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log]
+            [material-ui.surfaces :as surfaces]))
 
 (def page-ident [:PAGE :processes-list-page])
 
 (defn icon-badge [title value icon-class]
-  (grid/item {}
-    (layout/box {:display :flex
-                 :alignItems :center
-                 :title title
-                 :aria-label title
-                 :color "text.secondary"}
-      (dd/typography {:color :inherit} value)
-      (layout/box {:m 1 :color :inherit :component icon-class}))))
+  (layout/box {:display :flex
+               :alignItems :center
+               :title title
+               :aria-label title
+               :mx 1
+               :color "text.secondary"}
+    (dd/typography {:color :inherit} value)
+    (layout/box {:m 1 :color :inherit :component icon-class})))
 
-(defsc ProcessListEntry [_ {::process/keys [slug title description no-of-authors no-of-proposals]}]
+(defsc Moderator [_ {::user/keys [id display-name]}]
+  {:query [::user/id ::user/display-name]
+   :ident ::user/id})
+
+(defn- is-moderator? [moderators current-session]
+  (and
+    (:session/valid? current-session)
+    (contains? (set (map (partial comp/get-ident Moderator) moderators))
+      (:user current-session))))
+
+
+(defsc ProcessListEntry [_ {::process/keys [slug title description no-of-authors no-of-proposals moderators]
+                            :keys [root/current-session]}]
   {:query [::process/slug ::process/title ::process/description ::process/no-of-authors
-           ::process/no-of-proposals]
+           ::process/no-of-proposals
+           {::process/moderators (comp/get-query Moderator)}
+           [:root/current-session '_]]
    :ident ::process/slug}
-  (list/item
-    {:button true
-     :component :a
-     :href (str "/decision/" slug "/home")
-     :divider true}
-    (grid/container {:justify :space-between :spacing 1}
-      (grid/item {:xs 12 :sm "auto"}
-        (list/item-text {:primary title :secondary description}))
-      (grid/container {:item true
-                       :xs 12
-                       :sm "auto"
-                       :spacing 2
-                       :alignItems :center
-                       :style {:width "auto"}}
-        (icon-badge "Anzahl Vorschläge" no-of-proposals EmojiObjectsOutlinedIcon)
-        (icon-badge "Anzahl Teilnehmer" no-of-authors GroupIcon)))))
+  (grid/item {:xs 12}
+    (surfaces/card {}
+      (surfaces/card-action-area {:href (str "/decision/" slug "/home")}
+        (surfaces/card-header {:title title})
+        (surfaces/card-content {} description))
+      (dd/divider {})
+      (surfaces/card-actions {}
+        (icon-badge "Anzahl Vorschläge" (or no-of-proposals 0) EmojiObjectsOutlinedIcon)
+        (icon-badge "Anzahl Teilnehmer" (or no-of-authors 0) GroupIcon)
+        (when (is-moderator? moderators current-session)
+          (inputs/button {:color "inherit"}
+            "Bearbeiten"))))))
 
 
 (def ui-process-list-entry (comp/computed-factory ProcessListEntry {:keyfn ::process/slug}))
 
 (def skeleton-list
-  (grid/container {:spacing 2}
-    (grid/item {:xs 12} (skeleton {:variant "rect" :height "24px"}))
-    (grid/item {:xs 12} (skeleton {:variant "rect" :height "24px"}))
-    (grid/item {:xs 12} (skeleton {:variant "rect" :height "24px"}))))
+  (let [entry (grid/item {:xs 12} (skeleton {:variant "rect" :height "150px"}))]
+    (grid/container {:spacing 2}
+      entry
+      entry
+      entry)))
 
 (defsc AllProcessesList [this {:keys [all-processes] :as props}]
   {:query [{[:all-processes '_] (comp/get-query ProcessListEntry)}
@@ -68,7 +82,7 @@
   (let [loading? (#{:loading} (get-in props [[df/marker-table :all-processes] :status]))]
     (comp/fragment
       (dd/typography {:component :h1 :variant :h2} "Aktive Entscheidungen")
-      (list/list {}
+      (grid/container {:spacing 1}
         (map ui-process-list-entry all-processes))
       (when loading?
         (layout/box {}
@@ -92,10 +106,14 @@
     (layout/container {}
       (ui-all-process-list all-processes-list)
 
-      (inputs/button {:variant :text
-                      :color :secondary
-                      :disabled (not logged-in?)
-                      :onClick #(m/toggle! this :ui/new-process-dialog-open?)} "Neuen Entscheidungsprozess anlegen")
+      (layout/box {:my 2 :clone true}
+        (inputs/button {:variant :outlined
+                        :color :secondary
+                        :disabled (not logged-in?)
+                        :fullWidth true
+                        :size :large
+                        :onClick #(m/toggle! this :ui/new-process-dialog-open?)}
+          "Neuen Entscheidungsprozess anlegen"))
 
       (feedback/dialog
         {:open new-process-dialog-open?

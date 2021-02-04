@@ -32,6 +32,7 @@
       ::process/title "Meine Test-Entscheidung"
       ::process/description "Wir müssen irgendwas für die Uni entscheiden."
       ::process/latest-id 5,
+      ::process/moderators ["Björn"]
       ::process/proposals
       [{:db/id "Wasserspender"
         ::proposal/body "Wasser ist gesund für Studenten.",

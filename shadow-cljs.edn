@@ -40,7 +40,8 @@
                        :ns-regexp "-(test|ws|cards)$"
                        :output-dir "resources/public/workspaces/js"
                        :asset-path "/workspaces/js"
-                       :devtools {:preloads [com.fulcrologic.fulcro.inspect.websocket-preload]
+                       :devtools {:preloads [com.fulcrologic.fulcro.inspect.websocket-preload
+                                             decide.development-preload]
                                   :http-root "resources/public"
                                   :http-port 8023
                                   :http-resource-root "."}}}}

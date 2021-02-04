@@ -10,7 +10,7 @@
   :security {:ssl-redirect true}}
  :db {:store {:backend :file
               :path "/var/lib/decide"}
-      :db/reset? true}
+      :db/reset? false}
  :com.fulcrologic.rad.pathom/config {:sensitive-keys #{:decide.models.user/password}
                                      :trace? false
                                      :log-requests? false
