@@ -5,6 +5,7 @@
     [com.wsscode.pathom.connect :as pc]
     [com.wsscode.pathom.core :as p]
     [datahike.api :as d]
+    [decide.api.process :as api.process]
     [decide.models.argument :as argument]
     [decide.models.authorization :as auth]
     [decide.models.opinion :as opinion]
@@ -119,7 +120,7 @@
            env)))]
     [index-explorer
      user/resolvers
-     process/resolvers
+     api.process/all-resolvers
      proposal/resolvers
      argument/resolvers
      opinion/resolvers]))

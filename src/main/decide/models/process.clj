@@ -10,8 +10,7 @@
     [datahike.core :as d.core]
     [decide.models.authorization :as auth]
     [decide.models.proposal :as proposal]
-    [decide.models.user :as user]
-    [taoensso.timbre :as log]))
+    [decide.models.user :as user]))
 
 (def schema
   [{:db/ident ::slug
@@ -42,7 +41,11 @@
 
    {:db/ident ::latest-id
     :db/cardinality :db.cardinality/one
-    :db/valueType :db.type/long}])
+    :db/valueType :db.type/long}
+
+   {:db/ident ::end-time
+    :db/cardinality :db.cardinality/one
+    :db/valueType :db.type/instant}])
 
 (def slug-pattern #"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 (s/def ::slug (s/and string? (partial re-matches slug-pattern)))
@@ -101,50 +104,10 @@
 
 ;; region API
 
-(defresolver resolve-all-processes [{:keys [db]} _]
-  {::pc/input #{}
-   ::pc/output [{:all-processes [::slug]}]}
-  {:all-processes
-   (map #(hash-map ::slug %) (get-all-slugs db))})
-
-(defresolver resolve-process [{:keys [db]} {::keys [slug]}]
-  {::pc/input #{::slug}
-   ::pc/output [::title ::description]}
-  (d/pull db [::title ::description] [::slug slug]))
-
-(defresolver resolve-process-moderators [{:keys [db]} {::keys [slug]}]
-  {::pc/input #{::slug}
-   ::pc/output [{::moderators [::user/id]}]}
-  (d/pull db [{::moderators [::user/id]}] [::slug slug]))
-
-(defresolver resolve-user-moderated-processes [{:keys [db]} {::user/keys [id]}]
-  {::pc/output [{::user/moderated-processes [::slug]}]}
-  (if (user/exists? db id)
-    (d/pull db [{::_moderators :as ::user/moderated-processes [::slug]}] [::user/id id])
-    (throw (ex-info "User does not exist" {::user/id id}))))
-
-(defresolver resolve-authors [{:keys [db]} {::keys [proposals]}]
-  {::pc/input #{::proposals}
-   ::pc/output [{::authors [::user/id]}
-                ::no-of-authors]}
-  (let [authors (vec
-                  (set
-                    (for [{::proposal/keys [id original-author]} proposals]
-                      (if-let [user-id (::user/id original-author)]
-                        {::user/id user-id}
-                        (-> db
-                          (d/pull [{::proposal/original-author [::user/id]}] [::proposal/id id])
-                          ::proposal/original-author)))))]
-    {::authors authors
-     ::no-of-authors (count authors)}))
-
-(defresolver resolve-no-of-contributors [{:keys [db]} {::keys [slug]}]
-  {::no-of-contributors (get-no-of-contributors db slug)})
-
-(defmutation add-process [{:keys [conn db AUTH/user-id] :as env} {::keys [title slug description]}]
-  {::pc/params [::title ::slug ::description]
-   ::pc/output [::slug]}
-  (let [moderator-id user-id]
+(>defn add-process! [conn user-id {::keys [slug title description] :as process}]
+  [d.core/conn? ::user/id (s/keys :req [::slug ::title ::description]) => map?]
+  (let [db (d/db conn)
+        moderator-id user-id]
     (cond
       (not user-id)
       (throw (ex-info "User not logged in!" {}))
@@ -161,16 +124,17 @@
       (slug-in-use? db slug) (throw (ex-info "Slug already in use" {:slug slug}))
 
       :else
-      (let [{:keys [db-after]}
-            (d/transact conn
-              [(tx-map
-                 {::slug slug
-                  ::title title
-                  ::description description
-                  ::moderator-lookups [[::user/id moderator-id]]})
-               [:db/add "datomic.tx" :db/txUser [::user/id user-id]]])]
-        {::slug slug
-         ::p/env (assoc env :db db-after)}))))
+      (d/transact conn
+        [(merge
+           (tx-map
+             {::slug slug
+              ::title title
+              ::description description
+              ::moderator-lookups [[::user/id moderator-id]]})
+           process)
+         [:db/add "datomic.tx" :db/txUser [::user/id user-id]]]))))
+
+
 
 (>defn is-moderator? [db process-lookup user-id]
   [d.core/db? ::lookup ::user/id => boolean?]
@@ -179,8 +143,8 @@
       (::moderators (d/pull db [{::moderators [::user/id]}] process-lookup)))
     user-id))
 
-(defn update-process! [conn user-id {::keys [slug] :as process}]
-  [d.core/conn? ::user/id (s/keys :req [::slug] :opt [::title ::description])]
+(>defn update-process! [conn user-id {::keys [slug] :as process}]
+  [d.core/conn? ::user/id (s/keys :req [::slug] :opt [::title ::description]) => map?]
   (let [db (d/db conn)]
     (cond
       (not user-id)
@@ -203,6 +167,24 @@
               (conj facts [:db/add "datomic.tx" :db/txUser [::user/id user-id]]))]
         db-after))))
 
+(>defn get-number-of-participants [db slug]
+  [d.core/db? ::slug => nat-int?]
+  (-> db
+    (d/pull [::participants] [::slug slug])
+    ::participants
+    count))
+
+(>defn enter! [conn process-lookup user-lookup]
+  [d.core/conn? ::lookup ::user/lookup => map?]
+  (d/transact conn [[:db/add process-lookup ::participants user-lookup]]))
+
+;; region API
+(defmutation add-process [{:keys [conn AUTH/user-id] :as env} {::keys [slug] :as process}]
+  {::pc/params [::title ::slug ::description]
+   ::pc/output [::slug]}
+  (let [{:keys [db-after]} (add-process! conn user-id process)]
+    {::slug slug
+     ::p/env (assoc env :db db-after)}))
 
 (defmutation update-process [{:keys [conn AUTH/user-id] :as env} {::keys [slug] :as process}]
   {::pc/params [::title ::slug ::description]
@@ -211,10 +193,6 @@
     {::slug slug
      ::p/env (assoc env :db db-after)}))
 
-(>defn enter! [conn process-lookup user-lookup]
-  [d.core/conn? ::lookup ::user/lookup => map?]
-  (d/transact conn [[:db/add process-lookup ::participants user-lookup]]))
-
 (defmutation enter [{:keys [conn AUTH/user-id]} {user :user-id
                                                  slug ::slug}]
   {::pc/params [::slug :user-id]
@@ -222,47 +200,6 @@
   (when (= user-id user)
     (enter! conn [::slug slug] [::user/id user])
     nil))
-
-(>defn get-number-of-participants [db slug]
-  [d.core/db? ::slug => nat-int?]
-  (-> db
-    (d/pull [::participants] [::slug slug])
-    ::participants
-    count))
-
-(defresolver resolve-no-of-participants [{:keys [db]} {::keys [slug]}]
-  {::pc/input #{::slug}
-   ::pc/output [::no-of-participants]}
-  {::no-of-participants (get-number-of-participants db slug)})
-
-(defresolver resolve-proposals [{:keys [db]} {::keys [slug]}]
-  {::pc/input #{::slug}
-   ::pc/output [{::proposals [::proposal/id]}]}
-  (or
-    (d/pull db [{::proposals [::proposal/id]}] [::slug slug])
-    {::proposals []}))
-
-(defresolver resolve-no-of-proposals [_ {::keys [proposals]}]
-  {::no-of-proposals (count proposals)})
-
-(defresolver resolve-nice-proposal [{:keys [db]} {::proposal/keys [nice-ident]}]
-  {::pc/input #{::proposal/nice-ident}
-   ::pc/output [::proposal/id]}
-  (let [[slug nice-id] nice-ident]
-    {::proposal/id
-     (d/q '[:find ?id .
-            :in $ ?process ?nice-id
-            :where
-            [?process ::proposals ?proposal]
-            [?proposal ::proposal/nice-id ?nice-id]
-            [?proposal ::proposal/id ?id]]
-       db [::slug slug] nice-id)}))
-
-
-(defresolver resolve-proposal-process [{:keys [db]} {::proposal/keys [id]}]
-  {::pc/input #{::proposal/id}
-   ::pc/output [::slug]}
-  (::_proposals (d/pull db [{::_proposals [::slug]}] [::proposal/id id])))
 
 (defmutation add-proposal [{:keys [conn AUTH/user-id] :as env}
                            {::proposal/keys [id title body parents arguments]
@@ -289,23 +226,11 @@
 
 
 (def resolvers
-  [resolve-all-processes
-   resolve-process
-   resolve-no-of-contributors
-   add-process
+  [add-process
    update-process
 
    enter
-   resolve-no-of-participants
-   resolve-no-of-proposals
-   resolve-authors
 
-   resolve-user-moderated-processes
-   resolve-process-moderators
-
-   resolve-proposals
-   resolve-proposal-process
-   resolve-nice-proposal
    add-proposal])
 
 ;; endregion
