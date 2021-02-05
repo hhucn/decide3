@@ -8,6 +8,7 @@
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr :refer [defrouter]]
     [decide.models.process :as process]
+    [decide.ui.common.time :as time]
     [decide.ui.process.home :as process.home]
     [decide.ui.proposal.detail-page :as proposal.detail-page]
     [decide.ui.proposal.main-proposal-list :as proposal.main-list]
@@ -22,11 +23,17 @@
 
 (def ui-process-router (comp/computed-factory ProcessRouter))
 
-(defsc ProcessHeader [_ {::process/keys [title]}]
-  {:query [::process/slug ::process/title]
+(defsc ProcessHeader [_ {::process/keys [title end-time]}]
+  {:query [::process/slug ::process/title ::process/end-time]
    :ident ::process/slug}
   (layout/box {:mx 2 :mb 2 :mt 0}
-    (dd/typography {:component "h1" :variant "h2"} title)))
+    (dd/typography {:component "h1" :variant "h2"} title)
+    (when end-time
+      (let [over? (time/in-past? end-time)]
+        (dd/typography {:variant "subtitle1"}
+          (str (if over? "Endete " "Endet "))
+          (time/time-element end-time
+            (time/nice-string end-time {:dateprefix " am "})))))))
 
 (def ui-process-info (comp/factory ProcessHeader))
 

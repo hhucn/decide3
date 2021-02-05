@@ -32,12 +32,10 @@
   (comp/fragment "von " (dom/address (str author-name))))
 
 (defn time-part [^js/Date created]
-  (let [iso-string (.toISOString created)]
-    (comp/fragment
-      " "
-      (dom/time {:dateTime iso-string
-                 :title created}
-        (time/nice-string created)))))
+  (comp/fragment
+    " "
+    (time/time-element created
+      (time/nice-string created {:dateprefix " vom "}))))
 
 (defsc Parent [_ _]
   {:query [::proposal/id]
