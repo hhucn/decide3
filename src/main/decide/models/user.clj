@@ -174,7 +174,7 @@
   {::current-session
    (let [id (get-session-user-id env)]
      (wrap-session env
-       (if (exists? db id)
+       (if (and id (exists? db id))
          {:session/valid? true
           :user {::id id}
           ::id id}
