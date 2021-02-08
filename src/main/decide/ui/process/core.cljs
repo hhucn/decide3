@@ -29,23 +29,35 @@
   (layout/box {:mx 2 :mb 2 :mt 0}
     (dd/typography {:component "h1" :variant "h2"} title)
     (when end-time
-      (let [over? (time/in-past? end-time)]
-        (dd/typography {:variant "subtitle1"}
-          (str (if over? "Endete " "Endet "))
-          (time/time-element end-time
-            (time/nice-string end-time {:dateprefix " am "})))))))
+      (let [over? (time/in-past? end-time)
+            end-element (time/time-element end-time
+                          (time/nice-string end-time {:dateprefix " am "}))]
+        (dd/typography {:variant "subtitle1" :color (when over? "error")}
+          (if over?
+            ["Endete" end-element "!"]
+            ["Endet" end-element "."]))))))
 
 (def ui-process-info (comp/factory ProcessHeader))
 
+(defsc Process [_ _]
+  {:query [::process/slug ::process/end-time]
+   :ident ::process/slug
+   :initial-state
+   (fn [{:keys [slug]}]
+     (when slug
+       {::process/slug slug}))})
+
 (defsc ProcessContext [this {:ui/keys [process-router new-proposal-dialog]
-                             :keys [process-header ::process/slug]}]
+                             :keys [process-header ::process/slug process]}]
   {:query [::process/slug
+           {:process (comp/get-query Process)}
            {:process-header (comp/get-query ProcessHeader)}
            {:ui/process-router (comp/get-query ProcessRouter)}
            {:ui/new-proposal-dialog (comp/get-query new-proposal/NewProposalFormDialog)}]
    :initial-state
    (fn [{:keys [slug]}]
      {::process/slug slug
+      :process (comp/get-initial-state Process {:slug slug})
       :ui/process-router (comp/get-initial-state ProcessRouter)
       :ui/new-proposal-dialog (comp/get-initial-state new-proposal/NewProposalFormDialog {:slug slug})})
    :ident [:process-context ::process/slug]
@@ -61,7 +73,9 @@
                            {:target (targeting/replace-at (conj ident :process-header))})
                          (dr/target-ready! app ident))))))
    :use-hooks? true}
-  (let [show-new-proposal-dialog (hooks/use-callback #(comp/transact! this [(new-proposal/show {:slug slug})]))]
+  (let [show-new-proposal-dialog (hooks/use-callback #(comp/transact! this [(new-proposal/show {:slug slug})]))
+        {::process/keys [end-time]} process
+        process-over? (and (some? end-time) (time/in-past? end-time))]
     (comp/fragment
       (surfaces/paper
         {:square true}
@@ -81,5 +95,7 @@
                          :href (str "/decision/" slug "/proposals")})))))
       (ui-process-router process-router
         {:slug slug
+         :process process
+         :process-over? process-over?
          :show-new-proposal-dialog show-new-proposal-dialog})
       (new-proposal/ui-new-proposal-form new-proposal-dialog))))

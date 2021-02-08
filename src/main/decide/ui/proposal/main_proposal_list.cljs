@@ -1,5 +1,6 @@
 (ns decide.ui.proposal.main-proposal-list
   (:require
+    [clojure.string :as str]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.data-fetch :as df]
     [com.fulcrologic.fulcro.dom :as dom]
@@ -8,19 +9,19 @@
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
+    [decide.ui.common.time :as time]
     [decide.ui.proposal.card :as proposal-card]
     [decide.utils.breakpoint :as breakpoint]
     [material-ui.data-display :as dd]
+    [material-ui.data-display.list :as list]
     [material-ui.inputs :as inputs]
     [material-ui.inputs.form :as form]
     [material-ui.inputs.input :as input]
     [material-ui.layout :as layout]
     [material-ui.layout.grid :as grid]
-    [material-ui.surfaces :as surfaces]
-    ["@material-ui/icons/Add" :default AddIcon]
     [material-ui.navigation :as navigation]
-    [material-ui.data-display.list :as list]
-    [clojure.string :as str]))
+    [material-ui.surfaces :as surfaces]
+    ["@material-ui/icons/Add" :default AddIcon]))
 
 
 (defn add-proposal-fab [props]
@@ -94,10 +95,13 @@
           (inputs/checkbox {:checked (contains? selected value)})
           (list/item-text {:primary label}))))))
 
-(defsc MainProposalList [_ {::process/keys [slug proposals no-of-contributors] :keys [root/current-session]} {:keys [show-new-proposal-dialog]}]
+(defsc MainProposalList [_ {::process/keys [slug proposals no-of-contributors end-time]
+                            :keys [root/current-session]}
+                         {:keys [show-new-proposal-dialog]}]
   {:query [::process/slug
            {::process/proposals (comp/get-query proposal-card/ProposalCard)}
            ::process/no-of-contributors
+           ::process/end-time
            [:root/current-session '_]]
    :ident ::process/slug
    :route-segment ["proposals"]
@@ -111,9 +115,12 @@
   (let [logged-in? (get current-session :session/valid?)
         [selected-sort set-selected-sort!] (hooks/use-state "new->old")
         [selected-filters set-selected-filters!] (hooks/use-state #{})
-        sorted-proposals (sort-proposals selected-sort proposals)]
+        sorted-proposals (sort-proposals selected-sort proposals)
+        process-over? (and (some? end-time) (time/in-past? end-time))]
     (comp/fragment
       (layout/container {:maxWidth :xl}
+
+        ; sort / filter toolbar
         (layout/box {:my 1 :clone true}
           (surfaces/toolbar {:disableGutters true :variant :dense}
             (grid/container {:spacing 2}
@@ -128,23 +135,30 @@
                              :justify "flex-end"}
               (grid/item {} (filter-selector selected-filters set-selected-filters!))
               (grid/item {} (sort-selector selected-sort set-selected-sort!)))))
+
+        ; main list
         (grid/container {:spacing 2 :alignItems "stretch"}
           (for [{id ::proposal/id :as proposal} sorted-proposals]
             (grid/item {:xs 12 :md 6 :lg 4 :xl 3 :key id :style {:flexGrow 1}}
               (proposal-card/ui-proposal-card proposal {::process/slug slug})))
-          (grid/item {:xs 12 :md 6 :lg 4 :xl 3 :style {:flexGrow 1
-                                                       :minHeight "100px"}}
-            (inputs/button {:style {:height "100%"
-                                    :borderStyle "dashed"}
-                            :fullWidth true
-                            :size :large
-                            :disabled (not logged-in?)
-                            :variant :outlined
-                            :onClick show-new-proposal-dialog}
-              (layout/box {:color (when-not logged-in? "text.disabled") :mr 1 :component AddIcon})
-              (if logged-in?
-                "Neuer Vorschlag"
-                "Einloggen um einen neuen Vorschlag hinzuzufügen")))))
-      (layout/box {:pt 10}                                  ; prevent the fab from blocking content below
-        (add-proposal-fab {:onClick show-new-proposal-dialog
-                           :disabled (not logged-in?)})))))
+
+          (when-not process-over?
+            (grid/item {:xs 12 :md 6 :lg 4 :xl 3 :style {:flexGrow 1
+                                                         :minHeight "100px"}}
+              (inputs/button {:style {:height "100%"
+                                      :borderStyle "dashed"}
+                              :fullWidth true
+                              :size :large
+                              :disabled (not logged-in?)
+                              :variant :outlined
+                              :onClick show-new-proposal-dialog}
+                (layout/box {:color (when-not logged-in? "text.disabled") :mr 1 :component AddIcon})
+                (if logged-in?
+                  "Neuer Vorschlag"
+                  "Einloggen um einen neuen Vorschlag hinzuzufügen"))))))
+
+      ; fab
+      (when-not process-over?
+        (layout/box {:pt 10}                                ; prevent the fab from blocking content below
+          (add-proposal-fab {:onClick show-new-proposal-dialog
+                             :disabled (not logged-in?)}))))))
