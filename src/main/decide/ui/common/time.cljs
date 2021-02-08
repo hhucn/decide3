@@ -28,7 +28,7 @@
       (= (.getDate date) (dec (.getDate now))))))
 
 (def short-time-format {:hour "numeric"})                   ; e.g. "13 Uhr"
-(def long-time-format {:hour "2-digit" :minute "2-digit"})  ; e.g. "13:37"
+(def long-time-format {:hour "numeric" :minute "2-digit"})  ; e.g. "13:37"
 (def short-date-format {:day "numeric" :month "long"})      ; e.g. "14. Januar"
 (def long-date-format {:day "numeric" :month "short" :year "numeric"}) ; e.g. "14. Jan. 2020"
 
