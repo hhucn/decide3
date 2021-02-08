@@ -257,7 +257,7 @@
         x-left-circle radius
         x-right-circle (+ x-left-circle radius (/ radius -6))
         viewbox (str "-5 -5 " (+ x-right-circle radius 10) " " (+ y-circle radius 10))]
-    (dom/svg {:classes ["venn"] :height "50%" :viewBox viewbox :fill "currentColor" :stroke "currentColor"}
+    (dom/svg {:classes ["venn"] :height "100%" :viewBox viewbox :fill "currentColor" :stroke "currentColor" :aria-hidden true}
       (dom/circle {:cx x-left-circle :cy y-circle :r radius :style {:fill "none"}})
       (dom/circle {:cx x-right-circle :cy y-circle :r radius :style {:fill "none"}})
       (dom/text
@@ -296,7 +296,9 @@
            :color :primary
            :onClick #(show-add-dialog (comp/get-ident SimilarProposal other-proposal))}
           "Merge"))
-      (table/cell {:align :center} (venn-diagramm props)))))
+      (table/cell {:align :center
+                   :style {:height "100px"}}
+        (venn-diagramm props)))))
 
 (def ui-similarity-entry (comp/computed-factory SimilarEntry {:keyfn (comp ::proposal/id :other-proposal)}))
 
