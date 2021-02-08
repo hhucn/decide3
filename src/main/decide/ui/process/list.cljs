@@ -29,19 +29,21 @@
    (fn [_]
      {:ui/open? false
       :process-form nil})}
-  (dialog/dialog
-    {:open open?
-     :onClose #(m/set-value! this :ui/open? false)}
-    (dialog/title {} "Entscheidungsprozess bearbeiten")
-    (dialog/content {}
-      (process-forms/ui-edit-process-form process-form
-        {:onSubmit
-         (fn [{::process/keys [title slug description]}]
-           (comp/transact! this [(process/update-process
-                                   {::process/title title
-                                    ::process/slug slug
-                                    ::process/description description})
-                                 (m/set-props {:ui/open? false})]))}))))
+  (let [slug (::process/slug (:process process-form))]
+    (dialog/dialog
+      {:open (and slug open?)
+       :onClose #(m/set-value! this :ui/open? false)}
+      (dialog/title {} "Entscheidungsprozess bearbeiten")
+      (dialog/content {}
+        (process-forms/ui-edit-process-form process-form
+          {:onSubmit
+           (fn [{::process/keys [title description end-time]}]
+             (comp/transact! this [(process/update-process
+                                     {::process/title title
+                                      ::process/slug slug
+                                      ::process/description description
+                                      ::process/end-time end-time})
+                                   (m/set-props {:ui/open? false})]))})))))
 
 (def ui-edit-process-dialog (comp/computed-factory EditProcessDialog))
 
