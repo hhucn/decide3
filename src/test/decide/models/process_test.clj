@@ -22,9 +22,9 @@
     (let [parser (pathom/build-parser {} *conn*)]
       (assertions
         "can add a new process"
-        (parser {:ring/request {:session #uuid"eeeeeeee-c47b-46df-b74d-161a04e65b7e"}}
+        (parser {:ring/request {:session {:id #uuid"0000fb5e-a9d0-44b6-b293-bb3c506fc0cb"}}}
           `[{(process/add-process
-               #::process{:slug      "test"
+               #::process{:slug "test"
                           :title "My Test-Title"
                           :description "foobar"})
              [::process/slug ::process/title ::process/description]}])
