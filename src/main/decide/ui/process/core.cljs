@@ -8,6 +8,7 @@
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr :refer [defrouter]]
     [decide.models.process :as process]
+    [decide.routing :as r]
     [decide.ui.common.time :as time]
     [decide.ui.process.home :as process.home]
     [decide.ui.proposal.detail-page :as proposal.detail-page]
@@ -20,6 +21,9 @@
 
 (defrouter ProcessRouter [_this _]
   {:router-targets [process.home/ProcessHome proposal.main-list/MainProposalList proposal.detail-page/ProposalPage]})
+
+(defn current-target [c]
+  (dr/route-target ProcessRouter (dr/current-route c ProcessRouter)))
 
 (def ui-process-router (comp/computed-factory ProcessRouter))
 
@@ -38,6 +42,17 @@
             ["Endet" end-element "."]))))))
 
 (def ui-process-info (comp/factory ProcessHeader))
+
+(defn tab-bar [{current-target :target} & targets]
+  (let [lookup-map (zipmap (map :target targets) (range))
+        current-index (get lookup-map current-target false)]
+    (tabs/tabs {:value current-index
+                :indicatorColor "secondary"
+                :textColor "secondary"}
+      (for [{:keys [label target]} targets]
+        (tabs/tab {:label label
+                   :key label
+                   :href (r/path->url (dr/subpath target))})))))
 
 (defsc Process [_ _]
   {:query [::process/slug ::process/end-time]
@@ -82,17 +97,9 @@
         (layout/container {:maxWidth :xl :disableGutters true}
           (when process-header
             (ui-process-info process-header))
-          (let [current-target (case (first (drop 2 (dr/current-route this)))
-                                 "home" 0
-                                 "proposals" 1
-                                 false)]
-            (tabs/tabs {:value current-target
-                        :indicatorColor "secondary"
-                        :textColor "secondary"}
-              (tabs/tab {:label "Übersicht"
-                         :href (str "/decision/" slug "/home")})
-              (tabs/tab {:label "Alle Vorschläge"
-                         :href (str "/decision/" slug "/proposals")})))))
+          (tab-bar (current-target this)
+            {:label "Übersicht" :target process.home/ProcessHome}
+            {:label "Alle Vorschläge" :target proposal.main-list/MainProposalList})))
       (ui-process-router process-router
         {:slug slug
          :process process
