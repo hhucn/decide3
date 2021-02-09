@@ -91,6 +91,14 @@
                          (conj tx :com.wsscode.pathom/trace)
                          tx)))))
 
+(def all-resolvers
+  [index-explorer
+   user/resolvers
+   api.process/all-resolvers
+   proposal/resolvers
+   argument/resolvers
+   opinion/resolvers])
+
 (defn build-parser [config conn]
   (new-parser config
     [(p/env-plugin {:config config})
@@ -100,12 +108,7 @@
          (assoc env
            :conn conn
            :db (d/db conn))))]
-    [index-explorer
-     user/resolvers
-     process/resolvers
-     proposal/resolvers
-     argument/resolvers
-     opinion/resolvers]))
+    all-resolvers))
 
 (defstate parser
   :start
@@ -118,9 +121,4 @@
            {:conn conn
             :db (d/db conn)}
            env)))]
-    [index-explorer
-     user/resolvers
-     api.process/all-resolvers
-     proposal/resolvers
-     argument/resolvers
-     opinion/resolvers]))
+    all-resolvers))
