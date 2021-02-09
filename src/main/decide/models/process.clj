@@ -181,17 +181,31 @@
 ;; region API
 (defmutation add-process [{:keys [conn AUTH/user-id] :as env} {::keys [slug] :as process}]
   {::pc/params [::title ::slug ::description]
-   ::pc/output [::slug]}
+   ::pc/output [::slug]
+   ::pc/transform auth/check-logged-in}
   (let [{:keys [db-after]} (add-process! conn user-id process)]
     {::slug slug
      ::p/env (assoc env :db db-after)}))
 
 (defmutation update-process [{:keys [conn AUTH/user-id] :as env} {::keys [slug] :as process}]
   {::pc/params [::title ::slug ::description]
-   ::pc/output [::slug]}
+   ::pc/output [::slug]
+   ::pc/transform auth/check-logged-in}
   (let [db-after (update-process! conn user-id process)]
     {::slug slug
      ::p/env (assoc env :db db-after)}))
+
+(defmutation add-moderator [{:keys [conn db AUTH/user-id] :as env} {::keys [slug] email :email}]
+  {::pc/output [::user/id]
+   ::pc/transform auth/check-logged-in}
+  (if (slug-in-use? db slug)
+    (if-let [{::user/keys [id]} (and (user/email-in-db? db email) (user/get-by-email db email))]
+      (let [{:keys [db-after]} (d/transact conn [[:db/add [::slug slug] ::moderators [::user/id id]]
+                                                 [:db/add "datomic.tx" :db/txUser [::user/id user-id]]])]
+        {::user/id id
+         ::p/env (assoc env :db db-after)})
+      (throw (ex-info "User with this email doesn't exist!" {:email email})))
+    (throw (ex-info "Slug is not in use!" {:slug slug}))))
 
 (defmutation enter [{:keys [conn AUTH/user-id]} {user :user-id
                                                  slug ::slug}]
@@ -228,6 +242,8 @@
 (def resolvers
   [add-process
    update-process
+
+   add-moderator
 
    enter
 

@@ -8,9 +8,11 @@
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr :refer [defrouter]]
     [decide.models.process :as process]
+    [decide.models.user :as user]
     [decide.routing :as r]
     [decide.ui.common.time :as time]
     [decide.ui.process.home :as process.home]
+    [decide.ui.process.moderator-tab :as process.moderator]
     [decide.ui.proposal.detail-page :as proposal.detail-page]
     [decide.ui.proposal.main-proposal-list :as proposal.main-list]
     [decide.ui.proposal.new-proposal :as new-proposal]
@@ -20,7 +22,11 @@
     [material-ui.surfaces :as surfaces]))
 
 (defrouter ProcessRouter [_this _]
-  {:router-targets [process.home/ProcessHome proposal.main-list/MainProposalList proposal.detail-page/ProposalPage]})
+  {:router-targets
+   [process.home/ProcessHome
+    proposal.main-list/MainProposalList
+    proposal.detail-page/ProposalPage
+    process.moderator/ProcessModeratorTab]})
 
 (defn current-target [c]
   (dr/route-target ProcessRouter (dr/current-route c ProcessRouter)))
@@ -36,15 +42,17 @@
       (let [over? (time/in-past? end-time)
             end-element (time/time-element end-time
                           (time/nice-string end-time {:dateprefix " am "}))]
-        (dd/typography {:variant "subtitle1" :color (when over? "error")}
-          (if over?
-            ["Endete" end-element "!"]
-            ["Endet" end-element "."]))))))
+        (if over?
+          (dd/typography {:variant "subtitle1" :color (when over? "error")}
+            "Endete" end-element "!")
+          (dd/typography {:variant "subtitle1"}
+            "Endet" end-element "."))))))
 
 (def ui-process-info (comp/factory ProcessHeader))
 
 (defn tab-bar [{current-target :target} & targets]
-  (let [lookup-map (zipmap (map :target targets) (range))
+  (let [targets (filter some? targets)
+        lookup-map (zipmap (map :target targets) (range))
         current-index (get lookup-map current-target false)]
     (tabs/tabs {:value current-index
                 :indicatorColor "secondary"
@@ -52,23 +60,37 @@
       (for [{:keys [label target]} targets]
         (tabs/tab {:label label
                    :key label
-                   :href (r/path->url (dr/subpath target))})))))
+                   :href (r/path->url (dr/path-to target))})))))
+
+(defsc Moderator [_ _]
+  {:query [::user/id]
+   :ident ::user/id})
 
 (defsc Process [_ _]
-  {:query [::process/slug ::process/end-time]
+  {:query [::process/slug
+           ::process/title
+           ::process/end-time
+           {::process/moderators (comp/get-query Moderator)}]
    :ident ::process/slug
    :initial-state
    (fn [{:keys [slug]}]
      (when slug
        {::process/slug slug}))})
 
+(defn- is-moderator? [moderators current-session]
+  (and
+    (:session/valid? current-session)
+    (contains? (into #{} (map (partial comp/get-ident Moderator)) moderators)
+      (:user current-session))))
+
 (defsc ProcessContext [this {:ui/keys [process-router new-proposal-dialog]
-                             :keys [process-header ::process/slug process]}]
+                             :keys [process-header ::process/slug process root/current-session]}]
   {:query [::process/slug
            {:process (comp/get-query Process)}
            {:process-header (comp/get-query ProcessHeader)}
            {:ui/process-router (comp/get-query ProcessRouter)}
-           {:ui/new-proposal-dialog (comp/get-query new-proposal/NewProposalFormDialog)}]
+           {:ui/new-proposal-dialog (comp/get-query new-proposal/NewProposalFormDialog)}
+           [:root/current-session '_]]
    :initial-state
    (fn [{:keys [slug]}]
      {::process/slug slug
@@ -84,13 +106,14 @@
                      (dr/route-deferred ident
                        (fn []
                          (mrg/merge-component! app ProcessContext (comp/get-initial-state ProcessContext {:slug slug}))
-                         (df/load! app [::process/slug slug] ProcessHeader
+                         (df/load! app [::process/slug slug] Process
                            {:target (targeting/replace-at (conj ident :process-header))})
                          (dr/target-ready! app ident))))))
    :use-hooks? true}
   (let [show-new-proposal-dialog (hooks/use-callback #(comp/transact! this [(new-proposal/show {:slug slug})]))
-        {::process/keys [end-time]} process
-        process-over? (and (some? end-time) (time/in-past? end-time))]
+        {::process/keys [end-time moderators]} process
+        process-over? (and (some? end-time) (time/in-past? end-time))
+        moderator? (is-moderator? moderators current-session)]
     (comp/fragment
       (surfaces/paper
         {:square true}
@@ -99,10 +122,12 @@
             (ui-process-info process-header))
           (tab-bar (current-target this)
             {:label "Übersicht" :target process.home/ProcessHome}
-            {:label "Alle Vorschläge" :target proposal.main-list/MainProposalList})))
+            {:label "Alle Vorschläge" :target proposal.main-list/MainProposalList}
+            (when moderator?
+              {:label "Moderation" :target process.moderator/ProcessModeratorTab}))))
       (ui-process-router process-router
         {:slug slug
-         :process process
-         :process-over? process-over?
+         ;:process process
+         ;:process-over? process-over?
          :show-new-proposal-dialog show-new-proposal-dialog})
       (new-proposal/ui-new-proposal-form new-proposal-dialog))))

@@ -4,8 +4,8 @@
     [com.fulcrologic.fulcro.algorithms.merge :as mrg]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
-    [decide.models.proposal :as proposal]))
-
+    [decide.models.proposal :as proposal]
+    [decide.models.user :as user]))
 
 (defsc Process [_ _]
   {:query
@@ -35,8 +35,13 @@
 (defmutation update-process [{::keys [slug] :as process}]
   (action [{:keys [app]}]
     (when slug
-      (mrg/merge-component! app Process
-        (select-keys process [::slug ::title ::description]))))
+      (mrg/merge-component! app Process process)))
   (remote [env]
     (-> env
       (m/returning Process))))
+
+(defmutation add-moderator [{::keys [slug] email :email}]
+  (remote [env]
+    (-> env
+      (m/with-target (targeting/append-to [::slug slug ::moderators]))
+      (m/returning user/User))))

@@ -33,7 +33,7 @@
            :dev {:extra-paths ["src/test" "src/dev" "src/workspaces"]
                  :jvm-opts ["-XX:-OmitStackTraceInFastThrow"]
                  :extra-deps {org.clojure/clojurescript {:mvn/version "1.10.773"}
-                              thheller/shadow-cljs {:mvn/version "2.11.14"}
+                              thheller/shadow-cljs {:mvn/version "2.11.18"}
                               expound/expound {:mvn/version "0.8.7"}
                               fulcrologic/fulcro-spec {:mvn/version "3.1.9"}
                               binaryage/devtools {:mvn/version "1.0.2"}
