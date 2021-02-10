@@ -3,6 +3,7 @@
     [com.fulcrologic.fulcro.application :as app]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.data-fetch :as df]
+    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr :refer [defrouter]]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
@@ -45,20 +46,7 @@
 (defsc ProcessHome [_this {::process/keys [description proposals]}]
   {:query [::process/slug ::process/description
            {::process/proposals (comp/get-query TopEntry)}]
-   :ident ::process/slug
-   :route-segment ["home"]
-   :will-enter
-   (fn will-enter-process-home [app {::process/keys [slug]}]
-     (let [ident (comp/get-ident ProcessHome {::process/slug slug})]
-       (dr/route-deferred ident
-         (fn []
-           (if (get-in (app/current-state app) ident)
-             (do
-               (dr/target-ready! app ident)
-               (df/load! app ident ProcessHome))
-             (df/load! app ident ProcessHome
-               {:post-mutation `dr/target-ready
-                :post-mutation-params {:target ident}}))))))}
+   :ident ::process/slug}
   (layout/box {:clone true :pt 2}
     (layout/container {:maxWidth :lg :component :main}
       ;; description section
@@ -82,3 +70,25 @@
                     "Die aktuell besten Vorschläge"))
                 (list/list {}
                   (map ui-top-entry top-proposals))))))))))
+
+(def ui-process-home (comp/computed-factory ProcessHome))
+
+(defmutation init-overview-screen [{:keys [slug]}]
+  (action [{:keys [app ref]}]
+    (let [process-ident [::process/slug slug]]
+
+      (df/load! app process-ident ProcessHome
+        {:target (conj ref :process-home)
+         :post-mutation `dr/target-ready
+         :post-mutation-params {:target ref}}))))
+
+(defsc ProcessOverviewScreen [_ {:keys [process-home] :as props}]
+  {:query [{:process-home (comp/get-query ProcessHome)}]
+   :ident (fn [] [:SCREEN ::ProcessOverviewScreen])
+   :route-segment ["home"]
+   :will-enter
+   (fn will-enter-ProcessOverviewScreen [app {::process/keys [slug]}]
+     (let [ident (comp/get-ident ProcessOverviewScreen {:process-home {::process/slug slug}})]
+       (dr/route-deferred ident
+         #(comp/transact! app [(init-overview-screen {:slug slug})] {:ref ident}))))}
+  (ui-process-home process-home))

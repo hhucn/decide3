@@ -23,7 +23,7 @@
 
 (defrouter ProcessRouter [_this _]
   {:router-targets
-   [process.home/ProcessHome
+   [process.home/ProcessOverviewScreen
     proposal.main-list/MainProposalList
     proposal.detail-page/ProposalPage
     process.moderator/ProcessModeratorTab]})
@@ -121,7 +121,7 @@
           (when process-header
             (ui-process-info process-header))
           (tab-bar (current-target this)
-            {:label "Übersicht" :target process.home/ProcessHome}
+            {:label "Übersicht" :target process.home/ProcessOverviewScreen}
             {:label "Alle Vorschläge" :target proposal.main-list/MainProposalList}
             (when moderator?
               {:label "Moderation" :target process.moderator/ProcessModeratorTab}))))
