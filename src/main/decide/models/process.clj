@@ -52,6 +52,7 @@
 (s/def ::title (s/and string? (complement str/blank?)))
 (s/def ::description string?)
 (s/def ::latest-id (s/and int? #(<= 0 %)))
+(s/def ::end-time (s/nilable inst?))
 
 (s/def ::ident (s/tuple #{::slug} ::slug))
 (s/def ::lookup (s/or :ident ::ident :db/id pos-int?))
@@ -144,7 +145,7 @@
     user-id))
 
 (>defn update-process! [conn user-id {::keys [slug] :as process}]
-  [d.core/conn? ::user/id (s/keys :req [::slug] :opt [::title ::description]) => map?]
+  [d.core/conn? ::user/id (s/keys :req [::slug] :opt [::title ::description ::end-time]) => map?]
   (let [db (d/db conn)]
     (cond
       (not user-id)
@@ -153,15 +154,17 @@
       (not (slug-in-use? db slug))
       (throw (ex-info "Slug not in use" {:slug slug}))
 
-      (not (s/valid? (s/keys :req [::slug] :opt [::title ::description]) process))
-      (throw (ex-info "Parameter not valid" {:explain (s/explain-data (s/keys :req [::slug] :opt [::title ::description]) process)}))
+      (not (s/valid? (s/keys :req [::slug] :opt [::title ::description ::end-time]) process))
+      (throw (ex-info "Parameter not valid" {:explain (s/explain-data (s/keys :req [::slug] :opt [::title ::description ::end-time]) process)}))
 
       (not (is-moderator? db [::slug slug] user-id))
       (throw (ex-info "User is not moderator of this process" {::user/id user-id ::slug slug}))
 
       :else
       (let [facts (for [[k v] (dissoc process ::slug)]
-                    [:db/add [::slug slug] k v])
+                    (if v
+                      [:db/add [::slug slug] k v]
+                      [:db/retract [::slug slug] k]))
             {:keys [db-after]}
             (d/transact conn
               (conj facts [:db/add "datomic.tx" :db/txUser [::user/id user-id]]))]

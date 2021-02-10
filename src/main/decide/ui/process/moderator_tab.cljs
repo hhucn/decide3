@@ -89,7 +89,7 @@
    :ident ::process/slug
    :use-hooks? true}
   (accordion {:title "Prozess bearbeiten"}
-    (let [[mod-title change-title] (hooks/use-state nil)
+    (let [[mod-title change-title] (hooks/use-state title)
           [mod-description change-description] (hooks/use-state description)
           [with-end? set-with-end?] (hooks/use-state (boolean end-time))
           [mod-end-time set-end-time] (hooks/use-state end-time)]
@@ -98,15 +98,22 @@
          :onSubmit
          (fn [evt]
            (evt/prevent-default! evt)
+
            (comp/transact! this [(process/update-process
-                                   {::process/slug slug
-                                    ::process/title mod-title
-                                    ::process/description mod-description
-                                    ::process/end-time (and mod-end-time (js/Date. mod-end-time))})]))}
+                                   ;; calculate diff ;; NOTE have a look at clojure.data/diff
+                                   (cond-> {::process/slug slug}
+                                     (not= mod-title title)
+                                     (assoc ::process/title mod-title)
+
+                                     (not= mod-description description)
+                                     (assoc ::process/description mod-description)
+
+                                     (not= (when with-end? mod-end-time) end-time)
+                                     (assoc ::process/end-time (when with-end? mod-end-time))))]))}
         (inputs/textfield
           (merge default-input-props
             {:label "Titel"
-             :value (or mod-title title)
+             :value mod-title
              :helperText (when (not= title mod-title) "Bearbeitet")
              :onChange #(change-title (evt/target-value %))
              :inputProps {:maxLength 140}}))
