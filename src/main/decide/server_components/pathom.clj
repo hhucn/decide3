@@ -16,7 +16,6 @@
     [decide.server-components.database :refer [conn]]
     [mount.core :refer [defstate]]
     [taoensso.timbre :as log]
-    [decide.models.authorization :as auth]
     [clojure.spec.alpha :as s]))
 
 (defn- remove-keys-from-map-values [m & ks]
@@ -52,13 +51,23 @@
          (if (s/valid? spec params)
            (mutate env sym params)
            (do
-             (log/warn (s/explain spec params))
+             (log/debug (s/explain spec params))
              (throw (ex-info "Failed validation!" (s/explain-data spec params)))))
          (mutate env sym params))))})
 
 ;;;
 ;;; This is borrowed from com.fulcrologic.rad.pathom
 ;;;
+
+(defn process-error
+  "If there were any exceptions in the parser that cause complete failure we
+  respond with a well-known message that the client can handle."
+  [env err]
+  (let [msg (.getMessage err)
+        data (or (ex-data err) {})]
+    ; (log/error err "Parser Error:" msg data)
+    {::rad-pathom/errors {:message msg
+                          :data data}}))
 
 (defn parser-args [config plugins resolvers]
   (let [{:keys [trace? log-requests? log-responses? no-tempids?]} (::rad-pathom/config config)]
@@ -72,11 +81,12 @@
                      (concat
                        [(pc/connect-plugin {::pc/register resolvers})]
                        plugins
-                       [(p/env-plugin {::p/process-error rad-pathom/process-error})
+                       [spec-plugin
+                        (p/env-plugin {::p/process-error process-error})
                         (when log-requests? (p/pre-process-parser-plugin rad-pathom/log-request!))
                         ;; TODO: Do we need this, and if so, we need to pass the attribute map
                         ;(p/post-process-parser-plugin add-empty-vectors)
-                        spec-plugin
+
                         (p/post-process-parser-plugin p/elide-not-found)
                         (p/post-process-parser-plugin rad-pathom/elide-reader-errors)
                         (when log-responses? (rad-pathom/post-process-parser-plugin-with-env rad-pathom/log-response!))

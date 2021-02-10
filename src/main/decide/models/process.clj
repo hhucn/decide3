@@ -110,15 +110,6 @@
   (let [db (d/db conn)
         moderator-id user-id]
     (cond
-      (not (s/valid? ::slug slug))
-      (throw (ex-info "Slug not valid" {:explain (s/explain-data ::slug slug)}))
-
-      (not (s/valid? ::title title))
-      (throw (ex-info "Title not valid" {:explain (s/explain-data ::title title)}))
-
-      (not (s/valid? ::description description))
-      (throw (ex-info "Description not valid" {:explain (s/explain-data ::description description)}))
-
       (slug-in-use? db slug) (throw (ex-info "Slug already in use" {:slug slug}))
 
       :else
@@ -145,9 +136,6 @@
   [d.core/conn? ::user/id (s/keys :req [::slug] :opt [::title ::description ::end-time]) => map?]
   (let [db (d/db conn)]
     (cond
-      (not user-id)
-      (throw (ex-info "User not logged in!" {}))
-
       (not (s/valid? (s/keys :req [::slug] :opt [::title ::description ::end-time]) process))
       (throw (ex-info "Parameter not valid" {:explain (s/explain-data (s/keys :req [::slug] :opt [::title ::description ::end-time]) process)}))
 
@@ -185,24 +173,26 @@
         (throw (ex-info "Slug is not in use!" {:slug slug}))))))
 
 (defmutation add-process [{:keys [conn AUTH/user-id] :as env} {::keys [slug] :as process}]
-  {::pc/params [::title ::slug ::description]
+  {::pc/params [::title ::slug ::description ::end-time]
    ::pc/output [::slug]
+   ::s/params (s/keys :req [::slug ::title ::description] :opt [::end-time])
    ::pc/transform auth/check-logged-in}
-  (let [{:keys [db-after]} (add-process! conn user-id process)]
+  (let [{:keys [db-after]} (add-process! conn user-id (select-keys process [::title ::slug ::description ::end-time]))]
     {::slug slug
      ::p/env (assoc env :db db-after)}))
 
 (defmutation update-process [{:keys [conn AUTH/user-id] :as env} {::keys [slug] :as process}]
-  {::pc/params [::title ::slug ::description]
+  {::pc/params [::slug ::title ::description ::end-time]
    ::pc/output [::slug]
-   ::s/params (s/keys :req [::slug])
+   ::s/params (s/keys :req [::slug] :opt [::title ::description ::end-time])
    ::pc/transform (comp auth/check-logged-in check-slug-exists)}
-  (let [db-after (update-process! conn user-id process)]
+  (let [db-after (update-process! conn user-id (select-keys process [::title ::slug ::description ::end-time]))]
     {::slug slug
      ::p/env (assoc env :db db-after)}))
 
-(defmutation add-moderator [{:keys [conn db AUTH/user-id] :as env} {::keys [slug] email :email}]
+(defmutation add-moderator [{:keys [conn db AUTH/user-id] :as env} {::keys [slug] email ::user/email}]
   {::pc/output [::user/id]
+   ::s/params (s/keys :req [::slug ::user/email])
    ::pc/transform (comp auth/check-logged-in check-slug-exists)}
   (if (slug-in-use? db slug)
     (if-let [{::user/keys [id]} (and (user/email-in-db? db email) (user/get-by-email db email))]
@@ -213,9 +203,10 @@
       (throw (ex-info "User with this email doesn't exist!" {:email email})))
     (throw (ex-info "Slug is not in use!" {:slug slug}))))
 
-(defmutation enter [{:keys [conn AUTH/user-id]} {user :user-id
+(defmutation enter [{:keys [conn AUTH/user-id]} {user ::user/id
                                                  slug ::slug}]
-  {::pc/params [::slug :user-id]
+  {::pc/params [::slug ::user/id]
+   ::s/params (s/keys :req [::user/id ::slug])
    ::pc/transform (comp auth/check-logged-in check-slug-exists)}
   (when (= user-id user)
     (enter! conn [::slug slug] [::user/id user])

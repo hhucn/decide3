@@ -1,4 +1,4 @@
-{:taoensso.timbre/logging-config {:level :debug}
+{:taoensso.timbre/logging-config {:min-level [[#{"datahike.*"} :info] [#{"*"} :debug]]}
  :ring.middleware/defaults-config {:security {:anti-forgery true
                                               :hsts true
                                               :ssl-redirect false

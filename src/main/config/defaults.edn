@@ -3,7 +3,7 @@
  :org.httpkit.server/config {:port 3000}
 
  :taoensso.timbre/logging-config
- {:level :info
+ {:min-level :info
   :ns-whitelist []
   :ns-blacklist ["datomic.kv-cluster"
                  "datomic.process-monitor"

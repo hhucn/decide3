@@ -1,18 +1,17 @@
 (ns decide.models.process-test
   (:require
-    [decide.server-components.pathom :as pathom]
+    [clojure.test :refer [deftest is use-fixtures]]
+    [datahike.api :as d]
     [decide.models.process :as process]
     [decide.models.user :as user]
-    [clojure.test :refer [deftest is use-fixtures]]
-    [fulcro-spec.core :refer [specification provided behavior assertions component provided! =>]]
     [decide.server-components.database :as database]
-    [datahike.api :as d]
-    [taoensso.timbre :as log]))
+    [decide.server-components.pathom :as pathom]
+    [fulcro-spec.core :refer [specification provided behavior assertions component provided! => =fn=>]]))
 
 (def ^:dynamic *conn* nil)
 
 (defn db-fixture [f]
-  (binding [*conn* (log/with-level :info (database/test-database database/dev-db))]
+  (binding [*conn* (database/test-database database/dev-db)]
     (try
       (f)
       (catch Exception e (throw e))
@@ -64,7 +63,7 @@
 
 (deftest parser-integration-test
   (let [parser (pathom/build-parser {} *conn*)]
-    (component "An authorized user"
+    (behavior "An authorized user"
       (let [parser-existing-user (partial parser {:ring/request {:session {:id #uuid"0000fb5e-a9d0-44b6-b293-bb3c506fc0cb"}}})]
         (assertions
           "can query for an existing process."
@@ -128,7 +127,7 @@
               {`process/update-process
                {::process/title "My NEW Test-Title"}}
 
-              "can't update a process that is not in use."
+              "can not update a process that is not in use."
               (parser-existing-user
                 [{`(process/update-process
                      #::process{:slug "i-do-not-exist"
@@ -138,12 +137,57 @@
               {`process/update-process
                {:com.fulcrologic.rad.pathom/errors
                 {:message "Slug is not in use!"
-                 :data {:slug "i-do-not-exist"}}}})))
+                 :data {:slug "i-do-not-exist"}}}}
 
-        (component "who isn't a moderator of the process"
+              "can add an end-date afterwards"
+              (parser-with-moderator
+                [{`(process/update-process
+                     #::process{:slug "test" :end-time #inst"2030"})
+                  [::process/end-time]}])
+              =>
+              {`process/update-process
+               {::process/end-time #inst"2030"}}
+
+              "can remove an end-date afterwards"
+              (parser-with-moderator
+                [{`(process/update-process
+                     #::process{:slug "test" :end-time nil})
+                  [::process/slug ::process/end-time]}])
+              =>
+              {`process/update-process
+               #::process{:slug "test"}}
+
+              "can not remove an required attributes"
+              (get-in (parser-with-moderator
+                        [{`(process/update-process
+                             #::process{:slug "test" :title nil})
+                          [::process/slug ::process/end-time]}])
+                [`process/update-process :com.fulcrologic.rad.pathom/errors :message])
+              =>
+              "Failed validation!"
+
+              "can not remove slug"
+              (get-in (parser-with-moderator
+                        [{`(process/update-process
+                             #::process{:slug nil})
+                          [::process/slug ::process/end-time]}])
+                [`process/update-process :com.fulcrologic.rad.pathom/errors :message])
+              =>
+              "Failed validation!"
+
+              "can not set title to empty"
+              (get-in (parser-with-moderator
+                        [{`(process/update-process
+                             #::process{:slug "test" :title ""})
+                          [::process/slug ::process/end-time]}])
+                [`process/update-process :com.fulcrologic.rad.pathom/errors :message])
+              =>
+              "Failed validation!")))
+
+        (component "who is not a moderator of the process"
           (let [parser-with-non-moderator (partial parser {:ring/request {:session {:id #uuid"001e7a7e-3eb2-4226-b9ab-36dddcf64106"}}})]
             (assertions
-              "can not update an existing process."
+              "can not update the process."
               (parser-with-non-moderator
                 [{`(process/update-process
                      #::process{:slug "test"
@@ -155,3 +199,73 @@
                 {:message "User is not moderator of this process"
                  :data {::user/id #uuid"001e7a7e-3eb2-4226-b9ab-36dddcf64106"
                         ::process/slug "test"}}}})))))))
+
+(specification "Malformed add-process parameters"
+  (let [parser (pathom/build-parser {} *conn*)
+        parser-existing-user (partial parser {:ring/request {:session {:id #uuid"0000fb5e-a9d0-44b6-b293-bb3c506fc0cb"}}})
+        get-relevant-key
+        (fn [actual]
+          (-> actual
+            (get-in [`process/add-process :com.fulcrologic.rad.pathom/errors :message])))]
+    (behavior "process can not be added with"
+      (assertions
+
+        "malformed slug"
+        (->
+          (parser-existing-user
+            [{(list `process/add-process
+                #::process{:slug "I AM NOT A CORRECT SLUG"
+                           :title "My Test-Title"
+                           :description "foobar"})
+              [::process/slug ::process/title ::process/description]}])
+          get-relevant-key)
+        =>
+        "Failed validation!"
+
+        "empty title"
+        (->
+          (parser-existing-user
+            [{(list `process/add-process
+                #::process{:slug "correct-slug"
+                           :title ""
+                           :description "foobar"})
+              [::process/slug ::process/title ::process/description]}])
+          get-relevant-key)
+        =>
+        "Failed validation!"
+
+        "missing field"
+        (->
+          (parser-existing-user
+            [{(list `process/add-process
+                #::process{:slug "correct-slug"
+                           :description "foobar"})
+              [::process/slug ::process/title ::process/description]}])
+          get-relevant-key)
+        =>
+        "Failed validation!"
+
+        "string as end-date"
+        (->
+          (parser-existing-user
+            [{(list `process/add-process
+                #::process{:slug "correct-slug"
+                           :title "Bla"
+                           :description "foobar"
+                           :end-time "heute"})
+              [::process/slug ::process/title ::process/description]}])
+          get-relevant-key)
+        =>
+        "Failed validation!"
+
+        "slug is already in use"
+        (->
+          (parser-existing-user
+            [{(list `process/add-process
+                #::process{:slug "test-decision"
+                           :title "Bla"
+                           :description "foobar"})
+              [::process/slug ::process/title ::process/description]}])
+          get-relevant-key)
+        =>
+        "Slug already in use"))))
