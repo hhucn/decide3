@@ -63,13 +63,15 @@
       (not (short-time? datetime)) (merge long-time-format))))
 
 (>defn nice-string
-  ([^js/Date datetime] [:js/Date => string?] (nice-string datetime {}))
+  ([^js/Date datetime] [(s/nilable :js/Date) => string?] (nice-string datetime {}))
   ([^js/Date datetime {:keys [dateprefix]}]
-   [:js/Date map? => string?]
-   (cond
-     (today? datetime) (str "heute um " (format-time datetime))
-     (yesterday? datetime) (str "gestern um " (format-time datetime))
-     :else (str dateprefix (format-datetime datetime)))))
+   [(s/nilable :js/Date) map? => string?]
+   (if datetime
+     (cond
+       (today? datetime) (str "heute um " (format-time datetime))
+       (yesterday? datetime) (str "gestern um " (format-time datetime))
+       :else (str dateprefix (format-datetime datetime)))
+     "")))
 
 (>defn time-element [^js/Date datetime & children]
   [:js/Date (s/* any?) => dom/element?]
