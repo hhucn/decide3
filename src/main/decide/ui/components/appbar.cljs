@@ -64,7 +64,7 @@
             (inputs/button
               {:variant :outlined
                :color :inherit
-               :onClick #(comp/transact! this [(login/toggle-modal {})] {:compressible? true})}
+               :onClick #(comp/transact! this [(login/show-signinup-dialog {:which-form :sign-in})] {:compressible? true})}
               "Login")
 
             (comp/fragment

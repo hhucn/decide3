@@ -58,7 +58,6 @@
     <orderEntry type="library" name="Deps: com.lucasbradstreet/cljs-uuid-utils:1.0.2" level="project" />
     <orderEntry type="library" name="Deps: org.graalvm.regex/regex:20.1.0" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/tools.analyzer.jvm:1.1.0" level="project" />
-    <orderEntry type="library" name="Deps: net.incongru.watchservice/barbary-watchservice:1.0" level="project" />
     <orderEntry type="library" name="Deps: org.wildfly.common/wildfly-common:1.5.2.Final" level="project" />
     <orderEntry type="library" name="Deps: com.fulcrologic/fulcro-i18n:0.0.4-alpha" level="project" />
     <orderEntry type="library" name="Deps: cljsjs/react-dom:16.13.0-0" level="project" />
@@ -69,7 +68,7 @@
     <orderEntry type="library" name="Deps: com.cognitect/transit-cljs:0.8.264" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/google-closure-library:0.0-20191016-6ae1f72f" level="project" />
     <orderEntry type="library" name="Deps: io.aviso/pretty:0.1.37" level="project" />
-    <orderEntry type="library" name="Deps: thheller/shadow-cljs:2.11.14" level="project" />
+    <orderEntry type="library" name="Deps: thheller/shadow-cljs:2.11.18" level="project" />
     <orderEntry type="library" name="Deps: org.graalvm.sdk/graal-sdk:20.1.0" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/clojurescript:1.10.773" level="project" />
     <orderEntry type="library" name="Deps: fress:0.3.1" level="project" />
@@ -140,7 +139,6 @@
     <orderEntry type="library" name="Deps: org.wildfly.client/wildfly-client-config:1.0.1.Final" level="project" />
     <orderEntry type="library" name="Deps: cljs.java-time:0.1.13" level="project" />
     <orderEntry type="library" name="Deps: persistent-sorted-set:0.1.2" level="project" />
-    <orderEntry type="library" name="Deps: net.java.dev.jna/jna:3.2.2" level="project" />
     <orderEntry type="library" name="Deps: junit:4.13.1" level="project" />
     <orderEntry type="library" name="Deps: cheshire:5.8.0" level="project" />
     <orderEntry type="library" name="Deps: tigris:0.1.1" level="project" />
@@ -163,7 +161,6 @@
     <orderEntry type="library" name="Deps: org.ow2.asm/asm-analysis:7.1" level="project" />
     <orderEntry type="library" name="Deps: com.google.protobuf/protobuf-java:3.11.1" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/core.memoize:1.0.236" level="project" />
-    <orderEntry type="library" name="Deps: hawk:0.2.11" level="project" />
     <orderEntry type="library" name="Deps: camel-snake-kebab:0.4.0" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/data.priority-map:1.0.0" level="project" />
     <orderEntry type="library" name="Deps: bk/ring-gzip:0.3.0" level="project" />

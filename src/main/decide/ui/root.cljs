@@ -25,7 +25,6 @@
 (defrouter RootRouter [_this {:keys [current-state]}]
   {:router-targets [process.list/ProcessesPage
                     process-page/ProcessContext
-                    login/SignUpPage
                     settings/SettingsPage]}
 
   (when-not current-state
