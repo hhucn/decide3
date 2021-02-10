@@ -13,21 +13,22 @@
    :initial-state {::current-session {:session/valid? false
                                       ::id nil}}})
 
+(defn- add-user-id-to-env [env user-id]
+  (assoc env
+    :AUTH/user-id user-id
+    :session (when user-id
+               {:user {:session/valid? true
+                       ::user/id user-id}})))
 
 (defn session-wrapper [env]
   (let [user-id (user/get-session-user-id env)]
-    (assoc env
-      :AUTH/user-id user-id
-      :session (when user-id
-                 {:user {:session/valid? true
-                         ::user/id user-id}}))))
+    (add-user-id-to-env env user-id)))
 
 (defn check-logged-in [{::pc/keys [mutate] :as mutation}]
   (assoc mutation
     ::pc/mutate
     (fn [env params]
-      (if-let [session (user/get-session-user-id env)]
-        (mutate env params)
-        #_(-> env (assoc :session session) (mutate params)) ; instead of session-wrapper?
+      (if-let [user-id (user/get-session-user-id env)]
+        (-> env (add-user-id-to-env user-id) (mutate params)) ; instead of session-wrapper?
         (throw (ex-info "User is not logged in!" {}))))))
 

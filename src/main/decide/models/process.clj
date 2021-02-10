@@ -110,9 +110,6 @@
   (let [db (d/db conn)
         moderator-id user-id]
     (cond
-      (not user-id)
-      (throw (ex-info "User not logged in!" {}))
-
       (not (s/valid? ::slug slug))
       (throw (ex-info "Slug not valid" {:explain (s/explain-data ::slug slug)}))
 
@@ -151,9 +148,6 @@
       (not user-id)
       (throw (ex-info "User not logged in!" {}))
 
-      (not (slug-in-use? db slug))
-      (throw (ex-info "Slug not in use" {:slug slug}))
-
       (not (s/valid? (s/keys :req [::slug] :opt [::title ::description ::end-time]) process))
       (throw (ex-info "Parameter not valid" {:explain (s/explain-data (s/keys :req [::slug] :opt [::title ::description ::end-time]) process)}))
 
@@ -182,6 +176,14 @@
   (d/transact conn [[:db/add process-lookup ::participants user-lookup]]))
 
 ;; region API
+(defn check-slug-exists [{::pc/keys [mutate] :as mutation}]
+  (assoc mutation
+    ::pc/mutate
+    (fn [{:keys [db] :as env} {::keys [slug] :as params}]
+      (if (slug-in-use? db slug)
+        (mutate env params)
+        (throw (ex-info "Slug is not in use!" {:slug slug}))))))
+
 (defmutation add-process [{:keys [conn AUTH/user-id] :as env} {::keys [slug] :as process}]
   {::pc/params [::title ::slug ::description]
    ::pc/output [::slug]
@@ -193,14 +195,15 @@
 (defmutation update-process [{:keys [conn AUTH/user-id] :as env} {::keys [slug] :as process}]
   {::pc/params [::title ::slug ::description]
    ::pc/output [::slug]
-   ::pc/transform auth/check-logged-in}
+   ::s/params (s/keys :req [::slug])
+   ::pc/transform (comp auth/check-logged-in check-slug-exists)}
   (let [db-after (update-process! conn user-id process)]
     {::slug slug
      ::p/env (assoc env :db db-after)}))
 
 (defmutation add-moderator [{:keys [conn db AUTH/user-id] :as env} {::keys [slug] email :email}]
   {::pc/output [::user/id]
-   ::pc/transform auth/check-logged-in}
+   ::pc/transform (comp auth/check-logged-in check-slug-exists)}
   (if (slug-in-use? db slug)
     (if-let [{::user/keys [id]} (and (user/email-in-db? db email) (user/get-by-email db email))]
       (let [{:keys [db-after]} (d/transact conn [[:db/add [::slug slug] ::moderators [::user/id id]]
@@ -213,7 +216,7 @@
 (defmutation enter [{:keys [conn AUTH/user-id]} {user :user-id
                                                  slug ::slug}]
   {::pc/params [::slug :user-id]
-   ::pc/transform auth/check-logged-in}
+   ::pc/transform (comp auth/check-logged-in check-slug-exists)}
   (when (= user-id user)
     (enter! conn [::slug slug] [::user/id user])
     nil))
@@ -225,7 +228,7 @@
   {::pc/params [::slug
                 ::proposal/id ::proposal/title ::proposal/body ::proposal/parents ::proposal/arguments]
    ::pc/output [::proposal/id]
-   ::pc/transform auth/check-logged-in}
+   ::pc/transform (comp auth/check-logged-in check-slug-exists)}
   (let [{real-id ::proposal/id :as new-proposal}
         (proposal/tx-map #::proposal{:nice-id (new-nice-id! conn slug)
                                      :title title

@@ -109,11 +109,11 @@
       (d/create-database db-config))))
 
 
-(defn test-database [db-config]
+(defn test-database [inital-db]
   (d/create-database)
   (let [conn (d/connect)]
     (transact-schema! conn)
-    (d/transact conn dev-db)
+    (d/transact conn inital-db)
     conn))
 
 (defstate conn

@@ -16,8 +16,8 @@
     [decide.server-components.database :refer [conn]]
     [mount.core :refer [defstate]]
     [taoensso.timbre :as log]
-    [decide.models.authorization :as auth])
-  (:import (java.util UUID)))
+    [decide.models.authorization :as auth]
+    [clojure.spec.alpha :as s]))
 
 (defn- remove-keys-from-map-values [m & ks]
   (->> m
@@ -44,17 +44,29 @@
      (update ::pc/index-resolvers (fn [rs] (apply dissoc rs (filter #(str/starts-with? (namespace %) "com.wsscode.pathom") (keys rs)))))
      (update ::pc/index-mutations (fn [rs] (apply dissoc rs (filter #(str/starts-with? (namespace %) "com.wsscode.pathom") (keys rs))))))})
 
+(def spec-plugin
+  {::p/wrap-mutate
+   (fn [mutate]
+     (fn [env sym params]
+       (if-let [spec (get-in env [::pc/indexes ::pc/index-mutations sym ::s/params])]
+         (if (s/valid? spec params)
+           (mutate env sym params)
+           (do
+             (log/warn (s/explain spec params))
+             (throw (ex-info "Failed validation!" (s/explain-data spec params)))))
+         (mutate env sym params))))})
+
 ;;;
 ;;; This is borrowed from com.fulcrologic.rad.pathom
 ;;;
 
 (defn parser-args [config plugins resolvers]
   (let [{:keys [trace? log-requests? log-responses? no-tempids?]} (::rad-pathom/config config)]
-    {::p/mutate  pc/mutate
-     ::p/env     {::p/reader                 [p/map-reader pc/reader2 pc/index-reader
-                                              pc/open-ident-reader p/env-placeholder-reader]
-                  ::p/placeholder-prefixes   #{">"}
-                  ::pc/mutation-join-globals [(when-not no-tempids? :tempids) :errors]}
+    {::p/mutate pc/mutate
+     ::p/env {::p/reader [p/map-reader pc/reader2 pc/index-reader
+                          pc/open-ident-reader p/env-placeholder-reader]
+              ::p/placeholder-prefixes #{">"}
+              ::pc/mutation-join-globals [(when-not no-tempids? :tempids) :errors]}
      ::p/plugins (into []
                    (keep identity
                      (concat
@@ -64,6 +76,7 @@
                         (when log-requests? (p/pre-process-parser-plugin rad-pathom/log-request!))
                         ;; TODO: Do we need this, and if so, we need to pass the attribute map
                         ;(p/post-process-parser-plugin add-empty-vectors)
+                        spec-plugin
                         (p/post-process-parser-plugin p/elide-not-found)
                         (p/post-process-parser-plugin rad-pathom/elide-reader-errors)
                         (when log-responses? (rad-pathom/post-process-parser-plugin-with-env rad-pathom/log-response!))
