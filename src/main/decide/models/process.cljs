@@ -40,7 +40,7 @@
     (-> env
       (m/returning Process))))
 
-(defmutation add-moderator [{::keys [slug] email :email}]
+(defmutation add-moderator [{::keys [slug] email ::user/email}]
   (remote [env]
     (-> env
       (m/with-target (targeting/append-to [::slug slug ::moderators]))

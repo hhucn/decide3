@@ -67,7 +67,7 @@
            (fn [e]
              (evt/prevent-default! e)
              (set-new-moderator-email "")
-             (comp/transact! this [(process/add-moderator {::process/slug slug :email new-moderator-email})]))}
+             (comp/transact! this [(process/add-moderator {::process/slug slug ::user/email new-moderator-email})]))}
           (dd/typography {:variant :h6} "Moderator hinzufügen")
           (inputs/textfield
             {:label "E-Mail"

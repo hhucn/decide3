@@ -194,14 +194,13 @@
   {::pc/output [::user/id]
    ::s/params (s/keys :req [::slug ::user/email])
    ::pc/transform (comp auth/check-logged-in check-slug-exists)}
-  (if (slug-in-use? db slug)
-    (if-let [{::user/keys [id]} (and (user/email-in-db? db email) (user/get-by-email db email))]
-      (let [{:keys [db-after]} (d/transact conn [[:db/add [::slug slug] ::moderators [::user/id id]]
-                                                 [:db/add "datomic.tx" :db/txUser [::user/id user-id]]])]
-        {::user/id id
-         ::p/env (assoc env :db db-after)})
-      (throw (ex-info "User with this email doesn't exist!" {:email email})))
-    (throw (ex-info "Slug is not in use!" {:slug slug}))))
+  ;; TODO check if user is moderator
+  (if-let [{::user/keys [id]} (and (user/email-in-db? db email) (user/get-by-email db email))]
+    (let [{:keys [db-after]} (d/transact conn [[:db/add [::slug slug] ::moderators [::user/id id]]
+                                               [:db/add "datomic.tx" :db/txUser [::user/id user-id]]])]
+      {::user/id id
+       ::p/env (assoc env :db db-after)})
+    (throw (ex-info "User with this email doesn't exist!" {:email email}))))
 
 (defmutation enter [{:keys [conn AUTH/user-id]} {user ::user/id
                                                  slug ::slug}]
