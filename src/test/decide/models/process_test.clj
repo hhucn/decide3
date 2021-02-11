@@ -1,17 +1,18 @@
 (ns decide.models.process-test
   (:require
-    [clojure.test :refer [deftest is use-fixtures]]
+    [clojure.test :refer [deftest is use-fixtures testing are]]
     [datahike.api :as d]
     [decide.models.process :as process]
     [decide.models.user :as user]
     [decide.server-components.database :as database]
     [decide.server-components.pathom :as pathom]
-    [fulcro-spec.core :refer [specification provided behavior assertions component provided! => =fn=>]]))
+    [fulcro-spec.core :refer [specification provided behavior assertions component provided! => =fn=>]]
+    [taoensso.timbre :as log]))
 
 (def ^:dynamic *conn* nil)
 
 (defn db-fixture [f]
-  (binding [*conn* (database/test-database database/dev-db)]
+  (binding [*conn* (log/with-level :info (database/test-database database/dev-db))]
     (try
       (f)
       (catch Exception e (throw e))
@@ -269,3 +270,25 @@
           get-relevant-key)
         =>
         "Slug already in use"))))
+
+(specification "Moderator priviliges"
+  (let [parser (pathom/build-parser {} *conn*)
+        parser-with-alex-session (partial parser {:ring/request {:session {:id #uuid"000aa0e2-e4d6-463d-ae7c-46765e13a31b"}}})]
+    (behavior "Only a moderator can"
+      (behavior "add new moderators"
+        (assertions
+          (->
+            (parser-with-alex-session
+              [`(process/add-moderator
+                  {::process/slug "test-decision"
+                   ::user/email "Marc"})])
+            (get-in [`process/add-moderator :com.fulcrologic.rad.pathom/errors :message]))
+          =>
+          "Need moderation role for this operation")))))
+
+(specification "Private processes"
+  :kaocha/pending
+  (let [parser (pathom/build-parser {} *conn*)
+        parser-existing-user (partial parser {:ring/request {:session {:id #uuid"0000fb5e-a9d0-44b6-b293-bb3c506fc0cb"}}})]
+    (behavior "A private process"
+      (behavior "can not be queried by everyone"))))

@@ -172,6 +172,15 @@
         (mutate env params)
         (throw (ex-info "Slug is not in use!" {:slug slug}))))))
 
+(defn needs-moderator [{::pc/keys [mutate] :as mutation}]
+  (assoc mutation
+    ::pc/mutate
+    (fn [{:keys [db AUTH/user-id] :as env} {::keys [slug] :as params}]
+      (if (is-moderator? db [::slug slug] user-id)
+        (mutate env params)
+        (throw (ex-info "Need moderation role for this operation" {::slug slug
+                                                                   ::user/id user-id}))))))
+
 (defmutation add-process [{:keys [conn AUTH/user-id] :as env} {::keys [slug] :as process}]
   {::pc/params [::title ::slug ::description ::end-time]
    ::pc/output [::slug]
@@ -190,14 +199,17 @@
     {::slug slug
      ::p/env (assoc env :db db-after)}))
 
+(defn add-moderator! [conn process-lookup moderator-id new-moderator-lookup]
+  (d/transact conn [[:db/add process-lookup ::moderators new-moderator-lookup]
+                    [:db/add "datomic.tx" :db/txUser [::user/id moderator-id]]]))
+
 (defmutation add-moderator [{:keys [conn db AUTH/user-id] :as env} {::keys [slug] email ::user/email}]
   {::pc/output [::user/id]
    ::s/params (s/keys :req [::slug ::user/email])
-   ::pc/transform (comp auth/check-logged-in check-slug-exists)}
+   ::pc/transform (comp needs-moderator auth/check-logged-in check-slug-exists)}
   ;; TODO check if user is moderator
   (if-let [{::user/keys [id]} (and (user/email-in-db? db email) (user/get-by-email db email))]
-    (let [{:keys [db-after]} (d/transact conn [[:db/add [::slug slug] ::moderators [::user/id id]]
-                                               [:db/add "datomic.tx" :db/txUser [::user/id user-id]]])]
+    (let [{:keys [db-after]} (add-moderator! conn [::slug slug] user-id [::user/id id])]
       {::user/id id
        ::p/env (assoc env :db db-after)})
     (throw (ex-info "User with this email doesn't exist!" {:email email}))))
