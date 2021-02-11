@@ -197,7 +197,7 @@
               =>
               {`process/update-process
                {:com.fulcrologic.rad.pathom/errors
-                {:message "User is not moderator of this process"
+                {:message "Need moderation role for this operation"
                  :data {::user/id #uuid"001e7a7e-3eb2-4226-b9ab-36dddcf64106"
                         ::process/slug "test"}}}})))))))
 

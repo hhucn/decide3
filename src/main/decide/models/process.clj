@@ -194,7 +194,7 @@
   {::pc/params [::slug ::title ::description ::end-time]
    ::pc/output [::slug]
    ::s/params (s/keys :req [::slug] :opt [::title ::description ::end-time])
-   ::pc/transform (comp auth/check-logged-in check-slug-exists)}
+   ::pc/transform (comp auth/check-logged-in check-slug-exists needs-moderator)}
   (let [db-after (update-process! conn user-id (select-keys process [::title ::slug ::description ::end-time]))]
     {::slug slug
      ::p/env (assoc env :db db-after)}))
@@ -206,8 +206,7 @@
 (defmutation add-moderator [{:keys [conn db AUTH/user-id] :as env} {::keys [slug] email ::user/email}]
   {::pc/output [::user/id]
    ::s/params (s/keys :req [::slug ::user/email])
-   ::pc/transform (comp needs-moderator auth/check-logged-in check-slug-exists)}
-  ;; TODO check if user is moderator
+   ::pc/transform (comp auth/check-logged-in check-slug-exists needs-moderator)}
   (if-let [{::user/keys [id]} (and (user/email-in-db? db email) (user/get-by-email db email))]
     (let [{:keys [db-after]} (add-moderator! conn [::slug slug] user-id [::user/id id])]
       {::user/id id
