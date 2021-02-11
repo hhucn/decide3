@@ -1,17 +1,22 @@
 (ns decide.ui.components.nav-drawer
   (:require
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.dom :as dom]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [decide.application :refer [SPA]]
+    [decide.routing :as r]
+    [decide.ui.pages.settings :as settings]
+    [decide.ui.process.list :as process.list]
     [material-ui.data-display :as dd]
     [material-ui.data-display.list :as list]
+    [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
     [material-ui.navigation :as nav]
-    [material-ui.inputs :as inputs]
+    [material-ui.surfaces :as surfaces]
     ["@material-ui/icons/ChevronLeft" :default ChevronLeftIcon]
-    [taoensso.timbre :as log]
-    [com.fulcrologic.fulcro.dom :as dom]))
+    ["@material-ui/icons/Settings" :default SettingsIcon]
+    ["@material-ui/icons/DeviceHub" :default DeviceHubIcon]))
 
 (def ident [:component/id ::NavDrawer])
 
@@ -34,23 +39,48 @@
     (nav/drawer
       {:open open?
        :onClose on-close}
-      (layout/box {:width 250
-                   :height "100vh"}
-        (layout/box {:display :flex
-                     :width "100%"
-                     :justifyContent "flex-end"
-                     :p "4px"}
-          (inputs/icon-button {:onClick toggle-navdrawer!}
-            (js/React.createElement ChevronLeftIcon nil nil)))
-        (dd/divider {:light false})
-        (comp/children this)
+      (layout/box
+        {:display :flex
+         :flexDirection :column
+         :width "250px"
+         :height "100vh"}
+        (layout/box {:clone true
+                     :display :flex}
+          (surfaces/toolbar {:width "100%"}
+
+            (dd/typography {:variant :h5
+                            :color "inherit"} "decide")
+            (inputs/icon-button
+              {:edge :end :onClick toggle-navdrawer!
+               :style {:marginLeft :auto}}
+              (dom/create-element ChevronLeftIcon))))
+
+        (layout/box {:flexBasis "100%"
+                     :my 1}
+          (list/list {:component :nav}
+            (list/item {:button true
+                        :component :a
+                        :onClick toggle-navdrawer!
+                        :href (r/path-to->absolute-url process.list/ProcessesPage)}
+              (list/item-icon {} (dom/create-element DeviceHubIcon))
+              (list/item-text {} "Alle Entscheidungen"))
+            (dd/divider {})
+            (list/item {:button true
+                        :component :a
+                        :onClick toggle-navdrawer!
+                        :href (r/path-to->absolute-url settings/SettingsPage)}
+              (list/item-icon {} (dom/create-element SettingsIcon))
+              (list/item-text {} "Einstellungen"))))
+
         (layout/box
           {:width 250
            :bottom 0
            :align "center"}
           (dd/divider {:light false})
-          (layout/box {:p 1}
-            (dd/typography {:variant "caption"} "decide v3")))))))
+          (layout/box {:p 1 :component :footer}
+            (dd/typography {:variant "caption"
+                            :color "textSecondary"}
+              "decide v3")))))))
 
 (def ui-navdrawer (comp/computed-factory NavDrawer))
 

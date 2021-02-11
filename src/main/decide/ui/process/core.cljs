@@ -19,7 +19,8 @@
     [material-ui.data-display :as dd]
     [material-ui.layout :as layout]
     [material-ui.navigation.tabs :as tabs]
-    [material-ui.surfaces :as surfaces]))
+    [material-ui.surfaces :as surfaces]
+    ["@material-ui/icons/Settings" :default SettingsIcon]))
 
 (defrouter ProcessRouter [_this _]
   {:router-targets
@@ -56,11 +57,12 @@
         current-index (get lookup-map current-target false)]
     (tabs/tabs {:value current-index
                 :indicatorColor "secondary"
-                :textColor "secondary"}
-      (for [{:keys [label target]} targets]
-        (tabs/tab {:label label
-                   :key label
-                   :href (r/path->url (dr/path-to target))})))))
+                :textColor "secondary"
+                :component :nav}
+      (for [{:keys [target] :as tab-props} targets]
+        (tabs/tab
+          (merge tab-props
+            {:href (r/path->url (dr/path-to target))}))))))
 
 (defsc Moderator [_ _]
   {:query [::user/id]

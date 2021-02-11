@@ -6,7 +6,6 @@
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr :refer [defrouter]]
     [decide.models.authorization :as auth]
-    [decide.routing :as r]
     [decide.ui.components.appbar :as appbar]
     [decide.ui.components.nav-drawer :as nav-drawer]
     [decide.ui.components.snackbar :as snackbar]
@@ -17,7 +16,6 @@
     [decide.ui.process.list :as process.list]
     [decide.ui.theming.dark-mode :as dark-mode]
     [decide.ui.theming.themes :as themes]
-    [material-ui.data-display.list :as list]
     [material-ui.styles :as styles]
     [material-ui.utils :as m.utils]
     [taoensso.timbre :as log]))
@@ -67,16 +65,7 @@
     (appbar/ui-appbar app-bar {:menu-onClick nav-drawer/toggle-navdrawer!})
     (snackbar/ui-snackbar-container snackbar-container)
 
-    (nav-drawer/ui-navdrawer navdrawer nil
-      (list/list {}
-        (list/item {:button true
-                    :component :a
-                    :href (r/path-to->absolute-url process.list/ProcessesPage)}
-          (list/item-text {} "Processes"))
-        (list/item {:button true
-                    :component :a
-                    :href (r/path-to->absolute-url settings/SettingsPage)}
-          (list/item-text {} "Settings"))))
+    (nav-drawer/ui-navdrawer navdrawer)
     (login/ui-login-modal login-dialog)
 
     (ui-root-router root-router)))
