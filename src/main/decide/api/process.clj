@@ -1,23 +1,39 @@
 (ns decide.api.process
   (:require
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
-    [com.wsscode.pathom.core :as p]
     [datahike.api :as d]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
-    [decide.models.user :as user]
-    [taoensso.timbre :as log]))
+    [decide.models.user :as user]))
 
-(defresolver resolve-all-processes [{:keys [db]} _]
-  {::pc/input #{}
-   ::pc/output [{:all-processes [::process/slug]}]}
-  {:all-processes
-   (map #(hash-map ::process/slug %) (process/get-all-slugs db))})
+(defresolver resolve-all-processes [{:keys [db AUTH/user-id]} _]
+  {::pc/output [{:root/all-processes [::process/slug ::process/type]}]}
+  {:root/all-processes
+   (vec (if user-id
+          (process/get-all-processes db [::user/id user-id])
+          (process/get-all-processes db)))})
+
+(defresolver resolve-public-processes [{:keys [db]} _]
+  {::pc/output [{:root/public-processes [::process/slug ::process/type]}]}
+  {:root/public-processes (vec (process/get-public-processes db))})
+
+(defresolver resolve-private-processes [{:keys [db AUTH/user-id]} _]
+  {::pc/output [{:root/private-processes [::process/slug ::process/type]}]}
+  {:root/private-processes
+   (vec
+     (if user-id
+       (process/get-private-processes db [::user/id user-id])
+       []))})
 
 (defresolver resolve-process [{:keys [db]} {::process/keys [slug]}]
   {::pc/input #{::process/slug}
-   ::pc/output [::process/title ::process/description ::process/end-time]}
-  (d/pull db [::process/title ::process/description ::process/end-time] [::process/slug slug]))
+   ::pc/output [::process/title ::process/description ::process/end-time ::process/type]}
+  (d/pull db
+    [::process/title
+     ::process/description
+     ::process/end-time
+     [::process/type :default ::process/type.public]]
+    [::process/slug slug]))
 
 (defresolver resolve-process-moderators [{:keys [db]} {::process/keys [slug]}]
   {::pc/input #{::process/slug}
@@ -29,6 +45,10 @@
   (if (user/exists? db id)
     (d/pull db [{::process/_moderators :as ::user/moderated-processes [::process/slug]}] [::user/id id])
     (throw (ex-info "User does not exist" {::user/id id}))))
+
+(defresolver resolve-I-moderator? [{:keys [db AUTH/user-id]} {::process/keys [slug]}]
+  {::pc/output [:I/moderator?]}
+  {:I/moderator? (process/is-moderator? db [::process/slug slug] user-id)})
 
 (defresolver resolve-authors [{:keys [db]} {::process/keys [proposals]}]
   {::pc/output [{::process/authors [::user/id]}
@@ -79,11 +99,16 @@
 (def all-resolvers
   [process/resolvers
 
-   resolve-all-processes
+   resolve-all-processes (pc/alias-resolver2 :all-processes :root/all-processes)
+   resolve-public-processes
+   resolve-private-processes
+
    resolve-process
    resolve-process-moderators
    resolve-user-moderated-processes
    resolve-no-of-contributors
    resolve-no-of-participants
    resolve-proposals
-   resolve-authors])
+   resolve-authors
+
+   resolve-I-moderator?])

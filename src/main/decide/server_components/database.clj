@@ -35,7 +35,13 @@
                              ::user/email name
                              ::user/password name})
           :db/id name))
-      [{::process/slug "test-decision"
+      [#::process{:slug "private-decision"
+                  :type ::process/type.private
+                  :title "Private decision"
+                  :description "This decision ist private"
+                  :moderators ["Björn"]
+                  :participants ["Markus"]}
+       {::process/slug "test-decision"
         ::process/title "Meine Test-Entscheidung"
         ::process/description "Wir müssen irgendwas für die Uni entscheiden."
         ::process/latest-id 5,

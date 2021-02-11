@@ -31,6 +31,10 @@
     :db/valueType :db.type/ref
     :db/isComponent true}
 
+   {:db/ident ::type
+    :db/cardinality :db.cardinality/one
+    :db/valueType :db.type/keyword}
+
    {:db/ident ::participants
     :db/valueType :db.type/ref
     :db/cardinality :db.cardinality/many}
@@ -53,16 +57,45 @@
 (s/def ::description string?)
 (s/def ::latest-id (s/and int? #(<= 0 %)))
 (s/def ::end-time (s/nilable inst?))
+(s/def ::type #{::type.public ::type.private})
 
 (s/def ::ident (s/tuple #{::slug} ::slug))
 (s/def ::lookup (s/or :ident ::ident :db/id pos-int?))
 
-(>defn get-all-slugs [db]
-  [d.core/db? => (s/coll-of ::slug :distinct true)]
-  (d/q '[:find [?slug ...]
-         :where
-         [_ ::slug ?slug]]
-    db))
+(defn get-public-processes [db]
+  [d.core/db? => (s/coll-of (s/keys :req [::slug ::type]) :kind set?)]
+  (set (d/q '[:find ?slug ?type
+              :keys decide.models.process/slug decide.models.process/type
+              :in $
+              :where
+              [?e ::slug ?slug]
+              [(get-else $ ?e ::type ::type.public) ?type]
+              [(= ?type ::type.public)]]
+         db)))
+
+(>defn get-private-processes [db user-lookup]
+  [d.core/db? ::user/lookup => (s/coll-of (s/keys :req [::slug ::type]) :kind set?)]
+  (set (d/q '[:find ?slug ?type
+              :keys decide.models.process/slug decide.models.process/type
+              :in $ ?user
+              :where
+              [(ground ::type.private) ?type]
+              (or
+                [?e ::participants ?user]
+                [?e ::moderators ?user])
+              [?e ::type ?type]
+              [?e ::slug ?slug]]
+         db user-lookup)))
+
+(>defn get-all-processes
+  ([db]
+   [d.core/db? => (s/coll-of (s/keys :req [::slug ::type]) :kind set?)]
+   (get-public-processes db))
+  ([db user-lookup]
+   [d.core/db? ::user/lookup => (s/coll-of (s/keys :req [::slug ::type]) :kind set?)]
+   (set/union
+     (get-public-processes db)
+     (get-private-processes db user-lookup))))
 
 (>defn new-nice-id! [conn slug]
   [d.core/conn? ::slug => ::proposal/nice-id]
@@ -105,8 +138,9 @@
 
 ;; region API
 
-(>defn add-process! [conn user-id {::keys [slug title description] :as process}]
-  [d.core/conn? ::user/id (s/keys :req [::slug ::title ::description]) => map?]
+(>defn add-process! [conn user-id {::keys [slug title description type] :as process
+                                   :or {type ::type.public}}]
+  [d.core/conn? ::user/id (s/keys :req [::slug ::title ::description ::type]) => map?]
   (let [db (d/db conn)
         moderator-id user-id]
     (cond
@@ -119,6 +153,7 @@
              {::slug slug
               ::title title
               ::description description
+              ::type type
               ::moderator-lookups [[::user/id moderator-id]]})
            process)
          [:db/add "datomic.tx" :db/txUser [::user/id user-id]]]))))
@@ -182,20 +217,22 @@
                                                                    ::user/id user-id}))))))
 
 (defmutation add-process [{:keys [conn AUTH/user-id] :as env} {::keys [slug] :as process}]
-  {::pc/params [::title ::slug ::description ::end-time]
+  {::pc/params [::title ::slug ::description ::end-time ::type]
    ::pc/output [::slug]
-   ::s/params (s/keys :req [::slug ::title ::description] :opt [::end-time])
+   ::s/params (s/keys
+                :req [::slug ::title ::description]
+                :opt [::end-time ::type])
    ::pc/transform auth/check-logged-in}
-  (let [{:keys [db-after]} (add-process! conn user-id (select-keys process [::title ::slug ::description ::end-time]))]
+  (let [{:keys [db-after]} (add-process! conn user-id (select-keys process [::title ::slug ::description ::end-time ::type]))]
     {::slug slug
      ::p/env (assoc env :db db-after)}))
 
 (defmutation update-process [{:keys [conn AUTH/user-id] :as env} {::keys [slug] :as process}]
-  {::pc/params [::slug ::title ::description ::end-time]
+  {::pc/params [::slug ::title ::description ::end-time ::type]
    ::pc/output [::slug]
-   ::s/params (s/keys :req [::slug] :opt [::title ::description ::end-time])
+   ::s/params (s/keys :req [::slug] :opt [::title ::description ::end-time ::type])
    ::pc/transform (comp auth/check-logged-in check-slug-exists needs-moderator)}
-  (let [db-after (update-process! conn user-id (select-keys process [::title ::slug ::description ::end-time]))]
+  (let [db-after (update-process! conn user-id (select-keys process [::title ::slug ::description ::end-time ::type]))]
     {::slug slug
      ::p/env (assoc env :db db-after)}))
 

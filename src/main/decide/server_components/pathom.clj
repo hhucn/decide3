@@ -37,11 +37,11 @@
                                                           attribute-keys)]
                                        (select-keys attribute-map keys-to-keep))))
      ; this is necessary for now, because the index contains functions which can not be serialized by transit.
-     (update ::pc/index-resolvers remove-keys-from-map-values ::pc/resolve ::pc/transform)
-     (update ::pc/index-mutations remove-keys-from-map-values ::pc/mutate ::pc/transform)
+     (update ::pc/index-resolvers remove-keys-from-map-values ::pc/resolve ::pc/transform ::s/params)
+     (update ::pc/index-mutations remove-keys-from-map-values ::pc/mutate ::pc/transform ::s/params)
      ; to minimize clutter in the Index Explorer
-     (update ::pc/index-resolvers (fn [rs] (apply dissoc rs (filter #(str/starts-with? (namespace %) "com.wsscode.pathom") (keys rs)))))
-     (update ::pc/index-mutations (fn [rs] (apply dissoc rs (filter #(str/starts-with? (namespace %) "com.wsscode.pathom") (keys rs))))))})
+     (update ::pc/index-resolvers (fn [rs] (apply dissoc rs ::s/params (filter #(some-> % namespace (str/starts-with? "com.wsscode.pathom")) (keys rs)))))
+     (update ::pc/index-mutations (fn [rs] (apply dissoc rs ::s/params (filter #(some-> % namespace (str/starts-with? "com.wsscode.pathom")) (keys rs))))))})
 
 (def spec-plugin
   {::p/wrap-mutate

@@ -287,8 +287,12 @@
           "Need moderation role for this operation")))))
 
 (specification "Private processes"
-  :kaocha/pending
   (let [parser (pathom/build-parser {} *conn*)
-        parser-existing-user (partial parser {:ring/request {:session {:id #uuid"0000fb5e-a9d0-44b6-b293-bb3c506fc0cb"}}})]
+        parser-with-alex-session (partial parser {:ring/request {:session {:id #uuid"000aa0e2-e4d6-463d-ae7c-46765e13a31b"}}})]
     (behavior "A private process"
-      (behavior "can not be queried by everyone"))))
+      (behavior "can not be queried by everyone"
+        (assertions
+          (parser-with-alex-session
+            [{:root/all-processes [::process/slug]}])
+          =>
+          #:root{:all-processes [#:decide.models.process{:slug "test-decision"}]})))))
