@@ -61,7 +61,7 @@
                 :component :nav}
       (for [{:keys [target] :as tab-props} targets]
         (tabs/tab
-          (merge tab-props
+          (merge (dissoc tab-props :target)
             {:href (r/path->url (dr/path-to target))}))))))
 
 (defsc Moderator [_ _]

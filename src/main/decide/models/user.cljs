@@ -15,7 +15,7 @@
   (action [{:keys [state]}]
     (.clear goog.net.cookies)
     (swap! state assoc :root/current-session {:session/valid? false}))
-  (remote [_] false))
+  (remote [_] true))
 
 (defmutation change-password [{:keys [old-password new-password]}]
   (ok-action [{:keys [component] :as env}]
