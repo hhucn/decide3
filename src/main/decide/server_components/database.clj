@@ -40,7 +40,34 @@
                   :title "Private decision"
                   :description "This decision ist private"
                   :moderators ["Björn"]
-                  :participants ["Markus"]}
+                  :participants ["Markus"]
+                  :proposals
+                  [#::proposal{:db/id "A"
+                               :id #uuid"5fdc8014-bd58-43f6-990f-00000000000a"
+                               :title "A"
+                               :opinions (repeat 2 #::opinion{:value +1})}
+                   #::proposal{:db/id "B"
+                               :id #uuid"5fdc8014-bd58-43f6-990f-00000000000b"
+                               :title "B"
+                               :opinions (repeat 3 #::opinion{:value +1})}
+                   #::proposal{:db/id "C"
+                               :id #uuid"5fdc8014-bd58-43f6-990f-00000000000c"
+                               :title "C"
+                               :parents ["A"]
+                               :opinions (repeat 5 #::opinion{:value +1})}
+                   #::proposal{:db/id "D"
+                               :id #uuid"5fdc8014-bd58-43f6-990f-00000000000d"
+                               :title "D"
+                               :parents ["A" "B"]
+                               :opinions (repeat 3 #::opinion{:value +1})}
+                   #::proposal{:title "E"
+                               :id #uuid"5fdc8014-bd58-43f6-990f-00000000000e"
+                               :parents ["C"]
+                               :opinions (repeat 1 #::opinion{:value +1})}
+                   #::proposal{:title "F"
+                               :id #uuid"5fdc8014-bd58-43f6-990f-00000000000f"
+                               :parents ["C" "D"]
+                               :opinions (repeat 4 #::opinion{:value +1})}]}
        {::process/slug "test-decision"
         ::process/title "Meine Test-Entscheidung"
         ::process/description "Wir müssen irgendwas für die Uni entscheiden."
