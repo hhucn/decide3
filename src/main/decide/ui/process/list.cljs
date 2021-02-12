@@ -10,50 +10,13 @@
             [material-ui.lab :refer [skeleton]]
             [material-ui.layout :as layout]
             [material-ui.layout.grid :as grid]
-            ["@material-ui/icons/Group" :default GroupIcon]
             ["@material-ui/icons/EmojiObjectsOutlined" :default EmojiObjectsOutlinedIcon]
-            ["@material-ui/icons/Edit" :default EditIcon]
+            ["@material-ui/icons/Group" :default GroupIcon]
             [material-ui.feedback.dialog :as dialog]
             [material-ui.inputs :as inputs]
-            [taoensso.timbre :as log]
-            [material-ui.surfaces :as surfaces]
-            [com.fulcrologic.fulcro.algorithms.merge :as mrg]))
+            [material-ui.surfaces :as surfaces]))
 
 (def page-ident [:PAGE :processes-list-page])
-
-(defsc EditProcessDialog [this {:keys [ui/open? process-form]}]
-  {:query [:ui/open?
-           {:process-form (comp/get-query process-forms/EditProcessForm)}]
-   :ident (fn [] [:component/id ::EditProcessDialog])
-   :initial-state
-   (fn [_]
-     {:ui/open? false
-      :process-form nil})}
-  (let [slug (::process/slug (:process process-form))]
-    (dialog/dialog
-      {:open (and slug open?)
-       :onClose #(m/set-value! this :ui/open? false)}
-      (dialog/title {} "Entscheidungsprozess bearbeiten")
-      (dialog/content {}
-        (process-forms/ui-edit-process-form process-form
-          {:onSubmit
-           (fn [{::process/keys [title description end-time]}]
-             (comp/transact! this [(process/update-process
-                                     {::process/title title
-                                      ::process/slug slug
-                                      ::process/description description
-                                      ::process/end-time end-time})
-                                   (m/set-props {:ui/open? false})]))})))))
-
-(def ui-edit-process-dialog (comp/computed-factory EditProcessDialog))
-
-(defmutation show-edit-process-dialog [{:keys [process]}]
-  (action [{:keys [app]}]
-    (if-not (::process/slug process)
-      (log/error "The" :process "passed to" `show-edit-process-dialog "must have the key" ::process/slug "!")
-      (mrg/merge-component! app EditProcessDialog
-        {:ui/open? true
-         :process-form (comp/get-initial-state process-forms/EditProcessForm {:process process})}))))
 
 (defn icon-badge [title value icon-class]
   (layout/box {:display :flex
@@ -75,56 +38,21 @@
     (contains? (into #{} (map (partial comp/get-ident Moderator)) moderators)
       (:user current-session))))
 
-(defsc ProcessListEntry [this {::process/keys [slug title description no-of-authors no-of-proposals moderators]
-                               :keys [root/current-session]}]
+(defsc ProcessListEntry [_ {::process/keys [slug title description no-of-authors no-of-proposals]}]
   {:query [::process/slug ::process/title ::process/description ::process/no-of-authors
-           ::process/no-of-proposals
-           {::process/moderators (comp/get-query Moderator)}
-           [:root/current-session '_]]
+           ::process/no-of-proposals]
    :ident ::process/slug
    :use-hooks? true}
-  (let [moderator? (is-moderator? moderators current-session)
-        [edit-title? set-edit-title?] (hooks/use-state false)
-        submit-title (hooks/use-callback
-                       (fn []
-                         (set-edit-title? false)
-                         (comp/transact! this [(process/update-process {::process/slug slug ::process/title title})]))
-                       [title])]
-    (grid/item {:xs 12}
-      (surfaces/card {}
-        (if-not moderator?
-          (surfaces/card-action-area {:href (str "/decision/" slug "/home")}
-            (surfaces/card-header {:title title})
-            (surfaces/card-content {} description))
+  (grid/item {:xs 12}
+    (surfaces/card {}
+      (surfaces/card-action-area {:href (str "/decision/" slug "/home")}
+        (surfaces/card-header {:title title})
+        (surfaces/card-content {} description))
 
-          (comp/fragment
-            (surfaces/card-header
-              {:title
-               (if edit-title?
-                 (inputs/textfield
-                   {:value title
-                    :fullWidth true
-                    :onChange #(m/set-string!! this ::process/title :event %)
-                    :onBlur submit-title
-                    :InputProps {:endAdornment (inputs/button {:onClick submit-title} "Save")}})
-                 (layout/box {}
-                   title
-                   (inputs/icon-button {:onClick #(set-edit-title? true)
-                                        :aria-label "Edit title"
-                                        :title "Edit title"
-                                        :size :small}
-                     (layout/box {:component EditIcon :fontSize :small}))))})
-            (surfaces/card-action-area {:href (str "/decision/" slug "/home")}
-              (surfaces/card-content {} description))))
-
-        (dd/divider {})
-        (surfaces/card-actions {}
-          (icon-badge "Anzahl Vorschläge" (or no-of-proposals 0) EmojiObjectsOutlinedIcon)
-          (icon-badge "Anzahl Teilnehmer" (or no-of-authors 0) GroupIcon)
-          (when moderator?
-            (inputs/button {:color "inherit" :startIcon (layout/box {:component EditIcon})
-                            :onClick #(comp/transact! this [(show-edit-process-dialog {:process {::process/slug slug}})])}
-              "Bearbeiten")))))))
+      (dd/divider {})
+      (surfaces/card-actions {}
+        (icon-badge "Anzahl Vorschläge" (or no-of-proposals 0) EmojiObjectsOutlinedIcon)
+        (icon-badge "Anzahl Teilnehmer" (or no-of-authors 0) GroupIcon)))))
 
 
 (def ui-process-list-entry (comp/computed-factory ProcessListEntry {:keyfn ::process/slug}))
@@ -170,18 +98,15 @@
 (defsc ProcessesPage [this {:keys [all-processes-list root/current-session
                                    ui/new-process-dialog-open?
 
-                                   new-process-form
-                                   ui/edit-process-dialog]}]
+                                   new-process-form]}]
   {:query [{:all-processes-list (comp/get-query AllProcessesList)}
            :ui/new-process-dialog-open?
            {:new-process-form (comp/get-query process-forms/NewProcessForm)}
-           {:ui/edit-process-dialog (comp/get-query EditProcessDialog)}
            [:root/current-session '_]]
    :ident (fn [] page-ident)
    :initial-state (fn [_] {:all-processes-list (comp/get-initial-state AllProcessesList)
                            :ui/new-process-dialog-open? false
-                           :new-process-form (comp/get-initial-state process-forms/NewProcessForm)
-                           :ui/edit-process-dialog (comp/get-initial-state EditProcessDialog)})
+                           :new-process-form (comp/get-initial-state process-forms/NewProcessForm)})
    :route-segment ["decisions"]}
   (let [logged-in? (get current-session :session/valid? false)]
     (layout/container {}
@@ -197,6 +122,5 @@
                         :onClick #(m/toggle! this :ui/new-process-dialog-open?)}
           "Neuen Entscheidungsprozess anlegen"))
 
-      (ui-edit-process-dialog edit-process-dialog)
       (new-process-dialog this {:new-process-dialog-open? new-process-dialog-open?
                                 :new-process-form new-process-form}))))
