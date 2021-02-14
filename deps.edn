@@ -29,7 +29,8 @@
 
  :aliases {:clj-tests {:extra-paths ["src/test"]
                        :main-opts ["-m" "kaocha.runner"]
-                       :extra-deps {lambdaisland/kaocha {:mvn/version "1.0.732"}}}
+                       :extra-deps {lambdaisland/kaocha {:mvn/version "1.0.732"}
+                                    lambdaisland/kaocha-junit-xml {:mvn/version "0.0.76"}}}
 
            ;; See https://github.com/clojure-emacs/cider-nrepl/blob/master/deps.edn for Emacs support
            :dev {:extra-paths ["src/test" "src/dev" "src/workspaces"]

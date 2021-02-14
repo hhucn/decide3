@@ -41,7 +41,10 @@ clj-test:
     paths:
       - .m2
   script:
-    - clojure -J-Dguardrails.enabled=true -Sdeps '{:mvn/local-repo ".m2"}' -M:dev:clj-tests
+    - clojure -J-Dguardrails.enabled=true -Sdeps '{:mvn/local-repo ".m2"}' -M:dev:clj-tests --profile :ci
+  artifacts:
+    reports:
+      junit: junit.xml
 
 build_latest_images:
   stage: build-images
