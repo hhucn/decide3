@@ -110,7 +110,7 @@
    :route-segment ["decisions"]}
   (let [logged-in? (get current-session :session/valid? false)]
     (layout/container {}
-      (dd/typography {:component :h1 :variant :h2} "Aktive Entscheidungen")
+      (dd/typography {:component :h1 :variant :h2} "Aktive Entscheidungsprozesse")
       (ui-all-process-list all-processes-list)
 
       (layout/box {:my 2 :clone true}
