@@ -178,7 +178,7 @@
       (if-not (empty? arguments)
         (list/list {:dense true}
           (map ui-argument-row arguments))
-        (dd/typography {:variant :body2 :color :textSecondary
+        (dd/typography {:variant :body1 :color :textSecondary
                         :paragraph true} "Bisher gibt es noch keine Argumente.")))
 
     (ui-new-argument-line {}
@@ -237,7 +237,7 @@
 
       (when-not (empty? child-relations)
         (section
-          (str "Dieser Vorschlag hat " (count child-relations) " Abkömmling" (when (<= 2 (count child-relations)) "e") ".")
+          (str "Dieser Vorschlag hat " (count child-relations) " Kind" (when (<= 2 (count child-relations)) "er") ".")
           (list/list {:dense false}
             (map ui-relationship child-relations)))))))
 
@@ -295,7 +295,7 @@
            :size :small
            :color :primary
            :onClick #(show-add-dialog (comp/get-ident SimilarProposal other-proposal))}
-          "Merge"))
+          "Koalition bilden"))
       (table/cell {:align :center
                    :style {:height "100px"}}
         (venn-diagramm props)))))
@@ -361,7 +361,7 @@
                                                                        :parents [(comp/get-ident this)]})])
                    :startIcon (layout/box {:css {:transform "rotate (.5turn)"} :component CallSplit})
                    :endIcon (layout/box {:css {:transform "rotate (.5turn)"} :component MergeType})}
-                  "Fork / Merge")))
+                  "Änderung vorschlagen")))
             (grid/item {:xs true :component "section"}
               (section "Details" (dd/typography {:variant "body1" :style {:whiteSpace "pre-line"}} body)))
 
