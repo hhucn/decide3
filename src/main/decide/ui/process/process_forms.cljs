@@ -135,11 +135,12 @@
              :control (inputs/switch {})}))
 
         (transitions/collapse {:in (not public?)}
-          (inputs/textfield
-            (merge default-input-props
-              {:label "Teilnehmer E-Mail Adressen"
-               :helperText "Separiere mehrere Adressen mit Kommas"}))
-          (participant-list {:participants participants})))
+          (layout/box {:style {:borderWidth "thin" :borderStyle "dashed"} :borderColor "warning.main"}
+            (inputs/textfield
+              (merge default-input-props
+                {:label "Teilnehmer E-Mail Adressen"
+                 :helperText "Separiere mehrere Adressen mit Kommas"}))
+            (participant-list {:participants participants}))))
 
 
       (inputs/button
