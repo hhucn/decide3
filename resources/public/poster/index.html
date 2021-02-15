@@ -1,0 +1,138 @@
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Arbeitsgruppe Bürgerhaushalte</title>
+    <style>
+        :root {
+            --blue: #006AB3;
+        }
+
+        html {
+            font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+            max-width: 84.1cm;
+            max-height: 118.9cm;
+        }
+
+        iframe {
+            width: 100%;
+            border: none;
+        }
+
+        @page {
+            size: 84.1cm 118.9cm; /* A0 */
+            margin: 0;
+        }
+
+        @media print {
+            html {
+                font-size: 40;
+                height: 118.9cm;
+                width: 84.1cm;
+                margin: 0;
+            }
+        }
+
+        @media screen {
+            body {
+                max-width: 1200px;
+                padding-bottom: 0;
+                border: thin solid grey;
+                margin: auto;
+            }
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+        }
+
+        section {
+            border: 1px solid var(--blue);
+            border-radius: .5rem;
+            margin: 0rem 1rem 1rem 1rem;
+            overflow: hidden;
+        }
+
+        section > *:first-child {
+            background-color: var(--blue);
+            color: white;
+            padding: 0.25em 0.25em 0.25em 0.5em;
+            margin: 0;
+        }
+
+        section > * + * {
+            margin-left: .5rem;
+            margin-right: .5rem;
+            font-size: 1.4em;
+        }
+
+        footer {
+            bottom: 0;
+            background-color: var(--blue);
+            color: white;
+            padding: 8px;
+        }
+
+        footer a {
+            color: white !important;
+        }
+
+        header {
+            height: 5rem;
+            display: flex;
+            justify-content: space-between;
+            padding: 1.5rem;
+        }
+
+        header img {
+            height: 100%;
+            width: auto;
+        }
+
+        hr {
+            border-color: var(--blue);
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div>
+        <img src="fkop_text.svg"/>
+    </div>
+    <div>
+        <img src="hspv_logo.svg" style="padding-right: 1rem;"/>
+        <img src="HHU_Logo.svg"/>
+    </div>
+</header>
+<hr/>
+<article>
+    <h1>decide - Titel</h1>
+    <p style="text-align: center;  margin-top: 0; color: grey;">
+        <a href="mailto:ebbinghaus@hhu.de" style="color: grey;">
+            Björn Ebbinghaus
+        </a>
+    </p>
+
+    <section>
+        <h2>Demo</h2>
+        <iframe height="600px"
+                src="/decision/test-decision/proposals"
+                style="margin: 0;">
+        </iframe>
+    </section>
+
+    <!--
+    <section>
+        <h2>Contact</h2>
+        <p>
+            Björn Ebbinghaus: <a href="mailto:ebbinghaus@hhu.de">ebbinghaus@hhu.de</a>
+        </p>
+    </section>
+    -->
+
+    <footer>
+        <a href="https://www.fkop.de/en">www.fkop.de</a>
+    </footer>
+</article>
+</body>
+</html>
