@@ -1,7 +1,8 @@
 (ns decide.server-main
   (:require
-    [mount.core :as mount]
-    decide.server-components.http-server)
+    decide.server-components.http-server
+    decide.server-components.nrepl
+    [mount.core :as mount])
   (:gen-class))
 
 ;; This is a separate file for the uberjar only. We control the server in dev mode from src/dev/user.clj
