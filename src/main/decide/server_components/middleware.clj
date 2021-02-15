@@ -15,6 +15,7 @@
     [garden.core :as garden]
     [hiccup.page :refer [html5 include-js include-css]]
     [mount.core :refer [defstate]]
+    [ring.middleware.resource :refer [wrap-resource]]
     [ring.middleware.defaults :refer [wrap-defaults]]
     [ring.middleware.gzip :refer [wrap-gzip]]
     [ring.middleware.session.cookie :refer [cookie-store]]
@@ -156,6 +157,7 @@
       ;; the defaults-config here (which comes from an EDN file, so it can't have
       ;; code initialized).
       ;; E.g. (wrap-defaults (assoc-in defaults-config [:session :store] (my-store)))
+      (wrap-resource "public")
       (wrap-defaults (assoc defaults-config :session {:cookie-attrs {:max-age (* 60 60 24 30)}
                                                       :store (cookie-store {:key (byte-array 16)})})) ;; TODO configure this, when operation gets out of demo phase
       wrap-gzip)))

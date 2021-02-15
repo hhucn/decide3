@@ -148,7 +148,7 @@
     <orderEntry type="library" name="Deps: com.github.mrebbinghaus/fulcro-material-ui-wrapper:535112" level="project" />
     <orderEntry type="library" name="Deps: javax.servlet/javax.servlet-api:3.1.0" level="project" />
     <orderEntry type="library" name="Deps: io.replikativ/datahike:0.3.3" level="project" />
-    <orderEntry type="library" name="Deps: nrepl:0.7.0" level="project" />
+    <orderEntry type="library" name="Deps: nrepl:0.8.3" level="project" />
     <orderEntry type="library" name="Deps: mount:0.1.16" level="project" />
     <orderEntry type="library" name="Deps: buddy/buddy-auth:2.1.0" level="project" />
     <orderEntry type="library" name="Deps: cljsjs/js-joda-timezone:2.0.1-0" level="project" />
