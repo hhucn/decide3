@@ -25,7 +25,8 @@
     [material-ui.layout.grid :as grid]
     [material-ui.navigation.stepper :as stepper]
     ["@material-ui/icons/AddBoxOutlined" :default AddBox]
-    ["@material-ui/icons/MergeType" :default MergeType]))
+    ["@material-ui/icons/MergeType" :default MergeType]
+    ["@material-ui/icons/FileCopyOutlined" :default FileCopy]))
 
 
 (declare NewProposalFormDialog)
@@ -121,15 +122,19 @@
     children))
 ;; endregion
 
+(defn goto-step* [new-proposal-form step]
+  (assoc new-proposal-form
+    :ui/step
+    (case step
+      :type 0
+      :parents 1
+      :details 2
+      :arguments 3
+      :final 4)))
+
 (defmutation goto-step [{:keys [step]}]
   (action [{:keys [ref state]}]
-    (swap! state update-in ref assoc :ui/step
-      (case step
-        :type 0
-        :parents 1
-        :details 2
-        :arguments 3
-        :final 4))))
+    (swap! state update-in ref goto-step* step)))
 
 (defmutation next-step [_]
   (action [{:keys [ref state]}]
@@ -252,9 +257,23 @@
 
 
 (defsc Parent [_ _]
-  {:query [::proposal/id ::proposal/title ::proposal/nice-id
+  {:query [::proposal/id ::proposal/title ::proposal/body ::proposal/nice-id
            {::proposal/arguments (comp/get-query Argument)}]
    :ident ::proposal/id})
+
+(defn new-body [parents]
+  (case (count parents)
+    0 ""
+    1 (-> parents first ::proposal/body)
+    ""))
+
+(defn copy-parents-body* [form parents]
+  (assoc form :ui/body (new-body parents)))
+
+(defmutation copy-parents-body [_]
+  (action [{:keys [state ref component]}]
+    (let [{:keys [parents]} (norm/ui->props component)]
+      (swap! state update-in ref copy-parents-body* parents))))
 
 (defsc NewProposalFormDialog [this {:ui/keys [open? title body step]
                                     :step/keys [parent-step]
@@ -372,18 +391,25 @@
                 (dd/typography {:paragraph false}
                   "Füge Details hinzu, damit andere wissen, worum es sich bei deinem Vorschlag handelt:")
                 (inputs/textfield
-                  {:label        "Details"
-                   :variant      "outlined"
-                   :margin       "normal"
-                   :fullWidth    true
+                  {:label "Details"
+                   :variant "outlined"
+                   :margin "normal"
+                   :fullWidth true
                    :autoComplete "off"
-                   :multiline    true
-                   :rows         7
-                   :value        body
-                   :onChange     change-body})
+                   :multiline true
+                   :rows 7
+                   :value body
+                   :onChange change-body})
+                (when (= 1 (count parents))
+                  (inputs/button {:size :small :variant :outlined
+                                  :startIcon (dom/create-element FileCopy)
+                                  :onClick #(comp/transact! this [(copy-parents-body nil)])}
+                    "Copy details from parent"))
+                (dom/br {})
 
                 (inputs/button
                   {:color "primary"
+                   :variant "contained"
                    :disabled error?
                    :onClick #(comp/transact! this [(goto-step {:step (if (empty? parents) :final :arguments)})])}
                   "Weiter"))))
