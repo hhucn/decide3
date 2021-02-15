@@ -6,12 +6,10 @@
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]))
 
-(defresolver resolve-all-processes [{:keys [db AUTH/user-id]} _]
+(defresolver resolve-all-processes [{:root/keys [public-processes private-processes]}]
   {::pc/output [{:root/all-processes [::process/slug ::process/type]}]}
   {:root/all-processes
-   (vec (if user-id
-          (process/get-all-processes db [::user/id user-id])
-          (process/get-all-processes db)))})
+   (concat public-processes private-processes)})
 
 (defresolver resolve-public-processes [{:keys [db]} _]
   {::pc/output [{:root/public-processes [::process/slug ::process/type]}]}
@@ -78,7 +76,7 @@
     {::process/proposals []}))
 
 (defresolver resolve-no-of-proposals [_ {::process/keys [proposals]}]
-  {::no-of-proposals (count proposals)})
+  {::process/no-of-proposals (count proposals)})
 
 (defresolver resolve-nice-proposal [{:keys [db]} {::proposal/keys [nice-ident]}]
   {::pc/output [::proposal/id]}
@@ -108,7 +106,10 @@
    resolve-user-moderated-processes
    resolve-no-of-contributors
    resolve-no-of-participants
+
    resolve-proposals
+   resolve-no-of-proposals
+
    resolve-authors
 
    resolve-I-moderator?])
