@@ -19,8 +19,7 @@
     [material-ui.data-display :as dd]
     [material-ui.layout :as layout]
     [material-ui.navigation.tabs :as tabs]
-    [material-ui.surfaces :as surfaces]
-    ["@material-ui/icons/Settings" :default SettingsIcon]))
+    [material-ui.surfaces :as surfaces]))
 
 (defrouter ProcessRouter [_this _]
   {:router-targets
@@ -30,7 +29,8 @@
     process.moderator/ProcessModeratorTab]})
 
 (defn current-target [c]
-  (dr/route-target ProcessRouter (dr/current-route c ProcessRouter)))
+  (-> (dr/route-target ProcessRouter (dr/current-route c ProcessRouter))
+    (assoc :prefix (vec (take 2 (dr/current-route c))))))
 
 (def ui-process-router (comp/computed-factory ProcessRouter))
 
@@ -51,7 +51,8 @@
 
 (def ui-process-info (comp/factory ProcessHeader))
 
-(defn tab-bar [{current-target :target} & targets]
+(defn tab-bar [{current-target :target
+                current-path :prefix} & targets]
   (let [targets (filter some? targets)
         lookup-map (zipmap (map :target targets) (range))
         current-index (get lookup-map current-target false)]
@@ -61,8 +62,8 @@
                 :component :nav}
       (for [{:keys [target] :as tab-props} targets]
         (tabs/tab
-          (merge (dissoc tab-props :target)
-            {:href (r/path->url (dr/path-to target))}))))))
+          (merge (dissoc tab-props :target :path)
+            {:href (r/path->absolute-url (dr/into-path current-path target))}))))))
 
 (defsc Moderator [_ _]
   {:query [::user/id]
