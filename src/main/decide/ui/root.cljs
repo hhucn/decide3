@@ -16,6 +16,8 @@
     [decide.ui.process.list :as process.list]
     [decide.ui.theming.dark-mode :as dark-mode]
     [decide.ui.theming.themes :as themes]
+    [material-ui.inputs :as inputs]
+    [material-ui.lab.alert :as alert]
     [material-ui.styles :as styles]
     [material-ui.utils :as m.utils]
     [taoensso.timbre :as log]))
@@ -60,12 +62,18 @@
       (dark-mode/register-dark-mode-listener #(let [new-theme (if (.-matches %) :dark :light)]
                                                 (comp/transact! (comp/any->app this)
                                                   [(set-theme {:theme new-theme})])))))
-  (styles/theme-provider {:theme (themes/get-mui-theme theme)}
-    (m.utils/css-baseline {})
-    (appbar/ui-appbar app-bar {:menu-onClick nav-drawer/toggle-navdrawer!})
-    (snackbar/ui-snackbar-container snackbar-container)
+  (let [[show-wip-warning? set-wip-warning] (hooks/use-state true)]
+    (styles/theme-provider {:theme (themes/get-mui-theme theme)}
+      (m.utils/css-baseline {})
+      (appbar/ui-appbar app-bar {:menu-onClick nav-drawer/toggle-navdrawer!})
+      (snackbar/ui-snackbar-container snackbar-container)
 
-    (nav-drawer/ui-navdrawer navdrawer)
-    (login/ui-login-modal login-dialog)
+      (nav-drawer/ui-navdrawer navdrawer)
+      (login/ui-login-modal login-dialog)
 
-    (ui-root-router root-router)))
+      (when show-wip-warning?
+        (alert/alert
+          {:severity :warning
+           :action (inputs/button {:onClick #(set-wip-warning false)} "Dismiss")}
+          (dom/strong {} "Under construction!") " Components marked with a yellow outline are in progress."))
+      (ui-root-router root-router))))
