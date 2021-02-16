@@ -5,6 +5,7 @@
     [com.fulcrologic.fulcro.mutations :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr :refer [defrouter]]
+    [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [decide.models.authorization :as auth]
     [decide.ui.components.appbar :as appbar]
     [decide.ui.components.nav-drawer :as nav-drawer]
@@ -45,7 +46,8 @@
            {:root/snackbar-container (comp/get-query snackbar/SnackbarContainer)}
            {:root/navdrawer (comp/get-query nav-drawer/NavDrawer)}
            {:root/current-session (comp/get-query auth/Session)}
-           :all-processes]
+           :all-processes
+           {::i18n/current-locale (comp/get-query i18n/Locale)}]
    :initial-state
    (fn [_] {:root/root-router (comp/get-initial-state RootRouter)
             :ui/login-dialog (comp/get-initial-state login/LoginDialog)
@@ -54,7 +56,8 @@
             :root/snackbar-container (comp/get-initial-state snackbar/SnackbarContainer)
             :root/navdrawer (comp/get-initial-state nav-drawer/NavDrawer)
             :root/current-session (comp/get-initial-state auth/Session)
-            :all-processes []})
+            :all-processes []
+            ::i18n/current-locale nil})
    :use-hooks? true}
   (hooks/use-lifecycle
     (fn []
@@ -75,5 +78,5 @@
         (alert/alert
           {:severity :warning
            :action (inputs/button {:onClick #(set-wip-warning false)} "Dismiss")}
-          (dom/strong {} "Under construction!") " Components marked with a yellow outline are in progress."))
+          (dom/strong {} (i18n/tr "Under construction!")) (i18n/tr " Components marked with a yellow outline are in progress.")))
       (ui-root-router root-router))))

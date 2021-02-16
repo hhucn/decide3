@@ -20,6 +20,15 @@
                                        decide.development-preload
                                        com.fulcrologic.fulcro.inspect.dom-picker-preload]}}
 
+          :i18n {:target :browser
+                 :output-dir "resources/public/js/main"
+                 :asset-path "/js/main"
+
+                 :modules {:i18n {:init-fn decide.client/init
+                                  :entries [decide.client]}}
+
+                 :compiler-options {:optimizations :whitespace}}
+
           :test {:target :browser-test
                  :test-dir "resources/public/js/test"
                  :ns-regexp "-test$"

@@ -1,5 +1,6 @@
 (ns decide.client
   (:require
+    [com.fulcrologic.fulcro.algorithms.server-render :as ssr]
     [com.fulcrologic.fulcro.algorithms.timbre-support :refer [console-appender prefix-output-fn]]
     [com.fulcrologic.fulcro.application :as app]
     [com.fulcrologic.fulcro.components :as comp]
@@ -18,17 +19,20 @@
   (app/mount! SPA root/Root "decide" {:initialize-state? false}))
 
 (defn ^:export init []
-  (log/merge-config! {:output-fn prefix-output-fn
-                      :appenders {:console (console-appender)}})
-  (log/info "Application starting.")
-  (app/set-root! SPA root/Root {:initialize-state? true})
-  (routing/start-history! SPA)
-  (dr/initialize! SPA)
+  (let [db (ssr/get-SSR-initial-state)]
+    (log/merge-config!
+      {:output-fn prefix-output-fn
+       :appenders {:console (console-appender)}})
+    (log/info "Application starting.")
+    (app/set-root! SPA root/Root {:initialize-state? true})
+    (swap! (::app/state-atom SPA) merge db)
 
-  (df/load! SPA ::user/current-session auth/Session {:target [:root/current-session]})
-  (swap! (::app/state-atom SPA) update :process-context dissoc nil)
+    (routing/start-history! SPA)
+    (dr/initialize! SPA)
 
-  (routing/start!)
-  (app/mount! SPA root/Root "decide"
-    {:initialize-state? false
-     :hydrate false}))
+    (df/load! SPA ::user/current-session auth/Session {:target [:root/current-session]})
+
+    (routing/start!)
+    (app/mount! SPA root/Root "decide"
+      {:initialize-state? false
+       :hydrate false})))

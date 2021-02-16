@@ -27,7 +27,9 @@
         ring/ring-core {:mvn/version "1.9.0"}
         ring/ring-defaults {:mvn/version "0.3.2"}
 
-        nrepl/nrepl {:mvn/version "0.8.3"}}
+        nrepl/nrepl {:mvn/version "0.8.3"}
+
+        com.fulcrologic/fulcro-i18n {:mvn/version "0.0.5-alpha"}}
 
  :aliases {:clj-tests {:extra-paths ["src/test"]
                        :main-opts ["-m" "kaocha.runner"]

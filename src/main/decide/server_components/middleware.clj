@@ -8,8 +8,10 @@
                                                           wrap-transit-params
                                                           wrap-transit-response]]
     [decide.models.authorization :as auth]
+    [decide.models.user :as user]
     [decide.server-components.config :refer [config]]
     [decide.server-components.pathom :refer [parser]]
+    [decide.server-components.database :refer [conn]]
     [decide.ui.pages.splash :as splash]
     [decide.ui.theming.styles :as styles]
     [garden.core :as garden]
@@ -20,7 +22,8 @@
     [ring.middleware.gzip :refer [wrap-gzip]]
     [ring.middleware.session.cookie :refer [cookie-store]]
     [ring.util.response :as resp :refer [response file-response resource-response]]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [com.fulcrologic.fulcro-i18n.i18n :as i18n]))
 
 
 (def ^:private not-found-handler
@@ -53,8 +56,7 @@
 (defn index
   ([csrf-token script-manifest] (index csrf-token script-manifest nil nil))
   ([csrf-token script-manifest initial-state-script] (index csrf-token script-manifest initial-state-script nil))
-  ([csrf-token script-manifest initial-state-script initial-html]
-
+  ([csrf-token script-manifest initial-db initial-html]
    (html5
      [:html {:lang "de"}
       [:head
@@ -70,7 +72,7 @@
        [:meta {:name "msapplication-navbutton-color" :content styles/primary}]
        [:meta {:name "apple-mobile-web-app-status-bar-style" :content "default"}]
 
-       initial-state-script
+       (ssr/initial-state->script-tag initial-db)
 
        [:link {:href "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" :rel "stylesheet"}]
        [:script (str "var fulcro_network_csrf_token = '" csrf-token "';")]
@@ -83,15 +85,19 @@
 
 ; "?v=" js-hash
 
-(defn index-with-db [csrf-token normalized-db]
-  (log/debug "Serving index.html")
-  (let [initial-state-script (ssr/initial-state->script-tag normalized-db)]
-    (index csrf-token initial-state-script nil)))
+(comp/defsc Root [_ _]
+  {:query [{::i18n/current-locale (comp/get-query i18n/Locale)}
+           {:root/current-session (comp/get-query auth/Session)}]})
 
 (defn index-with-credentials [csrf-token script-manifest request]
-  (let [initial-state (ssr/build-initial-state (parser {:ring/request request} (comp/get-query auth/Session)) auth/Session)]
-    (index csrf-token script-manifest (ssr/initial-state->script-tag initial-state)
-      splash/splash)))
+  (let [de-locale (i18n/load-locale "po-files" :de-DE)
+        initial-state
+        (->
+          (comp/get-initial-state Root)
+          (assoc
+            ::i18n/current-locale de-locale)
+          (ssr/build-initial-state Root))]
+    (index csrf-token script-manifest (log/spy :info initial-state) splash/splash)))
 
 (defn ssr-html [csrf-token app normalized-db root-component-class]
   (log/debug "Serving index.html")
@@ -99,7 +105,7 @@
         root-factory (comp/factory root-component-class)]
     (index
       csrf-token
-      (ssr/initial-state->script-tag normalized-db)
+      normalized-db
       (binding [comp/*app* app]
         (dom/render-to-str (root-factory props))))))
 

@@ -9,9 +9,9 @@
     [decide.models.argument :as argument]
     [decide.models.authorization :as auth]
     [decide.models.opinion :as opinion]
-    [decide.models.process :as process]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
+    [decide.ui.translations.load :as translation]
     [decide.server-components.config :refer [config]]
     [decide.server-components.database :refer [conn]]
     [mount.core :refer [defstate]]
@@ -65,7 +65,7 @@
   [env err]
   (let [msg (.getMessage err)
         data (or (ex-data err) {})]
-    ; (log/error err "Parser Error:" msg data)
+    (log/error err "Parser Error:" msg data)
     {::rad-pathom/errors {:message msg
                           :data data}}))
 
@@ -120,7 +120,9 @@
    api.process/all-resolvers
    proposal/resolvers
    argument/resolvers
-   opinion/resolvers])
+   opinion/resolvers
+
+   translation/locale-resolver])
 
 (defn build-parser [config conn]
   (new-parser config
