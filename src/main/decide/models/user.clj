@@ -162,24 +162,27 @@
    ::pc/output [::display-name]}
   (d/pull db [::display-name] [::id id]))
 
-(>defn get-session-user-id [env]
+(>defn get-session-user-id [request]
   [map? => (s/nilable ::id)]
-  (get-in env [:ring/request :session :id]))
+  (get-in request [:session :id]))
 
-(defresolver current-session-resolver [{:keys [db] :as env} _]
+(defn get-current-session [db request]
+  (let [id (get-session-user-id request)]
+    (if (and id (exists? db id))
+      {:session/valid? true
+       :user {::id id}
+       ::id id}
+      {:session/valid? false
+       ::id nil})))
+
+(defresolver current-session-resolver [{:keys [db ring/request] :as env} _]
   {::pc/output [{::current-session
                  [:session/valid?
                   {:user [::id]}
                   ::id]}]}
   {::current-session
-   (let [id (get-session-user-id env)]
-     (wrap-session env
-       (if (and id (exists? db id))
-         {:session/valid? true
-          :user {::id id}
-          ::id id}
-         {:session/valid? false
-          ::id nil})))})
+   (wrap-session env
+     (get-current-session db request))})
 
 
 (def resolvers [sign-up sign-in sign-out change-password current-session-resolver resolve-public-infos])
