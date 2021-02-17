@@ -1,5 +1,6 @@
 (ns decide.models.user
   (:require
+    [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [goog.net.cookies]))
@@ -25,5 +26,5 @@
         (m/set-value!! component :ui/success-open? true)
         (cond
           (contains? errors :invalid-credentials)
-          (m/set-string!! component :ui/old-password-error :value "Password is wrong.")))))
+          (m/set-string!! component :ui/old-password-error :value (i18n/tr "Password is wrong"))))))
   (remote [_env] true))

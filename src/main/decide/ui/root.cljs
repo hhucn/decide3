@@ -77,6 +77,6 @@
       (when show-wip-warning?
         (alert/alert
           {:severity :warning
-           :action (inputs/button {:onClick #(set-wip-warning false)} "Dismiss")}
-          (dom/strong {} (i18n/tr "Under construction!")) (i18n/tr " Components marked with a yellow outline are in progress.")))
+           :action (inputs/button {:onClick #(set-wip-warning false)} (i18n/trc "Dismiss warning alert" "Dismiss"))}
+          (dom/strong {} (i18n/tr "Work in progress!")) " " (i18n/tr "Components marked with a yellow outline are in progress, and may not work yet!")))
       (ui-root-router root-router))))

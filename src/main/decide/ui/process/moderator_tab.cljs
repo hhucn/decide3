@@ -1,5 +1,6 @@
 (ns decide.ui.process.moderator-tab
   (:require
+    [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.data-fetch :as df]
@@ -53,7 +54,7 @@
    :ident ::process/slug
    :use-hooks? true}
   (let [[new-moderator-email set-new-moderator-email] (hooks/use-state "")]
-    (accordion {:title "Moderatoren"}
+    (accordion {:title (i18n/tr "Moderators")}
       (grid/container {:spacing 2}
         (grid/item {:xs 12}
           (list/list {}
@@ -68,13 +69,13 @@
              (evt/prevent-default! e)
              (set-new-moderator-email "")
              (comp/transact! this [(process/add-moderator {::process/slug slug ::user/email new-moderator-email})]))}
-          (dd/typography {:variant :h6} "Moderator hinzufügen")
+          (dd/typography {:variant :h6} (i18n/tr "Add moderator"))
           (inputs/textfield
-            {:label "E-Mail"
+            {:label (i18n/tr "Email")
              :value new-moderator-email
              :onChange #(set-new-moderator-email (evt/target-value %))
              :fullWidth true
-             :InputProps {:endAdornment (inputs/button {:type :submit} "Hinzufügen")}}))))))
+             :InputProps {:endAdornment (inputs/button {:type :submit} (i18n/trc "Submit new moderator form" "Add"))}}))))))
 
 (def ui-moderator-list (comp/computed-factory ModeratorList))
 
@@ -88,7 +89,7 @@
   {:query [::process/slug ::process/title ::process/description ::process/end-time]
    :ident ::process/slug
    :use-hooks? true}
-  (accordion {:title "Prozess bearbeiten"}
+  (accordion {:title (i18n/tr "Edit process")}
     (let [[mod-title change-title] (hooks/use-state title)
           [mod-description change-description] (hooks/use-state description)
           [with-end? set-with-end?] (hooks/use-state (boolean end-time))
@@ -112,16 +113,16 @@
                                      (assoc ::process/end-time (when with-end? mod-end-time))))]))}
         (inputs/textfield
           (merge default-input-props
-            {:label "Titel"
+            {:label (i18n/trc "Title of a process" "Title")
              :value mod-title
-             :helperText (when (not= title mod-title) "Bearbeitet")
+             :helperText (when (not= title mod-title) (i18n/tr "Edit"))
              :onChange #(change-title (evt/target-value %))
              :inputProps {:maxLength 140}}))
 
         (inputs/textfield
           (merge default-input-props
-            {:label "Beschreibung"
-             :helperText (when (not= description mod-description) "Bearbeitet")
+            {:label (i18n/trc "Description of a process" "Description")
+             :helperText (when (not= description mod-description) (i18n/tr "Edit"))
              :multiline true
              :rows 7
              :value mod-description
@@ -129,14 +130,14 @@
 
         (form/group {:row true}
           (form/control-label
-            {:label "Hat der Prozess ein Ende?"
+            {:label (i18n/tr "Does the process end?")
              :control
              (inputs/switch
                {:checked with-end?
                 :onChange #(set-with-end? (not with-end?))})}))
 
         (time/datetime-picker
-          {:label "Ende"
+          {:label (i18n/trc "End of a process" "End")
            :value mod-end-time
            :disabled (not with-end?)
            :inputVariant "filled"
@@ -144,7 +145,7 @@
            :fullWidth true})
 
         (grid/item {:xs 12}
-          (inputs/button {:color :primary :type "submit"} "Speichern"))))))
+          (inputs/button {:color :primary :type "submit"} (i18n/trc "Submit form" "Submit")))))))
 
 (def ui-process-edit (comp/computed-factory ProcessEdit))
 

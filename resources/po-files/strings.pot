@@ -1,0 +1,594 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-02-17 10:52+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: resources/public/js/main/i18n.js:16544
+msgid "Password is wrong"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19545
+msgid "Email already in use!"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19556
+msgid "Email or password is wrong"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19566
+msgctxt "Dialog header"
+msgid "Sign up"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19568
+#: resources/public/js/main/i18n.js:19569
+#: resources/public/js/main/i18n.js:20031
+msgid "Email"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19570
+#: resources/public/js/main/i18n.js:19571
+#: resources/public/js/main/i18n.js:19589
+#: resources/public/js/main/i18n.js:19590
+msgid "Password"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19573
+msgctxt "Label of submit form"
+msgid "Sign up"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19575
+msgid "Already have an account? Sign In"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19585
+msgctxt "Dialog header"
+msgid "Sign in"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19587
+#: resources/public/js/main/i18n.js:19588
+msgid "E-Mail"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19592
+msgctxt "Label of submit form"
+msgid "Sign in"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19594
+msgid "Don't have an account? Sign Up"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19631
+msgctxt "[aria] navigation menu"
+msgid "navigation menu"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19635
+msgctxt "Label of login button"
+msgid "Login"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19636
+msgctxt "[aria]"
+msgid "account of current user"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19639
+#: resources/public/js/main/i18n.js:19886
+msgid "Settings"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19640
+msgctxt "Label of logout button"
+msgid "Logout"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19651
+msgid "Change Password"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19651
+#: resources/public/js/main/i18n.js:19652
+msgid "Old password"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19653
+msgid "New password"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19655
+msgid "Save"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19656
+msgid "Password changed"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19722
+msgid "today at {time}"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19722
+msgid "yesterday at {time}"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19723
+msgid "on {datetime}"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19760
+#: resources/public/js/main/i18n.js:19796
+#: resources/public/js/main/i18n.js:20050
+msgctxt "Title of a process"
+msgid "Title"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19761
+msgctxt "URL of a process"
+msgid "URL"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19761
+msgid "Allowed are: lower case letters (a-z), numbers and hyphens"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19764
+msgctxt "What is the process about"
+msgid "What is it about?"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19765
+#: resources/public/js/main/i18n.js:19799
+#: resources/public/js/main/i18n.js:20053
+msgid "Does the process end?"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19767
+msgctxt "When does a process end?"
+msgid "When?"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19768
+msgid "Is the process public?"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19770
+msgid "Participant emails"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19770
+msgid "Separate addresses with commas"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19771
+#: resources/public/js/main/i18n.js:19802
+#: resources/public/js/main/i18n.js:20055
+#: resources/public/js/main/i18n.js:20315
+#: resources/public/js/main/i18n.js:20361
+msgctxt "Submit form"
+msgid "Submit"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19798
+#: resources/public/js/main/i18n.js:19979
+#: resources/public/js/main/i18n.js:20052
+msgctxt "Description of a process"
+msgid "Description"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19800
+#: resources/public/js/main/i18n.js:20054
+msgctxt "End of a process"
+msgid "End"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19826
+msgid "Number of proposals"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19827
+msgid "Number of participants"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19842
+msgctxt "Load indicator"
+msgid "Loading..."
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19846
+msgid "New decision-process"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19857
+msgid "Active decision-processes"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19859
+msgid "Create new decision-process"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19885
+msgid "All decisions"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19916
+msgctxt "[aria]"
+msgid "Close"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19943
+#: resources/public/js/main/i18n.js:19959
+msgid "Approvals: {pros}"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19944
+msgid "Approved"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19945
+msgid "Approve"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19961
+msgid "Children"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19962
+msgid "Parents"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19969
+msgid "Ballot"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:19981
+msgid ""
+"{numProposals, plural,\n"
+"                    =0 {There are no proposals!}\n"
+"                    =1 {The current best proposal:}\n"
+"                    other {The current best proposals:}}"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20027
+msgid "Moderators"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20031
+msgid "Add moderator"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20032
+msgctxt "Submit new moderator form"
+msgid "Add"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20045
+msgid "Edit process"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20051
+#: resources/public/js/main/i18n.js:20052
+msgid "Edit"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20115
+msgctxt "Alignment of argument"
+msgid "Pro:"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20116
+msgctxt "Alignment of argument"
+msgid "Con:"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20147
+msgid "Which arguments are still relevant?"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20148
+msgid "The parent of this proposal has no proposal"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20178
+msgid ""
+"Do you want to add a new proposal, fork from an existing or merge proposals?"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20180
+msgid "New"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20181
+msgid "Create a new proposal that is not related to another one."
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20182
+msgid "Fork / Merge"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20183
+msgid "Create a proposal derived from one or more proposals"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20234
+msgid "Von welchen bestehenden Vorschlägen hängt dein neuer Vorschlag ab?"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20234
+msgid "Du kannst einen oder mehrere wählen."
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20280
+msgctxt "Title of new proposal form"
+msgid "New proposal"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20282
+msgctxt "Type of proposal"
+msgid "Type"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20286
+#: resources/public/js/main/i18n.js:20301
+msgctxt "Input is optional"
+msgid "Optional"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20286
+msgctxt "Parents of a proposal"
+msgid "Parents"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20293
+msgid "Title and details must not be empty."
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20293
+#: resources/public/js/main/i18n.js:20295
+#: resources/public/js/main/i18n.js:20306
+#: resources/public/js/main/i18n.js:20484
+msgctxt "Details of a proposal"
+msgid "Details"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20294
+msgid "Add a recognizable title."
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20294
+#: resources/public/js/main/i18n.js:20306
+msgctxt "Title of a proposal"
+msgid "Title"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20297
+msgid "Copy details from parent"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20299
+#: resources/public/js/main/i18n.js:20304
+msgctxt "Go to the next part of the form"
+msgid "Next"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20301
+msgctxt "Helper text"
+msgid "Only applicable with parents."
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20301
+#: resources/public/js/main/i18n.js:20485
+msgctxt "Arguments of a proposal"
+msgid "Arguments"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20305
+msgid "Overview"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20307
+msgid "Derived from {count} other proposals:"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20315
+msgctxt "Abort form"
+msgid "Cancel"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20343
+#: resources/public/js/main/i18n.js:20377
+msgid "Pro"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20343
+msgid "Con"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20343
+msgid "By "
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20376
+#: resources/public/js/main/i18n.js:20378
+msgid "New argument"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20376
+#: resources/public/js/main/i18n.js:20591
+msgid "Login to add new argument"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20377
+msgid "Contra"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20386
+msgid "So far there are no arguments."
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20415
+msgid "This proposal depends on {count} previous proposals"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20416
+msgid "This proposal was derived {count} times"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20445
+msgctxt "Encourage to form a coalition"
+msgid "Form coalition"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20454
+msgid "Proposal"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20454
+msgid "Overlap of approvers"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20454
+msgid "Potential approvals"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20454
+msgid "Approvals (own/common/other)"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20483
+msgctxt "Prompt to merge or fork"
+msgid "Propose a change"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20486
+msgid "Similar proposals"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20496
+msgid "by {author}"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20508
+msgctxt "Type of proposal"
+msgid "Fork"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20508
+msgctxt "Type of proposal"
+msgid "Merge"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20538
+msgctxt "Approve a proposal"
+msgid "Approve"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20538
+msgctxt "Proposal has been approved"
+msgid "Approved"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20539
+msgid "{count} arguments"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20540
+msgctxt "Show more information about proposal"
+msgid "More"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20543
+#: resources/public/js/main/i18n.js:20591
+msgid "New proposal"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20544
+msgid "So far there are no arguments"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20551
+msgctxt "Label for sort order selection"
+msgid "Sort"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20553
+msgctxt "Sort order option"
+msgid "New → Old"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20553
+msgctxt "Sort order option"
+msgid "Old → New"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20553
+msgctxt "Sort order option"
+msgid "Approvals ↓"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20555
+msgctxt "Label for filter selection"
+msgid "Filter"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20580
+msgid "Proposals: {count}"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20581
+msgid "Participants {count}"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20619
+msgid "Ended on the {end-datetime}!"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20619
+msgid "Ends at {end-datetime}"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20671
+msgctxt "Overview over process"
+msgid "Overview"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20671
+msgid "All proposals"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20672
+msgctxt "Link to moderation page"
+msgid "Moderation"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20733
+msgctxt "Dismiss warning alert"
+msgid "Dismiss"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20733
+msgid "Work in progress!"
+msgstr ""
+
+#: resources/public/js/main/i18n.js:20734
+msgid ""
+"Components marked with a yellow outline are in progress, and may not work "
+"yet!"
+msgstr ""

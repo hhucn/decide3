@@ -1,5 +1,6 @@
 (ns decide.ui.process.home
   (:require
+    [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.data-fetch :as df]
     [com.fulcrologic.fulcro.dom :as dom]
@@ -24,14 +25,14 @@
      :component :a
      :href (str "proposal/" id)}
     (list/item-text {:primary title
-                     :secondary (str "Zustimmungen: " pro-votes)} title)
+                     :secondary (i18n/trf "Approvals: {pros}" {:pros pro-votes})} title)
     (when (get current-session :session/valid?)
       (list/item-secondary-action {}
         (if (pos? my-opinion)
-          (layout/box {:color "success.main"} (dd/typography {:color :inherit} "Zugestimmt"))
+          (layout/box {:color "success.main"} (dd/typography {:color :inherit} (i18n/tr "Approved")))
           (inputs/button {:color :primary}
 
-            "Zustimmen"))))))
+            (i18n/tr "Approve")))))))
 
 (def ui-top-entry (comp/factory TopEntry {:keyfn ::proposal/id}))
 
@@ -61,7 +62,7 @@
         {:edge :start
          :checked (pos? my-opinion)}))
 
-    (list/item-text {:secondary (str "Zustimmungen: " pro-votes)}
+    (list/item-text {:secondary (i18n/trf "Approvals: {pros}" {:pros pro-votes})}
       (if-not (and (empty? parents) (empty? children))
 
         ;; expandable content
@@ -70,12 +71,12 @@
           (layout/box {:borderLeft 1}
             (when-not (empty? children)
               (list/list
-                {:subheader (list/subheader {} "Children")
+                {:subheader (list/subheader {} (i18n/tr "Children"))
                  :dense true}
                 (map ui-experimental-ballot-entry (sort-by-votes children))))
             (when-not (empty? parents)
               (list/list
-                {:subheader (list/subheader {} "Parents")
+                {:subheader (list/subheader {} (i18n/tr "Parents"))
                  :dense true}
                 (map ui-experimental-ballot-entry (sort-by-votes parents))))))
 
@@ -88,7 +89,7 @@
            {::process/proposals (comp/get-query BallotEntry)}]
    :ident ::process/slug}
   (section-paper {:pb 0 :borderColor "warning.main"}        ; TODO remove warning color
-    (dd/typography {:component :h2 :variant "h5"} "Stimmzettel"
+    (dd/typography {:component :h2 :variant "h5"} (i18n/tr "Ballot")
       (let [sorted-proposals (sort-by-votes proposals)]
         (list/list {}
           (map ui-experimental-ballot-entry sorted-proposals))))))
@@ -108,7 +109,7 @@
         (grid/item {:xs 12}
           (section-paper {}
             (dd/typography {:component :h2 :variant "h4" :paragraph true}
-              "Beschreibung")
+              (i18n/trc "Description of a process" "Description"))
             (dd/typography {:variant "body1"}
               description)))
 
@@ -118,10 +119,11 @@
             (grid/item {:xs 12}
               (section-paper {:pb 0}
                 (dd/typography {:component :h2 :variant "h5"}
-                  (case (count top-proposals)
-                    0 "Es gibt keine Vorschläge!"
-                    1 "Der aktuell beste Vorschlag"
-                    "Die aktuell besten Vorschläge"))
+                  (i18n/trf "{numProposals, plural,
+                    =0 {There are no proposals!}
+                    =1 {The current best proposal:}
+                    other {The current best proposals:}}"
+                    {:numProposals (count top-proposals)}))
                 (list/list {}
                   (map ui-top-entry top-proposals))))))
 

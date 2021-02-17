@@ -90,14 +90,14 @@
            {:root/current-session (comp/get-query auth/Session)}]})
 
 (defn index-with-credentials [csrf-token script-manifest request]
-  (let [de-locale (i18n/load-locale "po-files" :de-DE)
+  (let [de-locale (i18n/load-locale "po-files" :de)
         initial-state
         (->
           (comp/get-initial-state Root)
           (assoc
             ::i18n/current-locale de-locale)
           (ssr/build-initial-state Root))]
-    (index csrf-token script-manifest (log/spy :info initial-state) splash/splash)))
+    (index csrf-token script-manifest initial-state splash/splash)))
 
 (defn ssr-html [csrf-token app normalized-db root-component-class]
   (log/debug "Serving index.html")

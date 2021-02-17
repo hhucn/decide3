@@ -1,5 +1,6 @@
 (ns decide.ui.components.appbar
   (:require
+    [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
@@ -42,7 +43,7 @@
           (inputs/icon-button
             {:edge :start
              :color :inherit
-             :aria-label "navigation menu"
+             :aria-label (i18n/trc "[aria] navigation menu" "navigation menu")
              :onClick menu-onClick}
             (layout/box {:component Menu})))
         (dd/typography
@@ -65,14 +66,14 @@
               {:variant :outlined
                :color :inherit
                :onClick #(comp/transact! this [(login/show-signinup-dialog {:which-form :sign-in})] {:compressible? true})}
-              "Login")
+              (i18n/trc "Label of login button" "Login"))
 
             (comp/fragment
 
               (inputs/icon-button
                 {:ref menu-ref
                  :edge "end"
-                 :aria-label "account of current user"
+                 :aria-label (i18n/trc "[aria]" "account of current user")
                  :aria-controls "menuId"
                  :aria-haspopup true
                  :onClick #(m/set-value! this :ui/account-menu-open? true)
@@ -95,8 +96,8 @@
                  :onClose #(m/set-value! this :ui/account-menu-open? false)}
                 (navigation/menu-item {:component :a
                                        :href "/settings"}
-                  "Settings")
+                  (i18n/tr "Settings"))
                 (navigation/menu-item {:onClick #(comp/transact! this [(user/sign-out nil)])}
-                  "Logout")))))))))
+                  (i18n/trc "Label of logout button" "Logout"))))))))))
 
 (def ui-appbar (comp/computed-factory AppBar))

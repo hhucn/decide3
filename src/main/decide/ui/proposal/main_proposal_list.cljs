@@ -1,6 +1,7 @@
 (ns decide.ui.proposal.main-proposal-list
   (:require
     [clojure.string :as str]
+    [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.data-fetch :as df]
     [com.fulcrologic.fulcro.dom :as dom]
@@ -32,21 +33,21 @@
        :right    "16px"}
       (inputs/fab
         (merge
-          {:aria-label "Neuer Vorschlag"
-           :title      "Neuer Vorschlag"
-           :color      "secondary"
-           :variant    (if extended? "extended" "round")}
+          {:aria-label (i18n/tr "New proposal")
+           :title (i18n/tr "New proposal")
+           :color "secondary"
+           :variant (if extended? "extended" "round")}
           props)
         (comp/create-element AddIcon nil nil)
         (when extended?
           (layout/box {:ml 1}
-            "Neuer Vorschlag"))))))
+            (i18n/tr "New proposal")))))))
 
 (defn empty-proposal-list-message []
   (layout/box {:p 2 :mx "auto"}
     (dd/typography {:align "center"
                     :color "textSecondary"}
-      "Bisher gibt es keine Vorschläge.")))
+      (i18n/tr "So far there are no arguments"))))
 
 (defmulti sort-proposals (fn [sort-order _] (keyword sort-order)))
 
@@ -64,15 +65,15 @@
 
 (defn sort-selector [selected set-selected!]
   (form/control {:size :small}
-    (input/label {:htmlFor "main-proposal-list-sort"} "Sortierung")
+    (input/label {:htmlFor "main-proposal-list-sort"} (i18n/trc "Label for sort order selection" "Sort"))
     (inputs/native-select
       {:value selected
        :onChange (fn [e]
                    (set-selected! (evt/target-value e)))
        :inputProps {:id "main-proposal-list-sort"}}
-      (dom/option {:value "new->old"} "Neu → Alt")
-      (dom/option {:value "old->new"} "Alt → Neu")
-      (dom/option {:value "most-approvals"} "Zustimmungen ↓"))))
+      (dom/option {:value "new->old"} (i18n/trc "Sort order option" "New → Old"))
+      (dom/option {:value "old->new"} (i18n/trc "Sort order option" "Old → New"))
+      (dom/option {:value "most-approvals"} (i18n/trc "Sort order option" "Approvals ↓")))))
 
 (def filter-types
   {"merges" "Merges"
@@ -81,7 +82,7 @@
 
 (defn filter-selector [selected set-selected!]
   (form/control {:size :small :disabled true}
-    (input/label {:htmlFor "main-proposal-list-filter"} "Filter")
+    (input/label {:htmlFor "main-proposal-list-filter"} (i18n/trc "Label for filter selection" "Filter"))
     (inputs/select
       {:multiple true
        :autoWidth true
@@ -126,11 +127,12 @@
             (grid/container {:spacing 2}
               (grid/item {}
                 (dd/typography {:variant :overline}
-                  "Vorschläge: "
-                  (count sorted-proposals)))
+                  (i18n/trf "Proposals: {count}"
+                    {:count (count sorted-proposals)})))
               (grid/item {}
                 (dd/typography {:variant :overline}
-                  "Teilnehmer: " (str no-of-contributors))))
+                  (i18n/trf "Participants {count}"
+                    {:count (str no-of-contributors)}))))
             (grid/container {:item true :spacing 2
                              :justify "flex-end"}
               (grid/item {} (filter-selector selected-filters set-selected-filters!))
@@ -154,8 +156,8 @@
                               :onClick show-new-proposal-dialog}
                 (layout/box {:color (when-not logged-in? "text.disabled") :mr 1 :component AddIcon})
                 (if logged-in?
-                  "Neuer Vorschlag"
-                  "Einloggen um einen neuen Vorschlag hinzuzufügen"))))))
+                  (i18n/tr "New proposal")
+                  (i18n/tr "Login to add new argument")))))))
 
       ; fab
       (when-not process-over?

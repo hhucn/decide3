@@ -1,5 +1,6 @@
 (ns decide.ui.process.core
   (:require
+    [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
     [com.fulcrologic.fulcro.algorithms.merge :as mrg]
     [com.fulcrologic.fulcro.application :as app]
@@ -41,13 +42,12 @@
     (dd/typography {:component "h1" :variant "h2"} title)
     (when end-time
       (let [over? (time/in-past? end-time)
-            end-element (time/time-element end-time
-                          (time/nice-string end-time {:dateprefix " am "}))]
+            end-element (time/nice-time-element end-time)]
         (if over?
           (dd/typography {:variant "subtitle1" :color (when over? "error")}
-            "Endete" end-element "!")
+            (i18n/tr "Ended on the {end-datetime}!") {:end-datetime end-element})
           (dd/typography {:variant "subtitle1"}
-            "Endet" end-element "."))))))
+            (i18n/trf "Ends at {end-datetime}" {:end-datetime end-element})))))))
 
 (def ui-process-info (comp/factory ProcessHeader))
 
@@ -124,10 +124,10 @@
           (when process-header
             (ui-process-info process-header))
           (tab-bar (current-target this)
-            {:label "Übersicht" :target process.home/ProcessOverviewScreen}
-            {:label "Alle Vorschläge" :target proposal.main-list/MainProposalList}
+            {:label (i18n/trc "Overview over process" "Overview") :target process.home/ProcessOverviewScreen}
+            {:label (i18n/tr "All proposals") :target proposal.main-list/MainProposalList}
             (when moderator?
-              {:label "Moderation" :target process.moderator/ProcessModeratorTab}))))
+              {:label (i18n/trc "Link to moderation page" "Moderation") :target process.moderator/ProcessModeratorTab}))))
       (ui-process-router process-router
         {:slug slug
          ;:process process

@@ -1,5 +1,6 @@
 (ns decide.ui.proposal.detail-page
   (:require
+    [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.algorithms.merge :as mrg]
     [com.fulcrologic.fulcro.algorithms.normalized-state :as norm]
     [com.fulcrologic.fulcro.algorithms.react-interop :as interop]
@@ -85,10 +86,10 @@
   (list/item {}
     (list/item-icon {}
       (case type
-        :pro (layout/box {:color "success.main"} "Pro:")
-        :contra (layout/box {:color "error.main"} "Con:")))
+        :pro (layout/box {:color "success.main"} (i18n/tr "Pro"))
+        :contra (layout/box {:color "error.main"} (i18n/tr "Con"))))
     (list/item-text {:primary content
-                     :secondary (comp/fragment "Von " (ui-argument-author author))})))
+                     :secondary (comp/fragment (i18n/tr "By ") (ui-argument-author author))})))
 
 (def ui-argument-row (comp/computed-factory ArgumentRow {:keyfn ::argument/id}))
 
@@ -115,8 +116,8 @@
   (inputs/icon-button
     (merge props
       {:type :submit
-       :aria-label "Absenden"})
-    (comp/create-element Send nil nil)))
+       :aria-label (i18n/trc "Submit form" "Submit")})
+    (dom/create-element Send)))
 
 (defsc NewArgumentLine [_ {:keys []} {:keys [root/current-session add-argument!]}]
   {:use-hooks? true}
@@ -139,24 +140,24 @@
                :disabled (not logged-in?)}
       (inputs/textfield
         {:fullWidth true
-         :label "Neues Argument"
+         :label (i18n/tr "New argument")
          :variant :outlined
          :value new-argument
          :onChange #(set-new-argument! (evt/target-value %))
          :disabled (not logged-in?)
-         :placeholder (when (not logged-in?) "Einloggen um Argumente hinzuzufügen.")
-         :inputProps {:aria-label "Neues Argument"}
+         :placeholder (when (not logged-in?) (i18n/tr "Login to add new argument"))
+         :inputProps {:aria-label (i18n/tr "New argument")}
          :InputProps {:startAdornment
                       (comp/fragment
                         (type-toggle
-                          {:label "Dafür"
+                          {:label (i18n/tr "Pro")
                            :type :pro
                            :color "success.main"
                            :onClick toggle-type!
                            :disabled (not logged-in?)
                            :selected-type type})
                         (type-toggle
-                          {:label "Dagegen"
+                          {:label (i18n/tr "Contra")
                            :type :contra
                            :color "error.main"
                            :onClick toggle-type!
@@ -178,18 +179,22 @@
       (if-not (empty? arguments)
         (list/list {:dense true}
           (map ui-argument-row arguments))
-        (dd/typography {:variant :body1 :color :textSecondary
-                        :paragraph true} "Bisher gibt es noch keine Argumente.")))
+        (dd/typography
+          {:variant :body1
+           :color :textSecondary
+           :paragraph true}
+          (i18n/tr "So far there are no arguments."))))
 
     (ui-new-argument-line {}
       {:root/current-session current-session
        :add-argument! (fn [{::argument/keys [content type]
                             :keys [user-id]}]
-                        (comp/transact! this [(add-argument {::proposal/id id
-                                                             :temp-id (tempid/tempid)
-                                                             :content content
-                                                             :type type
-                                                             :author-id user-id})]))})))
+                        (comp/transact! this
+                          [(add-argument {::proposal/id id
+                                          :temp-id (tempid/tempid)
+                                          :content content
+                                          :type type
+                                          :author-id user-id})]))})))
 
 (def ui-argument-section (comp/factory ArgumentSection {:keyfn ::proposal/id}))
 ;; endregion
@@ -231,13 +236,13 @@
 
       (when-not (empty? parent-relations)
         (section
-          (str "Dieser Vorschlag basiert auf " (count parent-relations) " weiteren Vorschlägen.")
+          (i18n/trf "This proposal depends on {count} previous proposals" {:count (count parent-relations)})
           (list/list {:dense false}
             (map ui-relationship parent-relations))))
 
       (when-not (empty? child-relations)
         (section
-          (str "Dieser Vorschlag hat " (count child-relations) " Kind" (when (<= 2 (count child-relations)) "er") ".")
+          (i18n/trf "This proposal was derived {count} times" {:count (count child-relations)})
           (list/list {:dense false}
             (map ui-relationship child-relations)))))))
 
@@ -295,7 +300,7 @@
            :size :small
            :color :primary
            :onClick #(show-add-dialog (comp/get-ident SimilarProposal other-proposal))}
-          "Koalition bilden"))
+          (i18n/trc "Encourage to form a coalition" "Form coalition")))
       (table/cell {:align :center
                    :style {:height "100px"}}
         (venn-diagramm props)))))
@@ -309,11 +314,11 @@
   (table/table {:size :small}
     (table/head {}
       (table/row {}
-        (table/cell {} "Vorschlag")
-        (table/cell {} "Übereinstimmung der Wähler")
-        (table/cell {} "Potentielle Stimmen")
+        (table/cell {} (i18n/tr "Proposal"))
+        (table/cell {} (i18n/tr "Overlap of approvers"))
+        (table/cell {} (i18n/tr "Potential approvals"))
         (table/cell {})
-        (table/cell {} "Stimmen (eig./zsm./fremd)")))
+        (table/cell {} (i18n/tr "Approvals (own/common/other)"))))
 
     (table/body {}
       (map #(ui-similarity-entry % {:show-add-dialog show-add-dialog}) (sort-by (fn [{:keys [sum-uniques common-uniques]}] (/ common-uniques sum-uniques)) > similar)))))
@@ -343,8 +348,11 @@
             {:post-mutation `dr/target-ready
              :post-mutation-params {:target ident}}))))}
   (let [show-add-dialog (hooks/use-callback
-                          (fn [& idents] (comp/transact! this [(new-proposal/show {:slug slug
-                                                                                   :parents (apply vector (comp/get-ident this) idents)})]))
+                          (fn [& idents]
+                            (comp/transact! this
+                              [(new-proposal/show
+                                 {:slug slug
+                                  :parents (apply vector (comp/get-ident this) idents)})]))
                           [slug])]
     (layout/container {:maxWidth :xl}
       (layout/box {:my 2 :p 2 :clone true}
@@ -361,15 +369,15 @@
                                                                        :parents [(comp/get-ident this)]})])
                    :startIcon (layout/box {:css {:transform "rotate (.5turn)"} :component CallSplit})
                    :endIcon (layout/box {:css {:transform "rotate (.5turn)"} :component MergeType})}
-                  "Änderung vorschlagen")))
+                  (i18n/trc "Prompt to merge or fork" "Propose a change"))))
             (grid/item {:xs true :component "section"}
-              (section "Details" (dd/typography {:variant "body1" :style {:whiteSpace "pre-line"}} body)))
+              (section (i18n/trc "Details of a proposal" "Details") (dd/typography {:variant "body1" :style {:whiteSpace "pre-line"}} body)))
 
             ;; " Dieser Vorschlag basiert auf " (count parents) " weiteren Vorschlägen "
             (ui-parent-section parent-section)
             #_(grid/item {:xs 6}
                 (section " Meinungen " (ui-opinion-section opinion-section)))
             (grid/item {:xs 12 :component "section"}
-              (section "Argumente" (ui-argument-section argument-section)))
+              (section (i18n/trc "Arguments of a proposal" "Arguments") (ui-argument-section argument-section)))
             (grid/item {:xs 12 :component "section"}
-              (section "Ähnliche Vorschläge" (ui-similar-section similar-section {:show-add-dialog show-add-dialog})))))))))
+              (section (i18n/tr "Similar proposals") (ui-similar-section similar-section {:show-add-dialog show-add-dialog})))))))))

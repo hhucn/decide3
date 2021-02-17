@@ -1,6 +1,7 @@
 (ns decide.ui.process.process-forms
   (:require
     [clojure.string :as str]
+    [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.dom.events :as evt]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
@@ -76,7 +77,7 @@
             close-to-max? (< (- title-max-length 10) length)]
         (inputs/textfield
           (merge default-input-props
-            {:label "Titel"
+            {:label (i18n/trc "Title of a process" "Title")
              :required true
              :value title
              :onChange update-title
@@ -87,8 +88,8 @@
 
       (inputs/textfield
         (merge default-input-props
-          {:label "URL"
-           :helperText "Erlaubt sind Kleinbuchstaben (a-z), Zahlen und Bindestriche."
+          {:label (i18n/trc "URL of a process" "URL")
+           :helperText (i18n/tr "Allowed are: lower case letters (a-z), numbers and hyphens")
            :value (if auto-slug? (slugify title) slug)
            :onChange (fn [e]
                        (let [value (evt/target-value e)]
@@ -99,7 +100,7 @@
 
       (inputs/textfield
         (merge default-input-props
-          {:label "Worum geht es?"
+          {:label (i18n/trc "What is the process about" "What is it about?")
            :multiline true
            :rows 7
            :value description
@@ -108,7 +109,7 @@
       (dom/div {}
         (form/group {:row true}
           (form/control-label
-            {:label "Endet der Entscheidungsprozess?"
+            {:label (i18n/tr "Does the process end?")
              :color "textSecondary"
              :checked with-end?
              :onChange #(set-with-end? (not with-end?))
@@ -117,7 +118,7 @@
         (transitions/collapse {:in with-end?}
           (time/datetime-picker
             (merge default-input-props
-              {:label "Wann?"
+              {:label (i18n/trc "When does a process end?" "When?")
                :value end-time
                :required with-end?
                :disabled (not with-end?)
@@ -128,7 +129,7 @@
       (dom/div {}
         (form/group {:row true}
           (form/control-label
-            {:label "Soll der Prozess öffentlich sein?"
+            {:label (i18n/tr "Is the process public?")
              :color "textSecondary"
              :checked public?
              :onChange #(set-public? (not public?))
@@ -138,15 +139,15 @@
           (layout/box {:style {:borderWidth "thin" :borderStyle "dashed"} :borderColor "warning.main"}
             (inputs/textfield
               (merge default-input-props
-                {:label "Teilnehmer E-Mail Adressen"
-                 :helperText "Separiere mehrere Adressen mit Kommas"}))
+                {:label (i18n/tr "Participant emails")
+                 :helperText (i18n/tr "Separate addresses with commas")}))
             (participant-list {:participants participants}))))
 
 
       (inputs/button
         {:color :primary
          :type "submit"}
-        "Anlegen"))))
+        (i18n/trc "Submit form" "Submit")))))
 
 (def ui-new-process-form (comp/computed-factory NewProcessForm))
 
@@ -184,14 +185,14 @@
                       ::process/end-time (and end-time (js/Date. end-time))}))}
       (inputs/textfield
         (merge default-input-props
-          {:label "Titel"
+          {:label (i18n/trc "Title of a process" "Title")
            :value title
            :onChange #(change-title (evt/target-value %))
            :inputProps {:maxLength 140}}))
 
       (inputs/textfield
         (merge default-input-props
-          {:label "Beschreibung"
+          {:label (i18n/trc "Description of a process" "Description")
            :multiline true
            :rows 7
            :value description
@@ -199,7 +200,7 @@
 
       (form/group {:row true}
         (form/control-label
-          {:label "Hat der Prozess ein Ende?"
+          {:label (i18n/tr "Does the process end?")
            :control
            (inputs/switch
              {:checked with-end?
@@ -207,7 +208,7 @@
 
       (inputs/textfield
         (merge default-input-props
-          {:label "Ende"
+          {:label (i18n/trc "End of a process" "End")
            :value end-time
            :disabled (not with-end?)
            :type "datetime-local"
@@ -215,6 +216,6 @@
            :InputLabelProps {:shrink true}}))
 
       (grid/item {:xs 12}
-        (inputs/button {:color :primary :type "submit"} "Speichern")))))
+        (inputs/button {:color :primary :type "submit"} (i18n/trc "Submit form" "Submit"))))))
 
 (def ui-edit-process-form (comp/computed-factory EditProcessForm))

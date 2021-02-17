@@ -1,5 +1,6 @@
 (ns decide.ui.proposal.card
   (:require
+    [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.dom :as dom]
@@ -29,13 +30,13 @@
     (str "#" (if (tempid/tempid? proposal-id) "?" proposal-id))))
 
 (defn author-part [author-name]
-  (comp/fragment "von " (dom/address (str author-name))))
+  (i18n/trf "by {author}" {:author (dom/address (str author-name))}))
 
 (defn time-part [^js/Date created]
   (comp/fragment
     " "
     (time/time-element created
-      (time/nice-string created {:dateprefix " vom "}))))
+      (time/nice-string created))))
 
 (defsc Parent [_ _]
   {:query [::proposal/id]
@@ -61,8 +62,8 @@
         (when (pos? no-of-parents)
           (str " · "
             (case no-of-parents
-              1 "Fork"
-              "Merge")))))))
+              1 (i18n/trc "Type of proposal" "Fork")
+              (i18n/trc "Type of proposal" "Merge"))))))))
 
 (def ui-subheader (comp/factory Subheader (:keyfn ::proposal/id)))
 
@@ -125,7 +126,9 @@
              :onClick #(comp/transact! this [(opinion/add {::proposal/id id
                                                            :opinion (if approved? 0 +1)})])
              :startIcon (comp/create-element ThumbUpAltTwoTone nil nil)}
-            (if-not approved? "Zustimmen" "Zugestimmt")))
+            (if-not approved?
+              (i18n/trc "Approve a proposal" "Approve")
+              (i18n/trc "Proposal has been approved" "Approved"))))
         #_(inputs/button-group
             {:size :small
              :variant :text
@@ -138,10 +141,12 @@
                             :startIcon (comp/create-element ThumbDownAltTwoTone nil nil)}))
 
         (layout/box {:style {:marginLeft "auto"}}
-          (dd/typography {:variant :button} (count arguments) " Argumente")
+          (dd/typography {:variant :button}
+            (i18n/trf "{count} arguments" {:count (count arguments)}))
 
           (inputs/button {:component "a"
                           :color :primary
-                          :href proposal-href} "Mehr"))))))
+                          :href proposal-href}
+            (i18n/trc "Show more information about proposal" "More")))))))
 
 (def ui-proposal-card (comp/computed-factory ProposalCard {:keyfn ::proposal/id}))

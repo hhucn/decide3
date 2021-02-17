@@ -1,5 +1,6 @@
 (ns decide.ui.login
   (:require
+    [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.dom.events :as evt]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
@@ -38,7 +39,7 @@
           (comp/transact! component [(close-dialog {})]))
         (cond
           (contains? errors :email-in-use)
-          (m/set-string! component :ui/email-error :value "Email already in use!")))))
+          (m/set-string! component :ui/email-error :value (i18n/tr "Email already in use!"))))))
   (remote [env]
     (-> env
       (m/with-server-side-mutation `user/sign-up)
@@ -59,7 +60,7 @@
             (or
               (contains? errors :account-does-not-exist)
               (contains? errors :invalid-credentials))
-            (m/set-string!! component :ui/password-error :value "Email or password is wrong."))))))
+            (m/set-string!! component :ui/password-error :value (i18n/tr "Email or password is wrong")))))))
   (remote [env]
     (-> env
       (m/with-server-side-mutation `user/sign-in)
@@ -89,7 +90,7 @@
   (comp/fragment
     (dialog/title {:disableTypography true}
       (dd/typography {:align "center" :variant "h5" :component "h2"}
-        "Sign up"))
+        (i18n/trc "Dialog header" "Sign up")))
     (dialog/content {}
       (grid/container
         {:spacing 1
@@ -99,24 +100,24 @@
                      (evt/prevent-default! e)
                      (comp/transact! this [(sign-up #:user{::user/email email ::user/password password})]))}
         (grid/item {:xs 12}
-          (wide-textfield {:label "E-Mail"
+          (wide-textfield {:label (i18n/tr "Email")
                            :type :email
                            :value email
                            :error (boolean email-error)
                            :helperText email-error
                            :autoFocus true
-                           :inputProps {:aria-label "Email"
+                           :inputProps {:aria-label (i18n/tr "Email")
                                         :autoComplete :email}
                            :onChange (fn [e]
                                        (when email-error (m/set-value!! this :ui/email-error nil))
                                        (m/set-string!! this ::user/email :event e))}))
         (grid/item {:xs 12}
-          (wide-textfield {:label "Password"
+          (wide-textfield {:label (i18n/tr "Password")
                            :type :password
                            :value password
                            :error (boolean password-error)
                            :helperText password-error
-                           :inputProps {:aria-label "Password"
+                           :inputProps {:aria-label (i18n/tr "Password")
                                         :autoComplete :new-password}
                            :onChange (fn [e]
                                        (when password-error (m/set-value!! this :ui/password-error nil))
@@ -126,7 +127,7 @@
                           :color :primary
                           :type :submit
                           :fullWidth true}
-            "Sign up"))
+            (i18n/trc "Label of submit form" "Sign up")))
         (grid/container
           {:item true
            :justify :flex-end}
@@ -134,7 +135,7 @@
             (inputs/button
               {:color "inherit"
                :onClick #(comp/transact! this [(show-signinup-dialog {:which-form :sign-in})])}
-              "Already have an account? Sign In")))))))
+              (i18n/tr "Already have an account? Sign In"))))))))
 
 (def ui-signup-form (comp/computed-factory SignUpForm))
 
@@ -155,7 +156,7 @@
   (comp/fragment
     (dialog/title {:disableTypography true}
       (dd/typography {:align "center" :variant "h5" :component "h2"}
-        "Sign in"))
+        (i18n/trc "Dialog header" "Sign in")))
     (dialog/content {}
       (grid/container
         {:spacing 1
@@ -166,11 +167,11 @@
                      (comp/transact! this [(sign-in #:user{::user/email email
                                                            ::user/password password})]))}
         (grid/item {:xs 12}
-          (wide-textfield {:label "E-Mail"
+          (wide-textfield {:label (i18n/tr "E-Mail")
                            :type :email
                            :error (boolean email-error)
                            :helperText email-error
-                           :inputProps {:aria-label "E-Mail"
+                           :inputProps {:aria-label (i18n/tr "E-Mail")
                                         :autoComplete :email}
                            :value email
                            :autoFocus true
@@ -178,11 +179,11 @@
                                        (when email-error (m/set-value! this :ui/email-error nil))
                                        (m/set-string!! this ::user/email :event e))}))
         (grid/item {:xs 12}
-          (wide-textfield {:label "Password"
+          (wide-textfield {:label (i18n/tr "Password")
                            :type :password
                            :error (boolean password-error)
                            :helperText password-error
-                           :inputProps {:aria-label "Password"
+                           :inputProps {:aria-label (i18n/tr "Password")
                                         :autoComplete :current-password}
                            :value password
                            :onChange (fn [e]
@@ -193,7 +194,7 @@
                           :color :primary
                           :type :submit
                           :fullWidth true}
-            "Sign in"))
+            (i18n/trc "Label of submit form" "Sign in")))
         (grid/container
           {:item true
            :justify :space-between}
@@ -203,7 +204,7 @@
             (inputs/button
               {:color "inherit"
                :onClick #(comp/transact! this [(show-signinup-dialog {:which-form :sign-up})])}
-              "Don't have an account? Sign Up")))))))
+              (i18n/tr "Don't have an account? Sign Up"))))))))
 
 (def ui-login-form (comp/computed-factory LoginForm))
 

@@ -1,5 +1,6 @@
 (ns decide.ui.components.snackbar
   (:require
+    [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.mutations :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
@@ -56,7 +57,7 @@
                  {:size "small"
                   :color "inherit"
                   :onClick handle-close
-                  :ariaLabel "close"}
+                  :ariaLabel (i18n/trc "[aria]" "Close")}
                  (comp/create-element Close #js {:fontSize "small"} nil))})))
 
 (def ui-snackbar (comp/computed-factory Snackbar))

@@ -1,20 +1,22 @@
 (ns decide.ui.process.list
-  (:require [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-            [com.fulcrologic.fulcro.data-fetch :as df]
-            [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
-            [com.fulcrologic.fulcro.react.hooks :as hooks]
-            [decide.models.process :as process]
-            [decide.models.user :as user]
-            [decide.ui.process.process-forms :as process-forms]
-            [material-ui.data-display :as dd]
-            [material-ui.lab :refer [skeleton]]
-            [material-ui.layout :as layout]
-            [material-ui.layout.grid :as grid]
-            ["@material-ui/icons/EmojiObjectsOutlined" :default EmojiObjectsOutlinedIcon]
-            ["@material-ui/icons/Group" :default GroupIcon]
-            [material-ui.feedback.dialog :as dialog]
-            [material-ui.inputs :as inputs]
-            [material-ui.surfaces :as surfaces]))
+  (:require
+    [com.fulcrologic.fulcro-i18n.i18n :as i18n]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+    [com.fulcrologic.fulcro.react.hooks :as hooks]
+    [decide.models.process :as process]
+    [decide.models.user :as user]
+    [decide.ui.process.process-forms :as process-forms]
+    [material-ui.data-display :as dd]
+    [material-ui.lab :refer [skeleton]]
+    [material-ui.layout :as layout]
+    [material-ui.layout.grid :as grid]
+    ["@material-ui/icons/EmojiObjectsOutlined" :default EmojiObjectsOutlinedIcon]
+    ["@material-ui/icons/Group" :default GroupIcon]
+    [material-ui.feedback.dialog :as dialog]
+    [material-ui.inputs :as inputs]
+    [material-ui.surfaces :as surfaces]))
 
 (def page-ident [:PAGE :processes-list-page])
 
@@ -51,8 +53,8 @@
 
       (dd/divider {})
       (surfaces/card-actions {}
-        (icon-badge "Anzahl Vorschläge" (or no-of-proposals 0) EmojiObjectsOutlinedIcon)
-        (icon-badge "Anzahl Teilnehmer" (or no-of-authors 0) GroupIcon)))))
+        (icon-badge (i18n/tr "Number of proposals") (or no-of-proposals 0) EmojiObjectsOutlinedIcon)
+        (icon-badge (i18n/tr "Number of participants") (or no-of-authors 0) GroupIcon)))))
 
 
 (def ui-process-list-entry (comp/computed-factory ProcessListEntry {:keyfn ::process/slug}))
@@ -77,7 +79,7 @@
         (map ui-process-list-entry all-processes))
       (when loading?
         (layout/box {}
-          "Loading..."
+          (i18n/trc "Load indicator" "Loading...")
           (when (empty? all-processes) skeleton-list))))))
 (def ui-all-process-list (comp/factory AllProcessesList))
 
@@ -85,7 +87,7 @@
   (dialog/dialog
     {:open new-process-dialog-open?
      :onClose #(m/set-value! comp :ui/new-process-dialog-open? false)}
-    (dialog/title {} "Neuer Entscheidungsprozess")
+    (dialog/title {} (i18n/tr "New decision-process"))
     (dialog/content {}
       (process-forms/ui-new-process-form new-process-form
         {:onSubmit (fn [{::process/keys [title slug description end-time]}]
@@ -110,7 +112,7 @@
    :route-segment ["decisions"]}
   (let [logged-in? (get current-session :session/valid? false)]
     (layout/container {}
-      (dd/typography {:component :h1 :variant :h2} "Aktive Entscheidungsprozesse")
+      (dd/typography {:component :h1 :variant :h2} (i18n/tr "Active decision-processes"))
       (ui-all-process-list all-processes-list)
 
       (layout/box {:my 2 :clone true}
@@ -120,7 +122,7 @@
                         :fullWidth true
                         :size :large
                         :onClick #(m/toggle! this :ui/new-process-dialog-open?)}
-          "Neuen Entscheidungsprozess anlegen"))
+          (i18n/tr "Create new decision-process")))
 
       (new-process-dialog this {:new-process-dialog-open? new-process-dialog-open?
                                 :new-process-form new-process-form}))))

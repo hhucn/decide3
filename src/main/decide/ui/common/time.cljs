@@ -1,6 +1,7 @@
 (ns decide.ui.common.time
   (:require
     [cljs.spec.alpha :as s]
+    [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.dom :as dom]
     [com.fulcrologic.guardrails.core :refer [>defn =>]]
     ["@date-io/date-fns" :as date-fns]
@@ -62,16 +63,17 @@
       (not (short-year? datetime)) (merge long-date-format)
       (not (short-time? datetime)) (merge long-time-format))))
 
-(>defn nice-string
-  ([^js/Date datetime] [(s/nilable :js/Date) => string?] (nice-string datetime {}))
-  ([^js/Date datetime {:keys [dateprefix]}]
-   [(s/nilable :js/Date) map? => string?]
-   (if datetime
-     (cond
-       (today? datetime) (str "heute um " (format-time datetime))
-       (yesterday? datetime) (str "gestern um " (format-time datetime))
-       :else (str dateprefix (format-datetime datetime)))
-     "")))
+(>defn nice-string [^js/Date datetime]
+  [(s/nilable :js/Date) => string?]
+  (if datetime
+    (cond
+      (today? datetime)
+      (i18n/trf "today at {time}" {:time (format-time datetime)})
+
+      (yesterday? datetime)
+      (i18n/trf "yesterday at {time}" {:time (format-time datetime)})
+      :else (i18n/trf "on {datetime}" {:datetime (format-datetime datetime)}))
+    ""))
 
 (>defn time-element [^js/Date datetime & children]
   [:js/Date (s/* any?) => dom/element?]
@@ -80,6 +82,11 @@
     (or
       children
       (format-datetime datetime))))
+
+(defn nice-time-element [^js/Date datetime]
+  (dom/time {:dateTime (.toISOString datetime)
+             :title datetime}
+    (nice-string datetime)))
 
 (defn datetime-picker [props]
   (dom/create-element MuiPickersUtilsProvider #js {:utils date-fns}

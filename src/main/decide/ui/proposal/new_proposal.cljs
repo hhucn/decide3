@@ -2,6 +2,7 @@
   (:require
     [cljs.spec.alpha :as s]
     [clojure.string :as str]
+    [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
     [com.fulcrologic.fulcro.algorithms.merge :as mrg]
     [com.fulcrologic.fulcro.algorithms.normalized-state :as norm]
@@ -61,8 +62,8 @@
          :onClick #(toggle-argument (comp/get-ident this))}))
     (list/item-text {:primary content}
       (case type
-        :pro (layout/box {:color "success.main"} "Pro:")
-        :contra (layout/box {:color "error.main"} "Con:"))
+        :pro (layout/box {:color "success.main"} (i18n/trc "Alignment of argument" "Pro:"))
+        :contra (layout/box {:color "error.main"} (i18n/trc "Alignment of argument" "Con:")))
       content)))
 
 (def ui-argument (comp/computed-factory Argument {:keyfn ::argument/id}))
@@ -96,10 +97,11 @@
   (hooks/use-lifecycle
     #(apply load-parents-with-arguments! this (map (fn [parent] (find parent ::proposal/id)) parents)))
   (comp/fragment
-    (dd/typography {:component "h3"} "Welche Argumente sind immer noch relevant?")
+    (dd/typography {:component "h3"} (i18n/tr "Which arguments are still relevant?"))
     (let [parents-with-arguments (remove #(->> % ::proposal/arguments empty?) parents)]
       (if (empty? parents-with-arguments)
-        (dd/typography {:variant "subtitle1" :color "textSecondary"} "Die Eltern dieses Vorschlags hat keine Argumente.")
+        (dd/typography {:variant "subtitle1" :color "textSecondary"}
+          (i18n/tr "The parents of this proposal have no arguments"))
         (for [parents parents-with-arguments]
           (ui-parent-argument-section parents {:selected-arguments selected-arguments
                                                :toggle-argument toggle-argument}))))))
@@ -156,24 +158,24 @@
 (defsc TypeStep [_ _ {:keys [to-step]}]
   (comp/fragment
     (dd/typography {:paragraph true}
-      "Möchtest du einen neuen Vorschlag hinzufügen, einen bestehenden erweitern oder Vorschläge zusammenführen?")
+      (i18n/tr "Do you want to add a new proposal, fork from an existing or merge proposals?"))
     (grid/container {:spacing 2}
       (grid/item {:sm 6 :xs 12}
         (button-card
           {:onClick #(to-step :details)
            :startIcon (comp/create-element AddBox nil nil)}
-          "Neu"
+          (i18n/tr "New")
           (dd/typography {:variant "caption" :color "textSecondary"}
-            "Einen neuen Vorschlag erstellen, der nicht mit einem anderen verwandt ist.")))
+            (i18n/tr "Create a new proposal that is not related to another one."))))
 
       (grid/item {:sm 6 :xs 12}
         (button-card
           {:onClick #(to-step :parents)
            :startIcon (layout/box {:clone true :css {:transform "rotate(.5turn)"}}
                         (comp/create-element MergeType nil nil))}
-          "Ableiten / Zusammenführen"
+          (i18n/tr "Fork / Merge")
           (dd/typography {:variant "caption" :color "textSecondary"}
-            "Ein Vorschlag erstellen mit einem oder mehreren Vorgängern."))))))
+            (i18n/tr "Create a proposal derived from one or more proposals")))))))
 
 (def ui-type-step (comp/computed-factory TypeStep))
 ;; endregion
@@ -226,9 +228,9 @@
      {:proposal-list (comp/get-initial-state ProcessProposalList {:slug slug})})}
   (comp/fragment
     (dd/typography {:paragraph false}
-      "Von welchen bestehenden Vorschlägen hängt dein neuer Vorschlag ab?")
+      (i18n/tr "Von welchen bestehenden Vorschlägen hängt dein neuer Vorschlag ab?"))
     (dd/typography {:paragraph false :variant "caption"}
-      "Du kannst einen oder mehrere wählen.")
+      (i18n/tr "You can choose one or more"))
 
     (ui-process-proposal-list proposal-list
       {:selected selected
@@ -323,7 +325,7 @@
                                       ::proposal/parents (mapv #(select-keys % [::proposal/id]) parents)
                                       ::proposal/arguments (vec arguments)})])
                                 (close-dialog))}}
-      (dialog/title {} "Neuer Vorschlag")
+      (dialog/title {} (i18n/trc "Title of new proposal form" "New proposal"))
       (dialog/content {}
         (stepper/stepper
           {:activeStep step
@@ -335,7 +337,7 @@
             {:completed (pos? step)}
             (stepper/step-button
               {:onClick #(comp/transact! this [(goto-step {:step :type})])}
-              "Typ")
+              (i18n/trc "Type of proposal" "Type"))
             (stepper/step-content {}
               (ui-type-step {} {:to-step (fn [step] (comp/transact! this [(goto-step {:step step})]))})))
           ;; endregion
@@ -346,8 +348,8 @@
             (stepper/step-button
               {:onClick #(comp/transact! this [(goto-step {:step :parents})])
                :style {:textAlign "start"}
-               :optional (dd/typography {:variant "caption" :color "textSecondary"} "Optional")}
-              "Eltern")
+               :optional (dd/typography {:variant "caption" :color "textSecondary"} (i18n/trc "Input is optional" "Optional"))}
+              (i18n/trc "Parents of a proposal" "Parents"))
             (stepper/step-content {}
               (ui-parent-step parent-step
                 {:next-step next-step
@@ -370,28 +372,26 @@
                  :style {:textAlign "start"}                ; fix for text alignment in button
                  :optional (when (and (< 2 step) error?)
                              (dd/typography {:variant "caption" :color "error"}
-                               "Titel oder Details dürfen nicht leer sein."))}
+                               (i18n/tr "Title and details must not be empty.")))}
                 (stepper/step-label
                   {:error (and (< 2 step) error?)}
-                  "Details"))
+                  (i18n/trc "Details of a proposal" "Details")))
 
               (stepper/step-content {}
                 (dd/typography {:paragraph false}
-                  "Gib dem Vorschlag einen erkennbaren Titel:")
+                  (i18n/tr "Add a recognizable title."))
                 (inputs/textfield
-                  {:label        "Titel"
-                   :variant      "outlined"
-                   :fullWidth    true
+                  {:label (i18n/trc "Title of a proposal" "Title")
+                   :variant "outlined"
+                   :fullWidth true
                    :autoComplete "off"
-                   :value        title
-                   :onChange     change-title
-                   :margin       "normal"})
+                   :value title
+                   :onChange change-title
+                   :margin "normal"})
 
                 ;; Body
-                (dd/typography {:paragraph false}
-                  "Füge Details hinzu, damit andere wissen, worum es sich bei deinem Vorschlag handelt:")
                 (inputs/textfield
-                  {:label "Details"
+                  {:label (i18n/trc "Details of a proposal" "Details")
                    :variant "outlined"
                    :margin "normal"
                    :fullWidth true
@@ -404,7 +404,7 @@
                   (inputs/button {:size :small :variant :outlined
                                   :startIcon (dom/create-element FileCopy)
                                   :onClick #(comp/transact! this [(copy-parents-body nil)])}
-                    "Copy details from parent"))
+                    (i18n/tr "Copy details from parent")))
                 (dom/br {})
 
                 (inputs/button
@@ -412,7 +412,7 @@
                    :variant "contained"
                    :disabled error?
                    :onClick #(comp/transact! this [(goto-step {:step (if (empty? parents) :final :arguments)})])}
-                  "Weiter"))))
+                  (i18n/trc "Go to the next part of the form" "Next")))))
           ;; endregion
 
           ;; region Arguments Step
@@ -424,9 +424,9 @@
                :style {:textAlign "start"}
                :optional (dd/typography {:variant "caption" :color "textSecondary"}
                            (if (empty? parents)
-                             "Nur mit Eltern möglich."
-                             "Optional"))}
-              "Argumente")
+                             (i18n/trc "Helper text" "Only applicable with parents.")
+                             (i18n/trc "Input is optional" "Optional")))}
+              (i18n/trc "Arguments of a proposal" "Arguments"))
             (stepper/step-content {}
               (ui-argument-step {}
                 {:parents parents
@@ -435,29 +435,27 @@
               (inputs/button
                 {:color "primary"
                  :onClick next-step}
-                "Weiter")))
+                (i18n/trc "Go to the next part of the form" "Next"))))
           ;; endregion
 
           (stepper/step {}
             (stepper/step-button
               {:onClick #(comp/transact! this [(goto-step {:step :final})])}
-              "Übersicht")
+              (i18n/tr "Overview"))
             (stepper/step-content {}
               (layout/box {:mb 2}
-                (section "Titel:")
+                (section (str (i18n/trc "Title of a proposal" "Title") ":"))
                 (quoted-body title)
 
-                (section "Details:")
+                (section (str (i18n/trc "Details of a proposal" "Details") ":"))
                 (quoted-body body)
 
                 (when-not (empty? parents)
                   (comp/fragment
                     (section
-                      "Abhängig von "
-                      (if (< 1 (count parents))
-                        (str (count parents) " anderen Vorschlägen")
-                        "einem anderem Vorschlag")
-                      ":")
+                      (i18n/trf
+                        "Derived from {count} other proposals:"
+                        {:count (count parents)}))
                     (list/list {:dense true :disablePadding true}
                       (for [{::proposal/keys [nice-id title]} parents]
                         (list/item {:key nice-id}
@@ -467,10 +465,10 @@
               (inputs/button {:color "primary"
                               :type "submit"
                               :variant "contained"}
-                "Abschicken")))))
+                (i18n/trc "Submit form" "Submit"))))))
 
 
       (dialog/actions {}
-        (inputs/button {:onClick close-dialog} "Abbrechen")))))
+        (inputs/button {:onClick close-dialog} (i18n/trc "Abort form" "Cancel"))))))
 
 (def ui-new-proposal-form (comp/computed-factory NewProposalFormDialog))
