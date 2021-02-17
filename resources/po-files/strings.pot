@@ -557,11 +557,11 @@ msgid "Participants {count}"
 msgstr ""
 
 #: resources/public/js/main/i18n.js:20619
-msgid "Ended on the {end-datetime}!"
+msgid "Ended on the {endDatetime}!"
 msgstr ""
 
 #: resources/public/js/main/i18n.js:20619
-msgid "Ends at {end-datetime}"
+msgid "Ends at {endDatetime}"
 msgstr ""
 
 #: resources/public/js/main/i18n.js:20671

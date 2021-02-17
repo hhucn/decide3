@@ -563,12 +563,12 @@ msgid "Participants {count}"
 msgstr "Teilnehmer {count}"
 
 #: resources/public/js/main/i18n.js:20619
-msgid "Ended on the {end-datetime}!"
-msgstr "Endete am {end-datetime}!"
+msgid "Ended on the {endDatetime}!"
+msgstr "Endete am {endDatetime}!"
 
 #: resources/public/js/main/i18n.js:20619
-msgid "Ends at {end-datetime}"
-msgstr "Endet am {end-datetime}"
+msgid "Ends at {endDatetime}"
+msgstr "Endet am {endDatetime}"
 
 #: resources/public/js/main/i18n.js:20671
 msgctxt "Overview over process"

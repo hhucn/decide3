@@ -45,9 +45,9 @@
             end-element (time/nice-time-element end-time)]
         (if over?
           (dd/typography {:variant "subtitle1" :color (when over? "error")}
-            (i18n/tr "Ended on the {end-datetime}!") {:end-datetime end-element})
+            (i18n/trf "Ended on the {endDatetime}!" {:endDatetime end-element}))
           (dd/typography {:variant "subtitle1"}
-            (i18n/trf "Ends at {end-datetime}" {:end-datetime end-element})))))))
+            (i18n/trf "Ends at {endDatetime}" {:endDatetime end-element})))))))
 
 (def ui-process-info (comp/factory ProcessHeader))
 
