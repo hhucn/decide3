@@ -2,6 +2,7 @@
   (:require
     [clojure.string :as str]
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
+    [com.fulcrologic.fulcro.application :as app]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.data-fetch :as df]
     [com.fulcrologic.fulcro.dom :as dom]
@@ -109,9 +110,14 @@
    :will-enter (fn [app {::process/keys [slug]}]
                  (let [ident (comp/get-ident MainProposalList {::process/slug slug})]
                    (dr/route-deferred ident
-                     #(df/load! app ident MainProposalList
-                        {:post-mutation `dr/target-ready
-                         :post-mutation-params {:target ident}}))))
+                     (fn []
+                       (if (get-in (app/current-state app) ident)
+                         (do
+                           (df/load! app ident MainProposalList {:parallel true})
+                           (dr/target-ready! app ident))
+                         (df/load! app ident MainProposalList
+                           {:post-mutation `dr/target-ready
+                            :post-mutation-params {:target ident}}))))))
    :use-hooks? true}
   (let [logged-in? (get current-session :session/valid?)
         [selected-sort set-selected-sort!] (hooks/use-state "new->old")

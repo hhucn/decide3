@@ -35,8 +35,7 @@
 (defn time-part [^js/Date created]
   (comp/fragment
     " "
-    (time/time-element created
-      (time/nice-string created))))
+    (time/nice-time-element created)))
 
 (defsc Parent [_ _]
   {:query [::proposal/id]
