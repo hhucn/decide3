@@ -4,7 +4,7 @@
     [com.fulcrologic.fulcro.components :as comp]
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.rad.application :as rad-app]
-    ["intl-messageformat" :default IntlMessageFormat]))
+    #?(:cljs ["intl-messageformat" :default IntlMessageFormat])))
 
 #?(:cljs
    (defn message-formatter [{:keys [::i18n/localized-format-string ::i18n/locale ::i18n/format-options]}]
