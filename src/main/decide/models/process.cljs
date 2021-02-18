@@ -24,9 +24,9 @@
   (remote [env] (m/returning env proposal/Proposal)))
 
 
-(defmutation add-process [{::keys [slug title description] :as params}]
+(defmutation add-process [{::keys [slug title description] :as process}]
   (action [{:keys [app]}]
-    (mrg/merge-component! app Process params))
+    (mrg/merge-component! app Process process))
   (remote [env]
     (-> env
       (m/returning Process)

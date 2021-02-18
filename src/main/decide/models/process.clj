@@ -10,7 +10,8 @@
     [datahike.core :as d.core]
     [decide.models.authorization :as auth]
     [decide.models.proposal :as proposal]
-    [decide.models.user :as user]))
+    [decide.models.user :as user])
+  (:import (java.util Date)))
 
 (def schema
   [{:db/ident ::slug
@@ -127,37 +128,47 @@
         voters (apply set/union (map (partial proposal/get-voters db) proposal-db-ids))]
     (count (set/union commenter authors voters))))
 
-(>defn tx-map [{::keys [title slug description moderator-lookups]}]
-  [(s/keys :req [::title ::slug ::description]) => (s/keys :req [::title ::slug ::description ::latest-id])]
-  {::slug slug
-   ::title title
-   ::description description
-   ::moderators moderator-lookups
-   ::proposals []
-   ::latest-id 0})
+(>defn in-past? [date]
+  [any? => boolean?]
+  (neg? (compare date (Date.))))
 
-;; region API
+(defn is-over?
+  "Checks if a processes is over based on its end-time and the current datetime.
+   Returns false if process has no end-time"
+  [db process-lookup]
+  [d.core/db? ::lookup]
+  (if-let [end-time (::end-time (d/pull db [::end-time] process-lookup))]
+    (in-past? end-time)
+    false))
 
-(>defn add-process! [conn user-id {::keys [slug title description type] :as process
-                                   :or {type ::type.public}}]
-  [d.core/conn? ::user/id (s/keys :req [::slug ::title ::description ::type]) => map?]
-  (let [db (d/db conn)
-        moderator-id user-id]
-    (cond
-      (slug-in-use? db slug) (throw (ex-info "Slug already in use" {:slug slug}))
+(comment
+  ;; TODO implement
+  (defn has-access-to-process? [db process-lookup user-lookup]
+    (d/q '[:find ?e
+           :in $ ?process ?user
+           :where
+           (or
+             [?process ::participants ?user]
+             [?process ::moderators ?user])])))
 
-      :else
-      (d/transact conn
-        [(merge
-           (tx-map
-             {::slug slug
-              ::title title
-              ::description description
-              ::type type
-              ::moderator-lookups [[::user/id moderator-id]]})
-           process)
-         [:db/add "datomic.tx" :db/txUser [::user/id user-id]]]))))
-
+(>defn ->add
+  "Returns a transaction as data, ready to be transacted."
+  [db {::keys [slug title description
+               type end-time moderators]
+       :or {type ::type.public
+            moderators []}}]
+  [d.core/db? (s/keys :req [::slug ::title ::description] :opt [::type ::end-time]) => vector?]
+  (if (slug-in-use? db slug)
+    (throw (ex-info "Slug already in use" {:slug slug}))
+    [(cond->
+       {::slug slug
+        ::title title
+        ::description description
+        ::type type
+        ::proposals []                                      ; Do not allow to set initial proposals as this may create conflicts with the nice id
+        ::latest-id 0
+        ::moderators moderators}
+       end-time (assoc ::end-time end-time))]))
 
 
 (>defn is-moderator? [db process-lookup user-id]
@@ -167,25 +178,25 @@
       (::moderators (d/pull db [{::moderators [::user/id]}] process-lookup)))
     user-id))
 
-(>defn update-process! [conn user-id {::keys [slug] :as process}]
-  [d.core/conn? ::user/id (s/keys :req [::slug] :opt [::title ::description ::end-time]) => map?]
-  (let [db (d/db conn)]
-    (cond
-      (not (s/valid? (s/keys :req [::slug] :opt [::title ::description ::end-time]) process))
-      (throw (ex-info "Parameter not valid" {:explain (s/explain-data (s/keys :req [::slug] :opt [::title ::description ::end-time]) process)}))
+(>defn ->update
+  "Generates a transaction data to update an existing process.
+  Any falsy key will be retracted."
+  [{::keys [slug] :as process}]
+  [(s/keys :req [::slug] :opt [::title ::description ::end-time]) => vector?]
+  (let [process-ident [::slug slug]]
+    (mapv
+      (fn [[k v]]
+        (if v
+          [:db/add process-ident k v]
+          [:db/retract process-ident k]))
+      (dissoc process ::slug))))
 
-      (not (is-moderator? db [::slug slug] user-id))
-      (throw (ex-info "User is not moderator of this process" {::user/id user-id ::slug slug}))
-
-      :else
-      (let [facts (for [[k v] (dissoc process ::slug)]
-                    (if v
-                      [:db/add [::slug slug] k v]
-                      [:db/retract [::slug slug] k]))
-            {:keys [db-after]}
-            (d/transact conn
-              (conj facts [:db/add "datomic.tx" :db/txUser [::user/id user-id]]))]
-        db-after))))
+(>defn ->upsert [db {::keys [slug] :as process}]
+  [d.core/db? (s/keys :req [::slug] :opt [::title ::description ::type ::end-time])
+   => vector?]
+  (if (slug-in-use? db slug)
+    (->update process)
+    (->add db process)))
 
 (>defn get-number-of-participants [db slug]
   [d.core/db? ::slug => nat-int?]
@@ -216,14 +227,29 @@
         (throw (ex-info "Need moderation role for this operation" {::slug slug
                                                                    ::user/id user-id}))))))
 
-(defmutation add-process [{:keys [conn AUTH/user-id] :as env} {::keys [slug] :as process}]
+(defn process-still-going [{::pc/keys [mutate] :as mutation}]
+  (assoc mutation
+    ::pc/mutate
+    (fn [{:keys [db] :as env} {::keys [slug] :as params}]
+      (if-not (is-over? db [::slug slug])
+        (mutate env params)
+        (throw (ex-info "The process is already over" {::slug slug}))))))
+
+
+(defmutation add-process [{:keys [conn db AUTH/user-id] :as env} {::keys [slug] :as process}]
   {::pc/params [::title ::slug ::description ::end-time ::type]
    ::pc/output [::slug]
    ::s/params (s/keys
                 :req [::slug ::title ::description]
                 :opt [::end-time ::type])
    ::pc/transform auth/check-logged-in}
-  (let [{:keys [db-after]} (add-process! conn user-id (select-keys process [::title ::slug ::description ::end-time ::type]))]
+  (let [user-ident [::user/id user-id]
+        process (update process ::moderators conj user-ident) ; remove that here? let the user come through parameters?
+        {:keys [db-after]}
+        (d/transact conn
+          {:tx-data
+           (conj (->add db process)
+             [:db/add "datomic.tx" :db/txUser user-ident])})]
     {::slug slug
      ::p/env (assoc env :db db-after)}))
 
@@ -232,13 +258,17 @@
    ::pc/output [::slug]
    ::s/params (s/keys :req [::slug] :opt [::title ::description ::end-time ::type])
    ::pc/transform (comp auth/check-logged-in check-slug-exists needs-moderator)}
-  (let [db-after (update-process! conn user-id (select-keys process [::title ::slug ::description ::end-time ::type]))]
+  (let [{:keys [db-after]}
+        (d/transact conn
+          {:tx-data
+           (-> process ->update (conj [:db/add "datomic.tx" :db/txUser [::user/id user-id]]))})]
     {::slug slug
      ::p/env (assoc env :db db-after)}))
 
 (defn add-moderator! [conn process-lookup moderator-id new-moderator-lookup]
-  (d/transact conn [[:db/add process-lookup ::moderators new-moderator-lookup]
-                    [:db/add "datomic.tx" :db/txUser [::user/id moderator-id]]]))
+  (d/transact conn
+    [[:db/add process-lookup ::moderators new-moderator-lookup]
+     [:db/add "datomic.tx" :db/txUser [::user/id moderator-id]]]))
 
 (defmutation add-moderator [{:keys [conn db AUTH/user-id] :as env} {::keys [slug] email ::user/email}]
   {::pc/output [::user/id]
@@ -255,9 +285,10 @@
   {::pc/params [::slug ::user/id]
    ::s/params (s/keys :req [::user/id ::slug])
    ::pc/transform (comp auth/check-logged-in check-slug-exists)}
-  (when (= user-id user)
-    (enter! conn [::slug slug] [::user/id user])
-    nil))
+  #_(when (= user-id user)
+      (enter! conn [::slug slug] [::user/id user])
+      nil)
+  :noop)
 
 (defmutation add-proposal [{:keys [conn AUTH/user-id] :as env}
                            {::proposal/keys [id title body parents arguments]

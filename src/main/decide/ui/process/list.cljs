@@ -90,12 +90,13 @@
     (dialog/title {} (i18n/tr "New decision-process"))
     (dialog/content {}
       (process-forms/ui-new-process-form new-process-form
-        {:onSubmit (fn [{::process/keys [title slug description end-time]}]
+        {:onSubmit (fn [{::process/keys [title slug description end-time type]}]
                      (comp/transact! comp [(process/add-process
                                              {::process/title title
                                               ::process/slug slug
                                               ::process/description description
-                                              ::process/end-time end-time})]))}))))
+                                              ::process/end-time end-time
+                                              ::process/type type})]))}))))
 
 (defsc ProcessesPage [this {:keys [all-processes-list root/current-session
                                    ui/new-process-dialog-open?

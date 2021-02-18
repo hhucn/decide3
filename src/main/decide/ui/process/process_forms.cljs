@@ -72,7 +72,8 @@
                              (onSubmit {::process/title title
                                         ::process/slug (slugify (if auto-slug? title slug))
                                         ::process/description description
-                                        ::process/end-time (and with-end? end-time)}))}
+                                        ::process/end-time (when with-end? end-time)
+                                        ::process/type (if public? ::process/type.public ::process/type.private)}))}
       (let [length (count title)
             close-to-max? (< (- title-max-length 10) length)]
         (inputs/textfield
