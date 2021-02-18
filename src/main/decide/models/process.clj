@@ -154,9 +154,11 @@
 (>defn ->add
   "Returns a transaction as data, ready to be transacted."
   [db {::keys [slug title description
-               type end-time moderators]
+               type end-time moderators
+               participants]
        :or {type ::type.public
-            moderators []}}]
+            moderators []
+            participants []}}]
   [d.core/db? (s/keys :req [::slug ::title ::description] :opt [::type ::end-time]) => vector?]
   (if (slug-in-use? db slug)
     (throw (ex-info "Slug already in use" {:slug slug}))
@@ -167,7 +169,8 @@
         ::type type
         ::proposals []                                      ; Do not allow to set initial proposals as this may create conflicts with the nice id
         ::latest-id 0
-        ::moderators moderators}
+        ::moderators moderators
+        ::participants participants}
        end-time (assoc ::end-time end-time))]))
 
 
@@ -205,9 +208,8 @@
     ::participants
     count))
 
-(>defn enter! [conn process-lookup user-lookup]
-  [d.core/conn? ::lookup ::user/lookup => map?]
-  (d/transact conn [[:db/add process-lookup ::participants user-lookup]]))
+(defn ->enter [process-lookup user-lookups]
+  [[:db/add process-lookup ::participants user-lookups]])
 
 ;; region API
 (defn check-slug-exists [{::pc/keys [mutate] :as mutation}]
@@ -236,19 +238,24 @@
         (throw (ex-info "The process is already over" {::slug slug}))))))
 
 
-(defmutation add-process [{:keys [conn db AUTH/user-id] :as env} {::keys [slug] :as process}]
-  {::pc/params [::title ::slug ::description ::end-time ::type]
+(defmutation add-process [{:keys [conn db AUTH/user-id] :as env}
+                          {::keys [slug] :keys [participant-emails] :as process}]
+  {::pc/params [::title ::slug ::description ::end-time ::type
+                :participant-emails]
    ::pc/output [::slug]
    ::s/params (s/keys
                 :req [::slug ::title ::description]
                 :opt [::end-time ::type])
    ::pc/transform auth/check-logged-in}
   (let [user-ident [::user/id user-id]
-        process (update process ::moderators conj user-ident) ; remove that here? let the user come through parameters?
+        existing-emails (filter #(user/email-in-db? db %) participant-emails)
         {:keys [db-after]}
         (d/transact conn
           {:tx-data
-           (conj (->add db process)
+           (conj (->add db
+                   (-> process
+                     (update ::moderators conj user-ident)  ; remove that here? let the user come through parameters?
+                     (update ::participants concat (map #(vector ::user/email %) existing-emails))))
              [:db/add "datomic.tx" :db/txUser user-ident])})]
     {::slug slug
      ::p/env (assoc env :db db-after)}))
@@ -280,15 +287,26 @@
        ::p/env (assoc env :db db-after)})
     (throw (ex-info "User with this email doesn't exist!" {:email email}))))
 
-(defmutation enter [{:keys [conn AUTH/user-id]} {user ::user/id
-                                                 slug ::slug}]
-  {::pc/params [::slug ::user/id]
-   ::s/params (s/keys :req [::user/id ::slug])
-   ::pc/transform (comp auth/check-logged-in check-slug-exists)}
-  #_(when (= user-id user)
-      (enter! conn [::slug slug] [::user/id user])
-      nil)
-  :noop)
+
+
+(defmutation add-participant [{:keys [conn db AUTH/user-id] :as env}
+                              {user-emails :user-emails slug ::slug}]
+  {::pc/params [::slug ::user/email]
+   ::pc/output [::slug]
+   ::s/params (s/keys :req [::slug])
+   ::pc/transform (comp auth/check-logged-in check-slug-exists needs-moderator)}
+  (let [user-lookups
+        (for [user-email user-emails
+              :when (user/email-in-db? db user-email)]
+          [::user/email user-email])
+
+        {:keys [db-after]}
+        (d/transact conn
+          (conj
+            (->enter [::slug slug] user-lookups)
+            [:db/add "datomic.tx" :db/txUser [::user/id user-id]]))]
+    {::slug slug
+     ::p/env (assoc env :db db-after)}))
 
 (defmutation add-proposal [{:keys [conn AUTH/user-id] :as env}
                            {::proposal/keys [id title body parents arguments]
@@ -306,9 +324,11 @@
                                      :argument-idents arguments
                                      :original-author [::user/id user-id]})
         tx-report (d/transact conn
-                    [(assoc new-proposal :db/id "new-proposal")
-                     [:db/add [::slug slug] ::proposals "new-proposal"]
-                     [:db/add "datomic.tx" :db/txUser [::user/id user-id]]])]
+                    (concat
+                      (->enter [::slug slug] [::user/id user-id])
+                      [(assoc new-proposal :db/id "new-proposal")
+                       [:db/add [::slug slug] ::proposals "new-proposal"]
+                       [:db/add "datomic.tx" :db/txUser [::user/id user-id]]]))]
     {::proposal/id real-id
      :tempids {id real-id}
      ::p/env (assoc env :db (:db-after tx-report))}))
@@ -320,7 +340,7 @@
 
    add-moderator
 
-   enter
+   add-participant
 
    add-proposal])
 

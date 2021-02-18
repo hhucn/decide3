@@ -17,7 +17,8 @@
     [decide.ui.common.time :as time]
     [com.fulcrologic.fulcro.dom :as dom]
     [material-ui.transitions :as transitions]
-    [material-ui.data-display.list :as list]))
+    [material-ui.data-display.list :as list]
+    [material-ui.surfaces :as surfaces]))
 
 (def slug-pattern #"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 
@@ -51,8 +52,8 @@
   (list/list {}
     (map ui-participant participants)))
 
-(defsc NewProcessForm [_ {:keys [participants]} {:keys [onSubmit]}]
-  {:query [{:participants [::user/id]}]
+(defsc NewProcessForm [_ {:keys []} {:keys [onSubmit]}]
+  {:query []
    :initial-state {}
    :use-hooks? true}
   (let [[title change-title] (hooks/use-state "")
@@ -63,6 +64,8 @@
         [with-end? set-with-end?] (hooks/use-state false)
         [end-time set-end-time] (hooks/use-state nil)
         [public? set-public?] (hooks/use-state true)
+        [participants set-participants] (hooks/use-state #{})
+        [participants-field-text set-participants-field] (hooks/use-state "")
         update-title (hooks/use-callback (fn [e] (let [value (evt/target-value e)]
                                                    (change-title value)
                                                    (set-auto-slug true))))]
@@ -73,7 +76,8 @@
                                         ::process/slug (slugify (if auto-slug? title slug))
                                         ::process/description description
                                         ::process/end-time (when with-end? end-time)
-                                        ::process/type (if public? ::process/type.public ::process/type.private)}))}
+                                        ::process/type (if public? ::process/type.public ::process/type.private)
+                                        :participant-emails (vec participants)}))}
       (let [length (count title)
             close-to-max? (< (- title-max-length 10) length)]
         (inputs/textfield
@@ -136,13 +140,32 @@
              :onChange #(set-public? (not public?))
              :control (inputs/switch {})}))
 
+        (when (seq participants)
+          (surfaces/paper {:variant :outlined}
+            (layout/box {:p 1}
+              (input/label {:shrink true} (i18n/trc "Label for list of participants" "Participants"))
+              (grid/container {:spacing 1}
+                (for [p participants]
+                  (grid/item {:key p}
+                    (dd/chip {:label p
+                              :onDelete #(set-participants (disj participants p))})))))))
+
         (transitions/collapse {:in (not public?)}
-          (layout/box {:style {:borderWidth "thin" :borderStyle "dashed"} :borderColor "warning.main"}
-            (inputs/textfield
-              (merge default-input-props
-                {:label (i18n/tr "Participant emails")
-                 :helperText (i18n/tr "Separate addresses with commas")}))
-            (participant-list {:participants participants}))))
+          (inputs/textfield
+            (merge default-input-props
+              {:label (i18n/trc "Label for input field" "Participant emails")
+               :multiline true
+               :value participants-field-text
+               :onChange (fn [e]
+                           (let [value (str/triml (evt/target-value e))
+                                 matches (re-seq #"([\w@\.\+\u00C0-\u017F]+)[\s,;]" value)]
+                             (if-not matches
+                               (set-participants-field value)
+                               (let [prefix-length (reduce + (map (comp count first) matches))
+                                     emails (map second matches)]
+                                 (set-participants (apply conj participants emails))
+                                 (set-participants-field (apply str (drop prefix-length value)))))))
+               :rows 1}))))
 
 
       (inputs/button

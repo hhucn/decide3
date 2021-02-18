@@ -40,8 +40,9 @@
     (contains? (into #{} (map (partial comp/get-ident Moderator)) moderators)
       (:user current-session))))
 
-(defsc ProcessListEntry [_ {::process/keys [slug title description no-of-authors no-of-proposals]}]
-  {:query [::process/slug ::process/title ::process/description ::process/no-of-authors
+(defsc ProcessListEntry [_ {::process/keys [slug title description no-of-participants no-of-proposals no-of-contributors]}]
+  {:query [::process/slug ::process/title ::process/description
+           ::process/no-of-participants ::process/no-of-contributors
            ::process/no-of-proposals]
    :ident ::process/slug
    :use-hooks? true}
@@ -54,7 +55,7 @@
       (dd/divider {})
       (surfaces/card-actions {}
         (icon-badge (i18n/tr "Number of proposals") (or no-of-proposals 0) EmojiObjectsOutlinedIcon)
-        (icon-badge (i18n/tr "Number of participants") (or no-of-authors 0) GroupIcon)))))
+        (icon-badge (i18n/tr "Number of participants") (max no-of-participants no-of-contributors 0) GroupIcon)))))
 
 
 (def ui-process-list-entry (comp/computed-factory ProcessListEntry {:keyfn ::process/slug}))
@@ -83,20 +84,22 @@
           (when (empty? all-processes) skeleton-list))))))
 (def ui-all-process-list (comp/factory AllProcessesList))
 
-(defn new-process-dialog [comp {:keys [new-process-dialog-open? new-process-form]}]
+(defn new-process-dialog [comp {:keys [close new-process-dialog-open? new-process-form]}]
   (dialog/dialog
     {:open new-process-dialog-open?
      :onClose #(m/set-value! comp :ui/new-process-dialog-open? false)}
     (dialog/title {} (i18n/tr "New decision-process"))
     (dialog/content {}
       (process-forms/ui-new-process-form new-process-form
-        {:onSubmit (fn [{::process/keys [title slug description end-time type]}]
+        {:onSubmit (fn [{::process/keys [title slug description end-time type] :keys [participant-emails]}]
                      (comp/transact! comp [(process/add-process
                                              {::process/title title
                                               ::process/slug slug
                                               ::process/description description
                                               ::process/end-time end-time
-                                              ::process/type type})]))}))))
+                                              ::process/type type
+                                              :participant-emails participant-emails})])
+                     #_(close))}))))
 
 (defsc ProcessesPage [this {:keys [all-processes-list root/current-session
                                    ui/new-process-dialog-open?
@@ -125,5 +128,6 @@
                         :onClick #(m/toggle! this :ui/new-process-dialog-open?)}
           (i18n/tr "Create new decision-process")))
 
-      (new-process-dialog this {:new-process-dialog-open? new-process-dialog-open?
+      (new-process-dialog this {:close #(m/set-value! this :ui/new-process-dialog-open? false)
+                                :new-process-dialog-open? new-process-dialog-open?
                                 :new-process-form new-process-form}))))

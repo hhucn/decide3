@@ -97,12 +97,13 @@
           (inputs/checkbox {:checked (contains? selected value)})
           (list/item-text {:primary label}))))))
 
-(defsc MainProposalList [_ {::process/keys [slug proposals no-of-contributors end-time]
+(defsc MainProposalList [_ {::process/keys [slug proposals no-of-contributors end-time no-of-participants]
                             :keys [root/current-session]}
                          {:keys [show-new-proposal-dialog]}]
   {:query [::process/slug
            {::process/proposals (comp/get-query proposal-card/ProposalCard)}
            ::process/no-of-contributors
+           ::process/no-of-participants
            ::process/end-time
            [:root/current-session '_]]
    :ident ::process/slug
@@ -138,7 +139,7 @@
               (grid/item {}
                 (dd/typography {:variant :overline}
                   (i18n/trf "Participants {count}"
-                    {:count (str no-of-contributors)}))))
+                    {:count (str (max no-of-participants no-of-contributors 0))}))))
             (grid/container {:item true :spacing 2
                              :justify "flex-end"}
               (grid/item {} (filter-selector selected-filters set-selected-filters!))

@@ -112,9 +112,25 @@
      ::nice-id nice-id
      ::body body
      ::parents parents
-     ::arguments argument-idents                     ; TODO check if arguments exist and belog to parents
+     ::arguments argument-idents                            ; TODO check if arguments exist and belog to parents
      ::original-author original-author
      ::created created}))
+
+(defn ->add [process-lookup {::keys [id nice-id title body parents argument-idents created original-author]
+                             :or {parents []
+                                  argument-idents []}}]
+  (let [created (or created (Date.))
+        id (or id (d.core/squuid (inst-ms created)))]
+    [{:db/id (str id)
+      ::id id
+      ::title title
+      ::nice-id nice-id
+      ::body body
+      ::parents parents
+      ::arguments argument-idents                           ; TODO check if arguments exist and belog to parents
+      ::original-author original-author
+      ::created created}
+     [:db/add process-lookup :decide.models.process/proposals (str id)]]))
 
 ;;; region API
 
