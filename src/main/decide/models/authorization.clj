@@ -21,14 +21,14 @@
                        ::user/id user-id}})))
 
 (defn session-wrapper [env]
-  (let [user-id (user/get-session-user-id env)]
+  (let [user-id (user/get-session-user-id (:ring/request env))]
     (add-user-id-to-env env user-id)))
 
 (defn check-logged-in [{::pc/keys [mutate] :as mutation}]
   (assoc mutation
     ::pc/mutate
     (fn [env params]
-      (if-let [user-id (user/get-session-user-id env)]
+      (if-let [user-id (user/get-session-user-id (:ring/request env))]
         (-> env (add-user-id-to-env user-id) (mutate params)) ; instead of session-wrapper?
         (throw (ex-info "User is not logged in!" {}))))))
 
