@@ -106,7 +106,7 @@
      ::password (hash-password password)}))
 
 
-(defmutation sign-in [{:keys [db] :as env} {::keys [email password]}]
+(defmutation sign-in [{:keys [conn db] :as env} {::keys [email password]}]
   {::pc/params [::email ::password]
    ::pc/output [:session/valid? ::id {:user [::id]}
                 :signin/result :errors]}
@@ -120,8 +120,18 @@
            ::id id})
         {:signin/result :fail
          :errors #{:invalid-credentials}}))
-    {:signin/result :fail
-     :errors #{:account-does-not-exist}}))
+
+    ;; TODO register for now if not in DB...revert this later
+    (let [{::keys [id] :as user} (tx-map {::email email ::password password})
+          tx-report (d/transact conn [user [:db/add "datomic.tx" :db/txUser [::id id]]])]
+      (wrap-session env
+        {:signup/result :success
+         ::id id
+         :user {::id id}
+         :session/valid? true
+         ::p/env (assoc env :db (:db-after tx-report))}))
+    #_{:signin/result :fail
+       :errors #{:account-does-not-exist}}))
 
 ;; API
 (defmutation sign-up [{:keys [conn] :as env} {::keys [email password]}]

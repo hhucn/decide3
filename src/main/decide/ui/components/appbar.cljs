@@ -13,7 +13,9 @@
     [material-ui.navigation :as navigation]
     [material-ui.surfaces :as surfaces]
     ["@material-ui/icons/AccountCircle" :default AccountCircleIcon]
-    ["@material-ui/icons/Menu" :default Menu]))
+    ["@material-ui/icons/Menu" :default Menu]
+    [com.fulcrologic.fulcro.dom.events :as evt]
+    [com.fulcrologic.fulcro.dom :as dom]))
 
 (def appbar-theme-color
   {:light "primary"
@@ -33,7 +35,9 @@
         display-name (get-in current-session [:user ::user/display-name])
         menu-ref (hooks/use-ref)
         [easteregg-count set-easteregg-count!] (hooks/use-state 0)
-        show-easteregg? (and (zero? (mod easteregg-count 5)) (pos? easteregg-count))]
+        show-easteregg? (and (zero? (mod easteregg-count 5)) (pos? easteregg-count))
+
+        [temp-nickname set-temp-nickname] (hooks/use-state "")]
     (surfaces/app-bar
       {:position "sticky"
        :color (appbar-theme-color theme)
@@ -62,11 +66,23 @@
                      :flexDirection :row-reverse}
 
           (if-not logged-in?
-            (inputs/button
-              {:variant :outlined
-               :color :inherit
-               :onClick #(comp/transact! this [(login/show-signinup-dialog {:which-form :sign-in})] {:compressible? true})}
-              (i18n/trc "Label of login button" "Login"))
+            (dom/form
+              {:onSubmit #(comp/transact! this [(login/sign-in #:decide.models.user{:email temp-nickname :password temp-nickname})])}
+              (inputs/textfield
+                {:variant :outlined
+                 :size :small
+                 :value temp-nickname
+                 :onChange #(set-temp-nickname (evt/target-value %))
+                 :label (i18n/trc "Temp Nickname for login" "Nickname")
+                 :InputProps
+                 {:endAdornment
+                  (inputs/button
+                    {:variant :text
+                     :color :inherit
+                     :type :submit}
+                    ; :onClick #(comp/transact! this [(login/show-signinup-dialog {:which-form :sign-in})] {:compressible? true})}
+                    (i18n/trc "Label of login button" "Login"))}}))
+
 
             (comp/fragment
 
