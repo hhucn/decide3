@@ -30,7 +30,7 @@
     (str "#" (if (tempid/tempid? proposal-id) "?" proposal-id))))
 
 (defn author-part [author-name]
-  (i18n/trf "by {author}" {:author (dom/address (str author-name))}))
+  (apply comp/fragment (i18n/trf "by {author}" {:author (dom/address (str author-name))})))
 
 (defn time-part [^js/Date created]
   (comp/fragment
@@ -99,20 +99,21 @@
       {:raised false
        :component :article}
 
-      (surfaces/card-header
-        {:title title
-         :titleTypographyProps {:component "h3"}
-         :subheader (ui-subheader props)
-         :action (inputs/icon-button {:disabled true :size :small}
-                   (comp/create-element MoreVert nil nil))})
+      (surfaces/card-action-area {:href proposal-href}
+        (surfaces/card-header
+          {:title title
+           :titleTypographyProps {:component "h3"}
+           :subheader (ui-subheader props)
+           :action (inputs/icon-button {:disabled true :size :small}
+                     (comp/create-element MoreVert nil nil))})
 
-      (surfaces/card-content {}
-        (dd/typography
-          {:component "p"
-           :variant "body2"
-           :color "textSecondary"
-           :style {:whiteSpace "pre-line"}}
-          body))
+        (surfaces/card-content {}
+          (dd/typography
+            {:component "p"
+             :variant "body2"
+             :color "textSecondary"
+             :style {:whiteSpace "pre-line"}}
+            body)))
 
       (surfaces/card-actions {}
         (layout/box {:color "success.main"} (dd/typography {:variant :button} pro-votes))
@@ -122,8 +123,8 @@
             {:disabled (not logged-in?)
              :color (if approved? "primary" "default")
              :variant :text                                 ;(if approved? :contained :text)
-             :onClick #(comp/transact! this [(opinion/add {::proposal/id id
-                                                           :opinion (if approved? 0 +1)})])
+             :onClick #(comp/transact!! this [(opinion/add {::proposal/id id
+                                                            :opinion (if approved? 0 +1)})])
              :startIcon (comp/create-element ThumbUpAltTwoTone nil nil)}
             (if-not approved?
               (i18n/trc "Approve a proposal" "Approve")

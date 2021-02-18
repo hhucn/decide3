@@ -20,6 +20,7 @@
     ["@material-ui/icons/ChevronLeft" :default ChevronLeftIcon]
     ["@material-ui/icons/Settings" :default SettingsIcon]
     ["@material-ui/icons/DeviceHub" :default DeviceHubIcon]
+    ["@material-ui/icons/Translate" :default TranslateIcon]
     [taoensso.timbre :as log]))
 
 (def ident [:component/id ::NavDrawer])

@@ -60,10 +60,12 @@
                 :indicatorColor "secondary"
                 :textColor "secondary"
                 :component :nav}
-      (for [{:keys [target] :as tab-props} targets]
+      (for [{:keys [target] :as tab-props} targets
+            :let [href (r/path->absolute-url (dr/into-path current-path target))]]
         (tabs/tab
           (merge (dissoc tab-props :target :path)
-            {:href (r/path->absolute-url (dr/into-path current-path target))}))))))
+            {:href href
+             :key href}))))))
 
 (defsc Moderator [_ _]
   {:query [::user/id]
