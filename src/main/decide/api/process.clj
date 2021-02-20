@@ -4,7 +4,8 @@
     [datahike.api :as d]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
-    [decide.models.user :as user]))
+    [decide.models.user :as user]
+    [clojure.set :as set]))
 
 (defresolver resolve-all-processes [{:root/keys [public-processes private-processes]}]
   {::pc/output [{:root/all-processes [::process/slug ::process/type]}]}
@@ -94,6 +95,32 @@
   {::pc/output [::process/slug]}
   (::process/_proposals (d/pull db [{::process/_proposals [::process/slug]}] [::proposal/id id])))
 
+(defresolver sankey-data-resolver [{:keys [db]} {::process/keys [slug]}]
+  {::pc/output [{:sankey
+                 {:nodes [::proposal/id]
+                  :links
+                  [{:from [::proposal/id]}
+                   :weight
+                   {:to [::proposal/id]}]}}]}
+  {:sankey
+   {:nodes
+    (::process/proposals (d/pull db [{::process/proposals [::proposal/id]}] [::process/slug slug]) [])
+    :links
+    (for [{:keys [to from]}
+          (d/q '[:find (pull ?from [:decide.models.proposal/id]) (pull ?to [:decide.models.proposal/id])
+                 :keys from to
+                 :in $ ?process
+                 :where
+                 [?process :decide.models.process/proposals ?to]
+                 [?to :decide.models.proposal/parents ?from]]
+            db [:decide.models.process/slug slug])]
+      (let [voting-for-to (proposal/get-pro-voting-users db (find to ::proposal/id))
+            voting-for-from (proposal/get-pro-voting-users db (find from ::proposal/id))
+            weight (count (set/intersection voting-for-to voting-for-from))]
+        {:to to
+         :from from
+         :weight weight}))}})
+
 (def all-resolvers
   [process/resolvers
 
@@ -111,5 +138,7 @@
    resolve-no-of-proposals
 
    resolve-authors
+
+   sankey-data-resolver
 
    resolve-I-moderator?])

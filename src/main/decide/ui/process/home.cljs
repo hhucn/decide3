@@ -13,7 +13,9 @@
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
     [material-ui.layout.grid :as grid]
-    [material-ui.surfaces :as surfaces]))
+    [material-ui.surfaces :as surfaces]
+    [goog.object :as gobj]
+    [taoensso.timbre :as log]))
 
 (defsc TopEntry [_this {::proposal/keys [id title pro-votes my-opinion]
                         :keys [root/current-session] :as props}]
@@ -96,14 +98,105 @@
 
 (def ui-experimental-ballot (comp/computed-factory Ballot))
 
+(defn render-nodes! [^js/object dom-node nodes]
+  (-> dom-node
+    (.append "g")
+    (.selectAll ".node")
+    (.data nodes)
+    (.enter)
+    (.append "rect")
+    (.classed "node", true)
+    (.attr "x" (fn [^js/object node] (. node -x0)))
+    (.attr "y" (fn [^js/object node] (. node -y0)))
+    (.attr "width" (fn [^js/object d] (- (.-x1 d) (.-x0 d))))
+    (.attr "height" (fn [^js/object d] (- (.-y1 d) (.-y0 d))))
+    (.attr "fill" "blue")))
+
+(defn render-links! [^js/object dom-node links]
+  (-> dom-node
+    (.append "g")
+    (.selectAll ".node")
+    (.data links)
+    (.enter)
+    (.append "path")
+    (.classed "link", true)
+    (.attr "d" (js/d3.sankeyLinkHorizontal))
+    (.attr "fill" "none")
+    (.attr "stroke" "#606060")
+    (.attr "stroke-width" (fn [^js/object d] (.-width d)))
+    (.attr "stroke-opacity" 0.5)))
+
+(def generate-sankey
+  (doto (js/d3.sankey)
+    (.size #js [400 200])
+    (.nodeId (fn [node] (.-id node)))
+    (.nodeWidth 20)
+    (.nodePadding 10)
+    (.nodeAlign js/d3.sankeyCenter)))
+
+(defn render-sankey! [dom-node {:keys [nodes links] :as props}]
+  (log/info 'render-sankey!)
+  (let [svg (.select js/d3 "#my-diagram")
+        ^js/object graph
+        (generate-sankey
+          (clj->js
+            (-> props
+              (update :nodes
+                (fn [nodes]
+                  (map
+                    (fn [node]
+                      {:id (str (::proposal/id node))
+                       :fixedValue (::proposal/pro-votes node)})
+                    nodes)))
+
+              (update :links
+                (fn [links]
+                  (map (fn [{:keys [from to weight]}]
+                         {:source (str (::proposal/id from))
+                          :target (str (::proposal/id to))
+                          :value weight})
+                    links))))))]
+    (log/spy :info graph)
+    (.remove (.selectAll svg "*"))
+    (render-nodes! svg (.-nodes graph))
+    (render-links! svg (.-links graph))))
+
+(defsc SankeyDiagram [this props]
+  {:componentDidMount
+   (fn [this]
+     (when-let [dom-node (gobj/get this "svg")]
+       (render-sankey! dom-node (comp/props this))))
+   :shouldComponentUpdate
+   (fn [this next-props next-state]
+     (when-let [dom-node (gobj/get this "svg")]
+       (render-sankey! dom-node next-props))
+     false)}
+  (dom/svg {:id "my-diagram"
+            :style {:backgroundColor "rgb(240,240,240)"}
+            :width "100%" :height 200
+            :viewBox "0 0 400 200"
+            :ref (fn [r] (gobj/set this "svg" r))}))
+
+(def ui-sankey (comp/computed-factory SankeyDiagram))
+
+(defsc Proposal [_ _]
+  {:query [::proposal/id ::proposal/title ::proposal/pro-votes]
+   :ident ::proposal/id})
+
 (defsc ProcessHome [_this {::process/keys [description proposals]
-                           :keys [>/experimental-ballots]}]
+                           :keys [>/experimental-ballots sankey]}]
   {:query [::process/slug ::process/description
            {::process/proposals (comp/get-query TopEntry)}
+           {:sankey [{:nodes (comp/get-query Proposal)} :links]}
            {:>/experimental-ballots (comp/get-query Ballot)}]
    :ident ::process/slug}
   (layout/box {:clone true :pt 2}
     (layout/container {:maxWidth :lg :component :main}
+
+      (section-paper {}
+        (when sankey
+          (ui-sankey sankey)))
+
       ;; description section
       (grid/container {:spacing 2}
         (grid/item {:xs 12}

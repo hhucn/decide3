@@ -75,6 +75,12 @@
        (ssr/initial-state->script-tag initial-db)
 
        [:link {:href "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" :rel "stylesheet"}]
+       [:script {:src "https://d3js.org/d3.v6.js"}]
+       [:script {:src "https://unpkg.com/d3-array@1"}]
+       [:script {:src "https://unpkg.com/d3-collection@1"}]
+       [:script {:src "https://unpkg.com/d3-path@1"}]
+       [:script {:src "https://unpkg.com/d3-shape@1"}]
+       [:script {:src "https://unpkg.com/d3-sankey@0.12.3/dist/d3-sankey.js"}]
        [:script (str "var fulcro_network_csrf_token = '" csrf-token "';")]
        [:style (garden/css styles/body styles/splashscreen styles/sizing styles/address)]]
       [:body
