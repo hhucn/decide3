@@ -1,5 +1,6 @@
 (ns decide.ui.proposal.detail-page
   (:require
+    [clojure.string :as str]
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.algorithms.merge :as mrg]
     [com.fulcrologic.fulcro.algorithms.normalized-state :as norm]
@@ -16,7 +17,6 @@
     [decide.models.authorization :as auth]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
-    [goog.string :as gstring]
     [material-ui.data-display :as dd]
     [material-ui.data-display.list :as list]
     [material-ui.inputs :as inputs]
@@ -29,9 +29,9 @@
     ["@material-ui/icons/ThumbDownAltTwoTone" :default ThumbDownAltTwoTone]
     ["@material-ui/core/LinearProgress" :default LinearProgress]
     ["@material-ui/icons/Send" :default Send]
+    ["@material-ui/icons/DoneAll" :default DoneAllIcon]
     ["@material-ui/core/styles" :refer [withStyles useTheme]]
-    [decide.ui.proposal.new-proposal :as new-proposal]
-    [clojure.string :as str]))
+    [decide.ui.proposal.new-proposal :as new-proposal]))
 
 (declare ProposalPage)
 
@@ -182,7 +182,7 @@
           {:variant :body1
            :color :textSecondary
            :paragraph true}
-          (i18n/tr "So far there are no arguments."))))
+          (i18n/tr "So far there are no arguments"))))
 
     (ui-new-argument-line {}
       {:root/current-session current-session
@@ -211,41 +211,67 @@
 
 (def ui-parent (comp/computed-factory Parent {:keyfn ::proposal/id}))
 
-(defsc Relationship [_this {:keys [migration-rate]
-                            {::proposal/keys [id nice-id title]} :proposal}]
-  {:query [:migration-rate
-           {:proposal (comp/get-query Parent)}]}
+(defsc Relationship [_this {{::proposal/keys [id nice-id title]} :proposal}]
+  {:query [{:proposal (comp/get-query Parent)}]}
   (list/item
     {:button true
      :component "a"
      :href (str id)}
     (list/item-avatar {} (dd/typography {:color "textSecondary"} (str "#" nice-id)))
-    (list/item-text {} (str title))
-    (list/item-secondary-action {} (when migration-rate (dd/typography {} (gstring/format "%.0f%" (* migration-rate 100)))))))
+    (list/item-text {} (str title))))
 
 (def ui-relationship (comp/computed-factory Relationship {:keyfn (comp ::proposal/id :proposal)}))
 
-(defsc ParentSection [_ {:keys [child-relations parent-relations]}]
+(defsc ChildrenSection [_ {:keys [child-relations]}]
   {:query [::proposal/id
-           {:parent-relations (comp/get-query Relationship)}
            {:child-relations (comp/get-query Relationship)}]
    :ident ::proposal/id}
-  (when-not (and (empty? parent-relations) (empty? child-relations))
-    (grid/item {:xs 12 :md 4 :component "section"}
+  (when-not (empty? child-relations)
+    (grid/item {:xs 12 :component "section"}
+      (section
+        (i18n/trf "This proposal was derived {count, plural,  =1 {one time} other {# times}}" {:count (count child-relations)})
+        (list/list {:dense false}
+          (map ui-relationship child-relations))))))
 
-      (when-not (empty? parent-relations)
-        (section
-          (i18n/trf "This proposal depends on {count} previous proposals" {:count (count parent-relations)})
-          (list/list {:dense false}
-            (map ui-relationship parent-relations))))
+(def ui-children-section (comp/factory ChildrenSection {:keyfn ::proposal/id}))
 
-      (when-not (empty? child-relations)
-        (section
-          (i18n/trf "This proposal was derived {count} times" {:count (count child-relations)})
-          (list/list {:dense false}
-            (map ui-relationship child-relations)))))))
+(defsc SmallRelationship [_this {{::proposal/keys [id nice-id title]} :proposal}]
+  {:query [{:proposal (comp/get-query Parent)}]}
+  (dd/chip
+    {:component "a"
+     :clickable true
+     :href (str id)
+     :label (str title)
+     :variant :outlined
+     :avatar
+     (layout/box {:clone true :bgcolor "transparent"}
+       (dd/avatar {}
+         (str "#" nice-id)))}))
 
-(def ui-parent-section (comp/factory ParentSection {:keyfn ::proposal/id}))
+(def ui-small-relationship (comp/computed-factory SmallRelationship {:keyfn (comp ::proposal/id :proposal)}))
+
+(defsc SmallParentSection [_ {:keys [parent-relations]}]
+  {:query [::proposal/id
+           {:parent-relations (comp/get-query Relationship)}]
+   :ident ::proposal/id}
+  (when-not (empty? parent-relations)
+    (dd/typography {:component :label
+                    :variant :caption}
+      (i18n/trf "This proposal {count, plural, =0 {depends on no previous proposals} =1 {is derived from one proposal} other {combines # proposals}}" {:count (count parent-relations)})
+      (grid/container
+        {:spacing 1
+         :style {:marginTop "4px"
+                 :listStyle "none"
+                 :paddingLeft "0"}
+         :component :ul}
+        (for [relation parent-relations
+              :let [entry (ui-small-relationship relation)]]
+          (grid/item {:key (.-key entry)
+                      :component :li}
+            entry))))))
+
+(def ui-small-parent-section (comp/computed-factory SmallParentSection))
+
 ;; endregion
 
 ;; region Similar section
@@ -287,21 +313,21 @@
   (let [others-total (+ common-uniques other-uniques)
         own-total (+ own-uniques common-uniques)]
     (surfaces/card {:variant :outlined :style {:flexGrow 1}}
-      (surfaces/card-header {:title (ui-similar-proposal other-proposal)})
-      (surfaces/card-content {}
-        (grid/container {:spacing 1}
+      (surfaces/card-action-area {:href (str (::proposal/id other-proposal))}
+        (surfaces/card-header {:title (ui-similar-proposal other-proposal)})
+        (surfaces/card-content {}
+          (grid/container {:spacing 1}
 
-          (grid/item {:xs true}
-            (dd/typography {:variant :caption :component :label} "Übereinstimmung"
-              (dd/typography {:color "inherit"}
-                (let [value (* (/ common-uniques sum-uniques) 100)]
-                  (gstring/format "%.0f%% der Wähler" value)))))
+            (grid/item {:xs true}
+              (dd/typography {:variant :caption :component :label} "Übereinstimmung"
+                (dd/typography {:color "inherit"}
+                  (i18n/trf "{ratioOfVoters, number, ::percent} of approvees" {:ratioOfVoters (/ common-uniques sum-uniques)}))))
 
-          (grid/item {:xs true}
-            (dd/typography {:variant :caption :component :label} "Potentielle Stimmen"
-              (layout/box {:clone true :color "success.main"}
-                (dd/typography {}
-                  (gstring/format "+ %.0f%% mehr Stimmen" (- (* (/ sum-uniques own-total) 100) 100))))))))
+            (grid/item {:xs true}
+              (dd/typography {:variant :caption :component :label} "Potentielle Stimmen"
+                (layout/box {:clone true :color "success.main"}
+                  (dd/typography {}
+                    (i18n/trf "{ratioOfVoters, number, ::+! percent} more approves" {:ratioOfVoters (dec (/ sum-uniques own-total))}))))))))
 
       (surfaces/card-actions {}
         (inputs/button
@@ -320,7 +346,7 @@
     {:dense true
      :disablePadding true}
     (for [sim similar
-          :let [entry (ui-similarity-entry sim)]]
+          :let [entry (ui-similarity-entry sim {:show-add-dialog show-add-dialog})]]
       (list/item
         {:key (.-key entry)
          :disableGutters true}
@@ -333,10 +359,11 @@
 (defsc ProposalPage
   [this {::proposal/keys [title body]
          :keys [ui/current-process]
-         :>/keys [parent-section argument-section opinion-section similar-section] :as props}]
+         :>/keys [parent-section children-section argument-section opinion-section similar-section]}]
   {:query [::proposal/id
            ::proposal/title ::proposal/body
-           {:>/parent-section (comp/get-query ParentSection)}
+           {:>/children-section (comp/get-query ChildrenSection)}
+           {:>/parent-section (comp/get-query SmallParentSection)}
            {:>/opinion-section (comp/get-query OpinionSection)}
            {:>/argument-section (comp/get-query ArgumentSection)}
            {:>/similar-section (comp/get-query SimilarSection)}
@@ -363,29 +390,39 @@
     (layout/container {:maxWidth :xl}
       (layout/box {:my 2 :p 2 :clone true}
         (surfaces/paper {}
-          (grid/container {:spacing 3 :component "main"}
+          (grid/container {:spacing 2 :component "main"}
             (grid/item {:xs 12}
-              (dd/typography {:variant "h3" :component "h1"} title))
-            (grid/item {:xs 12}
-              (surfaces/toolbar {:disableGutters true :variant :dense}
-                (inputs/button
-                  {:color :primary
-                   :variant :outlined
-                   :onClick #(comp/transact! this [(new-proposal/show {:slug slug
-                                                                       :parents [(comp/get-ident this)]})])
-                   :startIcon (layout/box {:css {:transform "rotate (.5turn)"} :component CallSplit})
-                   :endIcon (layout/box {:css {:transform "rotate (.5turn)"} :component MergeType})}
-                  (i18n/trc "Prompt to merge or fork" "Propose a change"))))
+              (dd/typography {:variant "h3" :component "h1"} title)
+              ;; " Dieser Vorschlag basiert auf " (count parents) " weiteren Vorschlägen "
+              (ui-small-parent-section parent-section))
 
-            (grid/item {:xs true :component "section"}
-              (section (i18n/trc "Details of a proposal" "Details") (dd/typography {:variant "body1" :style {:whiteSpace "pre-line"}} body)))
+            (grid/container {:item true :xs 12 :lg 8
+                             :alignContent "flex-start"
+                             :spacing 1}
 
-            ;; " Dieser Vorschlag basiert auf " (count parents) " weiteren Vorschlägen "
-            (ui-parent-section parent-section)
+              (grid/item {:xs 12 :component "section"}
+                (section (i18n/trc "Details of a proposal" "Details") (dd/typography {:variant "body1" :style {:whiteSpace "pre-line"}} body)))
 
-            #_(grid/item {:xs 6}
-                (section " Meinungen " (ui-opinion-section opinion-section)))
-            (grid/item {:xs 12 :lg 8 :component "section"}
-              (section (i18n/trc "Arguments of a proposal" "Arguments") (ui-argument-section argument-section)))
+              (grid/item {:xs 12}
+                (surfaces/toolbar
+                  {:variant :dense
+                   :disableGutters true}
+                  (inputs/button
+                    {:color :primary
+                     :variant :contained
+                     :size :small
+                     :onClick #(comp/transact! this [(new-proposal/show {:parents [(comp/get-ident this)]})])}
+                    ;:startIcon (layout/box {:css {:transform "rotate(.5turn)"} :component MergeType})
+                    ;:endIcon (layout/box {:css {:transform "rotate(.5turn)"} :component CallSplit})}
+                    (i18n/trc "Prompt to merge or fork" "Propose a change"))))
+
+
+
+
+              #_(grid/item {:xs 6}
+                  (section " Meinungen " (ui-opinion-section opinion-section)))
+              (grid/item {:xs 12 :component "section"}
+                (section (i18n/trc "Arguments of a proposal" "Arguments") (ui-argument-section argument-section))))
             (grid/item {:xs 12 :lg 4 :component "section"}
+              (ui-children-section children-section)
               (section (i18n/tr "Similar proposals") (ui-similar-section2 similar-section {:show-add-dialog show-add-dialog})))))))))

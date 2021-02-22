@@ -62,8 +62,8 @@
          :onClick #(toggle-argument (comp/get-ident this))}))
     (list/item-text {:primary content}
       (case type
-        :pro (layout/box {:color "success.main"} (i18n/trc "Alignment of argument" "Pro:"))
-        :contra (layout/box {:color "error.main"} (i18n/trc "Alignment of argument" "Con:")))
+        :pro (layout/box {:color "success.main"} (i18n/trc "Alignment of argument" "Pro"))
+        :contra (layout/box {:color "error.main"} (i18n/trc "Alignment of argument" "Con")))
       content)))
 
 (def ui-argument (comp/computed-factory Argument {:keyfn ::argument/id}))
@@ -221,18 +221,16 @@
 
 (def ui-process-proposal-list (comp/computed-factory ProcessProposalList))
 
-(defsc ParentStep [_ {:keys [proposal-list]} {:keys [selected add-parent remove-parent next-step]}]
-  {:query [{:proposal-list (comp/get-query ProcessProposalList)}]
-   :initial-state
-   (fn [{:keys [slug]}]
-     {:proposal-list (comp/get-initial-state ProcessProposalList {:slug slug})})}
+(defsc ParentStep [_ {:keys [ui/current-process]} {:keys [selected add-parent remove-parent next-step]}]
+  {:query [{[:ui/current-process '_] (comp/get-query ProcessProposalList)}]
+   :initial-state {}}
   (comp/fragment
     (dd/typography {:paragraph false}
       (i18n/tr "Von welchen bestehenden Vorschlägen hängt dein neuer Vorschlag ab?"))
     (dd/typography {:paragraph false :variant "caption"}
-      (i18n/tr "You can choose one or more"))
+      (i18n/tr "You can choose as many as you want"))
 
-    (ui-process-proposal-list proposal-list
+    (ui-process-proposal-list current-process
       {:selected selected
        :add-parent add-parent
        :remove-parent remove-parent})
@@ -245,12 +243,14 @@
 (def ui-parent-step (comp/computed-factory ParentStep))
 ;; endregion
 
-(defmutation show [{:keys [slug title body parents]
+(defmutation show [{:keys [title body parents]
                     :or {title "" body "" parents []}}]
   (action [{:keys [app state]}]
-    (df/load! app [::process/slug slug] ProcessProposalList {:parallel true})
+    (when-let [ident (get @state :ui/current-process)]
+      (df/load! app ident ProcessProposalList {:parallel true}))
     (swap! state update-in [:component/id ::NewProposalFormDialog]
       assoc
+      :step/parent-step {}
       :ui/open? true
       :ui/title title
       :ui/body body
@@ -280,8 +280,7 @@
 
 (defsc NewProposalFormDialog [this {:ui/keys [open? title body step current-process]
                                     :step/keys [parent-step]
-                                    :keys [parents arguments]
-                                    ::process/keys [slug]}]
+                                    :keys [parents arguments]}]
   {:query [::process/slug
            :ui/open?
 
@@ -295,7 +294,7 @@
 
            [:ui/current-process '_]]
    :ident (fn [] [:component/id ::NewProposalFormDialog])
-   :initial-state (fn [{:keys [slug]}]
+   :initial-state (fn [{:keys [_slug]}]
                     (merge
                       {:parents []
                        :arguments #{}}
@@ -303,7 +302,7 @@
                            :title ""
                            :body ""
                            :step 0}
-                      #:step{:parent-step (comp/get-initial-state ParentStep {:slug slug})}))
+                      #:step{:parent-step (comp/get-initial-state ParentStep)}))
    :use-hooks? true}
   (let [[_ slug] current-process
         close-dialog (hooks/use-callback #(m/set-value! this :ui/open? false) [])
@@ -375,14 +374,14 @@
                  :style {:textAlign "start"}                ; fix for text alignment in button
                  :optional (when (and (< 2 step) error?)
                              (dd/typography {:variant "caption" :color "error"}
-                               (i18n/tr "Title and details must not be empty.")))}
+                               (i18n/tr "Title and details must not be empty")))}
                 (stepper/step-label
                   {:error (and (< 2 step) error?)}
                   (i18n/trc "Details of a proposal" "Details")))
 
               (stepper/step-content {}
                 (dd/typography {:paragraph false}
-                  (i18n/tr "Add a recognizable title."))
+                  (i18n/tr "Add a recognizable title"))
                 (inputs/textfield
                   {:label (i18n/trc "Title of a proposal" "Title")
                    :variant "outlined"
@@ -427,7 +426,7 @@
                :style {:textAlign "start"}
                :optional (dd/typography {:variant "caption" :color "textSecondary"}
                            (if (empty? parents)
-                             (i18n/trc "Helper text" "Only applicable with parents.")
+                             (i18n/trc "Helper text" "Only applicable with parents")
                              (i18n/trc "Input is optional" "Optional")))}
               (i18n/trc "Arguments of a proposal" "Arguments"))
             (stepper/step-content {}
