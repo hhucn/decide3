@@ -142,7 +142,7 @@
                     {:count (str (max no-of-participants no-of-contributors 0))}))))
             (grid/container {:item true :spacing 2
                              :justify "flex-end"}
-              (grid/item {} (filter-selector selected-filters set-selected-filters!))
+              #_(grid/item {} (filter-selector selected-filters set-selected-filters!))
               (grid/item {} (sort-selector selected-sort set-selected-sort!)))))
 
         ; main list
