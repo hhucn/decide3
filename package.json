@@ -25,7 +25,7 @@
         "start": "npx run-p client/server server"
     },
     "devDependencies": {
-        "intl-messageformat": "^9.4.6",
+        "intl-messageformat": "^9.4.9",
         "karma": "^6.1.0",
         "karma-chrome-launcher": "^3.1.0",
         "karma-cljs-test": "^0.1.0",
