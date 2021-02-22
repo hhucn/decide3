@@ -1,5 +1,6 @@
 (ns decide.server-components.middleware
   (:require
+    [clojure.string :as str]
     [com.fulcrologic.fulcro.algorithms.denormalize :as dn]
     [com.fulcrologic.fulcro.algorithms.server-render :as ssr]
     [com.fulcrologic.fulcro.components :as comp]
@@ -90,12 +91,13 @@
            {:root/current-session (comp/get-query auth/Session)}]})
 
 (defn index-with-credentials [csrf-token script-manifest request]
-  (let [de-locale (i18n/load-locale "po-files" :de)
+  (let [lang (keyword (first (str/split (get-in request [:headers "accept-language"]) #"[-_]")))
+        locale (or (i18n/load-locale "po-files" lang) {::i18n/locale :en})
         initial-state
         (->
           (comp/get-initial-state Root)
           (assoc
-            ::i18n/current-locale de-locale)
+            ::i18n/current-locale locale)
           (ssr/build-initial-state Root))]
     (index csrf-token script-manifest initial-state splash/splash)))
 

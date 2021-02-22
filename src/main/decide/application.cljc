@@ -24,7 +24,6 @@
          [:shared {::i18n/message-formatter message-formatter}])
 
      :shared-fn (fn [& args] (apply ::i18n/current-locale args))
-     :client-did-mount (fn [app] (comp/transact! app [(i18n/change-locale {:locale :de})]))
      :props-middleware
      (comp/wrap-update-extra-props
        (fn [cls extra-props]
