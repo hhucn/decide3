@@ -46,6 +46,7 @@
            {:root/snackbar-container (comp/get-query snackbar/SnackbarContainer)}
            {:root/navdrawer (comp/get-query nav-drawer/NavDrawer)}
            {:root/current-session (comp/get-query auth/Session)}
+           :ui/current-process
            :all-processes
            {::i18n/current-locale (comp/get-query i18n/Locale)}]
    :initial-state

@@ -6,6 +6,7 @@
     [com.fulcrologic.fulcro.application :as app]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.data-fetch :as df]
+    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr :refer [defrouter]]
     [decide.models.process :as process]
@@ -35,9 +36,21 @@
 
 (def ui-process-router (comp/computed-factory ProcessRouter))
 
-(defsc ProcessHeader [_ {::process/keys [title end-time]}]
-  {:query [::process/slug ::process/title ::process/end-time]
-   :ident ::process/slug}
+(defsc Moderator [_ _]
+  {:query [::user/id]
+   :ident ::user/id})
+
+(defsc Process [_ {::process/keys [title end-time]}]
+  {:query [::process/slug
+           ::process/title
+           ::process/description
+           ::process/end-time
+           {::process/moderators (comp/get-query Moderator)}]
+   :ident ::process/slug
+   :initial-state
+   (fn [{:keys [slug]}]
+     (when slug
+       {::process/slug slug}))}
   (layout/box {:mx 2 :mb 2 :mt 0}
     (dd/typography {:component "h1" :variant "h2"} title)
     (when end-time
@@ -49,7 +62,15 @@
           (dd/typography {:variant "subtitle1"}
             (i18n/trf "Ends at {endDatetime}" {:endDatetime end-element})))))))
 
-(def ui-process-info (comp/factory ProcessHeader))
+(def ui-process (comp/factory Process))
+
+(defsc ProcessHeader [_ {:keys [ui/current-process]}]
+  {:query
+   [{[:ui/current-process '_] (comp/get-query Process)}]
+   :initial-state {}}
+  (ui-process current-process))
+
+(def ui-process-header (comp/factory ProcessHeader))
 
 (defn tab-bar [{current-target :target
                 current-path :prefix} & targets]
@@ -67,72 +88,77 @@
             {:href href
              :key href}))))))
 
-(defsc Moderator [_ _]
-  {:query [::user/id]
-   :ident ::user/id})
-
-(defsc Process [_ _]
-  {:query [::process/slug
-           ::process/title
-           ::process/end-time
-           {::process/moderators (comp/get-query Moderator)}]
-   :ident ::process/slug
-   :initial-state
-   (fn [{:keys [slug]}]
-     (when slug
-       {::process/slug slug}))})
-
 (defn- is-moderator? [moderators current-session]
   (and
     (:session/valid? current-session)
     (contains? (into #{} (map (partial comp/get-ident Moderator)) moderators)
       (:user current-session))))
 
+(declare ProcessContext)
+
+(defn process-already-loaded? [db ident]
+  (boolean (get-in db ident)))
+
+(defmutation set-current-process [{:keys [ident slug]}]
+  (action [{:keys [app state]}]
+    (let [process-ident [::process/slug slug]]
+      (if (process-already-loaded? @state ident)
+        (do
+          (swap! state assoc :ui/current-process process-ident)
+          (dr/target-ready! app ident))
+        (do
+          (mrg/merge-component! app ProcessContext (comp/get-initial-state ProcessContext {:slug slug}))
+          (df/load! app process-ident Process
+            {:target (targeting/multiple-targets
+                       (targeting/replace-at (conj ident :process-header))
+                       (targeting/replace-at [:ui/current-process])
+                       (targeting/prepend-to [:all-processes])
+                       (targeting/prepend-to [:root/all-processes]))
+             :post-mutation `dr/target-ready
+             :post-mutation-params {:target ident}}))))))
+
+
+(defn current-process-already-set? [state ident]
+  (= ident (get state :ui/current-process)))
+
+
 (defsc ProcessContext [this {:ui/keys [process-router new-proposal-dialog]
-                             :keys [process-header ::process/slug process root/current-session]}]
-  {:query [::process/slug
-           {:process (comp/get-query Process)}
-           {:process-header (comp/get-query ProcessHeader)}
+                             :keys [ui/process-header root/current-session
+                                    ui/current-process]}]
+  {:query [{[:ui/current-process '_] (comp/get-query Process)}
+           {:ui/process-header (comp/get-query ProcessHeader)}
            {:ui/process-router (comp/get-query ProcessRouter)}
            {:ui/new-proposal-dialog (comp/get-query new-proposal/NewProposalFormDialog)}
            [:root/current-session '_]]
    :initial-state
    (fn [{:keys [slug]}]
-     {::process/slug slug
-      :process (comp/get-initial-state Process {:slug slug})
-      :ui/process-router (comp/get-initial-state ProcessRouter)
+     {:ui/process-router (comp/get-initial-state ProcessRouter)
+      :ui/process-header (comp/get-initial-state ProcessHeader)
       :ui/new-proposal-dialog (comp/get-initial-state new-proposal/NewProposalFormDialog {:slug slug})})
-   :ident [:process-context ::process/slug]
+   :ident (fn [] [:SCREEN ::ProcessContext])
    :route-segment ["decision" ::process/slug]
-   :will-enter (fn [app {slug ::process/slug}]
-                 (let [ident (comp/get-ident ProcessContext {::process/slug slug})]
-                   (if (get-in (app/current-state app) ident)
-                     (dr/route-immediate ident)
-                     (dr/route-deferred ident
-                       (fn []
-                         (mrg/merge-component! app ProcessContext (comp/get-initial-state ProcessContext {:slug slug}))
-                         (df/load! app [::process/slug slug] Process
-                           {:target (targeting/replace-at (conj ident :process-header))})
-                         (dr/target-ready! app ident))))))
+   :will-enter
+   (fn will-enter-ProcessContext [app {slug ::process/slug}]
+     (let [ident (comp/get-ident ProcessContext {})]
+       (if (current-process-already-set? (app/current-state app) [::process/slug slug])
+         (dr/route-immediate ident)
+         (dr/route-deferred ident
+           #(comp/transact! app [(set-current-process {:ident ident :slug slug})])))))
    :use-hooks? true}
-  (let [show-new-proposal-dialog (hooks/use-callback #(comp/transact! this [(new-proposal/show {:slug slug})]))
-        {::process/keys [end-time moderators]} process
+  (let [{::process/keys [slug end-time moderators]} current-process
+        show-new-proposal-dialog (hooks/use-callback #(comp/transact! this [(new-proposal/show {:slug slug})]))
         process-over? (and (some? end-time) (time/in-past? end-time))
         moderator? (is-moderator? moderators current-session)]
     (comp/fragment
       (surfaces/paper
         {:square true}
         (layout/container {:maxWidth :xl :disableGutters true}
-          (when process-header
-            (ui-process-info process-header))
+          (ui-process-header process-header)
           (tab-bar (current-target this)
             {:label (i18n/trc "Overview over process" "Overview") :target process.home/ProcessOverviewScreen}
             {:label (i18n/tr "All proposals") :target proposal.main-list/MainProposalList}
             (when moderator?
               {:label (i18n/trc "Link to moderation page" "Moderation") :target process.moderator/ProcessModeratorTab}))))
       (ui-process-router process-router
-        {:slug slug
-         ;:process process
-         ;:process-over? process-over?
-         :show-new-proposal-dialog show-new-proposal-dialog})
+        {:show-new-proposal-dialog show-new-proposal-dialog})
       (new-proposal/ui-new-proposal-form new-proposal-dialog))))

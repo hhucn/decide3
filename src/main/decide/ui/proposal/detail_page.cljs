@@ -12,8 +12,8 @@
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
-    [decide.models.authorization :as auth]
     [decide.models.argument :as argument]
+    [decide.models.authorization :as auth]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
     [goog.string :as gstring]
@@ -328,14 +328,15 @@
 
 (defsc ProposalPage
   [this {::proposal/keys [title body]
-         :>/keys [parent-section argument-section opinion-section similar-section]}
-   {:keys [slug]}]
+         :keys [ui/current-process]
+         :>/keys [parent-section argument-section opinion-section similar-section] :as props}]
   {:query [::proposal/id
            ::proposal/title ::proposal/body
            {:>/parent-section (comp/get-query ParentSection)}
            {:>/opinion-section (comp/get-query OpinionSection)}
            {:>/argument-section (comp/get-query ArgumentSection)}
-           {:>/similar-section (comp/get-query SimilarSection)}]
+           {:>/similar-section (comp/get-query SimilarSection)}
+           [:ui/current-process '_]]
    :ident ::proposal/id
    :use-hooks? true
    :route-segment ["proposal" ::proposal/id]
@@ -347,7 +348,8 @@
          #(df/load! app ident ProposalPage
             {:post-mutation `dr/target-ready
              :post-mutation-params {:target ident}}))))}
-  (let [show-add-dialog (hooks/use-callback
+  (let [[_ slug] current-process
+        show-add-dialog (hooks/use-callback
                           (fn [& idents]
                             (comp/transact! this
                               [(new-proposal/show

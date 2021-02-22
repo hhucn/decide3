@@ -67,7 +67,9 @@
 
           (if-not logged-in?
             (dom/form
-              {:onSubmit #(comp/transact! this [(login/sign-in #:decide.models.user{:email temp-nickname :password temp-nickname})])}
+              {:onSubmit (fn [e]
+                           (evt/prevent-default! e)
+                           (comp/transact! this [(login/sign-in #:decide.models.user{:email temp-nickname :password temp-nickname})]))}
               (inputs/textfield
                 {:variant :outlined
                  :size :small

@@ -132,22 +132,17 @@
 
 (def ui-process-home (comp/computed-factory ProcessHome))
 
-(defmutation init-overview-screen [{:keys [slug]}]
-  (action [{:keys [app ref]}]
-    (let [process-ident [::process/slug slug]]
 
-      (df/load! app process-ident ProcessHome
-        {:target (conj ref :process-home)
-         :post-mutation `dr/target-ready
-         :post-mutation-params {:target ref}}))))
-
-(defsc ProcessOverviewScreen [_ {:keys [process-home] :as props}]
-  {:query [{:process-home (comp/get-query ProcessHome)}]
+(defsc ProcessOverviewScreen [_ {:keys [ui/current-process]}]
+  {:query [{[:ui/current-process '_] (comp/get-query ProcessHome)}]
    :ident (fn [] [:SCREEN ::ProcessOverviewScreen])
    :route-segment ["home"]
+   :initial-state {:ui/current-process {}}
    :will-enter
    (fn will-enter-ProcessOverviewScreen [app {::process/keys [slug]}]
-     (let [ident (comp/get-ident ProcessOverviewScreen {:process-home {::process/slug slug}})]
+     (let [ident (comp/get-ident ProcessOverviewScreen {})]
        (dr/route-deferred ident
-         #(comp/transact! app [(init-overview-screen {:slug slug})] {:ref ident}))))}
-  (ui-process-home process-home))
+         (fn []
+           (df/load! app [::process/slug slug] ProcessHome)
+           (dr/target-ready! app ident)))))}
+  (ui-process-home current-process))

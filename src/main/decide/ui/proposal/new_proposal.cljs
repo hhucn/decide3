@@ -248,7 +248,8 @@
 (defmutation show [{:keys [slug title body parents]
                     :or {title "" body "" parents []}}]
   (action [{:keys [app state]}]
-    (swap! state update-in [::NewProposalFormDialog slug]
+    (df/load! app [::process/slug slug] ProcessProposalList {:parallel true})
+    (swap! state update-in [:component/id ::NewProposalFormDialog]
       assoc
       :ui/open? true
       :ui/title title
@@ -277,7 +278,7 @@
     (let [{:keys [parents]} (norm/ui->props component)]
       (swap! state update-in ref copy-parents-body* parents))))
 
-(defsc NewProposalFormDialog [this {:ui/keys [open? title body step]
+(defsc NewProposalFormDialog [this {:ui/keys [open? title body step current-process]
                                     :step/keys [parent-step]
                                     :keys [parents arguments]
                                     ::process/keys [slug]}]
@@ -290,8 +291,10 @@
 
            :ui/step
 
-           {:step/parent-step (comp/get-query ParentStep)}]
-   :ident [::NewProposalFormDialog ::process/slug]
+           {:step/parent-step (comp/get-query ParentStep)}
+
+           [:ui/current-process '_]]
+   :ident (fn [] [:component/id ::NewProposalFormDialog])
    :initial-state (fn [{:keys [slug]}]
                     (merge
                       {:parents []
@@ -300,10 +303,10 @@
                            :title ""
                            :body ""
                            :step 0}
-                      #:step{:parent-step (comp/get-initial-state ParentStep {:slug slug})}
-                      {::process/slug slug}))
+                      #:step{:parent-step (comp/get-initial-state ParentStep {:slug slug})}))
    :use-hooks? true}
-  (let [close-dialog (hooks/use-callback #(m/set-value! this :ui/open? false) [])
+  (let [[_ slug] current-process
+        close-dialog (hooks/use-callback #(m/set-value! this :ui/open? false) [])
         reset-form (hooks/use-callback #(comp/transact! this [(reset-form {})]) [])
         next-step (hooks/use-callback #(comp/transact! this [(next-step {})]) [])]
     (dialog/dialog
