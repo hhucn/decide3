@@ -6,8 +6,7 @@
     [com.fulcrologic.fulcro.dom.events :as evt]
     [material-ui.inputs :as inputs]
     [material-ui.inputs.form :as form]
-    [material-ui.inputs.input :as input]
-    [taoensso.timbre :as log]))
+    [material-ui.inputs.input :as input]))
 
 (defsc LocaleSwitcher [this {:keys [::i18n/current-locale]}]
   {:query [{[::i18n/current-locale '_] (comp/get-query i18n/Locale)}]
