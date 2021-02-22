@@ -11,3 +11,6 @@
            ::user/id]
    :initial-state {:session/valid? false}})
 
+(def current-session-link
+  [:root/current-session '_])
+

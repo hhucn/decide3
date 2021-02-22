@@ -19,7 +19,6 @@
     [goog.string :as gstring]
     [material-ui.data-display :as dd]
     [material-ui.data-display.list :as list]
-    [material-ui.data-display.table :as table]
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
     [material-ui.layout.grid :as grid]
@@ -38,7 +37,7 @@
 
 (defn section [title & children]
   (apply layout/box {}
-    (dd/typography {:variant "h6" :color "textPrimary" :component "h2"} title)
+    (dd/typography {:variant "h4" :color "textPrimary" :component "h2" :paragraph true} title)
     children))
 
 ;; region Opinion section
@@ -232,7 +231,7 @@
            {:child-relations (comp/get-query Relationship)}]
    :ident ::proposal/id}
   (when-not (and (empty? parent-relations) (empty? child-relations))
-    (grid/item {:xs 12 :md 6 :component "section"}
+    (grid/item {:xs 12 :md 4 :component "section"}
 
       (when-not (empty? parent-relations)
         (section
@@ -287,23 +286,29 @@
            :other-uniques]}
   (let [others-total (+ common-uniques other-uniques)
         own-total (+ own-uniques common-uniques)]
-    (table/row {}
-      (table/cell {} (ui-similar-proposal other-proposal))
-      (table/cell {} (layout/box {}
-                       (dd/typography {:color "inherit"}
-                         (let [value (* (/ common-uniques sum-uniques) 100)]
-                           (gstring/format "%.0f%" value)))))
-      (table/cell {} (layout/box {:clone true :color "success.main"} (dd/typography {} (gstring/format "+ %.0f%" (- (* (/ sum-uniques own-total) 100) 100)))))
-      (table/cell {}
+    (surfaces/card {:variant :outlined :style {:flexGrow 1}}
+      (surfaces/card-header {:title (ui-similar-proposal other-proposal)})
+      (surfaces/card-content {}
+        (grid/container {:spacing 1}
+
+          (grid/item {:xs true}
+            (dd/typography {:variant :caption :component :label} "Übereinstimmung"
+              (dd/typography {:color "inherit"}
+                (let [value (* (/ common-uniques sum-uniques) 100)]
+                  (gstring/format "%.0f%% der Wähler" value)))))
+
+          (grid/item {:xs true}
+            (dd/typography {:variant :caption :component :label} "Potentielle Stimmen"
+              (layout/box {:clone true :color "success.main"}
+                (dd/typography {}
+                  (gstring/format "+ %.0f%% mehr Stimmen" (- (* (/ sum-uniques own-total) 100) 100))))))))
+
+      (surfaces/card-actions {}
         (inputs/button
-          {:variant :outlined
-           :size :small
-           :color :primary
+          {:color :secondary
            :onClick #(show-add-dialog (comp/get-ident SimilarProposal other-proposal))}
-          (i18n/trc "Encourage to form a coalition" "Form coalition")))
-      (table/cell {:align :center
-                   :style {:height "100px"}}
-        (venn-diagramm props)))))
+          (i18n/trc "Encourage to form a coalition" "Form coalition"))))))
+
 
 (def ui-similarity-entry (comp/computed-factory SimilarEntry {:keyfn (comp ::proposal/id :other-proposal)}))
 
@@ -311,19 +316,18 @@
   {:query [::proposal/id
            {:similar (comp/get-query SimilarEntry)}]
    :ident ::proposal/id}
-  (table/table {:size :small}
-    (table/head {}
-      (table/row {}
-        (table/cell {} (i18n/tr "Proposal"))
-        (table/cell {} (i18n/tr "Overlap of approvers"))
-        (table/cell {} (i18n/tr "Potential approvals"))
-        (table/cell {})
-        (table/cell {} (i18n/tr "Approvals (own/common/other)"))))
+  (list/list
+    {:dense true
+     :disablePadding true}
+    (for [sim similar
+          :let [entry (ui-similarity-entry sim)]]
+      (list/item
+        {:key (.-key entry)
+         :disableGutters true}
+        entry))))
 
-    (table/body {}
-      (map #(ui-similarity-entry % {:show-add-dialog show-add-dialog}) (sort-by (fn [{:keys [sum-uniques common-uniques]}] (/ common-uniques sum-uniques)) > similar)))))
 
-(def ui-similar-section (comp/computed-factory SimilarSection))
+(def ui-similar-section2 (comp/computed-factory SimilarSection))
 ;; endregion
 
 (defsc ProposalPage
@@ -372,14 +376,16 @@
                    :startIcon (layout/box {:css {:transform "rotate (.5turn)"} :component CallSplit})
                    :endIcon (layout/box {:css {:transform "rotate (.5turn)"} :component MergeType})}
                   (i18n/trc "Prompt to merge or fork" "Propose a change"))))
+
             (grid/item {:xs true :component "section"}
               (section (i18n/trc "Details of a proposal" "Details") (dd/typography {:variant "body1" :style {:whiteSpace "pre-line"}} body)))
 
             ;; " Dieser Vorschlag basiert auf " (count parents) " weiteren Vorschlägen "
             (ui-parent-section parent-section)
+
             #_(grid/item {:xs 6}
                 (section " Meinungen " (ui-opinion-section opinion-section)))
-            (grid/item {:xs 12 :component "section"}
+            (grid/item {:xs 12 :lg 8 :component "section"}
               (section (i18n/trc "Arguments of a proposal" "Arguments") (ui-argument-section argument-section)))
-            (grid/item {:xs 12 :component "section"}
-              (section (i18n/tr "Similar proposals") (ui-similar-section similar-section {:show-add-dialog show-add-dialog})))))))))
+            (grid/item {:xs 12 :lg 4 :component "section"}
+              (section (i18n/tr "Similar proposals") (ui-similar-section2 similar-section {:show-add-dialog show-add-dialog})))))))))
