@@ -1,10 +1,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>decide</title>
+    <title>decide - Poster</title>
+    <meta name="author" content="Björn Ebbinghaus">
+    <meta http-equiv="content-language" content="en">
     <style>
         * {
             box-sizing: border-box;
+            color: #444444
         }
 
         :root {
@@ -105,8 +108,8 @@
         }
 
         section > * + * {
-            margin-left: .5rem;
-            margin-right: .5rem;
+            margin-left: 16px;
+            margin-right: 16px;
             font-size: 1.4em;
         }
 
@@ -140,8 +143,24 @@
             border-bottom: 2px solid rgba(0, 0, 0, 0.1);
         }
 
+        ul {
+            list-style: none;
+        }
+
+        li::before {
+            content: "\2022";
+            color: var(--blue);
+            display: inline-block;
+            width: 1em;
+            margin-left: -1em;
+        }
+
         header img {
 
+        }
+
+        dt {
+            padding-bottom: 8px;
         }
     </style>
 </head>
@@ -152,68 +171,157 @@
     <img src="HHU_Logo.svg"/>
 </header>
 <article>
-    <h1><i>decide</i> - Support Decision-Making through Collaboration</h1>
+    <h1><i>decide</i> - Support Decision-making through Collaborative Evolution of Proposals</h1>
     <p class="authors">
         <a href="mailto:ebbinghaus@hhu.de">Björn Ebbinghaus</a>
     </p>
 
     <section>
-        <h2>Introduction</h2>
+        <h2>Goal</h2>
         <p>
-            We present a proposal on how to improve decision-making in groups by giving participants the tools to
-            improve a set of candidates together.
+            We aim to improve decision-making in groups by giving participants the tools to improve a set of
+            proposals together, without the need of external influence, that puts the participants strictly in the role
+            of just a voter.
         </p>
         <p>
-            As we have noticed in an <a href="https://doi.org/10.13140/RG.2.2.12515.09760/1" role="doc-noteref">experiment
-            in 2019</a>, involved participants
-            in a decision not only want to express their own proposals, but also actively participate in the improvement
-            of existing proposals. To reflect this, we use a technique common in software development, in which changes
-            to a code base each have one (or more) predecessors on which they build.
+            To evaluate our ideas in the field we built a prototype you can find below.
         </p>
+    </section>
+
+    <section>
+        <h2>Motivation</h2>
+        <p>
+            In an <a href="https://doi.org/10.13140/RG.2.2.12515.09760/1">experiment in 2019</a> we noticed that
+            involved participants in a decision not only want to express their own proposals, but also actively
+            participate in the improvement of existing proposals. They used the means available to them to express these
+            wishes and (mis)used the discussion function to propose improvements. The problem is that mere comments are
+            not the same as proposing a new candidate to vote for.
+        </p>
+
         <p>
             We hope to move from commenting on why a proposal is not good or how it can be improved to creating new and
             improved proposals.
         </p>
     </section>
 
-    <!--
     <section>
-        <h2>Motivation</h2>
+        <h2>How does it work?</h2>
         <p>
-            We improve the first step by allowing participants to make, modify and form coalitions between proposals in
-            order to improve the candidates for a later vote.
-            This enables participants to not just vote for their candidate, but allows them to take proposals of others
-            into consideration.
-            If they do not approve another proposal, but they see it is important to others they can improve on them,
-            resulting in collaborative solutions.
+            The idea on which we are building is similar to a version control system in software development, in which
+            changes to a code base each have one (or more) predecessors on which they build up on.
+            In our case a new proposal can have no, one or many predecessors (parents) and therefore fulfills one of
+            these roles:
         </p>
+        <dl>
+            <dt>1. A proposal with no parents</dt>
+            <dd>
+                A proposal can be independent.
+                This is like the behavior in current systems were a proposal is made without any relationship to
+                another proposal.
+
+                <p>
+                    Examples: <i>We should build a new playground.</i> Or: <i>We should improve our local
+                    parks.</i>
+                </p>
+            </dd>
+
+            <dt>2. A proposal with exactly one parent (Fork)</dt>
+            <dd>
+                This represents a proposed change to an existing proposal.
+                <p>
+                    Example: <i>We should build a new playground <u>with a slide.</u></i> <br>
+                    Which is derived from <i>We should build a new playground</i>.
+                </p>
+
+            </dd>
+
+            <dt>3. A proposal with more than one parent (Merge)</dt>
+            <dd>
+                Proposals can also be derived from several predecessors. This can represent a merge of closely
+                related proposals or even the formation of a coalition between rivaling proposals.
+
+                <p>
+                    Example: <i>We should <u>build a new playground</u> &nbsp;<u>in the park</u></i> <br>
+                    Which is a merge of <i>We should build a new playground</i> and <i>We should improve our local
+                    parks</i>.
+                </p>
+
+            </dd>
+        </dl>
+        <p>
+            We hope to improve the quality and diversity of proposals by focusing on improving proposals.
+            In the best case we are definitely trying to achieve — the given tools lead to a single, final merge.
+            No need for a vote or similar.
+        </p>
+
+
     </section>
-    -->
 
     <section>
         <h2>Demo</h2>
         <p>
-            Please feel free to play with this demo. Note that it is a prototype and work in progress you should not
+            Please feel free to play with this demo. Note that it is a prototype and work in progress and you should not
             enter confidential information.
-            Feedback is most welcome at <a href="mailto:ebbinghaus@hhu.de">ebbinghaus@hhu.de</a>.
+            Feedback is most welcome to <a href="mailto:ebbinghaus@hhu.de">ebbinghaus@hhu.de</a>.
         </p>
-
+        <p>
+            If you have problems to interact with the demo on mobile, you can visit the real instance here:
+            <a href="https://decide.ebbinghaus.me/decision/test-decision/proposals"
+               target="_blank">decide.ebbinghaus.me</a>.
+        </p>
         <iframe height="600px"
+                title="decide - Demo"
+                loading="lazy"
                 src="/decision/test-decision/proposals"
                 style="margin: 2px;">
         </iframe>
-
-        <p>
-            You can find the real instance here: <a href="https://decide.ebbinghaus.me">decide.ebbinghaus.me</a>
-        </p>
-
     </section>
 
     <section>
-        <h2>Open problems</h2>
+        <h2>Open research questions</h2>
         <p>
         <ul>
-            <li></li>
+            <li>
+                How can we encourage evolution of proposals, while keeping the set of candidate small and relevant?
+                <p>
+                    Since we want to encourage change and therefore progress towards better decisions we
+                    naturally increase the total number of proposals that were made, by a far greater amount than a
+                    traditional system that allow proposals.
+                    As every proposal should be respected, we can not just hide a proposal which has a child that may or
+                    may not be an improvement for some.
+                    How can we determine a relevance for a given proposal?
+                </p>
+            </li>
+            <li>
+                How to vote on candidates with relations between them?
+                <p>
+                    Imagine you expressed your approval with a certain proposal.
+                    Later on you approve a child of that proposal. How should your vote be counted?
+                    Should we prioritize the vote for a newer proposal, because we assume new = better?
+                    This may also be important when making a decision with multiple possible winner, as in reality
+                    proposals that are very closely related are often not suited to be implemented at the same time.
+                    E.g. <em>Add a slide to the playground</em> and <em>Add a jungle gym to the playground</em> may be
+                    constricted by available space on the playground.
+                </p>
+            </li>
+
+            <li>
+                How can we help participants find candidates for a coalition?
+                <p>
+                    We are already experimenting with <em>similar proposals</em>. Similarity for now is based on the
+                    size of the shared voters. This can be useful (if not crucial) when trying to settle a decision in
+                    a unanimous agreement.
+                </p>
+            </li>
+
+            <!--
+                <li>
+                    Can we improve the system such that we can (nearly) guarantee a single solution without a vote?
+                    <p>
+
+                    </p>
+                </li>
+            -->
         </ul>
 
         </p>
