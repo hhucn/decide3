@@ -64,6 +64,10 @@
                                 :req [::argument/id]
                                 :opt [::argument/content])
                      :distinct true))
+(s/def ::pro-votes nat-int?)
+(s/def ::con-votes nat-int?)
+(s/def ::parents (s/coll-of ::proposal :distinct true))
+(s/def ::proposal (s/keys :req [::id] :opt [::title ::body ::created ::parents ::pro-votes ::con-votes ::nice-id ::arguments]))
 
 (s/def ::ident (s/tuple #{::id} ::id))
 (s/def ::lookup (s/or :ident ::ident :db/id pos-int?))

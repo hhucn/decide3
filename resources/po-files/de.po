@@ -465,7 +465,7 @@ msgstr "{ratioOfVoters, number, ::+! percent} mehr Stimmen"
 #: i18n.js:20442
 msgctxt "Encourage to form a coalition"
 msgid "Form coalition"
-msgstr "Vereinigung vorschlagen"
+msgstr "Koalition vorschlagen"
 
 #: i18n.js:20483
 msgctxt "Prompt to merge or fork"

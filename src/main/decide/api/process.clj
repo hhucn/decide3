@@ -94,6 +94,11 @@
   {::pc/output [::process/slug]}
   (::process/_proposals (d/pull db [{::process/_proposals [::process/slug]}] [::proposal/id id])))
 
+(defresolver resolve-winner [{:keys [db]} process]
+  {::pc/input #{::process/slug}
+   ::pc/output [{::process/winner [::proposal/id]}]}
+  {::process/winner (process/get-winner db process)})
+
 (def all-resolvers
   [process/resolvers
 
@@ -106,6 +111,7 @@
    resolve-user-moderated-processes
    resolve-no-of-contributors
    resolve-no-of-participants
+   resolve-winner
 
    resolve-proposals
    resolve-no-of-proposals

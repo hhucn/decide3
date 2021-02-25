@@ -19,6 +19,7 @@
     [decide.ui.proposal.main-proposal-list :as proposal.main-list]
     [decide.ui.proposal.new-proposal :as new-proposal]
     [material-ui.data-display :as dd]
+    [material-ui.lab.alert :as alert]
     [material-ui.layout :as layout]
     [material-ui.navigation.tabs :as tabs]
     [material-ui.surfaces :as surfaces]))
@@ -40,7 +41,7 @@
   {:query [::user/id]
    :ident ::user/id})
 
-(defsc Process [_ {::process/keys [title end-time]}]
+(defsc Process [_ {::process/keys [title end-time] :as process}]
   {:query [::process/slug
            ::process/title
            ::process/description
@@ -50,16 +51,16 @@
    :initial-state
    (fn [{:keys [slug]}]
      (when slug
-       {::process/slug slug}))}
-  (layout/box {:mx 2 :mb 2 :mt 0}
+       {::process/slug slug}))
+   :use-hooks? true}
+  (layout/box {:mx 2 :my 1}
     (dd/typography {:component "h1" :variant "h2"} title)
     (when end-time
-      (let [over? (time/in-past? end-time)
-            end-element (time/nice-time-element end-time)]
-        (if over?
-          (dd/typography {:variant "subtitle1" :color (when over? "error")}
+      (let [end-element (time/nice-time-element end-time)]
+        (if (process/over? process)
+          (alert/alert {:severity :success}
             (i18n/trf "Ended on the {endDatetime}!" {:endDatetime end-element}))
-          (dd/typography {:variant "subtitle1"}
+          (alert/alert {:severity :info}
             (i18n/trf "Ends at {endDatetime}" {:endDatetime end-element})))))))
 
 (def ui-process (comp/factory Process))
@@ -105,6 +106,13 @@
       (if (process-already-loaded? @state ident)
         (do
           (swap! state assoc :ui/current-process process-ident)
+          (df/load! app process-ident Process
+            {:target (targeting/multiple-targets
+                       (targeting/replace-at (conj ident :process-header))
+                       (targeting/replace-at [:ui/current-process])
+                       (targeting/prepend-to [:all-processes])
+                       (targeting/prepend-to [:root/all-processes]))
+             :parallel true})
           (dr/target-ready! app ident))
         (do
           (mrg/merge-component! app ProcessContext (comp/get-initial-state ProcessContext {:slug slug}))
@@ -147,7 +155,6 @@
    :use-hooks? true}
   (let [{::process/keys [slug end-time moderators]} current-process
         show-new-proposal-dialog (hooks/use-callback #(comp/transact! this [(new-proposal/show {:slug slug})]))
-        process-over? (and (some? end-time) (time/in-past? end-time))
         moderator? (is-moderator? moderators current-session)]
     (comp/fragment
       (surfaces/paper

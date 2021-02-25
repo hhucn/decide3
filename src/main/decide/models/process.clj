@@ -3,12 +3,13 @@
     [clojure.set :as set]
     [clojure.spec.alpha :as s]
     [clojure.string :as str]
-    [com.fulcrologic.guardrails.core :refer [>defn => | <-]]
+    [com.fulcrologic.guardrails.core :refer [>defn => | <- ?]]
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
     [com.wsscode.pathom.core :as p]
     [datahike.api :as d]
     [datahike.core :as d.core]
     [decide.models.authorization :as auth]
+    [decide.models.opinion :as opinion]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user])
   (:import (java.util Date)))
@@ -210,6 +211,51 @@
 
 (defn ->enter [process-lookup user-lookups]
   [[:db/add process-lookup ::participants user-lookups]])
+
+(>defn get-most-approved-proposals
+  "From a collection of `proposals`, return a subset of `proposals` that have the most approval"
+  [proposals]
+  [(s/coll-of (s/keys :req [::proposal/pro-votes]))
+   => (s/coll-of ::proposal/proposal) | #(set/subset? (set %) (set proposals))]
+  (let [voting-groups (group-by ::proposal/pro-votes proposals)]
+    (get voting-groups (apply max (keys voting-groups)) [])))
+
+(>defn remove-parents
+  "From a list of `proposals`, remove all parents that have children in the collection."
+  [proposals]
+  [(s/coll-of ::proposal/proposal)
+   => (s/coll-of ::proposal/proposal) | #(set/subset? (set %) (set proposals))]
+  (let [parent-ids (set (map ::proposal/id (mapcat ::proposal/parents proposals)))]
+    (remove (comp parent-ids ::proposal/id) proposals)))
+
+(>defn solve-draw
+  "Takes a collection of `proposals` and returns a single winner."
+  [proposals]
+  [(s/coll-of ::proposal/proposal)
+   => ::proposal/proposal | #(contains? (set proposals) %)]
+  (->> proposals
+    (sort-by ::proposal/created)
+    reverse
+    first))
+
+(s/keys)
+
+(>defn get-winner [db process]
+  [d.core/db? (s/keys :req [::slug]) => (? ::proposal/proposal)]
+  (let [most-approved-proposals
+        (->> (find process ::slug)
+          (d/pull db [{::proposals
+                       [::proposal/id
+                        ::proposal/created
+                        {::proposal/opinions [::opinion/value]}
+                        {::proposal/parents [::proposal/id]}]}])
+          ::proposals
+          (map opinion/votes)
+          get-most-approved-proposals)]
+
+    (if (< 2 (count most-approved-proposals))
+      (first most-approved-proposals)
+      (solve-draw most-approved-proposals))))
 
 ;; region API
 (defn check-slug-exists [{::pc/keys [mutate] :as mutation}]
