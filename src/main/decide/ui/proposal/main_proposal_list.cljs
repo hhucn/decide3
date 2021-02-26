@@ -11,7 +11,7 @@
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
-    [decide.ui.common.time :as time]
+    [decide.utils.time :as time]
     [decide.ui.proposal.card :as proposal-card]
     [decide.utils.breakpoint :as breakpoint]
     [material-ui.data-display :as dd]

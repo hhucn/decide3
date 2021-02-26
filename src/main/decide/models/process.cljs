@@ -8,7 +8,7 @@
     [com.fulcrologic.guardrails.core :refer [>defn => ? | <-]]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
-    [decide.ui.common.time :as time]))
+    [decide.utils.time :as time]))
 
 (s/def ::end-time inst?)
 
@@ -18,6 +18,7 @@
     ::title
     ::description
     ::end-time
+    ::type
     {::proposals (comp/get-query proposal/Proposal)}]
    :ident ::slug})
 

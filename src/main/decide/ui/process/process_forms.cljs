@@ -14,7 +14,7 @@
     [material-ui.layout :as layout]
     [material-ui.layout.grid :as grid]
     [taoensso.timbre :as log]
-    [decide.ui.common.time :as time]
+    [decide.utils.time :as time]
     [com.fulcrologic.fulcro.dom :as dom]
     [material-ui.transitions :as transitions]
     [material-ui.data-display.list :as list]

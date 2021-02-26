@@ -12,7 +12,7 @@
     [decide.models.process :as process]
     [decide.models.user :as user]
     [decide.routing :as r]
-    [decide.ui.common.time :as time]
+    [decide.utils.time :as time]
     [decide.ui.process.home :as process.home]
     [decide.ui.process.moderator-tab :as process.moderator]
     [decide.ui.proposal.detail-page :as proposal.detail-page]

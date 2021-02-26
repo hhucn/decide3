@@ -12,7 +12,7 @@
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
     [decide.routing :as routing]
-    [decide.ui.common.time :as time]
+    [decide.utils.time :as time]
     [decide.ui.proposal.detail-page :as detail-page]
     [material-ui.data-display :as dd]
     [material-ui.inputs :as inputs]

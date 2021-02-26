@@ -1,6 +1,6 @@
 (ns decide.ui.common.time-test
   (:require
-    [decide.ui.common.time :as time]
+    [decide.utils.time :as time]
     [fulcro-spec.core :refer [specification provided behavior assertions component provided! =>]]))
 
 (defn +days [^js/Date date days]

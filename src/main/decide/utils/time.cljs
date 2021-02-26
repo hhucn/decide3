@@ -1,4 +1,4 @@
-(ns decide.ui.common.time
+(ns decide.utils.time
   (:require
     [cljs.spec.alpha :as s]
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
