@@ -22,7 +22,7 @@
     ["@material-ui/icons/MoreVert" :default MoreVert]
     ["@material-ui/icons/ThumbDownAltTwoTone" :default ThumbDownAltTwoTone]
     ["@material-ui/icons/ThumbUpAltTwoTone" :default ThumbUpAltTwoTone]
-    [taoensso.timbre :as log]))
+    [material-ui.layout.grid :as grid]))
 
 (defn id-part [proposal-id]
   (dom/data {:className "proposal-id"
@@ -49,7 +49,7 @@
            {::proposal/original-author (comp/get-query proposal/Author)}]
    :ident ::proposal/id}
   (let [author-name (::user/display-name original-author)]
-    (comp/fragment
+    (dom/span {:classes ["subheader"]}
       (id-part nice-id)
       " · "
       (when author-name
@@ -58,11 +58,16 @@
       (when (instance? js/Date created)
         (time-part created))
       (let [no-of-parents (count parents)]
-        (when (pos? no-of-parents)
-          (str " · "
-            (case no-of-parents
-              1 (i18n/trc "Type of proposal" "Fork")
-              (i18n/trc "Type of proposal" "Merge"))))))))
+        (case no-of-parents
+          0 nil
+          1 (dd/chip
+              {:size :small
+               :color :primary
+               :label (i18n/trc "Type of proposal" "Fork")})
+          (dd/chip
+            {:size :small
+             :color :secondary
+             :label (i18n/trc "Type of proposal" "Merge")}))))))
 
 (def ui-subheader (comp/factory Subheader (:keyfn ::proposal/id)))
 
@@ -72,7 +77,8 @@
 
 (defsc ProposalCard [this {::proposal/keys [id title body my-opinion arguments pro-votes]
                            :keys [root/current-session] :as props}
-                     {::process/keys [slug]}]
+                     {::process/keys [slug]
+                      :keys [process-over?]}]
   {:query (fn []
             [::proposal/id
              ::proposal/title ::proposal/body
@@ -97,9 +103,13 @@
                         [slug id])]
     (surfaces/card
       {:raised false
-       :component :article}
+       :component :article
+       :style {:height "100%"
+               :display :flex
+               :flexDirection "column"}}
 
-      (surfaces/card-action-area {:href proposal-href}
+      (surfaces/card-action-area {:href proposal-href
+                                  :style {:flexGrow 1}}
         (surfaces/card-header
           {:title title
            :titleTypographyProps {:component "h3"}
@@ -107,46 +117,43 @@
            :action (inputs/icon-button {:disabled true :size :small}
                      (comp/create-element MoreVert nil nil))})
 
-        (surfaces/card-content {}
-          (dd/typography
-            {:component "p"
-             :variant "body2"
-             :color "textSecondary"
-             :style {:whiteSpace "pre-line"}}
-            body)))
+        (layout/box {:maxHeight "6rem"
+                     :overflow "hidden"
+                     :clone true}
+          (surfaces/card-content {}
+            (dd/typography
+              {:component "p"
+               :variant "body2"
+               :color "textSecondary"
+               :style {:whiteSpace "pre-line"}}
+              body))))
 
+      (dd/divider {:variant :middle})
       (surfaces/card-actions {}
-        (layout/box {:color "success.main"} (dd/typography {:variant :button} pro-votes))
-
         (let [approved? (pos? my-opinion)]
-          (inputs/button
-            {:disabled (not logged-in?)
-             :color (if approved? "primary" "default")
-             :variant :text                                 ;(if approved? :contained :text)
-             :onClick #(comp/transact!! this [(opinion/add {::proposal/id id
-                                                            :opinion (if approved? 0 +1)})])
-             :startIcon (comp/create-element ThumbUpAltTwoTone nil nil)}
-            (if-not approved?
-              (i18n/trc "Approve a proposal" "Approve")
-              (i18n/trc "Proposal has been approved" "Approved"))))
-        #_(inputs/button-group
-            {:size :small
-             :variant :text
-             :disableElevation true}
-            (layout/box {:color "green"} (dd/typography {:variant :button :color "inherit"} pro-votes))
-            (inputs/button {:color (if (neg? my-opinion) "primary" "default")
-                            :aria-label "Ablehnen"
-                            :onClick #(comp/transact! this [(opinion/add {::proposal/id id
-                                                                          :opinion (if (neg? my-opinion) 0 -1)})])
-                            :startIcon (comp/create-element ThumbDownAltTwoTone nil nil)}))
+          (layout/box {:mx 1 :clone true}
+            (grid/container
+              {:alignItems :center
+               :spacing 1}
 
-        (layout/box {:style {:marginLeft "auto"}}
-          (dd/typography {:variant :button}
-            (i18n/trf "{count} arguments" {:count (count arguments)}))
+              (grid/item {}
+                (inputs/icon-button
+                  {:size :small
+                   :aria-label
+                   (if-not approved?
+                     (i18n/trc "Approve a proposal" "Approve")
+                     (i18n/trc "Proposal has been approved" "Approved"))
+                   :color (if approved? "primary" "default")
+                   :disabled (or (not logged-in?) process-over?)
+                   :onClick #(comp/transact! this [(opinion/add {::proposal/id id
+                                                                 :opinion (if approved? 0 1)})])}
+                  (dom/create-element ThumbUpAltTwoTone #js {"fontSize" "small"})))
+              (grid/item {} (dd/typography {} pro-votes))
 
-          (inputs/button {:component "a"
-                          :color :primary
-                          :href proposal-href}
-            (i18n/trc "Show more information about proposal" "More")))))))
+
+              (layout/box {:ml "auto" :clone true}
+                (grid/item {}
+                  (dd/typography {:variant :body2}
+                    (i18n/trf "{count} arguments" {:count (count arguments)})))))))))))
 
 (def ui-proposal-card (comp/computed-factory ProposalCard {:keyfn ::proposal/id}))
