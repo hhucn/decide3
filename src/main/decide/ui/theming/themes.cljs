@@ -16,7 +16,7 @@
                   {:palette {:type "dark"
                              :primary {:main "#68b9e9"}
                              :secondary {:main "#f490c1"}
-                             :success {:main "#6bca80"}}}))
+                             :success {:main "#7fef97"}}}))
 
 (defn responsive-font-theme [theme]
   (responsiveFontSizes (create-mui-theme theme)))
