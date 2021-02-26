@@ -1,9 +1,15 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>decide - Poster</title>
+
+    <title>decide - Support Decision-making through Collaborative Evolution of Proposals</title>
+    <meta name="description"
+          content="We aim to improve decision-making in groups by giving participants the tools to evolve proposals and form coalitions. For that we built software to evaluate.">
     <meta name="author" content="Björn Ebbinghaus">
+
+    <meta charset="UTF-8">
     <meta http-equiv="content-language" content="en">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         * {
             box-sizing: border-box;
@@ -82,7 +88,7 @@
         }
 
         .authors a {
-            color: grey;
+            color: #595959;
         }
 
         article {
@@ -110,7 +116,6 @@
         section > * + * {
             margin-left: 16px;
             margin-right: 16px;
-            font-size: 1.4em;
         }
 
         footer {
@@ -118,6 +123,7 @@
             bottom: 0;
             left: 0;
             width: 100%;
+            max-width: 100vw;
 
             display: flex;
             justify-content: space-between;
@@ -138,9 +144,11 @@
 
         header {
             height: 5rem;
+            width: 100%;
             display: flex;
             justify-content: space-between;
             border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+            text-align: center;
         }
 
         ul {
@@ -156,7 +164,7 @@
         }
 
         header img {
-
+            height: 100%;
         }
 
         dt {
@@ -166,9 +174,9 @@
 </head>
 <body>
 <header>
-    <img src="fkop_text.svg" style="padding: 8px"/>
+    <img src="fkop_text.svg" style="padding: 8px" alt="Logo Forschungskolleg NRW"/>
     <!--<img src="Logo_HHU_+Name_EN_horizontal_rgb_+Safezone.png"/>-->
-    <img src="HHU_Logo.svg"/>
+    <img src="HHU_Logo.svg" alt="Logo HHU"/>
 </header>
 <article>
     <h1><i>decide</i> - Support Decision-making through Collaborative Evolution of Proposals</h1>
