@@ -235,10 +235,8 @@
    => ::proposal/proposal | #(contains? (set proposals) %)]
   (->> proposals
     (sort-by ::proposal/created)
-    reverse
     first))
 
-(s/keys)
 
 (>defn get-winner [db process]
   [d.core/db? (s/keys :req [::slug]) => (? ::proposal/proposal)]

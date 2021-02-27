@@ -4,10 +4,10 @@
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.data-fetch :as df]
     [com.fulcrologic.fulcro.dom :as dom]
-    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr :refer [defrouter]]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
+    [decide.ui.proposal.card :as proposal-card]
     [material-ui.data-display :as dd]
     [material-ui.data-display.list :as list]
     [material-ui.inputs :as inputs]
@@ -96,39 +96,56 @@
 
 (def ui-experimental-ballot (comp/computed-factory Ballot))
 
-(defsc ProcessHome [_this {::process/keys [description proposals]
-                           :keys [>/experimental-ballots]}]
+(defsc ProcessHome [_this {::process/keys [description proposals winner]
+                           :keys [>/experimental-ballots] :as process}]
   {:query [::process/slug ::process/description
            {::process/proposals (comp/get-query TopEntry)}
-           {:>/experimental-ballots (comp/get-query Ballot)}]
+           ::process/end-time
+           {:>/experimental-ballots (comp/get-query Ballot)}
+           {::process/winner (comp/get-query proposal-card/ProposalCard)}]
    :ident ::process/slug}
-  (layout/box {:clone true :pt 2}
-    (layout/container {:maxWidth :lg :component :main}
-      ;; description section
-      (grid/container {:spacing 2}
-        (grid/item {:xs 12}
-          (section-paper {}
-            (dd/typography {:component :h2 :variant "h4" :paragraph true}
-              (i18n/trc "Description of a process" "Description"))
-            (dd/typography {:variant "body1"}
-              description)))
-
-
-        (let [top-proposals (top-proposals proposals)]
-          (when-not (zero? (count top-proposals))
+  (let [process-over? (process/over? process)]
+    (layout/box {:clone true :pt 2}
+      (layout/container {:maxWidth :lg :component :main}
+        ;; description section
+        (grid/container {:spacing 2}
+          (when process-over?
             (grid/item {:xs 12}
-              (section-paper {:pb 0}
-                (dd/typography {:component :h2 :variant "h5"}
-                  (i18n/trf "{numProposals, plural,
-                    =0 {There are no proposals!}
-                    =1 {The current best proposal:}
-                    other {The current best proposals:}}"
-                    {:numProposals (count top-proposals)}))
-                (list/list {}
-                  (map ui-top-entry top-proposals))))))
+              (section-paper {}
+                (dd/typography {:component :h2 :variant :h4}
+                  (i18n/tr "Winner"))
+                (layout/box {:m 3}
+                  (proposal-card/ui-proposal-card winner {:process-over? process-over?
+                                                          :max-height nil
+                                                          :card-props {:raised true
+                                                                       :color :primary}})))))
 
-        (grid/item {:xs 12}
-          (ui-experimental-ballot experimental-ballots))))))
+          (grid/item {:xs 12}
+            (section-paper {}
+              (dd/typography {:component :h2 :variant :h4 :paragraph true}
+                (i18n/trc "Description of a process" "Description"))
+              (dd/typography {:variant :body1}
+                description)))
+
+
+          (let [top-proposals (top-proposals proposals)]
+            (when (or (not process-over?) #_(< 1 (count top-proposals)))
+              (when (pos? (count top-proposals))
+                (grid/item {:xs 12}
+                  (section-paper {}
+                    (dd/typography {:component :h2 :variant :h4}
+                      (i18n/trf
+                        "{numProposals, plural,
+                        =0 {There are no proposals!}
+                        =1 {The current best proposal}
+                        other {The current best proposals}}"
+                        {:numProposals (count top-proposals)}))
+                    (list/list {}
+                      (map ui-top-entry top-proposals)))))))
+
+          (when-not process-over?
+            (grid/item {:xs 12}
+              (ui-experimental-ballot experimental-ballots))))))))
 
 (def ui-process-home (comp/computed-factory ProcessHome))
 

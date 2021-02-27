@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: decide3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-23 00:12+0100\n"
-"PO-Revision-Date: 2021-02-23 00:14+0100\n"
+"POT-Creation-Date: 2021-02-27 13:55+0100\n"
+"PO-Revision-Date: 2021-02-27 13:56+0100\n"
 "Last-Translator: Björn Ebbinghaus <ebbinghaus@hhu.de>\n"
 "Language-Team: Björn Ebbinghaus\n"
 "Language: de\n"
@@ -15,437 +15,299 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: trc:1c,2;tr:1;trf:1\n"
+"X-Poedit-Flags-xgettext: --no-location\n"
 "X-Poedit-SearchPath-0: i18n.js\n"
 
-#: i18n.js:16492
 msgid "Password is wrong"
 msgstr "Passwort ist falsch"
 
-#: i18n.js:19494
 msgid "Email already in use!"
 msgstr "E-Mail ist bereits vergeben!"
 
-#: i18n.js:19505
 msgid "Email or password is wrong"
 msgstr "E-Mail oder Passwort ist falsch"
 
-#: i18n.js:19515
 msgctxt "Dialog header"
 msgid "Sign up"
 msgstr "Registrierung"
 
-#: i18n.js:19517 i18n.js:19518 i18n.js:20003
 msgid "Email"
 msgstr "E-Mail"
 
-#: i18n.js:19519 i18n.js:19520 i18n.js:19538 i18n.js:19539
 msgid "Password"
 msgstr "Passwort"
 
-#: i18n.js:19522
 msgctxt "Label of submit form"
 msgid "Sign up"
 msgstr "Registrieren"
 
-#: i18n.js:19524
 msgid "Already have an account? Sign In"
 msgstr "Du hast bereits einen Account? Anmelden"
 
-#: i18n.js:19534
 msgctxt "Dialog header"
 msgid "Sign in"
 msgstr "Anmelden"
 
-#: i18n.js:19536 i18n.js:19537
 msgid "E-Mail"
 msgstr "E-Mail"
 
-#: i18n.js:19541
 msgctxt "Label of submit form"
 msgid "Sign in"
 msgstr "Anmelden"
 
-#: i18n.js:19543
 msgid "Don't have an account? Sign Up"
 msgstr "Noch keinen Account? Registrieren"
 
-#: i18n.js:19581
 msgctxt "[aria] navigation menu"
 msgid "navigation menu"
 msgstr "navigations menü"
 
-#: i18n.js:19585
 msgctxt "Temp Nickname for login"
 msgid "Nickname"
 msgstr "Name"
 
-#: i18n.js:19586
 msgctxt "Label of login button"
 msgid "Login"
 msgstr "Anmelden"
 
-#: i18n.js:19587
 msgctxt "[aria]"
 msgid "account of current user"
 msgstr "Account aktueller Benutzer"
 
-#: i18n.js:19590 i18n.js:19864
 msgid "Settings"
 msgstr "Einstellungen"
 
-#: i18n.js:19591
 msgctxt "Label of logout button"
 msgid "Logout"
 msgstr "Abmelden"
 
-#: i18n.js:19603
 msgid "Change Password"
 msgstr "Passwort ändern"
 
-#: i18n.js:19603 i18n.js:19604
 msgid "Old password"
 msgstr "Altes Passwort"
 
-#: i18n.js:19605
 msgid "New password"
 msgstr "Neues Passwort"
 
-#: i18n.js:19607
 msgid "Save"
 msgstr "Speichern"
 
-#: i18n.js:19608
 msgid "Password changed"
 msgstr "Passwort geändert"
 
-#: i18n.js:19674
 msgid "today at {time}"
 msgstr "heute um {time}"
 
-#: i18n.js:19674
 msgid "yesterday at {time}"
 msgstr "gestern um {time}"
 
-#: i18n.js:19675
 msgid "on {datetime}"
 msgstr "am {datetime}"
 
-#: i18n.js:19712 i18n.js:19761 i18n.js:20022
 msgctxt "Title of a process"
 msgid "Title"
 msgstr "Titel"
 
-#: i18n.js:19713
 msgctxt "URL of a process"
 msgid "URL"
 msgstr "URL"
 
-#: i18n.js:19713
 msgid "Allowed are: lower case letters (a-z), numbers and hyphens"
 msgstr "Erlaubt sind Kleinbuchstaben (a-z), Zahlen und Bindestriche"
 
-#: i18n.js:19716
 msgctxt "What is the process about"
 msgid "What is it about?"
 msgstr "Worum geht es?"
 
-#: i18n.js:19717 i18n.js:19764 i18n.js:20025
 msgid "Does the process end?"
 msgstr "Endet der Prozess?"
 
-#: i18n.js:19719
 msgctxt "When does a process end?"
 msgid "When?"
 msgstr "Wann?"
 
-#: i18n.js:19720
 msgid "Is the process public?"
 msgstr "Ist der Prozess öffentlich?"
 
-#: i18n.js:19722
 #, fuzzy
 #| msgid "Participant emails"
 msgctxt "Label for list of participants"
 msgid "Participants"
 msgstr "Teilnehmer E-Mails"
 
-#: i18n.js:19734
 msgctxt "Label for input field"
 msgid "Participant emails"
 msgstr "Teilnehmer E-Mails"
 
-#: i18n.js:19737 i18n.js:19767 i18n.js:20027 i18n.js:20290 i18n.js:20337
 msgctxt "Submit form"
 msgid "Submit"
 msgstr "Fertig"
 
-#: i18n.js:19763 i18n.js:19958 i18n.js:20024
 msgctxt "Description of a process"
 msgid "Description"
 msgstr "Beschreibung"
 
-#: i18n.js:19765 i18n.js:20026
 msgctxt "End of a process"
 msgid "End"
 msgstr "Ende"
 
-#: i18n.js:19792
 msgid "Number of proposals"
 msgstr "Anzahl an Vorschlägen"
 
-#: i18n.js:19792
 msgid "Number of participants"
 msgstr "Anzahl an Teilnehmern"
 
-#: i18n.js:19808
 msgctxt "Load indicator"
 msgid "Loading..."
 msgstr "Laden…"
 
-#: i18n.js:19812
 msgid "New decision-process"
 msgstr "Neuer Entscheidungsprozess"
 
-#: i18n.js:19824
 msgid "Active decision-processes"
 msgstr "Aktive Entscheidungsprozesse"
 
-#: i18n.js:19826
 msgid "Create new decision-process"
 msgstr "Neuen Entscheidungsprozess erstellen"
 
-#: i18n.js:19833
 msgctxt "Lable for language switcher"
 msgid "Language"
 msgstr "Language"
 
-#: i18n.js:19835
 msgid "English"
 msgstr ""
 
-#: i18n.js:19836
 msgid "Deutsch"
 msgstr ""
 
-#: i18n.js:19863
 msgid "All decisions"
 msgstr "Alle Entscheidungen"
 
-#: i18n.js:19895
 msgctxt "[aria]"
 msgid "Close"
 msgstr "schließen"
 
-#: i18n.js:19922 i18n.js:19938
-msgid "Approvals: {pros}"
-msgstr "Zustimmungen: {pros}"
-
-#: i18n.js:19923
-msgid "Approved"
-msgstr "Zugestimmt"
-
-#: i18n.js:19924
-msgid "Approve"
-msgstr "Zustimmen"
-
-#: i18n.js:19940
-msgid "Children"
-msgstr "Kinder"
-
-#: i18n.js:19941
-msgid "Parents"
-msgstr "Eltern"
-
-#: i18n.js:19948
-msgid "Ballot"
-msgstr "Stimmzettel"
-
-#: i18n.js:19960
-msgid ""
-"{numProposals, plural,\n"
-"                    =0 {There are no proposals!}\n"
-"                    =1 {The current best proposal:}\n"
-"                    other {The current best proposals:}}"
-msgstr ""
-"{numProposals, plural, =0 {Es gibt bisher keine Vorschläge!} =1 {Der aktuell "
-"beste Vorschlag:} other {Die aktuell besten Vorschläge:}}"
-
-#: i18n.js:19999
-msgid "Moderators"
-msgstr "Moderatoren"
-
-#: i18n.js:20003
-msgid "Add moderator"
-msgstr "Moderator hinzufügen"
-
-#: i18n.js:20004
-msgctxt "Submit new moderator form"
-msgid "Add"
-msgstr "Hinzufügen"
-
-#: i18n.js:20017
-msgid "Edit process"
-msgstr "Prozess bearbeiten"
-
-#: i18n.js:20023 i18n.js:20024
-msgid "Edit"
-msgstr "Bearbeiten"
-
-#: i18n.js:20085
 msgctxt "Alignment of argument"
 msgid "Pro"
 msgstr "Dafür"
 
-#: i18n.js:20086
 msgctxt "Alignment of argument"
 msgid "Con"
 msgstr "Dagegen"
 
-#: i18n.js:20117
 msgid "Which arguments are still relevant?"
 msgstr "Welche Argumente sind immer noch relevant?"
 
-#: i18n.js:20118
 msgid "The parents of this proposal have no arguments"
 msgstr "Die Eltern von diesem Vorschlag haben keine Argumente"
 
-#: i18n.js:20148
 msgid ""
 "Do you want to add a new proposal, fork from an existing or merge proposals?"
 msgstr ""
 "Möchtest du einen neuen Vorschlag hinzufügen, einen bestehenden erweitern "
 "oder Vorschläge zusammenführen?"
 
-#: i18n.js:20150
 msgid "New"
 msgstr "Neu"
 
-#: i18n.js:20151
 msgid "Create a new proposal that is not related to another one."
 msgstr ""
 "Einen neuen Vorschlag erstellen, der nicht mit einem anderen verwandt ist."
 
-#: i18n.js:20152
 msgid "Fork / Merge"
 msgstr "Ableiten / Zusammenführen"
 
-#: i18n.js:20153
 msgid "Create a proposal derived from one or more proposals"
 msgstr ""
 "Ein Vorschlag erstellen basierend auf einem oder mehreren anderen Vorschlägen"
 
-#: i18n.js:20203
 msgid "Von welchen bestehenden Vorschlägen hängt dein neuer Vorschlag ab?"
 msgstr "Von welchen bestehenden Vorschlägen hängt dein neuer Vorschlag ab?"
 
-#: i18n.js:20204
 msgid "You can choose as many as you want"
 msgstr "Es können beliebig viele gewählt werden"
 
-#: i18n.js:20255
 msgctxt "Title of new proposal form"
 msgid "New proposal"
 msgstr "Neuer Vorschlag"
 
-#: i18n.js:20257
 msgctxt "Type of proposal"
 msgid "Type"
 msgstr "Typ"
 
-#: i18n.js:20261 i18n.js:20276
 msgctxt "Input is optional"
 msgid "Optional"
 msgstr "Optional"
 
-#: i18n.js:20261
 msgctxt "Parents of a proposal"
 msgid "Parents"
 msgstr "Eltern"
 
-#: i18n.js:20268
 msgid "Title and details must not be empty"
 msgstr "Titel or Details dürfen nicht leer sein"
 
-#: i18n.js:20268 i18n.js:20270 i18n.js:20281 i18n.js:20480
 msgctxt "Details of a proposal"
 msgid "Details"
 msgstr "Details"
 
-#: i18n.js:20269
 msgid "Add a recognizable title"
 msgstr "Füge einen erkennbaren Titel hinzu"
 
-#: i18n.js:20269 i18n.js:20281
 msgctxt "Title of a proposal"
 msgid "Title"
 msgstr "Titel"
 
-#: i18n.js:20272
 msgid "Copy details from parent"
 msgstr "Kopiere Details von Eltern"
 
-#: i18n.js:20274 i18n.js:20279
 msgctxt "Go to the next part of the form"
 msgid "Next"
 msgstr "Weiter"
 
-#: i18n.js:20276
 msgctxt "Helper text"
 msgid "Only applicable with parents"
 msgstr "Nur mit Eltern möglich"
 
-#: i18n.js:20276 i18n.js:20484
 msgctxt "Arguments of a proposal"
 msgid "Arguments"
 msgstr "Argumente"
 
-#: i18n.js:20280
 msgid "Overview"
 msgstr "Übersicht"
 
-#: i18n.js:20282
 msgid "Derived from {count} other proposals:"
 msgstr "Abgeleitet von {count} anderen Vorschlägen:"
 
-#: i18n.js:20290
 msgctxt "Abort form"
 msgid "Cancel"
 msgstr "Abbrechen"
 
-#: i18n.js:20319 i18n.js:20353
 msgid "Pro"
 msgstr "Dafür"
 
-#: i18n.js:20319
 msgid "Con"
 msgstr "Dagegen"
 
-#: i18n.js:20319
 msgid "By "
 msgstr "Von "
 
-#: i18n.js:20352 i18n.js:20354
 msgid "New argument"
 msgstr "Neues Argument"
 
-#: i18n.js:20352 i18n.js:20593
 msgid "Login to add new argument"
 msgstr "Anmelden um ein neues Argument hinzuzufügen"
 
-#: i18n.js:20353
 msgid "Contra"
 msgstr "Dagegen"
 
-#: i18n.js:20362 i18n.js:20544
 msgid "So far there are no arguments"
 msgstr "Bisher gibt es keine Argumente"
 
-#: i18n.js:20390
 msgid ""
 "This proposal was derived {count, plural,  =1 {one time} other {# times}}"
 msgstr "Dieser Vorschlag hat {count, plural, =1 {ein Kind} other {# Kinder}}"
 
-#: i18n.js:20408
 msgid ""
 "This proposal {count, plural, =0 {depends on no previous proposals} =1 {is "
 "derived from one proposal} other {combines # proposals}}"
@@ -454,126 +316,141 @@ msgstr ""
 "=1 {basiert auf einem anderen Vorschlag} other {vereinigt # andere "
 "Vorschläge}}}"
 
-#: i18n.js:20439
 msgid "{ratioOfVoters, number, ::percent} of approvees"
 msgstr "{ratioOfVoters, number, ::percent} der Wähler"
 
-#: i18n.js:20441
 msgid "{ratioOfVoters, number, ::+! percent} more approves"
 msgstr "{ratioOfVoters, number, ::+! percent} mehr Stimmen"
 
-#: i18n.js:20442
 msgctxt "Encourage to form a coalition"
 msgid "Form coalition"
 msgstr "Koalition vorschlagen"
 
-#: i18n.js:20483
 msgctxt "Prompt to merge or fork"
 msgid "Propose a change"
 msgstr "Änderung vorschlagen"
 
-#: i18n.js:20485
 msgid "Similar proposals"
 msgstr "Ähnliche Vorschläge"
 
-#: i18n.js:20496
 msgid "by {author}"
 msgstr "von {author}"
 
-#: i18n.js:20508
 msgctxt "Type of proposal"
 msgid "Fork"
 msgstr "Ableitung"
 
-#: i18n.js:20508
 msgctxt "Type of proposal"
 msgid "Merge"
 msgstr "Koalition"
 
-#: i18n.js:20539
 msgctxt "Approve a proposal"
 msgid "Approve"
 msgstr "Zustimmen"
 
-#: i18n.js:20539
 msgctxt "Proposal has been approved"
 msgid "Approved"
 msgstr "Zugestimmt"
 
-#: i18n.js:20539
 msgid "{count} arguments"
 msgstr "{count, plural, =1 {# Argument} other {# Argumente}}"
 
-#: i18n.js:20540
-msgctxt "Show more information about proposal"
-msgid "More"
-msgstr "Mehr"
+msgid "Approvals: {pros}"
+msgstr "Zustimmungen: {pros}"
 
-#: i18n.js:20543 i18n.js:20593
+msgid "Approved"
+msgstr "Zugestimmt"
+
+msgid "Approve"
+msgstr "Zustimmen"
+
+msgid "Children"
+msgstr "Kinder"
+
+msgid "Parents"
+msgstr "Eltern"
+
+msgid "Ballot"
+msgstr "Stimmzettel"
+
+msgid "Winner"
+msgstr "Gewinner"
+
+msgid ""
+"{numProposals, plural,\n"
+"                        =0 {There are no proposals!}\n"
+"                        =1 {The current best proposal}\n"
+"                        other {The current best proposals}}"
+msgstr ""
+"{numProposals, plural, =0 {Es gibt bisher keine Vorschläge!} =1 {Der aktuell "
+"beste Vorschlag} other {Die aktuell besten Vorschläge}}"
+
+msgid "Moderators"
+msgstr "Moderatoren"
+
+msgid "Add moderator"
+msgstr "Moderator hinzufügen"
+
+msgctxt "Submit new moderator form"
+msgid "Add"
+msgstr "Hinzufügen"
+
+msgid "Edit process"
+msgstr "Prozess bearbeiten"
+
+msgid "Edit"
+msgstr "Bearbeiten"
+
 msgid "New proposal"
 msgstr "Neuer Vorschlag"
 
-#: i18n.js:20551
 msgctxt "Label for sort order selection"
 msgid "Sort"
 msgstr "Sortierung"
 
-#: i18n.js:20553
 msgctxt "Sort order option"
 msgid "New → Old"
 msgstr "Neu → Alt"
 
-#: i18n.js:20553
 msgctxt "Sort order option"
 msgid "Old → New"
 msgstr "Alt → Neu"
 
-#: i18n.js:20553
 msgctxt "Sort order option"
 msgid "Approvals ↓"
 msgstr "Zustimmungen ↓"
 
-#: i18n.js:20555
 msgctxt "Label for filter selection"
 msgid "Filter"
 msgstr "Filter"
 
-#: i18n.js:20582
 msgid "Proposals: {count}"
 msgstr "Vorschläge: {count}"
 
-#: i18n.js:20632
 msgid "Ended on the {endDatetime}!"
 msgstr "Endete am {endDatetime}!"
 
-#: i18n.js:20633
 msgid "Ends at {endDatetime}"
 msgstr "Endet am {endDatetime}"
 
-#: i18n.js:20690
 msgctxt "Overview over process"
 msgid "Overview"
 msgstr "Übersicht"
 
-#: i18n.js:20690
 msgid "All proposals"
 msgstr "Alle Vorschläge"
 
-#: i18n.js:20691
 msgctxt "Link to moderation page"
 msgid "Moderation"
 msgstr "Moderation"
 
-#: i18n.js:20753
 msgctxt "Dismiss warning alert"
 msgid "Dismiss"
 msgstr "Ausblenden"
 
-#: i18n.js:20753
 msgid "Work in progress!"
 msgstr ""
 
-#: i18n.js:20753
 msgid ""
 "Components marked with a yellow outline are in progress, and may not work "
 "yet!"
@@ -581,9 +458,12 @@ msgstr ""
 "Gelb markierte Bereich werden aktiv bearbeitet und funktionieren eventuell "
 "nicht richtig!"
 
-#: i18n.js:20582
 msgid "Participants {count}"
 msgstr "Teilnehmer {count}"
+
+#~ msgctxt "Show more information about proposal"
+#~ msgid "More"
+#~ msgstr "Mehr"
 
 #~ msgctxt "Alignment of argument"
 #~ msgid "Pro:"

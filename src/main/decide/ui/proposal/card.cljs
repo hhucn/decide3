@@ -78,7 +78,10 @@
 (defsc ProposalCard [this {::proposal/keys [id title body my-opinion arguments pro-votes]
                            :keys [root/current-session] :as props}
                      {::process/keys [slug]
-                      :keys [process-over?]}]
+                      :keys [process-over?
+                             card-props
+                             max-height]
+                      :or {max-height "6rem"}}]
   {:query (fn []
             [::proposal/id
              ::proposal/title ::proposal/body
@@ -91,7 +94,7 @@
              {::proposal/original-author (comp/get-query proposal/Author)}
              [:root/current-session '_]])
    :ident ::proposal/id
-   :initial-state (fn [{:keys [id title body]}]
+   :initial-state (fn [{::keys [id title body]}]
                     {::proposal/id id
                      ::proposal/title title
                      ::proposal/body body})
@@ -102,11 +105,13 @@
                            (dr/into-path ["decision" slug] detail-page/ProposalPage (str id)))
                         [slug id])]
     (surfaces/card
-      {:raised false
-       :component :article
-       :style {:height "100%"
-               :display :flex
-               :flexDirection "column"}}
+      (merge
+        {:raised false
+         :component :article
+         :style {:height "100%"
+                 :display :flex
+                 :flexDirection "column"}}
+        card-props)
 
       (surfaces/card-action-area {:href proposal-href
                                   :style {:flexGrow 1}}
@@ -117,7 +122,7 @@
            :action (inputs/icon-button {:disabled true :size :small}
                      (comp/create-element MoreVert nil nil))})
 
-        (layout/box {:maxHeight "6rem"
+        (layout/box {:maxHeight max-height
                      :overflow "hidden"
                      :clone true}
           (surfaces/card-content {}
