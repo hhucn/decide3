@@ -149,7 +149,8 @@
         (grid/container {:spacing 2 :alignItems "stretch"}
           (for [{id ::proposal/id :as proposal} sorted-proposals]
             (grid/item {:xs 12 :md 6 :lg 4 :xl 3 :key id :style {:flexGrow 1}}
-              (proposal-card/ui-proposal-card proposal {::process/slug slug})))
+              (proposal-card/ui-proposal-card proposal {::process/slug slug
+                                                        :process-over? process-over?})))
 
           (when-not process-over?
             (grid/item {:xs 12 :md 6 :lg 4 :xl 3 :style {:flexGrow 1

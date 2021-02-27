@@ -142,17 +142,21 @@
                :spacing 1}
 
               (grid/item {}
-                (inputs/icon-button
-                  {:size :small
-                   :aria-label
-                   (if-not approved?
-                     (i18n/trc "Approve a proposal" "Approve")
-                     (i18n/trc "Proposal has been approved" "Approved"))
-                   :color (if approved? "primary" "default")
-                   :disabled (or (not logged-in?) process-over?)
-                   :onClick #(comp/transact! this [(opinion/add {::proposal/id id
-                                                                 :opinion (if approved? 0 1)})])}
-                  (dom/create-element ThumbUpAltTwoTone #js {"fontSize" "small"})))
+                (if process-over?
+                  (dom/create-element ThumbUpAltTwoTone
+                    #js {:fontSize "small"
+                         :color (if approved? "primary" "disabled")})
+                  (inputs/icon-button
+                    {:size :small
+                     :aria-label
+                     (if approved?
+                       (i18n/trc "Proposal has been approved" "Approved")
+                       (i18n/trc "Approve a proposal" "Approve"))
+                     :color (if approved? "primary" "default")
+                     :disabled (or (not logged-in?) process-over?)
+                     :onClick #(comp/transact! this [(opinion/add {::proposal/id id
+                                                                   :opinion (if approved? 0 1)})])}
+                    (dom/create-element ThumbUpAltTwoTone #js {"fontSize" "small"}))))
               (grid/item {} (dd/typography {} pro-votes))
 
 
