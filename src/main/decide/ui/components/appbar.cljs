@@ -15,7 +15,9 @@
     ["@material-ui/icons/AccountCircle" :default AccountCircleIcon]
     ["@material-ui/icons/Menu" :default Menu]
     [com.fulcrologic.fulcro.dom.events :as evt]
-    [com.fulcrologic.fulcro.dom :as dom]))
+    [com.fulcrologic.fulcro.dom :as dom]
+    [material-ui.inputs.input :as input]
+    [material-ui.inputs.form :as form]))
 
 (def appbar-theme-color
   {:light "primary"
@@ -71,13 +73,16 @@
                            (evt/prevent-default! e)
                            (comp/transact! this [(login/sign-in #:decide.models.user{:email temp-nickname :password temp-nickname})]))}
               (inputs/textfield
-                {:variant :outlined
+                {:variant :filled
                  :size :small
                  :value temp-nickname
                  :onChange #(set-temp-nickname (evt/target-value %))
                  :label (i18n/trc "Temp Nickname for login" "Nickname")
+                 :style {:color "inherit"}
                  :InputProps
-                 {:endAdornment
+                 {:style {:color :inherit
+                          :border "1px solid rgba(255,255,255,0.77)"}
+                  :endAdornment
                   (inputs/button
                     {:variant :text
                      :color :inherit
