@@ -31,7 +31,8 @@
     ["@material-ui/icons/Send" :default Send]
     ["@material-ui/icons/DoneAll" :default DoneAllIcon]
     ["@material-ui/core/styles" :refer [withStyles useTheme]]
-    [decide.ui.proposal.new-proposal :as new-proposal]))
+    [decide.ui.proposal.new-proposal :as new-proposal]
+    [decide.models.process :as process]))
 
 (declare ProposalPage)
 
@@ -168,7 +169,8 @@
 (def ui-new-argument-line (comp/computed-factory NewArgumentLine))
 
 (defsc ArgumentSection [this {::proposal/keys [id arguments]
-                              :keys [root/current-session]}]
+                              :keys [root/current-session]}
+                        {:keys [process-over?]}]
   {:query [::proposal/id
            {::proposal/arguments (comp/get-query ArgumentRow)}
            {[:root/current-session '_] (comp/get-query auth/Session)}]
@@ -184,18 +186,19 @@
            :paragraph true}
           (i18n/tr "So far there are no arguments"))))
 
-    (ui-new-argument-line {}
-      {:root/current-session current-session
-       :add-argument! (fn [{::argument/keys [content type]
-                            :keys [user-id]}]
-                        (comp/transact! this
-                          [(add-argument {::proposal/id id
-                                          :temp-id (tempid/tempid)
-                                          :content content
-                                          :type type
-                                          :author-id user-id})]))})))
+    (when-not process-over?
+      (ui-new-argument-line {}
+        {:root/current-session current-session
+         :add-argument! (fn [{::argument/keys [content type]
+                              :keys [user-id]}]
+                          (comp/transact! this
+                            [(add-argument {::proposal/id id
+                                            :temp-id (tempid/tempid)
+                                            :content content
+                                            :type type
+                                            :author-id user-id})]))}))))
 
-(def ui-argument-section (comp/factory ArgumentSection {:keyfn ::proposal/id}))
+(def ui-argument-section (comp/computed-factory ArgumentSection {:keyfn ::proposal/id}))
 ;; endregion
 
 ;; region Parent section
@@ -302,7 +305,8 @@
          :textAnchor "middle" :dominantBaseline "central"}
         (str other-uniques)))))
 
-(defsc SimilarEntry [this {:keys [sum-uniques own-uniques common-uniques other-proposal other-uniques] :as props} {:keys [show-add-dialog]}]
+(defsc SimilarEntry [this {:keys [sum-uniques own-uniques common-uniques other-proposal other-uniques] :as props}
+                     {:keys [show-add-dialog process-over?]}]
   {:query [:own-uniques
 
            :common-uniques
@@ -329,16 +333,18 @@
                   (dd/typography {}
                     (i18n/trf "{ratioOfVoters, number, ::+! percent} more approves" {:ratioOfVoters (dec (/ sum-uniques own-total))}))))))))
 
-      (surfaces/card-actions {}
-        (inputs/button
-          {:color :secondary
-           :onClick #(show-add-dialog (comp/get-ident SimilarProposal other-proposal))}
-          (i18n/trc "Encourage to form a coalition" "Form coalition"))))))
+      (when-not process-over?
+        (surfaces/card-actions {}
+          (inputs/button
+            {:color :secondary
+             :onClick #(show-add-dialog (comp/get-ident SimilarProposal other-proposal))}
+            (i18n/trc "Encourage to form a coalition" "Form coalition")))))))
 
 
 (def ui-similarity-entry (comp/computed-factory SimilarEntry {:keyfn (comp ::proposal/id :other-proposal)}))
 
-(defsc SimilarSection [_ {:keys [similar]} {:keys [show-add-dialog]}]
+(defsc SimilarSection [_ {:keys [similar]} {:keys [show-add-dialog
+                                                   process-over?]}]
   {:query [::proposal/id
            {:similar (comp/get-query SimilarEntry)}]
    :ident ::proposal/id}
@@ -346,15 +352,20 @@
     {:dense true
      :disablePadding true}
     (for [sim similar
-          :let [entry (ui-similarity-entry sim {:show-add-dialog show-add-dialog})]]
+          :let [entry (ui-similarity-entry sim {:show-add-dialog show-add-dialog
+                                                :process-over? process-over?})]]
       (list/item
         {:key (.-key entry)
          :disableGutters true}
         entry))))
 
 
-(def ui-similar-section2 (comp/computed-factory SimilarSection))
+(def ui-similar-section (comp/computed-factory SimilarSection))
 ;; endregion
+
+(defsc Process [_ _]
+  {:query [::process/slug ::process/end-time]
+   :ident ::process/slug})
 
 (defsc ProposalPage
   [this {::proposal/keys [title body]
@@ -367,7 +378,7 @@
            {:>/opinion-section (comp/get-query OpinionSection)}
            {:>/argument-section (comp/get-query ArgumentSection)}
            {:>/similar-section (comp/get-query SimilarSection)}
-           [:ui/current-process '_]]
+           {[:ui/current-process '_] (comp/get-query Process)}]
    :ident ::proposal/id
    :use-hooks? true
    :route-segment ["proposal" ::proposal/id]
@@ -379,7 +390,8 @@
          #(df/load! app ident ProposalPage
             {:post-mutation `dr/target-ready
              :post-mutation-params {:target ident}}))))}
-  (let [[_ slug] current-process
+  (let [{::process/keys [slug] :as process} current-process
+        process-over? (process/over? process)
         show-add-dialog (hooks/use-callback
                           (fn [& idents]
                             (comp/transact! this
@@ -407,22 +419,23 @@
                 (surfaces/toolbar
                   {:variant :dense
                    :disableGutters true}
-                  (inputs/button
-                    {:color :primary
-                     :variant :contained
-                     :size :small
-                     :onClick #(comp/transact! this [(new-proposal/show {:parents [(comp/get-ident this)]})])}
-                    ;:startIcon (layout/box {:css {:transform "rotate(.5turn)"} :component MergeType})
-                    ;:endIcon (layout/box {:css {:transform "rotate(.5turn)"} :component CallSplit})}
-                    (i18n/trc "Prompt to merge or fork" "Propose a change"))))
-
-
+                  (when-not process-over?
+                    (inputs/button
+                      {:color :primary
+                       :variant :contained
+                       :size :small
+                       :onClick #(comp/transact! this [(new-proposal/show {:parents [(comp/get-ident this)]})])}
+                      ;:startIcon (layout/box {:css {:transform "rotate(.5turn)"} :component MergeType})
+                      ;:endIcon (layout/box {:css {:transform "rotate(.5turn)"} :component CallSplit})}
+                      (i18n/trc "Prompt to merge or fork" "Propose a change")))))
 
 
               #_(grid/item {:xs 6}
                   (section " Meinungen " (ui-opinion-section opinion-section)))
               (grid/item {:xs 12 :component "section"}
-                (section (i18n/trc "Arguments of a proposal" "Arguments") (ui-argument-section argument-section))))
+                (section (i18n/trc "Arguments of a proposal" "Arguments") (ui-argument-section argument-section
+                                                                            {:process-over? process-over?}))))
             (grid/item {:xs 12 :lg 4 :component "section"}
               (ui-children-section children-section)
-              (section (i18n/tr "Similar proposals") (ui-similar-section2 similar-section {:show-add-dialog show-add-dialog})))))))))
+              (section (i18n/tr "Similar proposals") (ui-similar-section similar-section {:show-add-dialog show-add-dialog
+                                                                                          :process-over? process-over?})))))))))
