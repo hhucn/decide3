@@ -13,26 +13,31 @@
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
     [material-ui.layout.grid :as grid]
-    [material-ui.surfaces :as surfaces]))
+    [material-ui.surfaces :as surfaces]
+    [decide.models.opinion :as opinion]))
 
-(defsc TopEntry [_this {::proposal/keys [id title pro-votes my-opinion]
-                        :keys [root/current-session] :as props}]
+(defsc TopEntry [this {::proposal/keys [id title pro-votes my-opinion]
+                       :keys [root/current-session]}]
   {:query [::proposal/id ::proposal/title ::proposal/pro-votes ::proposal/my-opinion
            [:root/current-session '_]]
    :ident ::proposal/id}
-  (list/item
-    {:button true
-     :component :a
-     :href (str "proposal/" id)}
-    (list/item-text {:primary title
-                     :secondary (i18n/trf "Approvals: {pros}" {:pros pro-votes})} title)
-    (when (get current-session :session/valid?)
-      (list/item-secondary-action {}
-        (if (pos? my-opinion)
-          (layout/box {:color "success.main"} (dd/typography {:color :inherit} (i18n/tr "Approved")))
-          (inputs/button {:color :primary}
+  (let [approved? (pos? my-opinion)]
+    (list/item
+      {:button true
+       :component :a
+       :href (str "proposal/" id)}
+      (list/item-text {:primary title
+                       :secondary (i18n/trf "Approvals: {pros}" {:pros pro-votes})} title)
+      (when (get current-session :session/valid?)
+        (list/item-secondary-action {}
+          (if (pos? my-opinion)
+            (layout/box {:color "success.main"} (dd/typography {:color :inherit} (i18n/tr "Approved")))
+            (inputs/button
+              {:color :primary
+               :onClick #(comp/transact! this [(opinion/add {::proposal/id id
+                                                             :opinion (if approved? 0 1)})])}
 
-            (i18n/tr "Approve")))))))
+              (i18n/tr "Approve"))))))))
 
 (def ui-top-entry (comp/factory TopEntry {:keyfn ::proposal/id}))
 
@@ -48,7 +53,7 @@
 
 (declare ui-experimental-ballot-entry)
 
-(defsc BallotEntry [_ {::proposal/keys [title pro-votes parents children my-opinion]}]
+(defsc BallotEntry [this {::proposal/keys [id title pro-votes parents children my-opinion]}]
   {:query [::proposal/id
            ::proposal/title
            ::proposal/pro-votes
@@ -56,31 +61,34 @@
            {::proposal/children 1}
            ::proposal/my-opinion]
    :ident ::proposal/id}
-  (list/item {}
-    (list/item-icon {}
-      (inputs/checkbox
-        {:edge :start
-         :checked (pos? my-opinion)}))
+  (let [approved? (pos? my-opinion)]
+    (list/item {}
+      (list/item-icon {}
+        (inputs/checkbox
+          {:edge :start
+           :checked approved?
+           :onClick #(comp/transact! this [(opinion/add {::proposal/id id
+                                                         :opinion (if approved? 0 1)})])}))
 
-    (list/item-text {:secondary (i18n/trf "Approvals: {pros}" {:pros pro-votes})}
-      (if-not (and (empty? parents) (empty? children))
+      (list/item-text {:secondary (i18n/trf "Approvals: {pros}" {:pros pro-votes})}
+        (if-not (and (empty? parents) (empty? children))
 
-        ;; expandable content
-        (layout/box {:component :details}
-          (dom/summary {} title)
-          (layout/box {:borderLeft 1}
-            (when-not (empty? children)
-              (list/list
-                {:subheader (list/subheader {} (i18n/tr "Children"))
-                 :dense true}
-                (map ui-experimental-ballot-entry (sort-by-votes children))))
-            (when-not (empty? parents)
-              (list/list
-                {:subheader (list/subheader {} (i18n/tr "Parents"))
-                 :dense true}
-                (map ui-experimental-ballot-entry (sort-by-votes parents))))))
+          ;; expandable content
+          #_(layout/box {:component :details}
+              (dom/summary {} title)
+              (layout/box {:borderLeft 1}
+                (when-not (empty? children)
+                  (list/list
+                    {:subheader (list/subheader {} (i18n/tr "Children"))
+                     :dense true}
+                    (map ui-experimental-ballot-entry (sort-by-votes children))))
+                (when-not (empty? parents)
+                  (list/list
+                    {:subheader (list/subheader {} (i18n/tr "Parents"))
+                     :dense true}
+                    (map ui-experimental-ballot-entry (sort-by-votes parents))))))
 
-        title))))
+          title)))))
 
 (def ui-experimental-ballot-entry (comp/computed-factory BallotEntry {:keyfn ::proposal/id}))
 
@@ -88,10 +96,10 @@
   {:query [::process/slug
            {::process/proposals (comp/get-query BallotEntry)}]
    :ident ::process/slug}
-  (section-paper {:pb 0 :borderColor "warning.main"}        ; TODO remove warning color
+  (section-paper {:pb 0}
     (dd/typography {:component :h2 :variant "h5"} (i18n/tr "Ballot")
       (let [sorted-proposals (sort-by-votes proposals)]
-        (list/list {}
+        (list/list {:dense true}
           (map ui-experimental-ballot-entry sorted-proposals))))))
 
 (def ui-experimental-ballot (comp/computed-factory Ballot))
