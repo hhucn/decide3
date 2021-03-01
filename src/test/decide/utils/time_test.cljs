@@ -1,4 +1,4 @@
-(ns decide.ui.common.time-test
+(ns decide.utils.time-test
   (:require
     [decide.utils.time :as time]
     [fulcro-spec.core :refer [specification provided behavior assertions component provided! =>]]))
@@ -22,5 +22,5 @@
       (time/yesterday? (+days (js/Date.) -1)) => true
       "two days ago is not yesterday"
       (time/yesterday? (+days (js/Date.) -2)) => false
-      "two days ago is not yesterday"
-      (time/yesterday? (+days (js/Date.) -2)) => false)))
+      "tomorrow is not yesterday"
+      (time/yesterday? (+days (js/Date.) 1)) => false)))

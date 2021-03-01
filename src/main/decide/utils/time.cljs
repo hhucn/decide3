@@ -24,11 +24,12 @@
 
 (>defn yesterday? [^js/Date date]
   [:js/Date => boolean?]
-  (let [now (js/Date.)]
+  (let [yesterday (js/Date.)]
+    (.setDate yesterday (dec (.getDate yesterday)))
     (and
-      (= (.getFullYear date) (.getFullYear now))
-      (= (.getMonth date) (.getMonth now))
-      (= (.getDate date) (dec (.getDate now))))))
+      (= (.getFullYear date) (.getFullYear yesterday))
+      (= (.getMonth date) (.getMonth yesterday))
+      (= (.getDate date) (.getDate yesterday)))))
 
 (def short-time-format {:hour "numeric"})                   ; e.g. "13 Uhr"
 (def long-time-format {:hour "numeric" :minute "2-digit"})  ; e.g. "13:37"
