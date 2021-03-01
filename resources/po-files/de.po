@@ -314,7 +314,7 @@ msgid ""
 msgstr ""
 "Dieser Vorschlag {count, plural, =0 {basiert auf keinem anderen Vorschlag} "
 "=1 {basiert auf einem anderen Vorschlag} other {vereinigt # andere "
-"Vorschläge}}}"
+"Vorschläge}}"
 
 msgid "{ratioOfVoters, number, ::percent} of approvees"
 msgstr "{ratioOfVoters, number, ::percent} der Wähler"
