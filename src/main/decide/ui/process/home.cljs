@@ -104,7 +104,7 @@
 
 (def ui-experimental-ballot (comp/computed-factory Ballot))
 
-(defsc ProcessHome [_this {::process/keys [description proposals winner]
+(defsc ProcessHome [_this {::process/keys [slug description proposals winner]
                            :keys [>/experimental-ballots] :as process}]
   {:query [::process/slug ::process/description
            {::process/proposals (comp/get-query TopEntry)}
@@ -123,10 +123,12 @@
                 (dd/typography {:component :h2 :variant :h4}
                   (i18n/tr "Winner"))
                 (layout/box {:m 3}
-                  (proposal-card/ui-proposal-card winner {:process-over? process-over?
-                                                          :max-height nil
-                                                          :card-props {:raised true
-                                                                       :color :primary}})))))
+                  (proposal-card/ui-proposal-card winner
+                    {::process/slug slug
+                     :process-over? process-over?
+                     :max-height nil
+                     :card-props {:raised true
+                                  :color :primary}})))))
 
           (grid/item {:xs 12}
             (section-paper {}
