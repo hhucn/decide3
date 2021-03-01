@@ -25,7 +25,7 @@
 (>defn over? [{::keys [end-time]}]
   [(s/keys :req [::end-time]) => boolean?]
   (if end-time
-    (time/in-past? end-time)
+    (time/past? end-time)
     false))
 
 (defmutation add-proposal [{::proposal/keys [_id _title _body _parents]

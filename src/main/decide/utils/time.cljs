@@ -9,7 +9,7 @@
 
 (s/def :js/Date #(instance? js/Date %))
 
-(>defn in-past? [^js/Date date]
+(>defn past? [^js/Date date]
   [:js/Date => boolean?]
   (let [now (js/Date.)]
     (< date now)))

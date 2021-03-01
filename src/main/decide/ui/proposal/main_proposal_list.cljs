@@ -124,7 +124,7 @@
         [selected-sort set-selected-sort!] (hooks/use-state "new->old")
         [selected-filters set-selected-filters!] (hooks/use-state #{})
         sorted-proposals (sort-proposals selected-sort proposals)
-        process-over? (and (some? end-time) (time/in-past? end-time))]
+        process-over? (and (some? end-time) (time/past? end-time))]
     (comp/fragment
       (layout/container {:maxWidth :xl}
 
