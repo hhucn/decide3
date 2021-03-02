@@ -70,25 +70,8 @@
            :onClick #(comp/transact! this [(opinion/add {::proposal/id id
                                                          :opinion (if approved? 0 1)})])}))
 
-      (list/item-text {:secondary (i18n/trf "Approvals: {pros}" {:pros pro-votes})}
-        (if-not (and (empty? parents) (empty? children))
-
-          ;; expandable content
-          #_(layout/box {:component :details}
-              (dom/summary {} title)
-              (layout/box {:borderLeft 1}
-                (when-not (empty? children)
-                  (list/list
-                    {:subheader (list/subheader {} (i18n/tr "Children"))
-                     :dense true}
-                    (map ui-experimental-ballot-entry (sort-by-votes children))))
-                (when-not (empty? parents)
-                  (list/list
-                    {:subheader (list/subheader {} (i18n/tr "Parents"))
-                     :dense true}
-                    (map ui-experimental-ballot-entry (sort-by-votes parents))))))
-
-          title)))))
+      (list/item-text {:title title
+                       :secondary (i18n/trf "Approvals: {pros}" {:pros pro-votes})}))))
 
 (def ui-experimental-ballot-entry (comp/computed-factory BallotEntry {:keyfn ::proposal/id}))
 
