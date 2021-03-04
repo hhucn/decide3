@@ -17,7 +17,8 @@
     [com.fulcrologic.fulcro.dom.events :as evt]
     [com.fulcrologic.fulcro.dom :as dom]
     [material-ui.inputs.input :as input]
-    [material-ui.inputs.form :as form]))
+    [material-ui.inputs.form :as form]
+    [clojure.string :as str]))
 
 (def appbar-theme-color
   {:light "primary"
@@ -75,8 +76,9 @@
               (inputs/textfield
                 {:variant :filled
                  :size :small
+                 :required true
                  :value temp-nickname
-                 :onChange #(set-temp-nickname (evt/target-value %))
+                 :onChange #(set-temp-nickname (str/replace (evt/target-value %) #"\s" ""))
                  :label (i18n/trc "Temp Nickname for login" "Nickname")
                  :style {:color "inherit"}
                  :InputProps
