@@ -53,12 +53,10 @@
 
 (declare ui-experimental-ballot-entry)
 
-(defsc BallotEntry [this {::proposal/keys [id title pro-votes parents children my-opinion]}]
+(defsc BallotEntry [this {::proposal/keys [id title pro-votes my-opinion]}]
   {:query [::proposal/id
            ::proposal/title
            ::proposal/pro-votes
-           {::proposal/parents 1}
-           {::proposal/children 1}
            ::proposal/my-opinion]
    :ident ::proposal/id}
   (let [approved? (pos? my-opinion)]
@@ -70,8 +68,9 @@
            :onClick #(comp/transact! this [(opinion/add {::proposal/id id
                                                          :opinion (if approved? 0 1)})])}))
 
-      (list/item-text {:title title
-                       :secondary (i18n/trf "Approvals: {pros}" {:pros pro-votes})}))))
+      (list/item-text
+        {:primary title
+         :secondary (i18n/trf "Approvals: {pros}" {:pros pro-votes})}))))
 
 (def ui-experimental-ballot-entry (comp/computed-factory BallotEntry {:keyfn ::proposal/id}))
 
