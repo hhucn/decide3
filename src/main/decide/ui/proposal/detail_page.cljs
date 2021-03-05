@@ -323,12 +323,12 @@
           (grid/container {:spacing 1}
 
             (grid/item {:xs true}
-              (dd/typography {:variant :caption :component :label} "Übereinstimmung"
+              (dd/typography {:variant :caption :component :label} (i18n/trc "Overlap of voters" "Overlap")
                 (dd/typography {:color "inherit"}
                   (i18n/trf "{ratioOfVoters, number, ::percent} of approvees" {:ratioOfVoters (/ common-uniques sum-uniques)}))))
 
             (grid/item {:xs true}
-              (dd/typography {:variant :caption :component :label} "Potentielle Stimmen"
+              (dd/typography {:variant :caption :component :label} (i18n/tr "Potential approves")
                 (layout/box {:clone true :color "success.main"}
                   (dd/typography {}
                     (i18n/trf "{ratioOfVoters, number, ::+! percent} more approves" {:ratioOfVoters (dec (/ sum-uniques own-total))}))))))))

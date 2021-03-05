@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: decide3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-27 13:55+0100\n"
-"PO-Revision-Date: 2021-02-27 13:56+0100\n"
+"POT-Creation-Date: 2021-03-05 09:35+0100\n"
+"PO-Revision-Date: 2021-03-05 09:36+0100\n"
 "Last-Translator: Björn Ebbinghaus <ebbinghaus@hhu.de>\n"
 "Language-Team: Björn Ebbinghaus\n"
 "Language: de\n"
@@ -316,8 +316,15 @@ msgstr ""
 "=1 {basiert auf einem anderen Vorschlag} other {vereinigt # andere "
 "Vorschläge}}"
 
+msgctxt "Overlap of voters"
+msgid "Overlap"
+msgstr "Übereinstimmung"
+
 msgid "{ratioOfVoters, number, ::percent} of approvees"
 msgstr "{ratioOfVoters, number, ::percent} der Wähler"
+
+msgid "Potential approves"
+msgstr "Potentielle Stimmen"
 
 msgid "{ratioOfVoters, number, ::+! percent} more approves"
 msgstr "{ratioOfVoters, number, ::+! percent} mehr Stimmen"
@@ -344,13 +351,13 @@ msgctxt "Type of proposal"
 msgid "Merge"
 msgstr "Koalition"
 
-msgctxt "Approve a proposal"
-msgid "Approve"
-msgstr "Zustimmen"
-
 msgctxt "Proposal has been approved"
 msgid "Approved"
 msgstr "Zugestimmt"
+
+msgctxt "Approve a proposal"
+msgid "Approve"
+msgstr "Zustimmen"
 
 msgid "{count} arguments"
 msgstr "{count, plural, =1 {# Argument} other {# Argumente}}"
@@ -363,12 +370,6 @@ msgstr "Zugestimmt"
 
 msgid "Approve"
 msgstr "Zustimmen"
-
-msgid "Children"
-msgstr "Kinder"
-
-msgid "Parents"
-msgstr "Eltern"
 
 msgid "Ballot"
 msgstr "Stimmzettel"
@@ -461,6 +462,12 @@ msgstr ""
 msgid "Participants {count}"
 msgstr "Teilnehmer {count}"
 
+#~ msgid "Children"
+#~ msgstr "Kinder"
+
+#~ msgid "Parents"
+#~ msgstr "Eltern"
+
 #~ msgctxt "Show more information about proposal"
 #~ msgid "More"
 #~ msgstr "Mehr"
@@ -492,9 +499,6 @@ msgstr "Teilnehmer {count}"
 #~ msgstr "Vorschlag"
 
 #~ msgid "Overlap of approvers"
-#~ msgstr "Übereinstimmung der Wähler"
-
-#~ msgid "Potential approvals"
 #~ msgstr "Übereinstimmung der Wähler"
 
 #~ msgid "Approvals (own/common/other)"
