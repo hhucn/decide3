@@ -85,15 +85,16 @@
    :autoComplete "off"
    :margin "normal"})
 
-(defsc ProcessEdit [this {::process/keys [slug title description end-time]}]
-  {:query [::process/slug ::process/title ::process/description ::process/end-time]
+(defsc ProcessEdit [this {::process/keys [slug title description end-time type]}]
+  {:query [::process/slug ::process/title ::process/description ::process/end-time ::process/type]
    :ident ::process/slug
    :use-hooks? true}
   (accordion {:title (i18n/tr "Edit process")}
     (let [[mod-title change-title] (hooks/use-state title)
           [mod-description change-description] (hooks/use-state description)
           [with-end? set-with-end?] (hooks/use-state (boolean end-time))
-          [mod-end-time set-end-time] (hooks/use-state end-time)]
+          [mod-end-time set-end-time] (hooks/use-state end-time)
+          [mod-type set-type] (hooks/use-state type)]
       (grid/container
         {:component :form
          :onSubmit
@@ -108,6 +109,9 @@
 
                                      (not= mod-description description)
                                      (assoc ::process/description mod-description)
+
+                                     (not= mod-type type)
+                                     (assoc ::process/type mod-type)
 
                                      (not= (when with-end? mod-end-time) end-time)
                                      (assoc ::process/end-time (when with-end? mod-end-time))))]))}
@@ -127,6 +131,14 @@
              :rows 7
              :value mod-description
              :onChange #(change-description (evt/target-value %))}))
+
+        (form/group {:row true}
+          (form/control-label
+            {:label (i18n/tr "Is the process public?")
+             :control
+             (inputs/switch
+               {:checked (= mod-type ::process/type.public)
+                :onChange #(set-type (if (= mod-type ::process/type.public) ::process/type.private ::process/type.public))})}))
 
         (form/group {:row true}
           (form/control-label
