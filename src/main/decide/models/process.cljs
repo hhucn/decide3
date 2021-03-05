@@ -23,7 +23,7 @@
    :ident ::slug})
 
 (>defn over? [{::keys [end-time]}]
-  [(s/keys :req [::end-time]) => boolean?]
+  [(s/keys :opt [::end-time]) => boolean?]
   (if end-time
     (time/past? end-time)
     false))
