@@ -179,9 +179,11 @@
   [::id ::id => number?]
   (let [parent-voters (set (d/q voters-query db [::id parent-id]))
         child-voters (set (d/q voters-query db [::id child-id]))]
-    (float
-      (/ (count (set/intersection parent-voters child-voters))
-        (count parent-voters)))))
+    (if (zero? child-voters)
+      0
+      (float
+        (/ (count (set/intersection parent-voters child-voters))
+          (count parent-voters))))))
 
 (defresolver resolve-child-relations [{:keys [db]} {::keys [id]}]
   {::pc/output [{:child-relations [{:proposal [::id]}
