@@ -217,8 +217,11 @@
   [proposals]
   [(s/coll-of (s/keys :req [::proposal/pro-votes]))
    => (s/coll-of ::proposal/proposal) | #(set/subset? (set %) (set proposals))]
-  (let [voting-groups (group-by ::proposal/pro-votes proposals)]
-    (get voting-groups (apply max (keys voting-groups)) [])))
+  (let [voting-groups (group-by ::proposal/pro-votes proposals)
+        votes (keys voting-groups)]
+    (if (empty? votes)
+      []
+      (get voting-groups (apply max votes) []))))
 
 (>defn remove-parents
   "From a list of `proposals`, remove all parents that have children in the collection."
