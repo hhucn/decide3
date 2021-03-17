@@ -179,7 +179,7 @@
   [::id ::id => number?]
   (let [parent-voters (set (d/q voters-query db [::id parent-id]))
         child-voters (set (d/q voters-query db [::id child-id]))]
-    (if (zero? child-voters)
+    (if (empty? parent-voters)
       0
       (float
         (/ (count (set/intersection parent-voters child-voters))
