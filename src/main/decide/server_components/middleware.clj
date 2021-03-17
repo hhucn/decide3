@@ -96,8 +96,8 @@
         initial-state
         (->
           (comp/get-initial-state Root)
-          #_(assoc
-              ::i18n/current-locale locale)
+          (assoc
+            ::i18n/current-locale locale)
           (ssr/build-initial-state Root))]
     (index csrf-token script-manifest initial-state splash/splash)))
 
