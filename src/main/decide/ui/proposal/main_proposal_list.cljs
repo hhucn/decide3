@@ -59,7 +59,7 @@
   (sort-by ::proposal/nice-id > proposals))
 
 (defmethod sort-proposals :most-approvals [_ proposals]
-  (sort-by ::proposal/pro-votes > proposals))
+  (sort-by (juxt ::proposal/pro-votes ::proposal/created) > proposals))
 
 (defmethod sort-proposals :default [_ proposals]
   (sort-proposals "old->new" proposals))
@@ -121,7 +121,7 @@
                             :post-mutation-params {:target ident}}))))))
    :use-hooks? true}
   (let [logged-in? (get current-session :session/valid?)
-        [selected-sort set-selected-sort!] (hooks/use-state "new->old")
+        [selected-sort set-selected-sort!] (hooks/use-state "most-approvals")
         [selected-filters set-selected-filters!] (hooks/use-state #{})
         sorted-proposals (sort-proposals selected-sort proposals)
         process-over? (and (some? end-time) (time/past? end-time))]
