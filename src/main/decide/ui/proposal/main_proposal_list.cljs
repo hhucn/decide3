@@ -97,6 +97,27 @@
           (inputs/checkbox {:checked (contains? selected value)})
           (list/item-text {:primary label}))))))
 
+(defn plain-list [{:keys [items card-props]}]
+  (for [{id ::proposal/id :as proposal} items]
+    (grid/item {:xs 12 :md 6 :lg 4 :xl 3 :key id :style {:flexGrow 1}}
+      (proposal-card/ui-proposal-card proposal card-props))))
+
+(defn favorite-list
+  "Displays a list of proposal card `items` with the first element prominent at the top."
+  [{:keys [items card-props]}]
+  (comp/fragment
+    (grid/item {:xs 12}
+      (layout/container {:maxWidth :sm :disableGutters true}
+        (dd/typography {:variant :h5} (i18n/tr "This is the best proposal for the moment"))
+        (proposal-card/ui-proposal-card (first items) card-props)))
+
+    (plain-list {:items (rest items) :card-props card-props})))
+
+(defn info-toolbar-item [{:keys [label]}]
+  (grid/item {}
+    (dd/typography {:variant :overline} label)))
+
+
 (defsc MainProposalList [_ {::process/keys [slug proposals no-of-contributors end-time no-of-participants]
                             :keys [root/current-session]}
                          {:keys [show-new-proposal-dialog]}]
@@ -132,14 +153,11 @@
         (layout/box {:my 1 :clone true}
           (surfaces/toolbar {:disableGutters true :variant :dense}
             (grid/container {:spacing 2}
-              (grid/item {}
-                (dd/typography {:variant :overline}
-                  (i18n/trf "Proposals: {count}"
-                    {:count (count sorted-proposals)})))
-              (grid/item {}
-                (dd/typography {:variant :overline}
-                  (i18n/trf "Participants {count}"
-                    {:count (str (max no-of-participants no-of-contributors 0))}))))
+              (info-toolbar-item
+                {:label (i18n/trf "Proposals: {count}" {:count (count sorted-proposals)})})
+              (info-toolbar-item
+                {:label (i18n/trf "Participants {count}"
+                          {:count (str (max no-of-participants no-of-contributors 0))})}))
             (grid/container {:item true :spacing 2
                              :justify "flex-end"}
               #_(grid/item {} (filter-selector selected-filters set-selected-filters!))
@@ -147,10 +165,15 @@
 
         ; main list
         (grid/container {:spacing 2 :alignItems "stretch"}
-          (for [{id ::proposal/id :as proposal} sorted-proposals]
-            (grid/item {:xs 12 :md 6 :lg 4 :xl 3 :key id :style {:flexGrow 1}}
-              (proposal-card/ui-proposal-card proposal {::process/slug slug
-                                                        :process-over? process-over?})))
+          (if (#{"most-approvals"} selected-sort)
+            (favorite-list
+              {:items sorted-proposals
+               :card-props {::process/slug slug
+                            :process-over? process-over?}})
+            (plain-list
+              {:items sorted-proposals
+               :card-props {::process/slug slug
+                            :process-over? process-over?}}))
 
           (when-not process-over?
             (grid/item {:xs 12 :md 6 :lg 4 :xl 3 :style {:flexGrow 1
