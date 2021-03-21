@@ -79,7 +79,7 @@
            {::process/proposals (comp/get-query BallotEntry)}]
    :ident ::process/slug}
   (section-paper {:pb 0}
-    (dd/typography {:component :h2 :variant "h5"} (i18n/tr "Ballot")
+    (dd/typography {:component :h2 :variant "h5"} (i18n/tr "Your approvals")
       (let [sorted-proposals (sort-by-votes proposals)]
         (list/list {:dense true}
           (map ui-experimental-ballot-entry sorted-proposals))))))

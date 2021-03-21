@@ -374,6 +374,9 @@ msgstr "Zustimmen"
 msgid "Ballot"
 msgstr "Stimmzettel"
 
+msgid "Your approvals"
+msgstr "Deine Zustimmungen"
+
 msgid "Winner"
 msgstr "Gewinner"
 
