@@ -17,6 +17,7 @@
     [decide.ui.process.moderator-tab :as process.moderator]
     [decide.ui.proposal.detail-page :as proposal.detail-page]
     [decide.ui.proposal.main-proposal-list :as proposal.main-list]
+    [decide.ui.process.personal-dashboard :as process.dashboard]
     [decide.ui.proposal.new-proposal :as new-proposal]
     [material-ui.data-display :as dd]
     [material-ui.lab.alert :as alert]
@@ -29,7 +30,8 @@
    [process.home/ProcessOverviewScreen
     proposal.main-list/MainProposalList
     proposal.detail-page/ProposalPage
-    process.moderator/ProcessModeratorTab]})
+    process.moderator/ProcessModeratorTab
+    process.dashboard/PersonalProcessDashboard]})
 
 (defn current-target [c]
   (-> (dr/route-target ProcessRouter (dr/current-route c ProcessRouter))
@@ -164,6 +166,7 @@
           (tab-bar (current-target this)
             {:label (i18n/trc "Overview over process" "Overview") :target process.home/ProcessOverviewScreen}
             {:label (i18n/tr "All proposals") :target proposal.main-list/MainProposalList}
+            {:label "Dashboard" :target process.dashboard/PersonalProcessDashboard}
             (when moderator?
               {:label (i18n/trc "Link to moderation page" "Moderation") :target process.moderator/ProcessModeratorTab}))))
       (ui-process-router process-router

@@ -4,6 +4,7 @@
     [datahike.api :as d]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
+    [decide.models.opinion :as opinion]
     [decide.models.user :as user]))
 
 (defresolver resolve-all-processes [{:root/keys [public-processes private-processes]}]
@@ -99,6 +100,21 @@
    ::pc/output [{::process/winner [::proposal/id]}]}
   {::process/winner (process/get-winner db process)})
 
+(defresolver resolve-personal-approved-proposals [{:keys [db AUTH/user-id]} process]
+  {::pc/input #{::process/slug}
+   ::pc/output [{:MY/personal-proposals [::proposal/id]}]}
+  (when user-id
+    {:MY/personal-proposals
+     (d/q '[:find [(pull ?proposal [::proposal/id]) ...]
+            :in $ % ?process ?user
+            :where
+            [?process ::process/proposals ?proposal]
+            (approves? ?user ?proposal)]
+       db
+       opinion/approves-rule
+       (find process ::process/slug)
+       [::user/id user-id])}))
+
 (def all-resolvers
   [process/resolvers
 
@@ -115,6 +131,8 @@
 
    resolve-proposals
    resolve-no-of-proposals
+
+   resolve-personal-approved-proposals
 
    resolve-authors
 

@@ -29,6 +29,17 @@
 (s/def ::opinion (s/keys :req [::value]))
 (s/def ::proposal/opinions (s/coll-of ::opinion))
 
+(def approves-rule
+  '[[(approves? ?user ?proposal)
+     [?user ::user/opinions ?opinion]
+     [?proposal ::proposal/opinions ?opinion]
+     [?opinion ::value +1]]
+    [(undecided? ?user ?proposal)
+     [?user ::user/opinions ?opinion]
+     [?proposal ::proposal/opinions ?opinion]
+     (not-join [?opinion]
+       [?opinion ::value])]])
+
 (>defn get-opinion [db user-ident proposal-ident]
   [d.core/db? ::user/lookup ::proposal/ident => (s/nilable nat-int?)]
   (d/q '[:find ?opinion .
