@@ -50,20 +50,6 @@
                     :color "textSecondary"}
       (i18n/tr "So far there are no arguments"))))
 
-(defmulti sort-proposals (fn [sort-order _] (keyword sort-order)))
-
-(defmethod sort-proposals :old->new [_ proposals]
-  (sort-by ::proposal/nice-id < proposals))
-
-(defmethod sort-proposals :new->old [_ proposals]
-  (sort-by ::proposal/nice-id > proposals))
-
-(defmethod sort-proposals :most-approvals [_ proposals]
-  (sort-by (juxt ::proposal/pro-votes ::proposal/created) > proposals))
-
-(defmethod sort-proposals :default [_ proposals]
-  (sort-proposals "old->new" proposals))
-
 (defn sort-selector [selected set-selected!]
   (form/control {:size :small}
     (input/label {:htmlFor "main-proposal-list-sort"} (i18n/trc "Label for sort order selection" "Sort"))
@@ -144,7 +130,7 @@
   (let [logged-in? (get current-session :session/valid?)
         [selected-sort set-selected-sort!] (hooks/use-state "most-approvals")
         [selected-filters set-selected-filters!] (hooks/use-state #{})
-        sorted-proposals (sort-proposals selected-sort proposals)
+        sorted-proposals (proposal/sort-proposals selected-sort proposals)
         process-over? (and (some? end-time) (time/past? end-time))]
     (comp/fragment
       (layout/container {:maxWidth :xl}

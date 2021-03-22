@@ -23,4 +23,20 @@
 (defn load-all! [app-or-comp]
   (df/load! app-or-comp :all-proposals Proposal))
 
+(def approval-order (juxt ::pro-votes ::created))
+
+(defmulti sort-proposals (fn [sort-order _] (keyword sort-order)))
+
+(defmethod sort-proposals :old->new [_ proposals]
+  (sort-by ::nice-id < proposals))
+
+(defmethod sort-proposals :new->old [_ proposals]
+  (sort-by ::nice-id > proposals))
+
+(defmethod sort-proposals :most-approvals [_ proposals]
+  (sort-by approval-order > proposals))
+
+(defmethod sort-proposals :default [_ proposals]
+  (sort-proposals :most-approvals proposals))
+
 (def add-argument `add-argument)
