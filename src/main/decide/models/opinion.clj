@@ -35,10 +35,14 @@
      [?proposal ::proposal/opinions ?opinion]
      [?opinion ::value +1]]
     [(undecided? ?user ?proposal)
-     [?user ::user/opinions ?opinion]
-     [?proposal ::proposal/opinions ?opinion]
-     (not-join [?opinion]
-       [?opinion ::value])]])
+     (or-join [?user ?proposal]
+       (not
+         [?user ::user/opinions ?opinion]
+         [?proposal ::proposal/opinions ?opinion])
+       (and
+         [?user ::user/opinions ?opinion]
+         [?proposal ::proposal/opinions ?opinion]
+         [?opinion ::value 0]))]])
 
 (>defn get-opinion [db user-ident proposal-ident]
   [d.core/db? ::user/lookup ::proposal/ident => (s/nilable nat-int?)]
