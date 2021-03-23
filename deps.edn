@@ -25,7 +25,7 @@
 
         buddy/buddy {:mvn/version "2.0.0"}
 
-        ring/ring-core {:mvn/version "1.9.1"}
+        ring/ring-core {:mvn/version "1.9.2"}
         ring/ring-defaults {:mvn/version "0.3.2"}
 
         nrepl/nrepl {:mvn/version "0.8.3"}}
@@ -39,7 +39,7 @@
            :dev {:extra-paths ["src/test" "src/dev" "src/workspaces"]
                  :jvm-opts ["-XX:-OmitStackTraceInFastThrow"]
                  :extra-deps {org.clojure/clojurescript {:mvn/version "1.10.773"}
-                              thheller/shadow-cljs {:mvn/version "2.11.23"}
+                              thheller/shadow-cljs {:mvn/version "2.11.24"}
                               expound/expound {:mvn/version "0.8.9"}
                               fulcrologic/fulcro-spec {:mvn/version "3.1.11"}
                               binaryage/devtools {:mvn/version "1.0.2"}

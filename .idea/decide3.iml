@@ -68,7 +68,7 @@
     <orderEntry type="library" name="Deps: com.cognitect/transit-cljs:0.8.264" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/google-closure-library:0.0-20191016-6ae1f72f" level="project" />
     <orderEntry type="library" name="Deps: io.aviso/pretty:0.1.37" level="project" />
-    <orderEntry type="library" name="Deps: thheller/shadow-cljs:2.11.23" level="project" />
+    <orderEntry type="library" name="Deps: thheller/shadow-cljs:2.11.24" level="project" />
     <orderEntry type="library" name="Deps: org.graalvm.sdk/graal-sdk:20.1.0" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/clojurescript:1.10.773" level="project" />
     <orderEntry type="library" name="Deps: fress:0.3.1" level="project" />
@@ -169,7 +169,7 @@
     <orderEntry type="library" name="Deps: crisptrutski/boot-cljs-test:0.2.2-20160402.204547-3" level="project" />
     <orderEntry type="library" name="Deps: thheller/shadow-undertow:0.1.0" level="project" />
     <orderEntry type="library" name="Deps: com.google.code.findbugs/jsr305:3.0.2" level="project" />
-    <orderEntry type="library" name="Deps: ring/ring-core:1.9.1" level="project" />
+    <orderEntry type="library" name="Deps: ring/ring-core:1.9.2" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/core.cache:1.0.207" level="project" />
     <orderEntry type="library" name="Deps: org.ow2.asm/asm-tree:7.1" level="project" />
     <orderEntry type="library" name="Deps: io.replikativ/konserve:0.5.1" level="project" />
