@@ -86,6 +86,7 @@
     (surfaces/card {}
       (surfaces/card-header
         {:title (i18n/tr "Proposals you might be interested in")
+         :subheader (i18n/tr "These are proposals derived from proposals you already approved.")
          #_:action #_(inputs/icon-button {:onClick #(set-compact (not compact?))}
                        (if compact?
                          (dom/create-element UnfoldMoreIcon)
@@ -136,7 +137,7 @@
   (layout/container {:maxWidth :xl}
     (layout/box {:m 2}
       (grid/container {:spacing 2}
-        (grid/item {:xs 12 :sm 6 :xl 4}
+        (grid/item {:xs 12 :lg 6 :xl 4}
           (ui-personal-proposal-list personal-proposal-list))
-        (grid/item {:xs 12 :sm 6 :xl 4}
+        (grid/item {:xs 12 :lg 6 :xl 4}
           (ui-personal-recommendations-list personal-recommendations-list))))))

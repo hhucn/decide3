@@ -2,9 +2,10 @@
   (:require
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
     [datahike.api :as d]
+    [decide.features.recommendations.api :as recommendations.api]
+    [decide.models.opinion :as opinion]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
-    [decide.models.opinion :as opinion]
     [decide.models.user :as user]))
 
 (defresolver resolve-all-processes [{:root/keys [public-processes private-processes]}]
@@ -136,4 +137,6 @@
 
    resolve-authors
 
-   resolve-I-moderator?])
+   resolve-I-moderator?
+
+   recommendations.api/all-resolvers])
