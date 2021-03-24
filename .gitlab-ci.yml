@@ -44,6 +44,10 @@ clj-test:
     key: ${CI_JOB_NAME}
     paths:
       - .m2
+  before_script:
+    - apt-get update
+    - apt-get upgrade -y
+    - apt-get install -y git
   script:
     - clojure -J-Dguardrails.enabled=true -Sdeps '{:mvn/local-repo ".m2"}' -M:dev:clj-tests --profile :ci
   artifacts:
