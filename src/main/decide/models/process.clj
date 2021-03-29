@@ -373,7 +373,12 @@
         tx-report (d/transact conn
                     (concat
                       (->enter [::slug slug] [::user/id user-id])
-                      [(assoc new-proposal :db/id "new-proposal")
+                      [(assoc new-proposal
+                         :db/id "new-proposal"
+                         ::proposal/opinions
+                         {:db/id "authors-opinion"
+                          ::opinion/value +1})
+                       [:db/add [::user/id user-id] ::user/opinions "authors-opinion"]
                        [:db/add [::slug slug] ::proposals "new-proposal"]
                        [:db/add "datomic.tx" :db/txUser [::user/id user-id]]]))]
     {::proposal/id real-id
