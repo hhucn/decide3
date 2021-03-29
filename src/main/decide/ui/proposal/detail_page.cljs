@@ -80,14 +80,10 @@
 
 (def ui-argument-author (comp/factory Author))
 
-(defsc ArgumentRow [_ {::argument/keys [content author type]}]
-  {:query [::argument/id ::argument/type ::argument/content {::argument/author (comp/get-query Author)}]
+(defsc ArgumentRow [_ {::argument/keys [content author]}]
+  {:query [::argument/id ::argument/content {::argument/author (comp/get-query Author)}]
    :ident ::argument/id}
   (list/item {}
-    (list/item-icon {}
-      (case type
-        :pro (layout/box {:color "success.main"} (i18n/tr "Pro"))
-        :contra (layout/box {:color "error.main"} (i18n/tr "Con"))))
     (list/item-text {:primary content
                      :secondary (comp/fragment (i18n/tr "By ") (ui-argument-author author))})))
 
@@ -96,10 +92,12 @@
 (defmutation add-argument [{::proposal/keys [id]
                             :keys [temp-id content type author-id]}]
   (action [{:keys [state]}]
-    (let [new-argument-data {::argument/id temp-id
-                             ::argument/content content
-                             ::argument/type type
-                             ::argument/author {::user/id author-id}}]
+    (let [new-argument-data
+          (cond->
+            {::argument/id temp-id
+             ::argument/content content
+             ::argument/author {::user/id author-id}}
+            type (assoc ::argument/type type))]
       (norm/swap!-> state
         (mrg/merge-component ArgumentRow new-argument-data
           :append (conj (comp/get-ident ProposalPage {::proposal/id id}) ::proposal/arguments)))))
@@ -140,29 +138,29 @@
                :disabled (not logged-in?)}
       (inputs/textfield
         {:fullWidth true
-         :label (i18n/tr "New argument")
+         :label (i18n/tr "New comment")
          :variant :outlined
          :value new-argument
          :onChange #(set-new-argument! (evt/target-value %))
          :disabled (not logged-in?)
-         :placeholder (when (not logged-in?) (i18n/tr "Login to add new argument"))
-         :inputProps {:aria-label (i18n/tr "New argument")}
-         :InputProps {:startAdornment
-                      (comp/fragment
-                        (type-toggle
-                          {:label (i18n/tr "Pro")
-                           :type :pro
-                           :color "success.main"
-                           :onClick toggle-type!
-                           :disabled (not logged-in?)
-                           :selected-type type})
-                        (type-toggle
-                          {:label (i18n/tr "Contra")
-                           :type :contra
-                           :color "error.main"
-                           :onClick toggle-type!
-                           :disabled (not logged-in?)
-                           :selected-type type}))
+         :placeholder (when (not logged-in?) (i18n/tr "Login to add new comment"))
+         :inputProps {:aria-label (i18n/tr "New comment")}
+         :InputProps {#_:startAdornment
+                      #_(comp/fragment
+                          (type-toggle
+                            {:label (i18n/tr "Pro")
+                             :type :pro
+                             :color "success.main"
+                             :onClick toggle-type!
+                             :disabled (not logged-in?)
+                             :selected-type type})
+                          (type-toggle
+                            {:label (i18n/tr "Contra")
+                             :type :contra
+                             :color "error.main"
+                             :onClick toggle-type!
+                             :disabled (not logged-in?)
+                             :selected-type type}))
                       :endAdornment (submit-new-argument-button {:disabled (not logged-in?)})}}))))
 
 
@@ -370,13 +368,13 @@
 (defsc ProposalPage
   [this {::proposal/keys [title body]
          :keys [ui/current-process]
-         :>/keys [parent-section children-section argument-section opinion-section similar-section]}]
+         :>/keys [parent-section children-section comment-section opinion-section similar-section]}]
   {:query [::proposal/id
            ::proposal/title ::proposal/body
            {:>/children-section (comp/get-query ChildrenSection)}
            {:>/parent-section (comp/get-query SmallParentSection)}
            {:>/opinion-section (comp/get-query OpinionSection)}
-           {:>/argument-section (comp/get-query ArgumentSection)}
+           {:>/comment-section (comp/get-query ArgumentSection)}
            {:>/similar-section (comp/get-query SimilarSection)}
            {[:ui/current-process '_] (comp/get-query Process)}]
    :ident ::proposal/id
@@ -433,8 +431,9 @@
               #_(grid/item {:xs 6}
                   (section " Meinungen " (ui-opinion-section opinion-section)))
               (grid/item {:xs 12 :component "section"}
-                (section (i18n/trc "Arguments of a proposal" "Arguments") (ui-argument-section argument-section
-                                                                            {:process-over? process-over?}))))
+                (section (i18n/tr "Comments")
+                  (ui-argument-section comment-section
+                    {:process-over? process-over?}))))
             (grid/item {:xs 12 :lg 4 :component "section"}
               (ui-children-section children-section)
               (section (i18n/tr "Similar proposals") (ui-similar-section similar-section {:show-add-dialog show-add-dialog

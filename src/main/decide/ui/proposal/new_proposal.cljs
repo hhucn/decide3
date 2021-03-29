@@ -131,8 +131,8 @@
       :type 0
       :parents 1
       :details 2
-      :arguments 3
-      :final 4)))
+      ; :arguments 3
+      :final 3)))
 
 (defmutation goto-step [{:keys [step]}]
   (action [{:keys [ref state]}]
@@ -413,31 +413,31 @@
                   {:color "primary"
                    :variant "contained"
                    :disabled error?
-                   :onClick #(comp/transact! this [(goto-step {:step (if (empty? parents) :final :arguments)})])}
+                   :onClick #(comp/transact! this [(goto-step {:step :final})])}
                   (i18n/trc "Go to the next part of the form" "Next")))))
           ;; endregion
 
           ;; region Arguments Step
-          (stepper/step
-            {:disabled  (empty? parents)
-             :completed (< 3 step)}
-            (stepper/step-button
-              {:onClick #(comp/transact! this [(goto-step {:step :arguments})])
-               :style {:textAlign "start"}
-               :optional (dd/typography {:variant "caption" :color "textSecondary"}
-                           (if (empty? parents)
-                             (i18n/trc "Helper text" "Only applicable with parents")
-                             (i18n/trc "Input is optional" "Optional")))}
-              (i18n/trc "Arguments of a proposal" "Arguments"))
-            (stepper/step-content {}
-              (ui-argument-step {}
-                {:parents parents
-                 :selected-arguments arguments
-                 :toggle-argument #(comp/transact! this [(toggle-argument {::argument/ident %})])})
-              (inputs/button
-                {:color "primary"
-                 :onClick next-step}
-                (i18n/trc "Go to the next part of the form" "Next"))))
+          #_(stepper/step
+              {:disabled (empty? parents)
+               :completed (< 3 step)}
+              (stepper/step-button
+                {:onClick #(comp/transact! this [(goto-step {:step :arguments})])
+                 :style {:textAlign "start"}
+                 :optional (dd/typography {:variant "caption" :color "textSecondary"}
+                             (if (empty? parents)
+                               (i18n/trc "Helper text" "Only applicable with parents")
+                               (i18n/trc "Input is optional" "Optional")))}
+                (i18n/trc "Arguments of a proposal" "Arguments"))
+              (stepper/step-content {}
+                (ui-argument-step {}
+                  {:parents parents
+                   :selected-arguments arguments
+                   :toggle-argument #(comp/transact! this [(toggle-argument {::argument/ident %})])})
+                (inputs/button
+                  {:color "primary"
+                   :onClick next-step}
+                  (i18n/trc "Go to the next part of the form" "Next"))))
           ;; endregion
 
           (stepper/step {}
