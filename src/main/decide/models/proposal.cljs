@@ -25,18 +25,31 @@
 
 (def approval-order (juxt ::pro-votes ::created))
 
-(defmulti sort-proposals (fn [sort-order _] (keyword sort-order)))
+(defmulti rank-by (fn [sort-order _] (keyword sort-order)))
 
-(defmethod sort-proposals :old->new [_ proposals]
+(defmethod rank-by :old->new [_ proposals]
   (sort-by ::nice-id < proposals))
 
-(defmethod sort-proposals :new->old [_ proposals]
+(defmethod rank-by :new->old [_ proposals]
   (sort-by ::nice-id > proposals))
 
-(defmethod sort-proposals :most-approvals [_ proposals]
+(defmethod rank-by :most-approvals [_ proposals]
   (sort-by approval-order > proposals))
 
-(defmethod sort-proposals :default [_ proposals]
-  (sort-proposals :most-approvals proposals))
+(defmethod rank-by :default [_ proposals]
+  (rank-by :most-approvals proposals))
+
+(defn rank [proposals]
+  (rank-by :most-approvals proposals))
+
+(defn top-proposals
+  "Returns all proposals that tie for first place, with no tie breaker in place."
+  [proposals]
+  (first (partition-by ::pro-votes (rank proposals))))
+
+(defn top-proposal
+  "Returns the top-proposal with the use of a tie breaker."
+  [proposals]
+  (first (top-proposals proposals)))
 
 (def add-argument `add-argument)

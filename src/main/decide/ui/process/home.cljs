@@ -3,8 +3,8 @@
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.data-fetch :as df]
-    [com.fulcrologic.fulcro.dom :as dom]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr :refer [defrouter]]
+    [decide.models.opinion :as opinion]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
     [decide.ui.proposal.card :as proposal-card]
@@ -13,8 +13,7 @@
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
     [material-ui.layout.grid :as grid]
-    [material-ui.surfaces :as surfaces]
-    [decide.models.opinion :as opinion]))
+    [material-ui.surfaces :as surfaces]))
 
 (defsc TopEntry [this {::proposal/keys [id title pro-votes my-opinion]
                        :keys [root/current-session]}]
@@ -46,10 +45,7 @@
     (apply surfaces/paper {:variant :outlined} children)))
 
 (defn top-proposals [proposals]
-  (first (partition-by ::proposal/pro-votes (sort-by ::proposal/pro-votes > proposals))))
-
-(defn sort-by-votes [proposals]
-  (sort-by ::proposal/pro-votes > proposals))
+  (first (partition-by ::proposal/pro-votes (proposal/rank proposals))))
 
 (declare ui-experimental-ballot-entry)
 
@@ -80,9 +76,10 @@
    :ident ::process/slug}
   (section-paper {:pb 0}
     (dd/typography {:component :h2 :variant "h5"} (i18n/tr "Your approvals")
-      (let [sorted-proposals (sort-by-votes proposals)]
-        (list/list {:dense true}
-          (map ui-experimental-ballot-entry sorted-proposals))))))
+      (list/list {:dense true}
+        (->> proposals
+          proposal/rank
+          (map ui-experimental-ballot-entry))))))
 
 (def ui-experimental-ballot (comp/computed-factory Ballot))
 

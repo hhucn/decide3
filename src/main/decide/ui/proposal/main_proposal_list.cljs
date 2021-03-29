@@ -130,7 +130,7 @@
   (let [logged-in? (get current-session :session/valid?)
         [selected-sort set-selected-sort!] (hooks/use-state "most-approvals")
         [selected-filters set-selected-filters!] (hooks/use-state #{})
-        sorted-proposals (proposal/sort-proposals selected-sort proposals)
+        sorted-proposals (proposal/rank-by selected-sort proposals)
         process-over? (and (some? end-time) (time/past? end-time))]
     (comp/fragment
       (layout/container {:maxWidth :xl}
@@ -151,7 +151,7 @@
 
         ; main list
         (grid/container {:spacing 2 :alignItems "stretch"}
-          (if (#{"most-approvals"} selected-sort)
+          (if (and (#{"most-approvals"} selected-sort) (not (empty? sorted-proposals)))
             (favorite-list
               {:items sorted-proposals
                :card-props {::process/slug slug

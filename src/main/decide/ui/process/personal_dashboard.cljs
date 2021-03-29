@@ -67,7 +67,7 @@
       (surfaces/card-content {}
         (list/list {}
           (->> personal-proposals
-            (proposal/sort-proposals :most-approvals)
+            proposal/rank
             (map #(ui-proposal-list-item % {:compact? compact?}))))))))
 
 (def ui-personal-proposal-list (comp/computed-factory PersonalProposalsList))
@@ -94,7 +94,7 @@
       (surfaces/card-content {}
         (list/list {}
           (->> proposal-recommendations
-            (proposal/sort-proposals :most-approvals)
+            proposal/rank
             (map #(ui-proposal-list-item % {:compact? compact?}))))))))
 
 (def ui-personal-recommendations-list (comp/computed-factory PersonalRecommendationsList))
