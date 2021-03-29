@@ -11,7 +11,7 @@
     [decide.models.argument :as argument]
     [decide.models.authorization :as auth]
     [decide.models.user :as user]
-    [taoensso.timbre :as log])
+    [decide.schema :as schema])
   (:import (java.util Date)))
 
 (def schema
@@ -210,12 +210,10 @@
   [d.core/db? any? => (s/coll-of pos-int? :kind set)]
   (->> proposal-lookup
     (d/q '[:find ?user
-           :in $ ?proposal
+           :in $ % ?proposal
            :where
-           [?proposal ::opinions ?opinion]
-           [?opinion :decide.models.opinion/value +1]
-           [?user ::user/opinions ?opinion]]
-      db)
+           (approves? ?user ?proposal)]
+      db schema/rules)
     (map first)
     set))
 
@@ -245,8 +243,6 @@
            [(not= ?uuid ?other-uuid)]]
       db)
     set))
-
-(defn get-all-opinions-with-more-proposals [db])
 
 (defresolver resolve-similar [{:keys [db]} {::keys [id]}]
   {::pc/input #{::id}

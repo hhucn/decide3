@@ -25,17 +25,20 @@
 
 
     ;; approve rules
-    [(approves? ?user ?proposal)
+    [(opinion ?user ?proposal ?value)
      [?user :decide.models.user/opinions ?opinion]
      [?proposal :decide.models.proposal/opinions ?opinion]
-     [?opinion :decide.models.opinion/value +1]]
+     [?opinion :decide.models.opinion/value ?value]]
+
+    [(approves? ?user ?proposal)
+     (opinion ?user ?proposal +1)]
+
+    [(rejects? ?user ?proposal)
+     (opinion ?user ?proposal -1)]
 
     [(undecided? ?user ?proposal)
      (or-join [?user ?proposal]
        (not
          [?user :decide.models.user/opinions ?opinion]
          [?proposal :decide.models.proposal/opinions ?opinion])
-       (and
-         [?user :decide.models.user/opinions ?opinion]
-         [?proposal :decide.models.proposal/opinions ?opinion]
-         [?opinion :decide.models.opinion/value 0]))]])
+       (opinion ?user ?proposal 0))]])
