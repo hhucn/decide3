@@ -116,7 +116,7 @@
             (section-paper {}
               (dd/typography {:component :h2 :variant :h4 :paragraph true}
                 (i18n/trc "Description of a process" "Description"))
-              (dd/typography {:variant :body1}
+              (dd/typography {:variant :body1 :style {:whiteSpace "pre-line"}}
                 description)))
 
 
