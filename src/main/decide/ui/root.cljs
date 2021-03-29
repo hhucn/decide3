@@ -67,7 +67,7 @@
                                                 (comp/transact! (comp/any->app this)
                                                   [(set-theme {:theme new-theme})])))))
   (let [[show-wip-warning? set-wip-warning] (hooks/use-state true)]
-    (styles/theme-provider {:theme (themes/get-mui-theme theme)}
+    (styles/theme-provider {:theme (themes/get-mui-theme :light)}
       (m.utils/css-baseline {})
       (appbar/ui-appbar app-bar {:menu-onClick nav-drawer/toggle-navdrawer!})
       (snackbar/ui-snackbar-container snackbar-container)
