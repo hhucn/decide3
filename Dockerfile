@@ -20,7 +20,6 @@ RUN echo "Compile CLJS..." && \
 FROM openjdk:14-jdk-slim
 COPY src/main/config/prod.edn /config/production.edn
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "decide.jar", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=85", "-XX:+UnlockExperimentalVMOptions", "-XX:+UseZGC"]
-CMD ["-Dconfig=/config/production.edn", "-Dfulcro.logging=info"]
+ENTRYPOINT ["java", "-Dconfig=/config/production.edn", "-Dfulcro.logging=info", "-jar", "decide.jar", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=85", "-XX:+UnlockExperimentalVMOptions", "-XX:+UseZGC"]
 
 COPY --from=clj-build /code/decide.jar decide.jar
