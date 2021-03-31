@@ -15,4 +15,9 @@
                                      :trace? false
                                      :log-requests? false
                                      :log-responses? false}
- :parser {:trace? false}}
+ :parser {:trace? false}
+
+ :postal.core/email-config
+ {:from "decide@hhu.de"
+  :user nil
+  :pass nil}}

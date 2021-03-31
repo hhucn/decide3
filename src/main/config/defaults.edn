@@ -37,4 +37,10 @@
                               :mode :block}}}
  :com.fulcrologic.rad.pathom/config {:sensitive-keys #{:decide.models.user/password}}
  :db {:store {:backend :file
-              :path "/tmp/example"}}}
+              :path "/tmp/example"}}
+ :postal/email-config
+ {:host :env/EMAIL_SERVER
+  :user :env/EMAIL_USER
+  :pass :env/EMAIL_PASS
+  :type "text/html; charset=utf-8"
+  :ssl true}}

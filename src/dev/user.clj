@@ -7,7 +7,10 @@
     [datahike.api :as d]
     ;; this is the top-level dependent component...mount will find the rest via ns requires
     [decide.server-components.http-server :refer [http-server]]
-    [decide.server-components.database :refer [conn]]))
+    [decide.server-components.database :refer [conn]]
+    [decide.server-components.email :as email]
+    decide.features.notifications.notifier
+    [decide.server-components.nrepl :as nrepl]))
 
 ;; ==================== SERVER ====================
 (set-refresh-dirs "src/main" "src/dev" "src/test")
@@ -29,7 +32,13 @@
 
 (defn start
   "Start the web server"
-  [] (mount/start))
+  []
+  (->
+    (mount/except [#'nrepl/socket-repl])
+    (mount/swap-states
+      {#'email/mailer-chan {:start email/dev-mailer
+                            :stop #(email/close! email/mailer-chan)}})
+    mount/start))
 
 (defn stop
   "Stop the web server"

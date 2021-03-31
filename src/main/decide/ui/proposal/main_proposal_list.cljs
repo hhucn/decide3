@@ -147,7 +147,7 @@
             (grid/container {:item true :spacing 2
                              :justify "flex-end"}
               #_(grid/item {} (filter-selector selected-filters set-selected-filters!))
-              (grid/item {} (sort-selector selected-sort set-selected-sort!)))))
+              #_(grid/item {} (sort-selector selected-sort set-selected-sort!)))))
 
         ; main list
         (grid/container {:spacing 2 :alignItems "stretch"}

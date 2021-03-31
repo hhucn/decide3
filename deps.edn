@@ -28,6 +28,9 @@
         ring/ring-core {:mvn/version "1.9.2"}
         ring/ring-defaults {:mvn/version "0.3.2"}
 
+        com.draines/postal {:mvn/version "2.0.4"}
+        jarohen/chime {:mvn/version "0.3.2"}
+
         nrepl/nrepl {:mvn/version "0.8.3"}}
 
  :aliases {:clj-tests {:extra-paths ["src/test"]

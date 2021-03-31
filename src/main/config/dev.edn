@@ -11,6 +11,6 @@
                                      :log-responses? true}
 
  :db {:name "dev-db"
-      :db/reset? true
+      :db/reset? false
       :store {:backend :file
-              :path "/tmp/decide"}}}
+              :path "/Users/bjebb/Development/decide3/_data"}}}

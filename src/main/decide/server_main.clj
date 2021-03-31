@@ -2,6 +2,7 @@
   (:require
     decide.server-components.http-server
     decide.server-components.nrepl
+    decide.features.notifications.notifier
     [mount.core :as mount])
   (:gen-class))
 
