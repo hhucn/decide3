@@ -39,6 +39,7 @@
   {:to (if (str/includes? (::user/email user) "@")
          (::user/email user)
          "ebbinghaus@hhu.de")
-   :from "decide@hhu.de"
+   :from "decide <decide@hhu.de>"
    :subject "News from decide!"
-   :body (format-email db user payload)})
+   :body [{:content (format-email db user payload)
+           :type "text/html"}]})
