@@ -42,4 +42,4 @@
    :from "decide <decide@hhu.de>"
    :subject "News from decide!"
    :body [{:content (format-email db user payload)
-           :type "text/html"}]})
+           :type "text/html; charset=utf-8"}]})
