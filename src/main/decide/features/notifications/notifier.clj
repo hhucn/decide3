@@ -93,6 +93,6 @@
       (log/info "Notify!")
       (let [db (d/db conn)]
         (send-email-notifications! db
-          (collect/events-by-slug db (collect/minutes-ago (* 60 24 6)))))))
+          (collect/events-by-slug db (collect/minutes-ago 60))))))
   :stop
   (.close notifier))
