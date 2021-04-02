@@ -13,4 +13,8 @@
  :db {:name "dev-db"
       :db/reset? false
       :store {:backend :file
-              :path "/Users/bjebb/Development/decide3/_data"}}}
+              :path "/Users/bjebb/Development/decide3/_data"}}
+ :postal/email-config
+ {:host "mail.hhu.de"
+  :user "decide"
+  :pass "Kwy3y7u^7OQS"}}

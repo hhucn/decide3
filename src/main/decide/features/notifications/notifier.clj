@@ -50,7 +50,7 @@
         (->> argument-events
           (map :event/ref)
           (d/pull-many db [::argument/content
-                           {::proposal/_arguments [::proposal/id]}]))
+                           {::proposal/_arguments [::proposal/id ::proposal/title]}]))
 
         proposals
         (->> proposal-events
