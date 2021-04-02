@@ -1,45 +1,49 @@
 (ns decide.features.notifications.format-email
   (:require
     [clojure.string :as str]
-    [datahike.api :as d]
     [decide.models.argument :as argument]
+    [decide.models.process :as process]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
-    [hiccup.page :refer [html5]]
-    [taoensso.timbre :as log]))
+    [hiccup.page :refer [html5]]))
 
-(defmulti format-event (fn [_db event] (:event/what event)))
-(defmethod format-event :event.type/new-proposal
-  [db event]
-  (let [{::proposal/keys [title]} (d/pull db [::proposal/title] (:event/ref event))]
-    [:li {} (str "New proposal: " title)]))
+(defn format-argument [{::argument/keys [content]}]
+  [:li content])
 
-(defmethod format-event :event.type/new-argument
-  [db event]
-  (let [{::argument/keys [content]} (d/pull db [::argument/content] (:event/ref event))]
-    [:li {} (str "New argument: " content)]))
+(defn format-proposal [{::proposal/keys [id new? title arguments] :as p} {:keys [base-url]}]
+  [:li
+   [:p {}
+    (when new? [:span :.red "NEW"])
+    [:a {:href (str base-url "/proposal/" id)} title]]
+   (when-not (empty? arguments)
+     (list
+       [:p "New arguments:"]
+       [:ul
+        (map format-argument arguments)]))])
 
-(defmethod format-event :default [_ event] (str event))
+(defn format-process [{::process/keys [slug title proposals]} {:keys [base-url] :as payload}]
+  [:li
+   [:p.list-header
+    [:a {:href (str base-url "/decision/" slug "/home")} title]]
+   [:p "Proposals:"]
+   [:ul
+    (map #(format-proposal % (update payload :base-url (fn [base] (str base "/decision/" slug))))
+      proposals)]])
 
-(defn format-payload [db payload]
-  (for [[slug events] payload]
-    [:div
-      [:p.list-header slug]
-      [:ul
-       (map (partial format-event db) events)]]))
-
-(defn format-email [db {::user/keys [display-name]} payload]
+(defn format-email [{:keys [user] :as payload}]
   (html5
     [:html
      [:body
-      [:p "Hi " display-name ",\n\nthere is something new on decide!\n"]
-      (format-payload db payload)]]))
+      [:p "Hi " (::user/display-name user) ",\n\nthere is something new on decide!\n"]
+      [:ul
+       (for [process (:processes payload)]
+         (format-process process payload))]]]))
 
-(defn make-message [db user payload]
+(defn make-message [{:keys [user] :as payload}]
   {:to (if (str/includes? (::user/email user) "@")
          (::user/email user)
          "ebbinghaus@hhu.de")
    :from "decide <decide@hhu.de>"
    :subject "News from decide!"
-   :body [{:content (format-email db user payload)
+   :body [{:content (format-email payload)
            :type "text/html; charset=utf-8"}]})
