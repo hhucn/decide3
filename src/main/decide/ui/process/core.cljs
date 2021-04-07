@@ -80,10 +80,12 @@
   (let [targets (filter some? targets)
         lookup-map (zipmap (map :target targets) (range))
         current-index (get lookup-map current-target false)]
-    (tabs/tabs {:value current-index
-                :indicatorColor "secondary"
-                :textColor "secondary"
-                :component :nav}
+    (tabs/tabs
+      {:value current-index
+       :variant :scrollable
+       :indicatorColor "secondary"
+       :textColor "secondary"
+       :component :nav}
       (for [{:keys [target] :as tab-props} targets
             :let [href (r/path->absolute-url (dr/into-path current-path target))]]
         (tabs/tab
