@@ -32,7 +32,8 @@
     ["@material-ui/icons/DoneAll" :default DoneAllIcon]
     ["@material-ui/core/styles" :refer [withStyles useTheme]]
     [decide.ui.proposal.new-proposal :as new-proposal]
-    [decide.models.process :as process]))
+    [decide.models.process :as process]
+    [taoensso.timbre :as log]))
 
 (declare ProposalPage)
 
@@ -117,62 +118,65 @@
        :aria-label (i18n/trc "Submit form" "Submit")})
     (dom/create-element Send)))
 
-(defsc NewArgumentLine [_ {:keys []} {:keys [root/current-session add-argument!]}]
-  {:use-hooks? true}
+(defn new-comment-form [{:keys [onSubmit disabled? value onChange]}]
+  (dom/form {:onSubmit onSubmit
+             :disabled disabled?}
+    (inputs/textfield
+      {:fullWidth true
+       :label (i18n/tr "New comment")
+       :variant :outlined
+       :value value
+       :multiline true
+       :onChange onChange
+       :disabled disabled?
+       :maxLength 500
+       :placeholder (when disabled? (i18n/tr "Login to add new comment"))
+       :inputProps {:aria-label (i18n/tr "New comment")}})
+    (inputs/button
+      {:type :submit
+       :disabled disabled?}
+      (i18n/tr "Submit"))))
+
+(defsc NewCommentInput [_ _ {:keys [root/current-session add-argument!]}]
+  {:query [::NewCommentInput :value]                        ; FIXME This query isn't used.
+   ; :ident ::NewCommentInput
+   :initial-state
+   {::NewCommentInput :param/id
+    :value ""}
+   :use-hooks? true}
   (let [user-id (get-in current-session [:user ::user/id])
         logged-in? (get current-session :session/valid?)
-        [new-argument set-new-argument!] (hooks/use-state "")
-        [type set-type!] (hooks/use-state :pro)
-        toggle-type! (hooks/use-callback #(set-type! ({:pro :contra
-                                                       :contra :pro} type)) [type])
+        [new-comment set-new-comment!] (hooks/use-state "")
         submit (hooks/use-callback
                  (fn [e]
                    (evt/prevent-default! e)
-                   (when-not (str/blank? new-argument)
-                     (add-argument! {::argument/content new-argument
-                                     ::argument/type type
+                   (when-not (str/blank? new-comment)
+                     (add-argument! {::argument/content new-comment
                                      :author-id user-id})
-                     (set-new-argument! "")))
-                 [new-argument type])]
-    (dom/form {:onSubmit submit
-               :disabled (not logged-in?)}
-      (inputs/textfield
-        {:fullWidth true
-         :label (i18n/tr "New comment")
-         :variant :outlined
-         :value new-argument
-         :onChange #(set-new-argument! (evt/target-value %))
-         :disabled (not logged-in?)
-         :placeholder (when (not logged-in?) (i18n/tr "Login to add new comment"))
-         :inputProps {:aria-label (i18n/tr "New comment")}
-         :InputProps {#_:startAdornment
-                      #_(comp/fragment
-                          (type-toggle
-                            {:label (i18n/tr "Pro")
-                             :type :pro
-                             :color "success.main"
-                             :onClick toggle-type!
-                             :disabled (not logged-in?)
-                             :selected-type type})
-                          (type-toggle
-                            {:label (i18n/tr "Contra")
-                             :type :contra
-                             :color "error.main"
-                             :onClick toggle-type!
-                             :disabled (not logged-in?)
-                             :selected-type type}))
-                      :endAdornment (submit-new-argument-button {:disabled (not logged-in?)})}}))))
+                     (set-new-comment! "")))
+                 [new-comment])]
+    (new-comment-form
+      {:onSubmit submit
+       :disabled? (not logged-in?)
+       :value new-comment
+       :onChange #(set-new-comment! (evt/target-value %))})))
 
 
-(def ui-new-argument-line (comp/computed-factory NewArgumentLine))
+(def ui-new-comment-input (comp/computed-factory NewCommentInput))
 
-(defsc ArgumentSection [this {::proposal/keys [id arguments]
-                              :keys [root/current-session]}
-                        {:keys [process-over?]}]
+(defsc CommentSection [this {::proposal/keys [id arguments]
+                             :keys [root/current-session]}
+                       {:keys [process-over?]}]
   {:query [::proposal/id
            {::proposal/arguments (comp/get-query ArgumentRow)}
-           {[:root/current-session '_] (comp/get-query auth/Session)}]
-   :ident ::proposal/id}
+           {[:root/current-session '_] (comp/get-query auth/Session)}
+           {:ui/new-comment (comp/get-query NewCommentInput)}]
+   :ident ::proposal/id
+   :initial-state
+   (fn [{id ::proposal/id}]
+     {::proposal/id id
+      ::proposal/arguments []
+      :ui/new-comment {:id id}})}
   (comp/fragment
     (layout/box {:mb 1}
       (if-not (empty? arguments)
@@ -182,10 +186,10 @@
           {:variant :body1
            :color :textSecondary
            :paragraph true}
-          (i18n/tr "So far there are no arguments"))))
+          (i18n/tr "So far there are no comments"))))
 
     (when-not process-over?
-      (ui-new-argument-line {}
+      (ui-new-comment-input {}
         {:root/current-session current-session
          :add-argument! (fn [{::argument/keys [content type]
                               :keys [user-id]}]
@@ -196,7 +200,7 @@
                                             :type type
                                             :author-id user-id})]))}))))
 
-(def ui-argument-section (comp/computed-factory ArgumentSection {:keyfn ::proposal/id}))
+(def ui-comment-section (comp/computed-factory CommentSection {:keyfn ::proposal/id}))
 ;; endregion
 
 ;; region Parent section
@@ -374,7 +378,7 @@
            {:>/children-section (comp/get-query ChildrenSection)}
            {:>/parent-section (comp/get-query SmallParentSection)}
            {:>/opinion-section (comp/get-query OpinionSection)}
-           {:>/comment-section (comp/get-query ArgumentSection)}
+           {:>/comment-section (comp/get-query CommentSection)}
            {:>/similar-section (comp/get-query SimilarSection)}
            {[:ui/current-process '_] (comp/get-query Process)}]
    :ident ::proposal/id
@@ -432,7 +436,7 @@
                   (section " Meinungen " (ui-opinion-section opinion-section)))
               (grid/item {:xs 12 :component "section"}
                 (section (i18n/tr "Comments")
-                  (ui-argument-section comment-section
+                  (ui-comment-section comment-section
                     {:process-over? process-over?}))))
             (grid/item {:xs 12 :lg 4 :component "section"}
               (ui-children-section children-section)
