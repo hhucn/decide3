@@ -3,7 +3,17 @@
 = decide
 
 // image::decide-Demo.png[align="center"]
+== Goals & Motivation
 
+We aim to improve decision-making in groups by giving participants the tools to improve a set of proposals together.
+All that without the need of external influence —like a committee that provides proposals— that puts the participants strictly in the role of just a voter.
+To evaluate our ideas in the field, we built a prototype you can find below.
+
+In an https://doi.org/10.13140/RG.2.2.12515.09760/1[experiment in 2019] we noticed that involved participants in a decision not only want to express their own proposals, but also actively participate in the improvement of existing proposals.
+They used the means available to them to express these wishes and (mis)used the discussion function to propose improvements.
+The problem is that mere comments are not the same as proposing a new candidate to vote for.
+
+We hope to move from commenting on why a proposal is not good or how it can be improved to creating new and improved proposals.
 
 == How to get started
 
