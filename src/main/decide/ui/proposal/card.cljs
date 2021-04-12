@@ -18,10 +18,10 @@
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
     [material-ui.surfaces :as surfaces]
-    ["@material-ui/icons/CommentTwoTone" :default Comment]
+    ["@material-ui/icons/CommentOutlined" :default Comment]
     ["@material-ui/icons/MoreVert" :default MoreVert]
-    ["@material-ui/icons/ThumbDownAltTwoTone" :default ThumbDownAltTwoTone]
-    ["@material-ui/icons/ThumbUpAltTwoTone" :default ThumbUpAltTwoTone]
+    ["@material-ui/icons/ThumbDownAltOutlined" :default ThumbDownAlt]
+    ["@material-ui/icons/ThumbUpAltOutlined" :default ThumbUpAlt]
     [material-ui.layout.grid :as grid]))
 
 (defn id-part [proposal-id]
@@ -70,6 +70,41 @@
              :label (i18n/trc "Type of proposal" "Merge")}))))))
 
 (def ui-subheader (comp/factory Subheader (:keyfn ::proposal/id)))
+
+(defn toggle-button [{:keys [icon] :as props}]
+  (inputs/icon-button
+    (merge
+      {:size :small}
+      props)
+    (dom/create-element icon #js {"fontSize" "small"})))
+
+(defn approve-toggle
+  [{:keys [approved?
+           onClick
+           disabled?]}]
+  (toggle-button
+    {:aria-label
+     (if approved?
+       (i18n/trc "Proposal has been approved" "Approved")
+       (i18n/trc "Approve a proposal" "Approve"))
+     :color (if approved? "primary" "default")
+     :disabled disabled?
+     :onClick onClick
+     :icon ThumbUpAlt}))
+
+(defn reject-toggle
+  [{:keys [toggled?
+           onClick
+           disabled?]}]
+  (toggle-button
+    {:aria-label
+     (if toggled?
+       (i18n/trc "Proposal has been rejected by you" "Rejected")
+       (i18n/trc "Reject a proposal" "Reject"))
+     :color (if toggled? "secondary" "default")
+     :disabled disabled?
+     :onClick onClick
+     :icon ThumbDownAlt}))
 
 (defsc Argument [_ _]
   {:query [::argument/id]
@@ -135,7 +170,7 @@
 
       (dd/divider {:variant :middle})
       (surfaces/card-actions {}
-        (let [approved? (pos? my-opinion)]
+        (let [[approved? rejected?] ((juxt pos? neg?) my-opinion)]
           (layout/box {:mx 1 :clone true}
             (grid/container
               {:alignItems :center
@@ -143,26 +178,28 @@
 
               (grid/item {}
                 (if process-over?
-                  (dom/create-element ThumbUpAltTwoTone
+                  (dom/create-element ThumbUpAlt
                     #js {:fontSize "small"
                          :color (if approved? "primary" "disabled")})
-                  (inputs/icon-button
-                    {:size :small
-                     :aria-label
-                     (if approved?
-                       (i18n/trc "Proposal has been approved" "Approved")
-                       (i18n/trc "Approve a proposal" "Approve"))
-                     :color (if approved? "primary" "default")
-                     :disabled (or (not logged-in?) process-over?)
+                  (approve-toggle
+                    {:approved? approved?
+                     :disabled? (or (not logged-in?) process-over?)
                      :onClick #(comp/transact! this [(opinion/add {::proposal/id id
-                                                                   :opinion (if approved? 0 1)})])}
-                    (dom/create-element ThumbUpAltTwoTone #js {"fontSize" "small"}))))
+                                                                   :opinion (if approved? 0 1)})])})))
+
               (grid/item {} (dd/typography {} pro-votes))
+              (grid/item {}
+                (reject-toggle
+                  {:toggled? rejected?
+                   :disabled? (or (not logged-in?) process-over?)
+                   :onClick #(comp/transact! this [(opinion/add {::proposal/id id
+                                                                 :opinion (if rejected? 0 -1)})])}))
 
+              (layout/box {:ml "auto"})
+              #_(grid/item {} (dom/create-element Comment #js {"fontSize" "small"}))
 
-              (layout/box {:ml "auto" :clone true}
-                (grid/item {}
-                  (dd/typography {:variant :body2}
-                    (i18n/trf "{count} arguments" {:count (count arguments)})))))))))))
+              (grid/item {}
+                (dd/typography {:variant :body2}
+                  (i18n/trf "{count} arguments" {:count (count arguments)}))))))))))
 
 (def ui-proposal-card (comp/computed-factory ProposalCard {:keyfn ::proposal/id}))
