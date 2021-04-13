@@ -16,6 +16,7 @@
       <excludeFolder url="file://$MODULE_DIR$/.shadow-cljs" />
       <excludeFolder url="file://$MODULE_DIR$/resources/public/js" />
       <excludeFolder url="file://$MODULE_DIR$/resources/public/workspaces/js" />
+      <excludeFolder url="file://$MODULE_DIR$/_data" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -72,7 +73,7 @@
     <orderEntry type="library" name="Deps: com.cognitect/transit-cljs:0.8.264" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/google-closure-library:0.0-20201211-3e6c510d" level="project" />
     <orderEntry type="library" name="Deps: io.aviso/pretty:0.1.37" level="project" />
-    <orderEntry type="library" name="Deps: thheller/shadow-cljs:2.12.1" level="project" />
+    <orderEntry type="library" name="Deps: thheller/shadow-cljs:2.12.4" level="project" />
     <orderEntry type="library" name="Deps: org.graalvm.sdk/graal-sdk:20.1.0" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/clojurescript:1.10.844" level="project" />
     <orderEntry type="library" name="Deps: fress:0.3.1" level="project" />
@@ -102,7 +103,7 @@
     <orderEntry type="library" name="Deps: funcool/cuerdas:2.0.3" level="project" />
     <orderEntry type="library" name="Deps: ring/ring-headers:0.3.0" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/google-closure-library-third-party:0.0-20201211-3e6c510d" level="project" />
-    <orderEntry type="library" name="Deps: com.fulcrologic/fulcro:3.4.20" level="project" />
+    <orderEntry type="library" name="Deps: com.fulcrologic/fulcro:3.4.21" level="project" />
     <orderEntry type="library" name="Deps: org.clojars.mmb90/cljs-cache:0.1.4" level="project" />
     <orderEntry type="library" name="Deps: hiccup:1.0.5" level="project" />
     <orderEntry type="library" name="Deps: cljsjs/react-grid-layout:0.16.6-0" level="project" />
@@ -115,7 +116,7 @@
     <orderEntry type="library" name="Deps: com.github.awkay/workspaces:1.0.3" level="project" />
     <orderEntry type="library" name="Deps: org.graalvm.truffle/truffle-api:20.1.0" level="project" />
     <orderEntry type="library" name="Deps: adzerk/boot-test:1.1.2" level="project" />
-    <orderEntry type="library" name="Deps: binaryage/devtools:1.0.2" level="project" />
+    <orderEntry type="library" name="Deps: binaryage/devtools:1.0.3" level="project" />
     <orderEntry type="library" name="Deps: net.cgrand/macrovich:0.2.0" level="project" />
     <orderEntry type="library" name="Deps: buddy:2.0.0" level="project" />
     <orderEntry type="library" name="Deps: org.msgpack/msgpack:0.6.12" level="project" />
@@ -144,7 +145,7 @@
     <orderEntry type="library" name="Deps: io.replikativ/superv.async:0.2.11" level="project" />
     <orderEntry type="library" name="Deps: com.wsscode/fuzzy:1.0.0" level="project" />
     <orderEntry type="library" name="Deps: com.taoensso/nippy:2.14.0" level="project" />
-    <orderEntry type="library" name="Deps: com.github.mrebbinghaus/fulcro-material-ui-wrapper:b9bc05" level="project" />
+    <orderEntry type="library" name="Deps: com.github.mrebbinghaus/fulcro-material-ui-wrapper:38c237" level="project" />
     <orderEntry type="library" name="Deps: javax.servlet/javax.servlet-api:3.1.0" level="project" />
     <orderEntry type="library" name="Deps: io.replikativ/datahike:0.3.5" level="project" />
     <orderEntry type="library" name="Deps: nrepl:0.8.3" level="project" />

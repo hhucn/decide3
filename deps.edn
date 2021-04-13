@@ -7,7 +7,7 @@
         com.taoensso/timbre {:mvn/version "5.1.2"}
         com.taoensso/tufte {:mvn/version "2.2.0"}
         com.wsscode/pathom {:mvn/version "2.3.1"}
-        com.fulcrologic/fulcro {:mvn/version "3.4.20"}
+        com.fulcrologic/fulcro {:mvn/version "3.4.21"}
         com.fulcrologic/fulcro-garden-css {:mvn/version "3.0.9"}
         com.fulcrologic/fulcro-i18n {:mvn/version "0.0.5-alpha"}
         com.fulcrologic/fulcro-rad {:mvn/version "1.0.9"}
@@ -21,7 +21,7 @@
         io.replikativ/datahike {:mvn/version "0.3.5"}
         com.github.mrebbinghaus/fulcro-material-ui-wrapper
         {:git/url "https://github.com/MrEbbinghaus/fulcro-material-ui-wrapper"
-         :sha "b9bc05889ab0b3d9c7197f795a2f7b68a1c089db"}
+         :sha "38c237a65d0edd77a9b4c5ecb7cc06fb98d92d89"}
 
         buddy/buddy {:mvn/version "2.0.0"}
 
@@ -42,10 +42,10 @@
            :dev {:extra-paths ["src/test" "src/dev" "src/workspaces"]
                  :jvm-opts ["-XX:-OmitStackTraceInFastThrow"]
                  :extra-deps {org.clojure/clojurescript {:mvn/version "1.10.844"}
-                              thheller/shadow-cljs {:mvn/version "2.12.1"}
+                              thheller/shadow-cljs {:mvn/version "2.12.4"}
                               expound/expound {:mvn/version "0.8.9"}
                               fulcrologic/fulcro-spec {:mvn/version "3.1.11"}
-                              binaryage/devtools {:mvn/version "1.0.2"}
+                              binaryage/devtools {:mvn/version "1.0.3"}
                               com.github.awkay/workspaces {:mvn/version "1.0.3"}
                               org.clojure/tools.namespace {:mvn/version "1.1.0"}}}
 

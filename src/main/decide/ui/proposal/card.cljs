@@ -125,6 +125,7 @@
              ::proposal/pro-votes
              ::proposal/nice-id
              ::proposal/created
+             {::proposal/children 1}
              {::proposal/parents (comp/get-query Parent)}
              {::proposal/original-author (comp/get-query proposal/Author)}
              [:root/current-session '_]])

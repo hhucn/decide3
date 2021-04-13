@@ -104,9 +104,9 @@
     (d/pull [{::parents [::id]}] proposal-lookup)
     (get ::parents [])))
 
-(>defn tx-map [{::keys [id nice-id title body parents argument-idents created original-author]
-                :or {parents []
-                     argument-idents []}}]
+(defn tx-map [{::keys [id nice-id title body parents argument-idents created original-author]
+               :or {parents []
+                    argument-idents []}}]
   [(s/keys :req [::title ::body ::nice-id]
      :opt [::id])
    => (s/keys :req [::id ::title ::nice-id ::body ::created])]

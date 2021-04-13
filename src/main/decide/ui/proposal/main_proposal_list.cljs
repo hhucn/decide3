@@ -19,11 +19,14 @@
     [material-ui.inputs :as inputs]
     [material-ui.inputs.form :as form]
     [material-ui.inputs.input :as input]
+    [material-ui.lab.toggle-button :as toggle]
     [material-ui.layout :as layout]
     [material-ui.layout.grid :as grid]
     [material-ui.navigation :as navigation]
     [material-ui.surfaces :as surfaces]
-    ["@material-ui/icons/Add" :default AddIcon]))
+    ["@material-ui/icons/Add" :default AddIcon]
+    ["@material-ui/icons/FormatListNumbered" :default FormatListNumbered]
+    ["@material-ui/icons/FormatIndentIncrease" :default FormatIndentIncrease]))
 
 
 (defn add-proposal-fab [props]
@@ -99,6 +102,35 @@
 
     (plain-list {:items (rest items) :card-props card-props})))
 
+(defn hierarchy-list
+  [{:keys [items card-props]}]
+  (grid/container {:spacing 5}
+    (for [{id ::proposal/id :as proposal} items]
+      (grid/container {:xs 12 :key id :style {:flexGrow 1} :item true :spacing 1}
+        (layout/box {:clone true}
+          (grid/item {:xs 12 :lg 4 :xl 3}
+            (proposal-card/ui-proposal-card proposal (assoc card-props :elevation 10))))
+
+        (grid/item {:xs 12 :lg 8 :xl 9}
+          (dd/typography {:variant :overline} (i18n/tr "Children"))
+          (grid/container {:item true :spacing 1 :direction :row}
+            (for [proposal (::proposal/children proposal)]
+              (grid/item {:xs 4 :key (::proposal/id proposal)}
+                (proposal-card/ui-proposal-card proposal card-props)))))))))
+
+(defn new-proposal-card [{:keys [disabled? onClick]}]
+  (inputs/button {:style {:height "100%"
+                          :borderStyle "dashed"}
+                  :fullWidth true
+                  :size :large
+                  :disabled disabled?
+                  :variant :outlined
+                  :onClick onClick}
+    (layout/box {:color (when disabled? "text.disabled") :mr 1 :component AddIcon})
+    (if-not disabled?
+      (i18n/tr "New proposal")
+      (i18n/tr "Login to add new argument"))))
+
 (defn info-toolbar-item [{:keys [label]}]
   (grid/item {}
     (dd/typography {:variant :overline} label)))
@@ -130,8 +162,9 @@
   (let [logged-in? (get current-session :session/valid?)
         [selected-sort set-selected-sort!] (hooks/use-state "most-approvals")
         [selected-filters set-selected-filters!] (hooks/use-state #{})
-        sorted-proposals (proposal/rank-by selected-sort proposals)
-        process-over? (and (some? end-time) (time/past? end-time))]
+        [selected-layout set-selected-layout!] (hooks/use-state :favorite)
+        sorted-proposals (hooks/use-memo #(proposal/rank-by selected-sort proposals) [selected-sort proposals])
+        process-over? (hooks/use-memo #(boolean (some-> % end-time time/past?)) [end-time])]
     (comp/fragment
       (layout/container {:maxWidth :xl}
 
@@ -146,35 +179,37 @@
                           {:count (str (max no-of-participants no-of-contributors 0))})}))
             (grid/container {:item true :spacing 2
                              :justify "flex-end"}
+              (toggle/button-group
+                {:exclusive true
+                 :size :small
+                 :value selected-layout
+                 :onChange (fn [_event new-layout]
+                             (some-> new-layout keyword set-selected-layout!))}
+                (toggle/button {:value :favorite}
+                  (dom/create-element FormatListNumbered))
+                (toggle/button {:value :hierarchy}
+                  (dom/create-element FormatIndentIncrease)))
               #_(grid/item {} (filter-selector selected-filters set-selected-filters!))
               #_(grid/item {} (sort-selector selected-sort set-selected-sort!)))))
 
         ; main list
-        (grid/container {:spacing 2 :alignItems "stretch"}
-          (if (and (#{"most-approvals"} selected-sort) (not (empty? sorted-proposals)))
-            (favorite-list
-              {:items sorted-proposals
-               :card-props {::process/slug slug
-                            :process-over? process-over?}})
-            (plain-list
-              {:items sorted-proposals
-               :card-props {::process/slug slug
-                            :process-over? process-over?}}))
+        (let [list-options {:items sorted-proposals
+                            :card-props {::process/slug slug
+                                         :process-over? process-over?}}]
+          (case selected-layout
+            :favorite
+            (grid/container {:spacing 3 :alignItems "stretch"}
+              (if (and (#{"most-approvals"} selected-sort) (not (empty? sorted-proposals)))
+                (favorite-list list-options)
+                (plain-list list-options))
+              (when-not process-over?
+                (grid/item {:xs 12 :md 6 :lg 4 :xl 3 :style {:flexGrow 1
+                                                             :minHeight "100px"}}
+                  (new-proposal-card {:disabled? (not logged-in?)
+                                      :onClick show-new-proposal-dialog}))))
 
-          (when-not process-over?
-            (grid/item {:xs 12 :md 6 :lg 4 :xl 3 :style {:flexGrow 1
-                                                         :minHeight "100px"}}
-              (inputs/button {:style {:height "100%"
-                                      :borderStyle "dashed"}
-                              :fullWidth true
-                              :size :large
-                              :disabled (not logged-in?)
-                              :variant :outlined
-                              :onClick show-new-proposal-dialog}
-                (layout/box {:color (when-not logged-in? "text.disabled") :mr 1 :component AddIcon})
-                (if logged-in?
-                  (i18n/tr "New proposal")
-                  (i18n/tr "Login to add new argument")))))))
+            :hierarchy
+            (hierarchy-list list-options))))
 
       ; fab
       (when-not process-over?
