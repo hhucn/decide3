@@ -14,44 +14,56 @@
     [decide.models.user :as user])
   (:import (java.util Date)))
 
+(def available-features
+  #{::feature.rejects
+    ::feature.reject-popup})
+
 (def schema
-  [{:db/ident ::slug
-    :db/valueType :db.type/string
-    :db/unique :db.unique/identity
-    :db/cardinality :db.cardinality/one}
+  (concat
+    [{:db/ident ::slug
+      :db/valueType :db.type/string
+      :db/unique :db.unique/identity
+      :db/cardinality :db.cardinality/one}
 
-   {:db/ident ::title
-    :db/valueType :db.type/string
-    :db/cardinality :db.cardinality/one}
+     {:db/ident ::title
+      :db/valueType :db.type/string
+      :db/cardinality :db.cardinality/one}
 
-   {:db/ident ::description
-    :db/valueType :db.type/string
-    :db/cardinality :db.cardinality/one}
+     {:db/ident ::description
+      :db/valueType :db.type/string
+      :db/cardinality :db.cardinality/one}
 
-   {:db/ident ::proposals
-    :db/cardinality :db.cardinality/many
-    :db/valueType :db.type/ref
-    :db/isComponent true}
+     {:db/ident ::proposals
+      :db/cardinality :db.cardinality/many
+      :db/valueType :db.type/ref
+      :db/isComponent true}
 
-   {:db/ident ::type
-    :db/cardinality :db.cardinality/one
-    :db/valueType :db.type/keyword}
+     {:db/ident ::type
+      :db/cardinality :db.cardinality/one
+      :db/valueType :db.type/keyword}
 
-   {:db/ident ::participants
-    :db/valueType :db.type/ref
-    :db/cardinality :db.cardinality/many}
+     {:db/ident ::participants
+      :db/valueType :db.type/ref
+      :db/cardinality :db.cardinality/many}
 
-   {:db/ident ::moderators
-    :db/valueType :db.type/ref
-    :db/cardinality :db.cardinality/many}
+     {:db/ident ::moderators
+      :db/valueType :db.type/ref
+      :db/cardinality :db.cardinality/many}
 
-   {:db/ident ::latest-id
-    :db/cardinality :db.cardinality/one
-    :db/valueType :db.type/long}
+     {:db/ident ::latest-id
+      :db/cardinality :db.cardinality/one
+      :db/valueType :db.type/long}
 
-   {:db/ident ::end-time
-    :db/cardinality :db.cardinality/one
-    :db/valueType :db.type/instant}])
+     {:db/ident ::end-time
+      :db/cardinality :db.cardinality/one
+      :db/valueType :db.type/instant}
+
+     {:db/ident ::features
+      :db/doc "Feature toggles for a process."
+      :db/cardinality :db.cardinality/many
+      :db/valueType :db.type/ref}]
+    (map #(hash-map :db/ident %) available-features)))
+
 
 (def slug-pattern #"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 (s/def ::slug (s/and string? (partial re-matches slug-pattern)))
@@ -60,6 +72,8 @@
 (s/def ::latest-id (s/and int? #(<= 0 %)))
 (s/def ::end-time (s/nilable inst?))
 (s/def ::type #{::type.public ::type.private})
+(s/def ::feature available-features)
+(s/def ::features (s/coll-of ::feature))
 
 (s/def ::ident (s/tuple #{::slug} ::slug))
 (s/def ::lookup (s/or :ident ::ident :db/id pos-int?))
@@ -156,10 +170,11 @@
   "Returns a transaction as data, ready to be transacted."
   [db {::keys [slug title description
                type end-time moderators
-               participants]
+               participants features]
        :or {type ::type.public
             moderators []
-            participants []}}]
+            participants []
+            features []}}]
   [d.core/db? (s/keys :req [::slug ::title ::description] :opt [::type ::end-time]) => vector?]
   (if (slug-in-use? db slug)
     (throw (ex-info "Slug already in use" {:slug slug}))
@@ -171,6 +186,7 @@
         ::proposals []                                      ; Do not allow to set initial proposals as this may create conflicts with the nice id
         ::latest-id 0
         ::moderators moderators
+        ::features (filter available-features features)
         ::participants participants}
        end-time (assoc ::end-time end-time))]))
 
@@ -287,7 +303,7 @@
 
 (defmutation add-process [{:keys [conn db AUTH/user-id] :as env}
                           {::keys [slug] :keys [participant-emails] :as process}]
-  {::pc/params [::title ::slug ::description ::end-time ::type
+  {::pc/params [::title ::slug ::description ::end-time ::type ::features
                 :participant-emails]
    ::pc/output [::slug]
    ::s/params (s/keys

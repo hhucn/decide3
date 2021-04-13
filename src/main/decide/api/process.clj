@@ -27,11 +27,12 @@
 
 (defresolver resolve-process [{:keys [db]} {::process/keys [slug]}]
   {::pc/input #{::process/slug}
-   ::pc/output [::process/title ::process/description ::process/end-time ::process/type]}
+   ::pc/output [::process/title ::process/description ::process/end-time ::process/type ::process/features]}
   (d/pull db
     [::process/title
      ::process/description
      ::process/end-time
+     ::process/features
      [::process/type :default ::process/type.public]]
     [::process/slug slug]))
 
@@ -120,6 +121,7 @@
   [process/resolvers
 
    resolve-all-processes (pc/alias-resolver2 :all-processes :root/all-processes)
+   (pc/constantly-resolver ::process/available-features process/available-features)
    resolve-public-processes
    resolve-private-processes
 
