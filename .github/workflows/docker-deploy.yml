@@ -25,7 +25,7 @@ jobs:
           # Server address of Docker registry. If not set then will default to Docker Hub
           registry: docker.pkg.github.com
           # Docker repository to tag the image with
-          repository: mrebbinghaus/decide/decide
+          repository: hhucn/decide3/decide3
           # Comma-delimited list of tags. These will be added to the registry/repository to form the image's tags
           # tags: master
           # Automatically tags the built image with the git reference as per the readme
