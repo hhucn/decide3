@@ -253,7 +253,7 @@
   [(s/coll-of ::proposal/proposal)
    => ::proposal/proposal | #(contains? (set proposals) %)]
   (->> proposals
-    (sort-by ::proposal/created)
+    (sort-by ::proposal/created >)
     first))
 
 
