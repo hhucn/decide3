@@ -87,9 +87,10 @@
           (list/item-text {:primary label}))))))
 
 (defn plain-list [{:keys [items card-props]}]
-  (for [{id ::proposal/id :as proposal} items]
-    (grid/item {:xs 12 :md 6 :lg 4 :xl 3 :key id :style {:flexGrow 1}}
-      (proposal-card/ui-proposal-card proposal card-props))))
+  (vec
+    (for [{id ::proposal/id :as proposal} items]
+      (grid/item {:xs 12 :md 6 :lg 4 :xl 3 :key id :style {:flexGrow 1}}
+        (proposal-card/ui-proposal-card proposal card-props)))))
 
 (defn favorite-list
   "Displays a list of proposal card `items` with the first element prominent at the top."
@@ -105,18 +106,20 @@
 (defn hierarchy-list
   [{:keys [items card-props]}]
   (grid/container {:spacing 5}
-    (for [{id ::proposal/id :as proposal} items]
-      (grid/container {:xs 12 :key id :style {:flexGrow 1} :item true :spacing 1}
-        (layout/box {:clone true}
-          (grid/item {:xs 12 :lg 4 :xl 3}
-            (proposal-card/ui-proposal-card proposal (assoc card-props :elevation 10))))
+    (vec
+      (for [{id ::proposal/id :as proposal} items]
+        (grid/container {:xs 12 :key id :style {:flexGrow 1} :item true :spacing 1}
+          (layout/box {:clone true}
+            (grid/item {:xs 12 :lg 4 :xl 3}
+              (proposal-card/ui-proposal-card proposal (assoc card-props :elevation 10))))
 
-        (grid/item {:xs 12 :lg 8 :xl 9}
-          (dd/typography {:variant :overline} (i18n/tr "Children"))
-          (grid/container {:item true :spacing 1 :direction :row}
-            (for [proposal (::proposal/children proposal)]
-              (grid/item {:xs 4 :key (::proposal/id proposal)}
-                (proposal-card/ui-proposal-card proposal card-props)))))))))
+          (grid/item {:xs 12 :lg 8 :xl 9}
+            (dd/typography {:variant :overline} (i18n/tr "Children"))
+            (grid/container {:item true :spacing 1 :direction :row}
+              (vec
+                (for [proposal (::proposal/children proposal)]
+                  (grid/item {:xs 4 :key (::proposal/id proposal)}
+                    (proposal-card/ui-proposal-card proposal card-props)))))))))))
 
 (defn new-proposal-card [{:keys [disabled? onClick]}]
   (inputs/button {:style {:height "100%"
@@ -190,7 +193,7 @@
                 (toggle/button {:value :hierarchy}
                   (dom/create-element FormatIndentIncrease)))
               #_(grid/item {} (filter-selector selected-filters set-selected-filters!))
-              #_(grid/item {} (sort-selector selected-sort set-selected-sort!)))))
+              (grid/item {} (sort-selector selected-sort set-selected-sort!)))))
 
         ; main list
         (let [list-options {:items sorted-proposals
