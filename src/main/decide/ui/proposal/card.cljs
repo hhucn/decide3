@@ -12,17 +12,20 @@
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
     [decide.routing :as routing]
-    [decide.utils.time :as time]
     [decide.ui.proposal.detail-page :as detail-page]
+    [decide.ui.proposal.new-proposal :as new-proposal]
+    [decide.utils.time :as time]
     [material-ui.data-display :as dd]
+    [material-ui.data-display.list :as list]
+    [material-ui.feedback.dialog :as dialog]
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
+    [material-ui.layout.grid :as grid]
     [material-ui.surfaces :as surfaces]
     ["@material-ui/icons/CommentOutlined" :default Comment]
     ["@material-ui/icons/MoreVert" :default MoreVert]
     ["@material-ui/icons/ThumbDownAltOutlined" :default ThumbDownAlt]
-    ["@material-ui/icons/ThumbUpAltOutlined" :default ThumbUpAlt]
-    [material-ui.layout.grid :as grid]))
+    ["@material-ui/icons/ThumbUpAltOutlined" :default ThumbUpAlt]))
 
 (defn id-part [proposal-id]
   (dom/data {:className "proposal-id"
@@ -92,7 +95,7 @@
                              (comp/transact! this
                                [(new-proposal/show
                                   {:slug slug
-                                   :parents (log/spy :info (mapv #(find % ::proposal/id) (log/spy :info parents)))})
+                                   :parents (mapv #(find % ::proposal/id) parents)})
                                 (opinion/add {::proposal/id id
                                               :opinion -1})])
                              (onClose))}
