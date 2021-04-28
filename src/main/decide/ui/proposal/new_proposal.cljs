@@ -16,6 +16,7 @@
     [com.fulcrologic.guardrails.core :refer [>defn >defn- =>]]
     [decide.models.argument :as argument]
     [decide.models.process :as process]
+    [decide.models.process.mutations :as process.mutations]
     [decide.models.proposal :as proposal]
     [decide.utils.breakpoint :as breakpoint]
     [material-ui.data-display :as dd]
@@ -319,7 +320,7 @@
                     :onSubmit (fn submit-new-proposal-form [e]
                                 (evt/prevent-default! e)
                                 (comp/transact! this
-                                  [(process/add-proposal
+                                  [(process.mutations/add-proposal
                                      {::process/slug slug
                                       ::proposal/id (tempid/tempid)
                                       ::proposal/title title

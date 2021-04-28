@@ -6,6 +6,7 @@
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [decide.models.process :as process]
+    [decide.models.process.mutations :as process.mutations]
     [decide.models.user :as user]
     [decide.ui.process.process-forms :as process-forms]
     [material-ui.data-display :as dd]
@@ -92,7 +93,7 @@
     (dialog/content {}
       (process-forms/ui-new-process-form new-process-form
         {:onSubmit (fn [{::process/keys [title slug description end-time type] :keys [participant-emails]}]
-                     (comp/transact! comp [(process/add-process
+                     (comp/transact! comp [(process.mutations/add-process
                                              {::process/title title
                                               ::process/slug slug
                                               ::process/description description

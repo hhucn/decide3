@@ -47,9 +47,9 @@
   [proposals]
   (first (partition-by ::pro-votes (rank proposals))))
 
-(defn top-proposal
-  "Returns the top-proposal with the use of a tie breaker."
+(defn best
+  "Returns a single best proposal (i.e. winner)"
   [proposals]
-  (first (top-proposals proposals)))
+  (first (rank proposals)))
 
 (def add-argument `add-argument)

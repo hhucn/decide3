@@ -10,6 +10,7 @@
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [decide.models.process :as process]
+    [decide.models.process.mutations :as process.mutations]
     [decide.models.user :as user]
     [decide.utils.time :as time]
     [material-ui.data-display :as dd]
@@ -68,7 +69,7 @@
            (fn [e]
              (evt/prevent-default! e)
              (set-new-moderator-email "")
-             (comp/transact! this [(process/add-moderator {::process/slug slug ::user/email new-moderator-email})]))}
+             (comp/transact! this [(process.mutations/add-moderator {::process/slug slug ::user/email new-moderator-email})]))}
           (dd/typography {:variant :h6} (i18n/tr "Add moderator"))
           (inputs/textfield
             {:label (i18n/tr "Email")
@@ -101,7 +102,7 @@
          (fn [evt]
            (evt/prevent-default! evt)
 
-           (comp/transact! this [(process/update-process
+           (comp/transact! this [(process.mutations/update-process
                                    ;; calculate diff ;; NOTE have a look at clojure.data/diff
                                    (cond-> {::process/slug slug}
                                      (not= mod-title title)
@@ -161,6 +162,11 @@
 
 (def ui-process-edit (comp/computed-factory ProcessEdit))
 
+(defsc ParticipantChip [_ {::user/keys [display-name]}]
+  {:query [::user/id ::user/display-name]
+   :ident ::user/id}
+  (dd/chip {:label display-name}))
+
 (defsc Process [_ _]
   {:query (fn []
             (->> [[::process/slug]
@@ -184,6 +190,22 @@
          :post-mutation `dr/target-ready
          :post-mutation-params {:target ref}}))))
 
+(defsc ParticipantList [this props {{::process/keys [participants]} :process}]
+  {:query []
+   :use-hooks? true}
+  (log/info props)
+  (let [[participants set-participants] (hooks/use-state (or participants #{}))]
+    (dom/div {}
+      (surfaces/paper {:variant :outlined}
+        (grid/container {:spacing 1}
+          (for [p participants]
+            (grid/item {:key p}
+              (dd/chip {:label p
+                        :onDelete #(set-participants (disj participants p))}))))))))
+
+
+(def ui-participants-list (comp/factory ParticipantList))
+
 (defsc ProcessModeratorTab [this {:keys [moderator-list process-edit process]}]
   {:query [{:process (comp/get-query Process)}
            {:process-edit (comp/get-query ProcessEdit)}
@@ -198,4 +220,6 @@
   (layout/container {}
     (layout/box {:my 2}
       (ui-process-edit process-edit)
+      #_(accordion {:title (i18n/trc "Label for list of participants" "Participants")}
+          (ui-participants-list {} {:process (log/spy :info process)}))
       (ui-moderator-list moderator-list))))

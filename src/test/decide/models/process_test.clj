@@ -3,6 +3,7 @@
     [clojure.test :refer [deftest is use-fixtures testing are]]
     [datahike.api :as d]
     [decide.models.process :as process]
+    [decide.models.process.mutations :as process.mutations]
     [decide.models.user :as user]
     [decide.server-components.database :as database]
     [decide.server-components.pathom :as pathom]
@@ -39,25 +40,25 @@
 
           "can not add a new process."
           (parser-without-session
-            [{(list `process/add-process
+            [{(list `process.mutations/add-process
                 #::process{:slug "test"
                            :title "My Test-Title"
                            :description "foobar"})
               [::process/slug ::process/title ::process/description]}])
           =>
-          {`process/add-process
+          {`process.mutations/add-process
            {:com.fulcrologic.rad.pathom/errors
             {:message "User is not logged in!"
              :data {}}}}
 
           "can not update an existing process."
           (parser-without-session
-            [{`(process/update-process
+            [{`(process.mutations/update-process
                  #::process{:slug "test-decision"
                             :title "My NEW Test-Title"})
               [::process/title]}])
           =>
-          {`process/update-process
+          {`process.mutations/update-process
            {:com.fulcrologic.rad.pathom/errors
             {:message "User is not logged in!"
              :data {}}}})))))
@@ -78,12 +79,12 @@
 
           "can add a new process."
           (parser-existing-user
-            [{(list `process/add-process
+            [{(list `process.mutations/add-process
                 #::process{:slug "test"
                            :title "My Test-Title"
                            :description "foobar"})
               [::process/slug ::process/title ::process/description]}])
-          => {`process/add-process
+          => {`process.mutations/add-process
               #::process{:slug "test"
                          :title "My Test-Title"
                          :description "foobar"}}
@@ -120,68 +121,68 @@
             (assertions
               "can update the process afterwards"
               (parser-with-moderator
-                [{`(process/update-process
+                [{`(process.mutations/update-process
                      #::process{:slug "test"
                                 :title "My NEW Test-Title"})
                   [::process/title]}])
               =>
-              {`process/update-process
+              {`process.mutations/update-process
                {::process/title "My NEW Test-Title"}}
 
               "can not update a process that is not in use."
               (parser-existing-user
-                [{`(process/update-process
+                [{`(process.mutations/update-process
                      #::process{:slug "i-do-not-exist"
                                 :title "My NEW Test-Title"})
                   [::process/title]}])
               =>
-              {`process/update-process
+              {`process.mutations/update-process
                {:com.fulcrologic.rad.pathom/errors
                 {:message "Slug is not in use!"
                  :data {:slug "i-do-not-exist"}}}}
 
               "can add an end-date afterwards"
               (parser-with-moderator
-                [{`(process/update-process
+                [{`(process.mutations/update-process
                      #::process{:slug "test" :end-time #inst"2030"})
                   [::process/end-time]}])
               =>
-              {`process/update-process
+              {`process.mutations/update-process
                {::process/end-time #inst"2030"}}
 
               "can remove an end-date afterwards"
               (parser-with-moderator
-                [{`(process/update-process
+                [{`(process.mutations/update-process
                      #::process{:slug "test" :end-time nil})
                   [::process/slug ::process/end-time]}])
               =>
-              {`process/update-process
+              {`process.mutations/update-process
                #::process{:slug "test"}}
 
               "can not remove an required attributes"
               (get-in (parser-with-moderator
-                        [{`(process/update-process
+                        [{`(process.mutations/update-process
                              #::process{:slug "test" :title nil})
                           [::process/slug ::process/end-time]}])
-                [`process/update-process :com.fulcrologic.rad.pathom/errors :message])
+                [`process.mutations/update-process :com.fulcrologic.rad.pathom/errors :message])
               =>
               "Failed validation!"
 
               "can not remove slug"
               (get-in (parser-with-moderator
-                        [{`(process/update-process
+                        [{`(process.mutations/update-process
                              #::process{:slug nil})
                           [::process/slug ::process/end-time]}])
-                [`process/update-process :com.fulcrologic.rad.pathom/errors :message])
+                [`process.mutations/update-process :com.fulcrologic.rad.pathom/errors :message])
               =>
               "Failed validation!"
 
               "can not set title to empty"
               (get-in (parser-with-moderator
-                        [{`(process/update-process
+                        [{`(process.mutations/update-process
                              #::process{:slug "test" :title ""})
                           [::process/slug ::process/end-time]}])
-                [`process/update-process :com.fulcrologic.rad.pathom/errors :message])
+                [`process.mutations/update-process :com.fulcrologic.rad.pathom/errors :message])
               =>
               "Failed validation!")))
 
@@ -190,12 +191,12 @@
             (assertions
               "can not update the process."
               (parser-with-non-moderator
-                [{`(process/update-process
+                [{`(process.mutations/update-process
                      #::process{:slug "test"
                                 :title "My NEW Test-Title"})
                   [::process/title]}])
               =>
-              {`process/update-process
+              {`process.mutations/update-process
                {:com.fulcrologic.rad.pathom/errors
                 {:message "Need moderation role for this operation"
                  :data {::user/id #uuid"001e7a7e-3eb2-4226-b9ab-36dddcf64106"
@@ -207,14 +208,14 @@
         get-relevant-key
         (fn [actual]
           (-> actual
-            (get-in [`process/add-process :com.fulcrologic.rad.pathom/errors :message])))]
+            (get-in [`process.mutations/add-process :com.fulcrologic.rad.pathom/errors :message])))]
     (behavior "process can not be added with"
       (assertions
 
         "malformed slug"
         (->
           (parser-existing-user
-            [{(list `process/add-process
+            [{(list `process.mutations/add-process
                 #::process{:slug "I AM NOT A CORRECT SLUG"
                            :title "My Test-Title"
                            :description "foobar"})
@@ -226,7 +227,7 @@
         "empty title"
         (->
           (parser-existing-user
-            [{(list `process/add-process
+            [{(list `process.mutations/add-process
                 #::process{:slug "correct-slug"
                            :title ""
                            :description "foobar"})
@@ -238,7 +239,7 @@
         "missing field"
         (->
           (parser-existing-user
-            [{(list `process/add-process
+            [{(list `process.mutations/add-process
                 #::process{:slug "correct-slug"
                            :description "foobar"})
               [::process/slug ::process/title ::process/description]}])
@@ -249,7 +250,7 @@
         "string as end-date"
         (->
           (parser-existing-user
-            [{(list `process/add-process
+            [{(list `process.mutations/add-process
                 #::process{:slug "correct-slug"
                            :title "Bla"
                            :description "foobar"
@@ -262,7 +263,7 @@
         "slug is already in use"
         (->
           (parser-existing-user
-            [{(list `process/add-process
+            [{(list `process.mutations/add-process
                 #::process{:slug "test-decision"
                            :title "Bla"
                            :description "foobar"})
@@ -279,10 +280,10 @@
         (assertions
           (->
             (parser-with-alex-session
-              [`(process/add-moderator
+              [`(process.mutations/add-moderator
                   {::process/slug "test-decision"
                    ::user/email "Marc"})])
-            (get-in [`process/add-moderator :com.fulcrologic.rad.pathom/errors :message]))
+            (get-in [`process.mutations/add-moderator :com.fulcrologic.rad.pathom/errors :message]))
           =>
           "Need moderation role for this operation")))))
 

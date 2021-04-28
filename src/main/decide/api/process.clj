@@ -5,6 +5,8 @@
     [decide.features.recommendations.api :as recommendations.api]
     [decide.models.opinion :as opinion]
     [decide.models.process :as process]
+    [decide.models.process.database :as process.db]
+    [decide.models.process.mutations :as process.mutations]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]))
 
@@ -15,14 +17,14 @@
 
 (defresolver resolve-public-processes [{:keys [db]} _]
   {::pc/output [{:root/public-processes [::process/slug ::process/type]}]}
-  {:root/public-processes (vec (process/get-public-processes db))})
+  {:root/public-processes (vec (process.db/get-public-processes db))})
 
 (defresolver resolve-private-processes [{:keys [db AUTH/user-id]} _]
   {::pc/output [{:root/private-processes [::process/slug ::process/type]}]}
   {:root/private-processes
    (vec
      (if user-id
-       (process/get-private-processes db [::user/id user-id])
+       (process.db/get-private-processes db [::user/id user-id])
        []))})
 
 (defresolver resolve-process [{:keys [db]} {::process/keys [slug]}]
@@ -49,7 +51,7 @@
 
 (defresolver resolve-I-moderator? [{:keys [db AUTH/user-id]} {::process/keys [slug]}]
   {::pc/output [:I/moderator?]}
-  {:I/moderator? (process/is-moderator? db [::process/slug slug] user-id)})
+  {:I/moderator? (process/moderator? (d/pull db [{::process/moderators [::user/id]}] [::process/slug slug]) user-id)})
 
 (defresolver resolve-authors [{:keys [db]} {::process/keys [proposals]}]
   {::pc/output [{::process/authors [::user/id]}
@@ -66,11 +68,11 @@
      ::process/no-of-authors (count authors)}))
 
 (defresolver resolve-no-of-contributors [{:keys [db]} {::process/keys [slug]}]
-  {::process/no-of-contributors (process/get-no-of-contributors db slug)})
+  {::process/no-of-contributors (process.db/get-no-of-contributors db slug)})
 
 (defresolver resolve-no-of-participants [{:keys [db]} {::process/keys [slug]}]
   {::pc/output [::process/no-of-participants]}
-  {::process/no-of-participants (process/get-number-of-participants db slug)})
+  {::process/no-of-participants (process.db/get-number-of-participants db slug)})
 
 (defresolver resolve-proposals [{:keys [db]} {::process/keys [slug]}]
   {::pc/output [{::process/proposals [::proposal/id]}]}
@@ -100,7 +102,7 @@
 (defresolver resolve-winner [{:keys [db]} process]
   {::pc/input #{::process/slug}
    ::pc/output [{::process/winner [::proposal/id]}]}
-  {::process/winner (process/get-winner db process)})
+  {::process/winner (process.db/get-winner db process)})
 
 (defresolver resolve-personal-approved-proposals [{:keys [db AUTH/user-id]} process]
   {::pc/input #{::process/slug}
@@ -118,7 +120,7 @@
        [::user/id user-id])}))
 
 (def all-resolvers
-  [process/resolvers
+  [process.mutations/all-mutations
 
    resolve-all-processes (pc/alias-resolver2 :all-processes :root/all-processes)
    (pc/constantly-resolver ::process/available-features process/available-features)

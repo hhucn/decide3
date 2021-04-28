@@ -71,6 +71,44 @@
 
 (def ui-subheader (comp/factory Subheader (:keyfn ::proposal/id)))
 
+(defn reject-dialog [this {:keys [slug id open? onClose parents]}]
+  (dialog/dialog {:open open? :onClose onClose}
+    (dialog/title {} "WHHHHYYYY???")
+    (list/list {}
+      (list/item
+        {:button true
+         :onClick (fn []
+                    (comp/transact! this
+                      [(new-proposal/show
+                         {:slug slug
+                          :parents [[::proposal/id id]]})
+                       (opinion/add {::proposal/id id
+                                     :opinion -1})])
+                    (onClose))}
+        (list/item-text {:primary "I nearly like it"
+                         :secondary "Propose an improvement"}))
+      (list/item {:button true
+                  :onClick (fn []
+                             (comp/transact! this
+                               [(new-proposal/show
+                                  {:slug slug
+                                   :parents (log/spy :info (mapv #(find % ::proposal/id) (log/spy :info parents)))})
+                                (opinion/add {::proposal/id id
+                                              :opinion -1})])
+                             (onClose))}
+        (list/item-text {:primary "I hate it"
+                         :secondary "Propose an alternative"}))
+      (list/item {:button true
+                  :onClick (fn []
+                             (comp/transact! this
+                               [(opinion/add {::proposal/id id
+                                              :opinion -1})])
+                             (onClose))}
+        (list/item-text {:primary "Just reject it"
+                         :secondary "Hate it and don't be constructive. :-("})))
+    (dialog/actions {}
+      (inputs/button {:onClick onClose} "Abort"))))
+
 (defn toggle-button [{:keys [icon] :as props}]
   (inputs/icon-button
     (merge
@@ -110,7 +148,7 @@
   {:query [::argument/id]
    :ident ::argument/id})
 
-(defsc ProposalCard [this {::proposal/keys [id title body my-opinion arguments pro-votes]
+(defsc ProposalCard [this {::proposal/keys [id title body my-opinion arguments pro-votes parents]
                            :keys [root/current-session] :as props}
                      {::process/keys [slug]
                       :keys [process-over?
@@ -136,6 +174,7 @@
                      ::proposal/body body})
    :use-hooks? true}
   (let [logged-in? (get current-session :session/valid?)
+        [reject-open? set-reject-open] (hooks/use-state false)
         proposal-href (hooks/use-memo
                         #(routing/path->absolute-url
                            (dr/into-path ["decision" slug] detail-page/ProposalPage (str id)))
@@ -193,14 +232,23 @@
                 (reject-toggle
                   {:toggled? rejected?
                    :disabled? (or (not logged-in?) process-over?)
-                   :onClick #(comp/transact! this [(opinion/add {::proposal/id id
-                                                                 :opinion (if rejected? 0 -1)})])}))
+                   :onClick #(if-not rejected?
+                               (set-reject-open true)
+                               (comp/transact! this [(opinion/add {::proposal/id id
+                                                                   :opinion (if rejected? 0 -1)})]))}))
 
               (layout/box {:ml "auto"})
               #_(grid/item {} (dom/create-element Comment #js {"fontSize" "small"}))
 
               (grid/item {}
                 (dd/typography {:variant :body2}
-                  (i18n/trf "{count} arguments" {:count (count arguments)}))))))))))
+                  (i18n/trf "{count} arguments" {:count (count arguments)})))))))
+      (reject-dialog
+        this
+        {:open? reject-open?
+         :id id
+         :slug slug
+         :parents parents
+         :onClose #(set-reject-open false)}))))
 
 (def ui-proposal-card (comp/computed-factory ProposalCard {:keyfn ::proposal/id}))
