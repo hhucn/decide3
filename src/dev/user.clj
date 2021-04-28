@@ -9,7 +9,7 @@
     [decide.server-components.http-server :refer [http-server]]
     [decide.server-components.database :refer [conn]]
     [decide.server-components.email :as email]
-    decide.features.notifications.notifier
+    [decide.features.notifications.notifier :as notifier]
     [decide.server-components.nrepl :as nrepl]))
 
 ;; ==================== SERVER ====================
@@ -34,7 +34,7 @@
   "Start the web server"
   []
   (->
-    (mount/except [#'nrepl/socket-repl])
+    (mount/except [#'nrepl/socket-repl #'notifier/notifier])
     (mount/swap-states
       {#'email/mailer-chan {:start email/dev-mailer
                             :stop #(email/close! email/mailer-chan)}})
