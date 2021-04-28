@@ -73,6 +73,7 @@
         ::process/description "Wir müssen irgendwas für die Uni entscheiden."
         ::process/latest-id 5,
         ::process/moderators ["Björn"]
+        #_#_::process/end-time #inst"2021-02-01"
         ::process/proposals
         [{:db/id "Wasserspender"
           ::proposal/body "Wasser ist gesund für Studenten.",
