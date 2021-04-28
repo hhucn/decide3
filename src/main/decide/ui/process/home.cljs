@@ -96,7 +96,7 @@
       (layout/container {:maxWidth :lg :component :main}
         ;; description section
         (grid/container {:spacing 2}
-          (when process-over?
+          (when (and process-over? winner)
             (grid/item {:xs 12}
               (section-paper {}
                 (dd/typography {:component :h2 :variant :h4}
