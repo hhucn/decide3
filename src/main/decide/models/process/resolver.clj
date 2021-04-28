@@ -1,4 +1,4 @@
-(ns decide.api.process
+(ns decide.models.process.resolver
   (:require
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
     [datahike.api :as d]
@@ -9,6 +9,7 @@
     [decide.models.process.mutations :as process.mutations]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]))
+
 
 (defresolver resolve-all-processes [{:root/keys [public-processes private-processes]}]
   {::pc/output [{:root/all-processes [::process/slug ::process/type]}]}
