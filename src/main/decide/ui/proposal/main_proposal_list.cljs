@@ -201,7 +201,8 @@
                                          :process-over? process-over?}}]
           (case selected-layout
             :favorite
-            (grid/container {:spacing 3 :alignItems "stretch"}
+            (grid/container {:spacing (if (breakpoint/>=? "sm") 2 1)
+                             :alignItems "stretch"}
               (if (and (#{"most-approvals"} selected-sort) (not (empty? sorted-proposals)))
                 (favorite-list list-options)
                 (plain-list list-options))
