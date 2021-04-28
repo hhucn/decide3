@@ -68,6 +68,7 @@
 (s/def ::type #{::type.public ::type.private})
 (s/def ::feature available-features)
 (s/def ::features (s/coll-of ::feature))
+(s/def ::moderators (s/coll-of (s/keys :req [::user/id])))
 
 (s/def ::ident (s/tuple #{::slug} ::slug))
 (s/def ::lookup (s/or :ident ::ident :db/id pos-int?))
@@ -77,7 +78,7 @@
   (let [moderator-ids (set (map ::user/id moderators))]
     (contains? moderator-ids id)))
 
-(defn over?
+(>defn over?
   "Checks if a processes is over based on its end-time and the current datetime.
    Returns false if process has no end-time"
   [{::keys [end-time]}]
@@ -89,7 +90,7 @@
 (>defn get-most-approved-proposals
   "From a collection of `proposals`, return a subset of `proposals` that have the most approval"
   [proposals]
-  [(s/coll-of (s/keys :req [::proposal/pro-votes]))
+  [(s/coll-of (s/keys :req [::proposal/id ::proposal/pro-votes]))
    => (s/coll-of ::proposal/proposal) | #(set/subset? (set %) (set proposals))]
   (let [voting-groups (group-by ::proposal/pro-votes proposals)
         votes (keys voting-groups)]
@@ -100,26 +101,29 @@
 (>defn remove-parents
   "From a list of `proposals`, remove all parents that have children in the collection."
   [proposals]
-  [(s/coll-of ::proposal/proposal)
+  [(s/coll-of (s/keys :req [::proposal/id ::proposal/parents]))
    => (s/coll-of ::proposal/proposal) | #(set/subset? (set %) (set proposals))]
   (let [parent-ids (set (map ::proposal/id (mapcat ::proposal/parents proposals)))]
     (remove (comp parent-ids ::proposal/id) proposals)))
 
-(>defn solve-draw
+(>defn newest-proposal
   "Takes a collection of `proposals` and returns a single winner."
   [proposals]
-  [(s/coll-of ::proposal/proposal)
-   => ::proposal/proposal | #(contains? (set proposals) %)]
+  [(s/coll-of (s/keys :req [::proposal/created]) :min-count 1)
+   => (s/keys :req [::proposal/created])
+   | #(contains? (set proposals) %)]
   (->> proposals
-    (sort-by ::proposal/created >)
+    (sort-by ::proposal/created)
+    reverse
     first))
 
-(defn winner
+(>defn winner
   "Determines a winner for set of proposals.
   The proposals need `::proposal/pro-votes`"
   [proposals]
-  [(s/coll-of (s/keys :req [::proposal/id ::proposal/pro-votes]))]
+  [(s/coll-of (s/keys :req [::proposal/id ::proposal/created ::proposal/pro-votes]))
+   => (? ::proposal/proposal)]
   (let [most-approved-proposals (get-most-approved-proposals proposals)]
-    (if (> 1 (count most-approved-proposals))
-      (first most-approved-proposals)
-      (solve-draw most-approved-proposals))))
+    (if (< 1 (count most-approved-proposals))
+      (newest-proposal most-approved-proposals)
+      (first most-approved-proposals))))

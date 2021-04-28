@@ -66,7 +66,7 @@
                      :distinct true))
 (s/def ::pro-votes nat-int?)
 (s/def ::con-votes nat-int?)
-(s/def ::parents (s/coll-of ::proposal :distinct true))
+(s/def ::parents (s/coll-of (s/keys :req [::id]) :distinct true))
 (s/def ::proposal (s/keys :req [::id] :opt [::title ::body ::created ::parents ::pro-votes ::con-votes ::nice-id ::arguments]))
 
 (s/def ::ident (s/tuple #{::id} ::id))

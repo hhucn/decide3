@@ -3,7 +3,11 @@
               :ns-patterns ["-test$"]
               :test-paths ["src/test"]
               :skip-meta [:integration]
-              :source-paths ["src/main"]}]
+              :source-paths ["src/main"]}
+             {:id :generative-fdef-checks
+              :type :kaocha.type/spec.test.check
+              :source-paths ["src/main/decide/models/process.cljc"]
+              :clojure.spec.test.check/opts {}}]
      :reporter [kaocha.report/documentation]
      :plugins #profile {:default [:kaocha.plugin/randomize
                                   :kaocha.plugin/filter
