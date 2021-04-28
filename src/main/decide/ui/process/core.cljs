@@ -9,6 +9,7 @@
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr :refer [defrouter]]
+    [decide.models.authorization :as auth]
     [decide.models.process :as process]
     [decide.models.user :as user]
     [decide.routing :as r]
@@ -93,12 +94,6 @@
             {:href href
              :key href}))))))
 
-(defn- is-moderator? [moderators current-session]
-  (and
-    (:session/valid? current-session)
-    (contains? (into #{} (map (partial comp/get-ident Moderator)) moderators)
-      (:user current-session))))
-
 (declare ProcessContext)
 
 (defn process-already-loaded? [db ident]
@@ -141,7 +136,7 @@
            {:ui/process-header (comp/get-query ProcessHeader)}
            {:ui/process-router (comp/get-query ProcessRouter)}
            {:ui/new-proposal-dialog (comp/get-query new-proposal/NewProposalFormDialog)}
-           [:root/current-session '_]]
+           {[:root/current-session '_] (comp/get-query auth/Session)}]
    :initial-state
    (fn [{:keys [slug]}]
      {:ui/process-router (comp/get-initial-state ProcessRouter)
@@ -158,8 +153,7 @@
            #(comp/transact! app [(set-current-process {:ident ident :slug slug})])))))
    :use-hooks? true}
   (let [{::process/keys [slug end-time moderators]} current-process
-        show-new-proposal-dialog (hooks/use-callback #(comp/transact! this [(new-proposal/show {:slug slug})]))
-        moderator? (is-moderator? moderators current-session)]
+        show-new-proposal-dialog (hooks/use-callback #(comp/transact! this [(new-proposal/show {:slug slug})]))]
     (comp/fragment
       (surfaces/paper
         {:square true}
@@ -169,7 +163,7 @@
             {:label (i18n/trc "Overview over process" "Overview") :target process.home/ProcessOverviewScreen}
             {:label (i18n/tr "All proposals") :target proposal.main-list/MainProposalList}
             {:label "Dashboard" :target process.dashboard/PersonalProcessDashboard}
-            (when moderator?
+            (when (process/moderator? current-process (:user current-session))
               {:label (i18n/trc "Link to moderation page" "Moderation") :target process.moderator/ProcessModeratorTab}))))
       (ui-process-router process-router
         {:show-new-proposal-dialog show-new-proposal-dialog})
