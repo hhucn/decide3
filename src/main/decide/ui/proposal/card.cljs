@@ -14,6 +14,7 @@
     [decide.routing :as routing]
     [decide.ui.proposal.detail-page :as detail-page]
     [decide.ui.proposal.new-proposal :as new-proposal]
+    [decide.utils.breakpoint :as breakpoint]
     [decide.utils.time :as time]
     [material-ui.data-display :as dd]
     [material-ui.data-display.list :as list]
@@ -44,22 +45,26 @@
   {:query [::proposal/id]
    :ident ::proposal/id})
 
-(defsc Subheader [_ {::proposal/keys [nice-id created parents original-author]}]
+(defsc Subheader [_ {::proposal/keys [nice-id created parents original-author generation]}]
   {:query [::proposal/id
            ::proposal/nice-id
            ::proposal/created
+           ::proposal/generation
            {::proposal/parents (comp/get-query Parent)}
            {::proposal/original-author (comp/get-query proposal/Author)}]
    :ident ::proposal/id}
   (let [author-name (::user/display-name original-author)]
-    (dom/span {:classes ["subheader"]}
+    (dom/span {:classes ["subheader"]
+               :style {:height "24px"}}
       (id-part nice-id)
+      #_#_" · "
+          (when author-name
+            (author-part author-name))
+      #_#_" · "
+          (when (instance? js/Date created)
+            (time-part created))
       " · "
-      (when author-name
-        (author-part author-name))
-      " · "
-      (when (instance? js/Date created)
-        (time-part created))
+      (str "Gen. " generation " ")
       (let [no-of-parents (count parents)]
         (case no-of-parents
           0 nil
@@ -151,7 +156,7 @@
   {:query [::argument/id]
    :ident ::argument/id})
 
-(defsc ProposalCard [this {::proposal/keys [id title body my-opinion arguments pro-votes parents]
+(defsc ProposalCard [this {::proposal/keys [id title body my-opinion arguments pro-votes parents generation]
                            :keys [root/current-session] :as props}
                      {::process/keys [slug]
                       :keys [process-over?
@@ -162,6 +167,7 @@
             [::proposal/id
              ::proposal/title ::proposal/body
              ::proposal/my-opinion
+             ::proposal/generation
              {::proposal/arguments (comp/get-query Argument)}
              ::proposal/pro-votes
              ::proposal/nice-id
@@ -185,6 +191,7 @@
     (surfaces/card
       (merge
         {:raised false
+         :variant (when (breakpoint/>=? "sm") :outlined)
          :component :article
          :style {:height "100%"
                  :display :flex
