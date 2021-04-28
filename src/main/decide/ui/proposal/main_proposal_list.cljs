@@ -89,7 +89,7 @@
 (defn plain-list [{:keys [items card-props]}]
   (vec
     (for [{id ::proposal/id :as proposal} items]
-      (grid/item {:xs 12 :md 6 :lg 4 :xl 3 :key id :style {:flexGrow 1}}
+      (grid/item {:xs 12 :md 6 :lg 4 :key id :style {:flexGrow 1}}
         (proposal-card/ui-proposal-card proposal card-props)))))
 
 (defn favorite-list
@@ -110,10 +110,10 @@
       (for [{id ::proposal/id :as proposal} items]
         (grid/container {:xs 12 :key id :style {:flexGrow 1} :item true :spacing 1}
           (layout/box {:clone true}
-            (grid/item {:xs 12 :lg 4 :xl 3}
+            (grid/item {:xs 12 :lg 4}
               (proposal-card/ui-proposal-card proposal (assoc card-props :elevation 10))))
 
-          (grid/item {:xs 12 :lg 8 :xl 9}
+          (grid/item {:xs 12 :lg 8}
             (dd/typography {:variant :overline} (i18n/tr "Children"))
             (grid/container {:item true :spacing 1 :direction :row}
               (vec
@@ -206,8 +206,9 @@
                 (favorite-list list-options)
                 (plain-list list-options))
               (when-not process-over?
-                (grid/item {:xs 12 :md 6 :lg 4 :xl 3 :style {:flexGrow 1
-                                                             :minHeight "100px"}}
+                (grid/item {:xs 12 :md 6 :lg 4
+                            :style {:flexGrow 1
+                                    :minHeight "100px"}}
                   (new-proposal-card {:disabled? (not logged-in?)
                                       :onClick show-new-proposal-dialog}))))
 
