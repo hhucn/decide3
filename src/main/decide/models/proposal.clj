@@ -136,6 +136,32 @@
       ::created created}
      [:db/add process-lookup :decide.models.process/proposals (str id)]]))
 
+(>defn get-generation
+  "Query for the generation of a proposal.
+
+  A proposal without parents has generation = 0.
+  A child of that proposal would have generation = 1.
+  When a proposal has multiple parents, the generation is one higher than the highest generation of parents."
+  [db proposal]
+  [d.core/db? (s/keys :req [::id]) => nat-int?]
+  (d/q
+    '[:find ?gen .
+      :in $ % ?proposal
+      :where
+      (generation ?proposal ?gen)]
+    db
+    '[[(generation ?proposal ?gen)
+       [(ground 0) ?gen]
+       (not [?proposal ::parents])]
+      [(generation ?proposal ?gen)
+       [?proposal ::parents ?parent]
+       (generation ?parent ?pgen)
+       [(max ?pgen) ?max-pgen]
+       [(inc ?max-pgen) ?gen]]]
+
+
+    (find proposal ::id)))
+
 ;;; region API
 
 (defresolver resolve-proposal [{:keys [db]} input]
@@ -159,6 +185,11 @@
   {::pc/input #{::id}
    ::pc/output [{::parents [::id]}]}
   (or (d/pull db [{::parents [::id]}] [::id id]) {::parents []}))
+
+(defresolver resolve-generation [{:keys [db]} proposal]
+  {::pc/input #{::id}
+   ::pc/output [::generation]}
+  {::generation (get-generation db proposal)})
 
 (defresolver resolve-all-proposal-ids [{:keys [db]} _]
   {::pc/input #{}
@@ -300,4 +331,6 @@
    resolve-child-relations
    resolve-parent-relations
 
-   add-argument resolve-arguments resolve-parents resolve-children resolve-similar])
+   add-argument resolve-arguments resolve-parents resolve-children resolve-similar
+
+   resolve-generation])
