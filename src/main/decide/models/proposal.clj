@@ -183,8 +183,10 @@
 
 (defresolver resolve-parents [{:keys [db]} {::keys [id]}]
   {::pc/input #{::id}
-   ::pc/output [{::parents [::id]}]}
-  (or (d/pull db [{::parents [::id]}] [::id id]) {::parents []}))
+   ::pc/output [{::parents [::id]}
+                ::no-of-parents]}
+  (let [proposal (or (d/pull db [{::parents [::id]}] [::id id]) {::parents []})]
+    (assoc proposal ::no-of-parents (count (::parents proposal)))))
 
 (defresolver resolve-generation [{:keys [db]} proposal]
   {::pc/input #{::id}

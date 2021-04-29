@@ -26,63 +26,77 @@
     ["@material-ui/icons/CommentOutlined" :default Comment]
     ["@material-ui/icons/MoreVert" :default MoreVert]
     ["@material-ui/icons/ThumbDownAltOutlined" :default ThumbDownAlt]
-    ["@material-ui/icons/ThumbUpAltOutlined" :default ThumbUpAlt]))
+    ["@material-ui/icons/ThumbUpAltOutlined" :default ThumbUpAlt]
+    [taoensso.timbre :as log]))
 
 (defn id-part [proposal-id]
   (dom/data {:className "proposal-id"
              :value proposal-id}
     (str "#" (if (tempid/tempid? proposal-id) "?" proposal-id))))
 
-(defn author-part [author-name]
-  (apply comp/fragment (i18n/trf "by {author}" {:author (dom/address (str author-name))})))
-
 (defn time-part [^js/Date created]
   (comp/fragment
     " "
     (time/nice-time-element created)))
 
+(defsc Author [_ {::user/keys [display-name]}]
+  {:query [::user/id ::user/display-name]
+   :ident ::user/id}
+  (i18n/trf "by {author}" {:author (dom/address (str display-name))}))
+
+(def ui-author (comp/factory Author {:keyfn ::user/id}))
+
 (defsc Parent [_ _]
   {:query [::proposal/id]
    :ident ::proposal/id})
 
-(defsc Subheader [_ {::proposal/keys [nice-id created parents original-author generation]}]
+(defsc Subheader [_ {::proposal/keys [nice-id created no-of-parents original-author generation]}
+                  {:keys [author? created? gen? type?]
+                   :or {author? false
+                        created? false
+                        gen? false
+                        type? false}}]
   {:query [::proposal/id
            ::proposal/nice-id
            ::proposal/created
            ::proposal/generation
-           {::proposal/parents (comp/get-query Parent)}
-           {::proposal/original-author (comp/get-query proposal/Author)}]
+           ::proposal/no-of-parents
+           {::proposal/original-author (comp/get-query Author)}]
    :ident ::proposal/id}
-  (let [author-name (::user/display-name original-author)]
-    (dom/span {:classes ["subheader"]
-               :style {:height "24px"}}
-      (id-part nice-id)
-      #_#_" · "
-          (when author-name
-            (author-part author-name))
-      #_#_" · "
-          (when (instance? js/Date created)
-            (time-part created))
-      " · "
-      (dd/tooltip {:title (i18n/trf "This proposal has a chain of {count} proposals, that lead up to this" {:count generation})}
-        (dom/span {} (str "Gen. " generation " ")))
-      (let [no-of-parents (count parents)]
-        (case no-of-parents
-          0 nil
-          1
-          (dd/tooltip {:title (i18n/tr "This proposal is derived from one other proposal")}
-            (dd/chip
-              {:size :small
-               :color :primary
-               :label (i18n/trc "Type of proposal" "Fork")}))
+  (dom/span {:classes ["subheader"]
+             :style {:height "24px"}}
+    (id-part nice-id)
 
-          (dd/tooltip {:title (i18n/tr "This proposal is derived from two or more other proposals")}
-            (dd/chip
-              {:size :small
-               :color :secondary
-               :label (i18n/trc "Type of proposal" "Merge")})))))))
+    (when (and author? original-author)
+      (comp/fragment
+        " · "
+        (ui-author original-author)))
+    #_" · "
+    #_(when (and created? (instance? js/Date created))
+        (time-part created))
+    (when gen?
+      (comp/fragment
+        " · "
+        (dd/tooltip
+          {:title (i18n/trf "This proposal has a chain of {count} proposals, that lead up to this proposal" {:count generation})}
+          (dom/span {} (i18n/trf "Gen. {generation}" {:generation generation})))))
+    (when type?
+      (case no-of-parents
+        0 nil
+        1
+        (dd/tooltip {:title (i18n/tr "This proposal is derived from one other proposal")}
+          (dd/chip
+            {:size :small
+             :color :primary
+             :label (i18n/trc "Type of proposal" "Fork")}))
 
-(def ui-subheader (comp/factory Subheader (:keyfn ::proposal/id)))
+        (dd/tooltip {:title (i18n/tr "This proposal is derived from two or more other proposals")}
+          (dd/chip
+            {:size :small
+             :color :secondary
+             :label (i18n/trc "Type of proposal" "Merge")}))))))
+
+(def ui-subheader (comp/computed-factory Subheader (:keyfn ::proposal/id)))
 
 (defn reject-dialog [this {:keys [slug id open? onClose parents]}]
   (dialog/dialog {:open open? :onClose onClose}
@@ -161,8 +175,8 @@
   {:query [::argument/id]
    :ident ::argument/id})
 
-(defsc ProposalCard [this {::proposal/keys [id title body my-opinion arguments pro-votes parents generation]
-                           :keys [root/current-session] :as props}
+(defsc ProposalCard [this {::proposal/keys [id title body my-opinion arguments pro-votes parents]
+                           :keys [root/current-session >/subheader]}
                      {::process/keys [slug]
                       :keys [process-over?
                              card-props
@@ -172,15 +186,12 @@
             [::proposal/id
              ::proposal/title ::proposal/body
              ::proposal/my-opinion
-             ::proposal/generation
              {::proposal/arguments (comp/get-query Argument)}
              ::proposal/pro-votes
-             ::proposal/nice-id
-             ::proposal/created
              {::proposal/children 1}
              {::proposal/parents (comp/get-query Parent)}
-             {::proposal/original-author (comp/get-query proposal/Author)}
-             [:root/current-session '_]])
+             [:root/current-session '_]
+             {:>/subheader (comp/get-query Subheader)}])
    :ident ::proposal/id
    :initial-state (fn [{::keys [id title body]}]
                     {::proposal/id id
@@ -194,20 +205,21 @@
                            (dr/into-path ["decision" slug] detail-page/ProposalPage (str id)))
                         [slug id])]
     (surfaces/card
-      (merge
-        {:raised false
-         :component :article
-         :style {:height "100%"
-                 :display :flex
-                 :flexDirection "column"}}
-        card-props)
+      (log/spy :info
+        (merge
+          {:raised false
+           :component :article
+           :style {:height "100%"
+                   :display :flex
+                   :flexDirection "column"}}
+          card-props))
 
       (surfaces/card-action-area {:href proposal-href
                                   :style {:flexGrow 1}}
         (surfaces/card-header
           {:title title
            :titleTypographyProps {:component "h3"}
-           :subheader (ui-subheader props)
+           :subheader (ui-subheader subheader {:type? true :gen? true :created? true})
            :action (inputs/icon-button {:disabled true :size :small}
                      (comp/create-element MoreVert nil nil))})
 

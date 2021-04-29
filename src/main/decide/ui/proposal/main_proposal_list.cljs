@@ -196,9 +196,10 @@
               (grid/item {} (sort-selector selected-sort set-selected-sort!)))))
 
         ; main list
-        (let [list-options {:items sorted-proposals
-                            :card-props {::process/slug slug
-                                         :process-over? process-over?}}]
+        (let [computed {::process/slug slug
+                        :process-over? process-over?
+                        :card-props {:variant (when (breakpoint/>=? "sm") :outlined)}}
+              list-options {:items (map #(comp/computed % computed) sorted-proposals)}]
           (case selected-layout
             :favorite
             (grid/container {:spacing (if (breakpoint/>=? "sm") 2 1)
