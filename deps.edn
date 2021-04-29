@@ -1,7 +1,7 @@
 {:paths ["src/main" "resources"]
 
  :deps {org.clojure/clojure {:mvn/version "1.10.3"}
-        org.clojure/core.async {:mvn/version "1.3.610"}
+        org.clojure/core.async {:mvn/version "1.3.618"}
 
         bk/ring-gzip {:mvn/version "0.3.0"}
         com.taoensso/timbre {:mvn/version "5.1.2"}
@@ -21,11 +21,11 @@
         io.replikativ/datahike {:mvn/version "0.3.5"}
         com.github.mrebbinghaus/fulcro-material-ui-wrapper
         {:git/url "https://github.com/MrEbbinghaus/fulcro-material-ui-wrapper"
-         :sha "38c237a65d0edd77a9b4c5ecb7cc06fb98d92d89"}
+         :sha "702b7596a18fd625a9b8344a8eff4b5992ca041b"}
 
         buddy/buddy {:mvn/version "2.0.0"}
 
-        ring/ring-core {:mvn/version "1.9.2"}
+        ring/ring-core {:mvn/version "1.9.3"}
         ring/ring-defaults {:mvn/version "0.3.2"}
 
         com.draines/postal {:mvn/version "2.0.4"}
@@ -42,14 +42,14 @@
            :dev {:extra-paths ["src/test" "src/dev" "src/workspaces"]
                  :jvm-opts ["-XX:-OmitStackTraceInFastThrow"]
                  :extra-deps {org.clojure/clojurescript {:mvn/version "1.10.844"}
-                              thheller/shadow-cljs {:mvn/version "2.12.4"}
+                              thheller/shadow-cljs {:mvn/version "2.12.5"}
                               expound/expound {:mvn/version "0.8.9"}
-                              fulcrologic/fulcro-spec {:mvn/version "3.1.11"}
+                              fulcrologic/fulcro-spec {:mvn/version "3.1.12"}
                               binaryage/devtools {:mvn/version "1.0.3"}
                               com.github.awkay/workspaces {:mvn/version "1.0.3"}
                               org.clojure/tools.namespace {:mvn/version "1.1.0"}}}
 
-           :uberjar {:replace-deps {com.github.seancorfield/depstar {:mvn/version "2.0.193"}}
+           :uberjar {:replace-deps {com.github.seancorfield/depstar {:mvn/version "2.0.216"}}
                      :exec-fn hf.depstar/uberjar
                      :exec-args {:jar "decide.jar"
                                  :aot true
