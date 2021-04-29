@@ -1,4 +1,4 @@
-FROM circleci/clojure:openjdk-14-tools-deps-buster-node-browsers AS clj-build
+FROM circleci/clojure:openjdk-16-tools-deps-buster-node AS clj-build
 
 USER root
 RUN curl -o- -L https://yarnpkg.com/install.sh | bash
@@ -17,7 +17,7 @@ RUN echo "Compile CLJS..." && \
     echo "Compiling CLJ..." && \
     clj -Sdeps "{:mvn/local-repo \"$REPO\"}" -X:uberjar
 
-FROM openjdk:14-jdk-slim
+FROM adoptopenjdk:16-jre
 COPY src/main/config/prod.edn /config/production.edn
 EXPOSE 8080
 ENTRYPOINT ["java", "-Dconfig=/config/production.edn", "-Dfulcro.logging=info", "-jar", "decide.jar", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=85", "-XX:+UnlockExperimentalVMOptions", "-XX:+UseZGC"]

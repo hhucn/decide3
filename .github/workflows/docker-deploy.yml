@@ -25,7 +25,8 @@ jobs:
         uses: docker/build-push-action@v2.4.0
         with:
           context: .
-          registry: docker.pkg.github.com
+          push: true
+          pull: true
           tags: hhucn/decide3:latest
           labels: |
             org.opencontainers.image.source=${{ github.event.repository.html_url }}
