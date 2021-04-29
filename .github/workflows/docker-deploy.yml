@@ -27,7 +27,7 @@ jobs:
           context: .
           push: true
           pull: true
-          tags: hhucn/decide3:latest
+          tags: ghcr.io/hhucn/decide3:latest
           labels: |
             org.opencontainers.image.source=${{ github.event.repository.html_url }}
             org.opencontainers.image.created=${{ steps.prep.outputs.created }}
