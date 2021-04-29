@@ -64,18 +64,23 @@
           (when (instance? js/Date created)
             (time-part created))
       " · "
-      (str "Gen. " generation " ")
+      (dd/tooltip {:title (i18n/trf "This proposal has a chain of {count} proposals, that lead up to this" {:count generation})}
+        (dom/span {} (str "Gen. " generation " ")))
       (let [no-of-parents (count parents)]
         (case no-of-parents
           0 nil
-          1 (dd/chip
+          1
+          (dd/tooltip {:title (i18n/tr "This proposal is derived from one other proposal")}
+            (dd/chip
               {:size :small
                :color :primary
-               :label (i18n/trc "Type of proposal" "Fork")})
-          (dd/chip
-            {:size :small
-             :color :secondary
-             :label (i18n/trc "Type of proposal" "Merge")}))))))
+               :label (i18n/trc "Type of proposal" "Fork")}))
+
+          (dd/tooltip {:title (i18n/tr "This proposal is derived from two or more other proposals")}
+            (dd/chip
+              {:size :small
+               :color :secondary
+               :label (i18n/trc "Type of proposal" "Merge")})))))))
 
 (def ui-subheader (comp/factory Subheader (:keyfn ::proposal/id)))
 
@@ -94,7 +99,7 @@
                                      :opinion -1})])
                     (onClose))}
         (list/item-text {:primary "I nearly like it"
-                         :secondary "Propose an improvement"}))
+                         :secondary (i18n/tr "Propose an improvement")}))
       (list/item {:button true
                   :onClick (fn []
                              (comp/transact! this
@@ -105,7 +110,7 @@
                                               :opinion -1})])
                              (onClose))}
         (list/item-text {:primary "I hate it"
-                         :secondary "Propose an alternative"}))
+                         :secondary (i18n/tr "Propose an alternative")}))
       (list/item {:button true
                   :onClick (fn []
                              (comp/transact! this
@@ -115,7 +120,7 @@
         (list/item-text {:primary "Just reject it"
                          :secondary "Hate it and don't be constructive. :-("})))
     (dialog/actions {}
-      (inputs/button {:onClick onClose} "Abort"))))
+      (inputs/button {:onClick onClose} (i18n/tr "Cancel")))))
 
 (defn toggle-button [{:keys [icon] :as props}]
   (inputs/icon-button
@@ -191,7 +196,6 @@
     (surfaces/card
       (merge
         {:raised false
-         :variant (when (breakpoint/>=? "sm") :outlined)
          :component :article
          :style {:height "100%"
                  :display :flex
