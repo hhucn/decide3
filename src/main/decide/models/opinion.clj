@@ -68,7 +68,8 @@
         ::value opinion-value}])))
 
 (>defn votes [{::proposal/keys [opinions] :as proposal}]
-  [(s/keys :req [::proposal/opinions]) => (s/keys :req [::proposal/pro-votes ::proposal/con-votes])]
+  [(s/keys :opt [::proposal/opinions])
+   => (s/keys :req [::proposal/pro-votes ::proposal/con-votes])]
   (let [freqs (frequencies (map ::value opinions))]
     (assoc proposal
       ::proposal/pro-votes (get freqs 1 0)
