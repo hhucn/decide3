@@ -134,6 +134,10 @@
       (i18n/tr "New proposal")
       (i18n/tr "Login to add new argument"))))
 
+(defn main-list-toolbar [{:keys [left right]} & children]
+  (layout/box {:my 1 :clone true}
+    (apply surfaces/toolbar {:disableGutters true :variant :dense} children)))
+
 (defn info-toolbar-item [{:keys [label]}]
   (grid/item {}
     (dd/typography {:variant :overline} label)))
@@ -172,28 +176,27 @@
       (layout/container {:maxWidth :xl}
 
         ; sort / filter toolbar
-        (layout/box {:my 1 :clone true}
-          (surfaces/toolbar {:disableGutters true :variant :dense}
-            (grid/container {:spacing 2}
-              (info-toolbar-item
-                {:label (i18n/trf "Proposals: {count}" {:count (count sorted-proposals)})})
-              (info-toolbar-item
-                {:label (i18n/trf "Participants {count}"
-                          {:count (str (max no-of-participants no-of-contributors 0))})}))
-            (grid/container {:item true :spacing 2
-                             :justify "flex-end"}
-              (toggle/button-group
-                {:exclusive true
-                 :size :small
-                 :value selected-layout
-                 :onChange (fn [_event new-layout]
-                             (some-> new-layout keyword set-selected-layout!))}
-                (toggle/button {:value :favorite}
-                  (dom/create-element FormatListNumbered))
-                (toggle/button {:value :hierarchy}
-                  (dom/create-element FormatIndentIncrease)))
-              #_(grid/item {} (filter-selector selected-filters set-selected-filters!))
-              (grid/item {} (sort-selector selected-sort set-selected-sort!)))))
+        (main-list-toolbar {}
+          (grid/container {:spacing 2}
+            (info-toolbar-item
+              {:label (i18n/trf "Proposals: {count}" {:count (count sorted-proposals)})})
+            (info-toolbar-item
+              {:label (i18n/trf "Participants {count}"
+                        {:count (str (max no-of-participants no-of-contributors 0))})}))
+          (grid/container {:item true :spacing 2
+                           :justify "flex-end"}
+            (toggle/button-group
+              {:exclusive true
+               :size :small
+               :value selected-layout
+               :onChange (fn [_event new-layout]
+                           (some-> new-layout keyword set-selected-layout!))}
+              (toggle/button {:value :favorite}
+                (dom/create-element FormatListNumbered))
+              (toggle/button {:value :hierarchy}
+                (dom/create-element FormatIndentIncrease)))
+            #_(grid/item {} (filter-selector selected-filters set-selected-filters!))
+            (grid/item {} (sort-selector selected-sort set-selected-sort!))))
 
         ; main list
         (let [computed {::process/slug slug
