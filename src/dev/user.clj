@@ -30,6 +30,12 @@
       (d/q '[:find [(pull ?e [*]) ...]
              :where [?e :decide.models.process/slug]]))))
 
+(defn query-process [slug]
+  (d/q '[:find [(pull ?e [*]) ...]
+         :in $ ?slug
+         :where [?e :decide.models.process/slug ?slug]]
+    (d/db conn) slug))
+
 (defn start
   "Start the web server"
   []
