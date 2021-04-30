@@ -7,6 +7,7 @@
     [decide.models.opinion :as opinion]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
+    [decide.ui.process.ballot :as ballot]
     [decide.ui.proposal.card :as proposal-card]
     [material-ui.data-display :as dd]
     [material-ui.data-display.list :as list]
@@ -47,48 +48,12 @@
 (defn top-proposals [proposals]
   (first (partition-by ::proposal/pro-votes (proposal/rank proposals))))
 
-(declare ui-experimental-ballot-entry)
-
-(defsc BallotEntry [this {::proposal/keys [id title pro-votes my-opinion]}]
-  {:query [::proposal/id
-           ::proposal/title
-           ::proposal/pro-votes
-           ::proposal/my-opinion]
-   :ident ::proposal/id}
-  (let [approved? (pos? my-opinion)]
-    (list/item {}
-      (list/item-icon {}
-        (inputs/checkbox
-          {:edge :start
-           :checked approved?
-           :onClick #(comp/transact! this [(opinion/add {::proposal/id id
-                                                         :opinion (if approved? 0 1)})])}))
-
-      (list/item-text
-        {:primary title
-         :secondary (i18n/trf "Approvals: {pros}" {:pros pro-votes})}))))
-
-(def ui-experimental-ballot-entry (comp/computed-factory BallotEntry {:keyfn ::proposal/id}))
-
-(defsc Ballot [_ {::process/keys [proposals]}]
-  {:query [::process/slug
-           {::process/proposals (comp/get-query BallotEntry)}]
-   :ident ::process/slug}
-  (section-paper {:pb 0}
-    (dd/typography {:component :h2 :variant "h5"} (i18n/tr "Your approvals")
-      (list/list {:dense true}
-        (->> proposals
-          proposal/rank
-          (map ui-experimental-ballot-entry))))))
-
-(def ui-experimental-ballot (comp/computed-factory Ballot))
-
 (defsc ProcessHome [_this {::process/keys [slug description proposals winner]
-                           :keys [>/experimental-ballots] :as process}]
+                           :keys [>/ballot] :as process}]
   {:query [::process/slug ::process/description
            {::process/proposals (comp/get-query TopEntry)}
            ::process/end-time
-           {:>/experimental-ballots (comp/get-query Ballot)}
+           {:>/ballot (comp/get-query ballot/Ballot)}
            {::process/winner (comp/get-query proposal-card/ProposalCard)}]
    :ident ::process/slug}
   (let [process-over? (process/over? process)]
@@ -134,7 +99,8 @@
 
           (when-not process-over?
             (grid/item {:xs 12}
-              (ui-experimental-ballot experimental-ballots))))))))
+              (section-paper {:pb 0}
+                (ballot/ui-ballot ballot)))))))))
 
 (def ui-process-home (comp/computed-factory ProcessHome))
 
