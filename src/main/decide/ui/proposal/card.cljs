@@ -205,14 +205,13 @@
                            (dr/into-path ["decision" slug] detail-page/ProposalPage (str id)))
                         [slug id])]
     (surfaces/card
-      (log/spy :info
-        (merge
-          {:raised false
-           :component :article
-           :style {:height "100%"
-                   :display :flex
-                   :flexDirection "column"}}
-          card-props))
+      (merge
+        {:raised false
+         :component :article
+         :style {:height "100%"
+                 :display :flex
+                 :flexDirection "column"}}
+        card-props)
 
       (surfaces/card-action-area {:href proposal-href
                                   :style {:flexGrow 1}}
