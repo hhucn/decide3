@@ -35,11 +35,12 @@
 (s/def ::type #{:pro :contra})
 
 (>defn tx-map [{:keys [::content author ::type]}]
-  [(s/keys :req [::content ::type]) => (s/keys :req [::id ::content])]
-  {::id (d.core/squuid)
-   ::content content
-   ::author author
-   ::type type})
+  [(s/keys :req [::content]) => (s/keys :req [::id ::content])]
+  (merge
+    {::id (d.core/squuid)
+     ::content content}
+    (when ::author {::author author})
+    (when type {::type type})))
 
 (defresolver resolve-argument [{:keys [db]} {::keys [id]}]
   {::pc/input #{::id}

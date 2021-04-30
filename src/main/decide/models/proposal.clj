@@ -310,9 +310,10 @@
    ::pc/transform auth/check-logged-in}
   (let [{real-id ::argument/id :as argument}
         (argument/tx-map
-          {::argument/content content
-           ::argument/type type
-           :author [::user/id user-id]})
+          (merge
+            {::argument/content content
+             :author [::user/id user-id]}
+            (when type {::argument/type type})))
         tx-report (d/transact conn
                     [(assoc argument :db/id "new-argument")
                      [:db/add [::id id] ::arguments "new-argument"]
