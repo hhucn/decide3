@@ -12,7 +12,8 @@
     [nubank.workspaces.model :as wsm]
     [com.fulcrologic.fulcro.dom :as dom]
     [taoensso.timbre :as log]
-    [com.fulcrologic.fulcro.react.hooks :as hooks]))
+    [com.fulcrologic.fulcro.react.hooks :as hooks]
+    [material-ui.utils :as m.utils]))
 
 
 (ws/defcard process-list-item-card
@@ -33,37 +34,25 @@
     (js/ReactDOM.render comp node)))
 
 (defn fulcro-theme-card-init [card config]
-  (let [{::wsm/keys [refresh render] :as react-card
+  (let [{::wsm/keys [render] :as react-card
          :keys [::ct.fulcro/app]} (ct.fulcro/fulcro-card-init card config)]
     (assoc react-card
-      ::wsm/refresh
-      (fn [node]
-        (refresh node))
-
       ::wsm/render
       (fn [node]
         (let [theme-provider
-              (js/React.forwardRef
-                (fn [props ref]
-                  (let [props (log/spy :info (js->clj props))]
-                    (log/spy :info ref)
-                    (styles/theme-provider
-                      {:theme themes/light-theme}
-                      (dom/div {:ref ref}
-                        (.-children props))))))
-              ref (log/spy :info (js/React.createRef))
-              theme-element (js/React.createElement theme-provider {:ref ref})]
-          (log/spy :info theme-element)
-          (js/ReactDOM.render theme-element node)
-          (log/spy :info ref)
-          (render (.-current ref)))))))
+              (m.utils/scoped-css-baseline {}
+                (styles/theme-provider
+                  {:theme (themes/get-mui-theme :dark)}
+                  (dom/div {} "Container")))]
+          (js/ReactDOM.render theme-provider node
+            #(render (.-firstChild (.-firstChild node)))))))))
 
 (defn fulcro-theme-card [config]
   {::wsm/init
    #(fulcro-theme-card-init % config)})
 
 (ws/defcard process-all-processes-list
-  (ct.fulcro/fulcro-card
+  (fulcro-theme-card
     {::ct.fulcro/root list/AllProcessesList
      ::ct.fulcro/root-state
      {:all-processes [[::process/slug "test"] [::process/slug "test2"]]

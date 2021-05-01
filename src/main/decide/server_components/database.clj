@@ -5,6 +5,7 @@
     [decide.models.opinion :as opinion]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
+    [decide.models.argumentation :as argumentation]
     [decide.models.user :as user]
     [decide.server-components.config :refer [config]]
     [com.fulcrologic.guardrails.core :refer [>defn =>]]
@@ -18,7 +19,8 @@
      process/schema
      proposal/schema
      opinion/schema
-     argument/schema]))
+     argument/schema
+     argumentation/schema]))
 
 (def dev-db
   (vec

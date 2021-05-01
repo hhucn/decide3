@@ -14,6 +14,7 @@
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [decide.models.argument :as argument]
+    [decide.models.argumentation.ui :as argumentation.ui]
     [decide.models.authorization :as auth]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
@@ -372,7 +373,7 @@
 (defsc ProposalPage
   [this {::proposal/keys [title body]
          :keys [ui/current-process]
-         :>/keys [parent-section children-section comment-section opinion-section similar-section]}]
+         :>/keys [parent-section children-section comment-section opinion-section similar-section argumentation-section]}]
   {:query [::proposal/id
            ::proposal/title ::proposal/body
            {:>/children-section (comp/get-query ChildrenSection)}
@@ -380,6 +381,7 @@
            {:>/opinion-section (comp/get-query OpinionSection)}
            {:>/comment-section (comp/get-query CommentSection)}
            {:>/similar-section (comp/get-query SimilarSection)}
+           {:>/argumentation-section (comp/get-query argumentation.ui/ArgumentList)}
            {[:ui/current-process '_] (comp/get-query Process)}]
    :ident ::proposal/id
    :use-hooks? true
@@ -435,9 +437,12 @@
               #_(grid/item {:xs 6}
                   (section " Meinungen " (ui-opinion-section opinion-section)))
               (grid/item {:xs 12 :component "section"}
-                (section (i18n/tr "Comments")
-                  (ui-comment-section comment-section
-                    {:process-over? process-over?}))))
+                (section (i18n/tr "Argumentation")
+                  (argumentation.ui/ui-argument-list argumentation-section)))
+              #_(grid/item {:xs 12 :component "section"}
+                  (section (i18n/tr "Comments")
+                    (ui-comment-section comment-section
+                      {:process-over? process-over?}))))
             (grid/item {:xs 12 :lg 4 :component "section"}
               (ui-children-section children-section)
               (section (i18n/tr "Similar proposals") (ui-similar-section similar-section {:show-add-dialog show-add-dialog

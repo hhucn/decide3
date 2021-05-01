@@ -10,6 +10,7 @@
     [decide.models.authorization :as auth]
     [decide.models.opinion :as opinion]
     [decide.models.proposal :as proposal]
+    [decide.models.argumentation.api :as argumentation.api]
     [decide.models.user :as user]
     [decide.ui.translations.load :as translation]
     [decide.server-components.config :refer [config]]
@@ -122,7 +123,9 @@
    argument/resolvers
    opinion/resolvers
 
-   translation/locale-resolver])
+   translation/locale-resolver
+
+   argumentation.api/full-api])
 
 (defn build-parser [config conn]
   (new-parser config
