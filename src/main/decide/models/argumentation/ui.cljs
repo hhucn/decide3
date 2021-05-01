@@ -42,6 +42,7 @@
     (if (and new-argument-open? (comp/shared this :logged-in?))
       (dom/form
         {:onSubmit (fn [e]
+                     (evt/prevent-default! e)
                      (onSubmit new-argument)
                      (set-argument-open false)
                      (set-new-argument ""))}
@@ -107,7 +108,7 @@
 
 (def ui-argument (comp/factory Argument {:keyfn :argument/id}))
 
-(defsc ArgumentList [this {::proposal/keys [positions] :as proposal}]
+(defsc ArgumentList [this {::proposal/keys [id positions]}]
   {:query [::proposal/id
            {::proposal/positions (comp/get-query Argument)}]
    :ident ::proposal/id
@@ -117,7 +118,7 @@
       {:onSubmit
        (fn [statement]
          (comp/transact! this [(argumentation.api/add-argument-to-proposal
-                                 {:proposal proposal
+                                 {:proposal {::proposal/id id}
                                   :argument
                                   (argumentation/make-argument-with-premise {:statement/content statement})})]))})
     (list/list {}
