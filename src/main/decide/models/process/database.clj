@@ -9,8 +9,7 @@
     [decide.models.opinion :as opinion]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
-    [decide.models.user :as user]
-    [taoensso.timbre :as log]))
+    [decide.models.user :as user]))
 
 (>defn slug-in-use? [db slug]
   [d.core/db? ::process/slug => boolean?]
@@ -41,7 +40,7 @@
         ::process/type type
         ::process/proposals []                                      ; Do not allow to set initial proposals as this may create conflicts with the nice id
         ::process/latest-id 0
-        ::process/moderators moderators
+        ::process/moderators (map #(find % ::user/id) moderators)
         ::process/features (filter process/available-features features)
         ::process/participants participants}
        end-time (assoc ::process/end-time end-time))]))

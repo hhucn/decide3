@@ -48,16 +48,16 @@
                 :req [::process/slug ::process/title ::process/description]
                 :opt [::process/end-time ::process/type])
    ::pc/transform auth/check-logged-in}
-  (let [user-ident [::user/id user-id]
+  (let [user {::user/id user-id}
         existing-emails (filter #(user/email-in-db? db %) participant-emails)
         {:keys [db-after]}
         (d/transact conn
           {:tx-data
            (conj (process.db/->add db
                    (-> process
-                     (update ::process/moderators conj user-ident)  ; remove that here? let the user come through parameters?
+                     (update ::process/moderators conj user)  ; remove that here? let the user come through parameters?
                      (update ::process/participants concat (map #(vector ::user/email %) existing-emails))))
-             [:db/add "datomic.tx" :db/txUser user-ident])})]
+             [:db/add "datomic.tx" :db/txUser [::user/id user-id]])})]
     {::process/slug slug
      ::p/env (assoc env :db db-after)}))
 
