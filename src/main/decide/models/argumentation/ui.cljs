@@ -22,7 +22,7 @@
 (defsc StatementAuthor [_ {::user/keys [display-name]}]
   {:query [::user/id ::user/display-name]
    :ident ::user/id}
-  display-name)
+  (i18n/trf "by {author}" {:author display-name}))
 
 (def ui-statement-author (comp/factory StatementAuthor {:keyfn ::user/id}))
 

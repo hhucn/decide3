@@ -35,8 +35,15 @@
 (defresolver resolve-statement [{:keys [db]} {:statement/keys [id]}]
   {::pc/output [:statement/id
                 :statement/content
+                {:statement/author [::user/id]}
                 {:argument/_conclusion [:argument/id]}]}
-  (d/pull db [:statement/id :statement/content {:argument/_conclusion [:argument/id]}] [:statement/id id]))
+  (let [{:keys [author] :as statement}
+        (d/pull db [:statement/id :statement/content
+                    {:author [::user/id]}
+                    {:argument/_conclusion [:argument/id]}] [:statement/id id])]
+    (cond-> statement
+      :always (dissoc :author)
+      author (assoc :statement/author author))))
 
 (defresolver resolve-proposal-arguments [{:keys [db]} {::proposal/keys [id]}]
   {::pc/output [{::proposal/positions [:argument/id]}]}
@@ -55,8 +62,10 @@
   {::pc/output [:argument/id]}
   (when user-id
     (let [{real-premise-id :statement/id :as new-statement}
-          (argumentation/make-statement
-            {:statement/content statement-content})
+          (-> {:statement/content statement-content}
+            argumentation/make-statement
+            (assoc :author [::user/id user-id]))
+
 
           ; Make sole argument
           {real-argument-id :argument/id :as new-argument}
@@ -84,8 +93,9 @@
     :argument}]
   {::pc/output [:argument/id]}
   (let [{real-premise-id :statement/id :as new-statement}
-        (argumentation.db/make-statement
-          {:statement/content statement-content})
+        (-> {:statement/content statement-content}
+          argumentation/make-statement
+          (assoc :author [::user/id user-id]))
 
         ; Make sole argument
         {real-argument-id :argument/id :as new-argument}
