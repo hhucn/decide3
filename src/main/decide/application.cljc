@@ -23,7 +23,9 @@
      #?@(:cljs
          [:shared {::i18n/message-formatter message-formatter}])
 
-     :shared-fn (fn [& args] (apply ::i18n/current-locale args))
+     :shared-fn (fn [db]
+                  (-> (::i18n/current-locale db)
+                    (assoc :logged-in? (get-in db [:root/current-session :session/valid?] false))))
      :props-middleware
      (comp/wrap-update-extra-props
        (fn [cls extra-props]

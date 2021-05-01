@@ -11,7 +11,8 @@
     [material-ui.data-display :as dd]
     [material-ui.feedback.dialog :as dialog]
     [material-ui.inputs :as inputs]
-    [material-ui.layout.grid :as grid]))
+    [material-ui.layout.grid :as grid]
+    [com.fulcrologic.fulcro.application :as app]))
 
 (defn reset-password-field! [component]
   (m/set-string! component ::user/password :value ""))
@@ -31,12 +32,13 @@
 
 (defmutation sign-up [{:user/keys [_email _password]}]
   (action [_] true)
-  (ok-action [{:keys [component result]}]
+  (ok-action [{:keys [app component result]}]
     (let [{:keys [errors]} (get-in result [:body `user/sign-up])]
       (if (empty? errors)
         (do
           (reset-password-field! component)
-          (comp/transact! component [(close-dialog {})]))
+          (comp/transact! component [(close-dialog {})])
+          (app/force-root-render! app))
         (cond
           (contains? errors :email-in-use)
           (m/set-string! component :ui/email-error :value (i18n/tr "Email already in use!"))))))
@@ -48,13 +50,14 @@
 
 (defmutation sign-in [{:user/keys [_email _password]}]
   (action [_] true)
-  (ok-action [{:keys [component] :as env}]
+  (ok-action [{:keys [app component] :as env}]
     (let [{:keys [errors]}
           (get-in env [:result :body `user/sign-in])]
       (if (empty? errors)
         (do
           (reset-password-field! component)
-          (comp/transact! component [(close-dialog {})]))
+          (comp/transact! component [(close-dialog {})])
+          (app/force-root-render! app))
         (when errors
           (cond
             (or
