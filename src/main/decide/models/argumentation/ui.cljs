@@ -13,7 +13,6 @@
     [material-ui.data-display.list :as list]
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
-    [material-ui.layout.grid :as grid]
     [material-ui.transitions :as transitions]
     ["@material-ui/icons/ExpandMore" :default ExpandMore]
     ["@material-ui/icons/ExpandLess" :default ExpandLess]
@@ -36,8 +35,6 @@
                    :secondary (when author (ui-statement-author author))}))
 
 (def ui-statement (comp/factory Statement {:keyfn :statement/id}))
-
-(hooks/use-generated-id)
 
 (defn new-argument-ui [this {:keys [onSubmit]}]
   (let [[new-argument-open? set-argument-open] (hooks/use-state false)
