@@ -4,7 +4,6 @@
     [com.wsscode.pathom.core :as p]
     [datahike.api :as d]
     [decide.models.argumentation :as argumentation]
-    [decide.models.argumentation.database :as argumentation.db]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
     [taoensso.timbre :as log]))
