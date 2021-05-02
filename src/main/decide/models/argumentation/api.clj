@@ -99,7 +99,7 @@
 
         ; Make sole argument
         {real-argument-id :argument/id :as new-argument}
-        (argumentation.db/make-argument
+        (argumentation/make-argument
           (if argument-type {:argument/type argument-type} {}))
 
         tx-report

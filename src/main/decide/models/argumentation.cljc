@@ -43,7 +43,7 @@
     :gen #(gen/return (tempid/tempid))))
 
 (s/def :argument/id (s/or :uuid uuid? :tempid ::tempid/tempid))
-(s/def :argument/type #{:pro :con})
+(s/def :argument/type #{:pro :contra})
 (s/def :argument/premise (s/keys :req [:statement/id]))
 
 (s/def :statement/id (s/or :uuid uuid? :tempid ::tempid/tempid))
