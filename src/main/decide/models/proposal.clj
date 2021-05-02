@@ -302,26 +302,6 @@
 ;;; endregion
 
 ;;; region Arguments
-(defmutation add-argument
-  [{:keys [conn AUTH/user-id] :as env} {::keys [id]
-                                        :keys [temp-id content type]}]
-  {::pc/params [::id :temp-id :content :type]
-   ::pc/output [::argument/id]
-   ::pc/transform auth/check-logged-in}
-  (let [{real-id ::argument/id :as argument}
-        (argument/tx-map
-          (merge
-            {::argument/content content
-             :author [::user/id user-id]}
-            (when type {::argument/type type})))
-        tx-report (d/transact conn
-                    [(assoc argument :db/id "new-argument")
-                     [:db/add [::id id] ::arguments "new-argument"]
-                     [:db/add "datomic.tx" :db/txUser [::user/id user-id]]])]
-    {:tempids {temp-id real-id}
-     ::p/env (assoc env :db (:db-after tx-report))
-     ::argument/id real-id}))
-
 (defresolver resolve-arguments [{:keys [db]} {::keys [id]}]
   {::pc/input  #{::id}
    ::pc/output [{::arguments [::argument/id]}]}
@@ -334,6 +314,6 @@
    resolve-child-relations
    resolve-parent-relations
 
-   add-argument resolve-arguments resolve-parents resolve-children resolve-similar
+   resolve-arguments resolve-parents resolve-children resolve-similar
 
    resolve-generation])

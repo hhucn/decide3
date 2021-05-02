@@ -14,7 +14,6 @@
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.guardrails.core :refer [>defn >defn- =>]]
-    [decide.models.argument :as argument]
     [decide.models.process :as process]
     [decide.models.process.mutations :as process.mutations]
     [decide.models.proposal :as proposal]
@@ -39,78 +38,6 @@
       mrg/merge-component NewProposalFormDialog
       (comp/get-initial-state NewProposalFormDialog {:slug (second ref)}))))
 
-;; region Argument Step
-(defmutation toggle-argument [{::argument/keys [ident]}]
-  (action [{:keys [state ref]}]
-    (swap! state
-      update-in ref
-      update :arguments
-      (fn [arguments]
-        (let [arguments (set arguments)]
-          (if (arguments ident)
-            (disj arguments ident)
-            (conj arguments ident)))))))
-
-(defsc Argument [this {::argument/keys [content type]}
-                 {:keys [checked? toggle-argument]}]
-  {:query [::argument/id ::argument/content ::argument/type]
-   :ident ::argument/id}
-  (list/item {}
-    (list/item-icon {}
-      (inputs/checkbox
-        {:edge :start
-         :checked checked?
-         :onClick #(toggle-argument (comp/get-ident this))}))
-    (list/item-text {:primary content}
-      (case type
-        :pro (layout/box {:color "success.main"} (i18n/trc "Alignment of argument" "Pro"))
-        :contra (layout/box {:color "error.main"} (i18n/trc "Alignment of argument" "Con")))
-      content)))
-
-(def ui-argument (comp/computed-factory Argument {:keyfn ::argument/id}))
-
-(defsc ParentArgumentSection [_ {::proposal/keys [title arguments]}
-                              {:keys [selected-arguments toggle-argument]
-                               :or {selected-arguments {}}}]
-  {:query [::proposal/id ::proposal/title
-           {::proposal/arguments (comp/get-query Argument)}]
-   :ident ::proposal/id}
-  (list/list
-    {:dense true
-     :subheader (list/subheader {} title)}
-    (for [argument arguments
-          :let [checked? (contains? (set selected-arguments) (comp/get-ident Argument argument))]]
-      (ui-argument argument {:checked? checked?
-                             :toggle-argument toggle-argument}))))
-
-(def ui-parent-argument-section (comp/computed-factory ParentArgumentSection {:keyfn ::proposal/id}))
-
-(defn load-parents-with-arguments! [app-or-comp & parent-idents]
-  (run!
-    #(df/load! app-or-comp % ParentArgumentSection
-       {:parallel true
-        :focus [::proposal/arguments]})
-    parent-idents))
-
-
-(defsc ArgumentStep [this {} {:keys [parents toggle-argument selected-arguments]}]
-  {:use-hooks? true}
-  (hooks/use-lifecycle
-    #(apply load-parents-with-arguments! this (map (fn [parent] (find parent ::proposal/id)) parents)))
-  (comp/fragment
-    (dd/typography {:component "h3"} (i18n/tr "Which arguments are still relevant?"))
-    (let [parents-with-arguments (remove #(->> % ::proposal/arguments empty?) parents)]
-      (if (empty? parents-with-arguments)
-        (dd/typography {:variant "subtitle1" :color "textSecondary"}
-          (i18n/tr "The parents of this proposal have no arguments"))
-        (for [parents parents-with-arguments]
-          (ui-parent-argument-section parents {:selected-arguments selected-arguments
-                                               :toggle-argument toggle-argument}))))))
-
-
-(def ui-argument-step (comp/computed-factory ArgumentStep))
-;; endregion
-
 ;; region Final Step
 (defn- section [& children]
   (apply dd/typography {:variant "overline" :component "h3"} children))
@@ -132,7 +59,6 @@
       :type 0
       :parents 1
       :details 2
-      ; :arguments 3
       :final 3)))
 
 (defmutation goto-step [{:keys [step]}]
@@ -184,13 +110,12 @@
 ;; region Parent Step
 (defmutation add-parent [{:keys [::proposal/ident]}]
   (action [{:keys [app state ref]}]
-    (swap! state targeting/integrate-ident* ident :append (conj ref :parents))
-    (load-parents-with-arguments! app ident)))
+    (swap! state targeting/integrate-ident* ident :append (conj ref :parents))))
 
 (defmutation remove-parent [{:keys [::proposal/ident]}]
   (action [{:keys [state ref]}]
     (norm/swap!-> state
-      (mrg/remove-ident* ident (conj ref :parents)))))      ; TODO Remove Arguments as well
+      (mrg/remove-ident* ident (conj ref :parents)))))
 
 (>defn- id-in-parents? [parents id]
   [(s/coll-of map?) uuid? => boolean?]
@@ -256,13 +181,11 @@
       :ui/title title
       :ui/body body
       :parents parents
-      :ui/step (if (empty? parents) 0 1))
-    (apply load-parents-with-arguments! app parents)))
+      :ui/step (if (empty? parents) 0 1))))
 
 
 (defsc Parent [_ _]
-  {:query [::proposal/id ::proposal/title ::proposal/body ::proposal/nice-id
-           {::proposal/arguments (comp/get-query Argument)}]
+  {:query [::proposal/id ::proposal/title ::proposal/body ::proposal/nice-id]
    :ident ::proposal/id})
 
 (defn new-body [parents]
@@ -281,13 +204,12 @@
 
 (defsc NewProposalFormDialog [this {:ui/keys [open? title body step current-process]
                                     :step/keys [parent-step]
-                                    :keys [parents arguments]}]
+                                    :keys [parents]}]
   {:query [::process/slug
            :ui/open?
 
            :ui/title :ui/body
            {:parents (comp/get-query Parent)}
-           {:arguments (comp/get-query Argument)}
 
            :ui/step
 
@@ -297,8 +219,7 @@
    :ident (fn [] [:component/id ::NewProposalFormDialog])
    :initial-state (fn [{:keys [_slug]}]
                     (merge
-                      {:parents []
-                       :arguments #{}}
+                      {:parents []}
                       #:ui{:open? false
                            :title ""
                            :body ""
@@ -325,8 +246,7 @@
                                       ::proposal/id (tempid/tempid)
                                       ::proposal/title title
                                       ::proposal/body body
-                                      ::proposal/parents (mapv #(select-keys % [::proposal/id]) parents)
-                                      ::proposal/arguments (vec arguments)})])
+                                      ::proposal/parents (mapv #(select-keys % [::proposal/id]) parents)})])
                                 (close-dialog))}}
       (dialog/title {} (i18n/trc "Title of new proposal form" "New proposal"))
       (dialog/content {}
@@ -416,29 +336,6 @@
                    :disabled error?
                    :onClick #(comp/transact! this [(goto-step {:step :final})])}
                   (i18n/trc "Go to the next part of the form" "Next")))))
-          ;; endregion
-
-          ;; region Arguments Step
-          #_(stepper/step
-              {:disabled (empty? parents)
-               :completed (< 3 step)}
-              (stepper/step-button
-                {:onClick #(comp/transact! this [(goto-step {:step :arguments})])
-                 :style {:textAlign "start"}
-                 :optional (dd/typography {:variant "caption" :color "textSecondary"}
-                             (if (empty? parents)
-                               (i18n/trc "Helper text" "Only applicable with parents")
-                               (i18n/trc "Input is optional" "Optional")))}
-                (i18n/trc "Arguments of a proposal" "Arguments"))
-              (stepper/step-content {}
-                (ui-argument-step {}
-                  {:parents parents
-                   :selected-arguments arguments
-                   :toggle-argument #(comp/transact! this [(toggle-argument {::argument/ident %})])})
-                (inputs/button
-                  {:color "primary"
-                   :onClick next-step}
-                  (i18n/trc "Go to the next part of the form" "Next"))))
           ;; endregion
 
           (stepper/step {}

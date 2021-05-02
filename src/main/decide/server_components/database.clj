@@ -19,7 +19,6 @@
      process/schema
      proposal/schema
      opinion/schema
-     argument/schema
      argumentation/schema]))
 
 (def dev-db
@@ -91,7 +90,6 @@
           ::proposal/nice-id 2,
           ::proposal/original-author "Martin",
           ::proposal/parents ["Wasserspender"],
-          ::proposal/arguments (argument/tx-map {::argument/content "Völlige Verschwendung!" :author "Markus" ::argument/type :pro})
           ::proposal/title "Wir sollten einen goldenen Wasserspender aufstellen"}
          (-> #::proposal{:title "Ein 3-D Drucker für DIY Projekte"
                          :body "Viele DIY Projekte lassen sich heutzutage gut mithilfe von Prototypen aus dem 3-D Drucker bewerkstelligen. Z.B. ein Gehäuse für den Raspberry PI."

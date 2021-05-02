@@ -120,7 +120,6 @@
    user/resolvers
    process.api/all-resolvers
    proposal/resolvers
-   argument/resolvers
    opinion/resolvers
 
    translation/locale-resolver

@@ -1,40 +1,24 @@
 (ns decide.ui.proposal.detail-page
   (:require
-    [clojure.string :as str]
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
-    [com.fulcrologic.fulcro.algorithms.merge :as mrg]
-    [com.fulcrologic.fulcro.algorithms.normalized-state :as norm]
     [com.fulcrologic.fulcro.algorithms.react-interop :as interop]
-    [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.data-fetch :as df]
     [com.fulcrologic.fulcro.dom :as dom]
-    [com.fulcrologic.fulcro.dom.events :as evt]
-    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
-    [decide.models.argument :as argument]
     [decide.models.argumentation.ui :as argumentation.ui]
-    [decide.models.authorization :as auth]
     [decide.models.proposal :as proposal]
-    [decide.models.user :as user]
     [material-ui.data-display :as dd]
     [material-ui.data-display.list :as list]
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
     [material-ui.layout.grid :as grid]
     [material-ui.surfaces :as surfaces]
-    ["@material-ui/icons/CallSplit" :default CallSplit]
-    ["@material-ui/icons/MergeType" :default MergeType]
-    ["@material-ui/icons/ThumbUpAltTwoTone" :default ThumbUpAltTwoTone]
-    ["@material-ui/icons/ThumbDownAltTwoTone" :default ThumbDownAltTwoTone]
     ["@material-ui/core/LinearProgress" :default LinearProgress]
-    ["@material-ui/icons/Send" :default Send]
-    ["@material-ui/icons/DoneAll" :default DoneAllIcon]
     ["@material-ui/core/styles" :refer [withStyles useTheme]]
     [decide.ui.proposal.new-proposal :as new-proposal]
-    [decide.models.process :as process]
-    [taoensso.timbre :as log]))
+    [decide.models.process :as process]))
 
 (declare ProposalPage)
 
@@ -74,134 +58,7 @@
 (def ui-opinion-section (comp/computed-factory OpinionSection {:keyfn ::proposal/id}))
 ;; endregion
 
-;; region Argument section
-(defsc Author [_ {::user/keys [display-name]}]
-  {:query [::user/id ::user/display-name]
-   :ident ::user/id}
-  (dom/span display-name))
 
-(def ui-argument-author (comp/factory Author))
-
-(defsc ArgumentRow [_ {::argument/keys [content author]}]
-  {:query [::argument/id ::argument/content {::argument/author (comp/get-query Author)}]
-   :ident ::argument/id}
-  (list/item {}
-    (list/item-text {:primary content
-                     :secondary (comp/fragment (i18n/tr "By ") (ui-argument-author author))})))
-
-(def ui-argument-row (comp/computed-factory ArgumentRow {:keyfn ::argument/id}))
-
-(defmutation add-argument [{::proposal/keys [id]
-                            :keys [temp-id content type author-id]}]
-  (action [{:keys [state]}]
-    (let [new-argument-data
-          (cond->
-            {::argument/id temp-id
-             ::argument/content content
-             ::argument/author {::user/id author-id}}
-            type (assoc ::argument/type type))]
-      (norm/swap!-> state
-        (mrg/merge-component ArgumentRow new-argument-data
-          :append (conj (comp/get-ident ProposalPage {::proposal/id id}) ::proposal/arguments)))))
-  (remote [env]
-    (-> env
-      (m/with-server-side-mutation proposal/add-argument)
-      (m/returning ArgumentRow))))
-
-(defn type-toggle [{:keys [color type selected-type label] :as props}]
-  (layout/box {:color color :display (when (not= selected-type type) "none")}
-    (inputs/button (merge props {:color :inherit :type :button}) label)))
-
-(defn submit-new-argument-button [props]
-  (inputs/icon-button
-    (merge props
-      {:type :submit
-       :aria-label (i18n/trc "Submit form" "Submit")})
-    (dom/create-element Send)))
-
-(defn new-comment-form [{:keys [onSubmit disabled? value onChange]}]
-  (dom/form {:onSubmit onSubmit
-             :disabled disabled?}
-    (inputs/textfield
-      {:fullWidth true
-       :label (i18n/tr "New comment")
-       :variant :outlined
-       :value value
-       :multiline true
-       :onChange onChange
-       :disabled disabled?
-       :maxLength 500
-       :placeholder (when disabled? (i18n/tr "Login to add new comment"))
-       :inputProps {:aria-label (i18n/tr "New comment")}})
-    (inputs/button
-      {:type :submit
-       :disabled disabled?}
-      (i18n/tr "Submit"))))
-
-(defsc NewCommentInput [_ _ {:keys [root/current-session add-argument!]}]
-  {:query [::NewCommentInput :value]                        ; FIXME This query isn't used.
-   ; :ident ::NewCommentInput
-   :initial-state
-   {::NewCommentInput :param/id
-    :value ""}
-   :use-hooks? true}
-  (let [user-id (get-in current-session [:user ::user/id])
-        logged-in? (get current-session :session/valid?)
-        [new-comment set-new-comment!] (hooks/use-state "")
-        submit (hooks/use-callback
-                 (fn [e]
-                   (evt/prevent-default! e)
-                   (when-not (str/blank? new-comment)
-                     (add-argument! {::argument/content new-comment
-                                     :author-id user-id})
-                     (set-new-comment! "")))
-                 [new-comment])]
-    (new-comment-form
-      {:onSubmit submit
-       :disabled? (not logged-in?)
-       :value new-comment
-       :onChange #(set-new-comment! (evt/target-value %))})))
-
-
-(def ui-new-comment-input (comp/computed-factory NewCommentInput))
-
-(defsc CommentSection [this {::proposal/keys [id arguments]
-                             :keys [root/current-session]}
-                       {:keys [process-over?]}]
-  {:query [::proposal/id
-           {::proposal/arguments (comp/get-query ArgumentRow)}
-           {[:root/current-session '_] (comp/get-query auth/Session)}
-           {:ui/new-comment (comp/get-query NewCommentInput)}]
-   :ident ::proposal/id
-   :initial-state
-   (fn [{id ::proposal/id}]
-     {::proposal/id id
-      ::proposal/arguments []
-      :ui/new-comment {:id id}})}
-  (comp/fragment
-    (layout/box {:mb 1}
-      (if-not (empty? arguments)
-        (list/list {:dense true}
-          (map ui-argument-row arguments))
-        (dd/typography
-          {:variant :body1
-           :color :textSecondary
-           :paragraph true}
-          (i18n/tr "So far there are no comments"))))
-
-    (when-not process-over?
-      (ui-new-comment-input {}
-        {:root/current-session current-session
-         :add-argument! (fn [{::argument/keys [content type]
-                              :keys [user-id]}]
-                          (comp/transact! this
-                            [(add-argument {::proposal/id id
-                                            :temp-id (tempid/tempid)
-                                            :content content
-                                            :type type
-                                            :author-id user-id})]))}))))
-
-(def ui-comment-section (comp/computed-factory CommentSection {:keyfn ::proposal/id}))
 ;; endregion
 
 ;; region Parent section
@@ -373,13 +230,12 @@
 (defsc ProposalPage
   [this {::proposal/keys [title body]
          :keys [ui/current-process]
-         :>/keys [parent-section children-section comment-section opinion-section similar-section argumentation-section]}]
+         :>/keys [parent-section children-section opinion-section similar-section argumentation-section]}]
   {:query [::proposal/id
            ::proposal/title ::proposal/body
            {:>/children-section (comp/get-query ChildrenSection)}
            {:>/parent-section (comp/get-query SmallParentSection)}
            {:>/opinion-section (comp/get-query OpinionSection)}
-           {:>/comment-section (comp/get-query CommentSection)}
            {:>/similar-section (comp/get-query SimilarSection)}
            {:>/argumentation-section (comp/get-query argumentation.ui/ArgumentList)}
            {[:ui/current-process '_] (comp/get-query Process)}]
@@ -438,11 +294,7 @@
                   (section " Meinungen " (ui-opinion-section opinion-section)))
               (grid/item {:xs 12 :component "section"}
                 (section (i18n/tr "Argumentation")
-                  (argumentation.ui/ui-argument-list argumentation-section)))
-              #_(grid/item {:xs 12 :component "section"}
-                  (section (i18n/tr "Comments")
-                    (ui-comment-section comment-section
-                      {:process-over? process-over?}))))
+                  (argumentation.ui/ui-argument-list argumentation-section))))
             (grid/item {:xs 12 :lg 4 :component "section"}
               (ui-children-section children-section)
               (section (i18n/tr "Similar proposals") (ui-similar-section similar-section {:show-add-dialog show-add-dialog
