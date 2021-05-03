@@ -2,6 +2,7 @@
   (:require
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.dom :as dom]
     [decide.models.opinion :as opinion]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
@@ -34,10 +35,12 @@
   {:query [::process/slug
            {::process/proposals (comp/get-query Entry)}]
    :ident ::process/slug}
-  (dd/typography {:component :h2 :variant "h5"} (i18n/tr "Your approvals")
-    (list/list {:dense true}
-      (->> proposals
-        proposal/rank
-        (map entry)))))
+  (when (seq proposals)
+    (dom/div {}
+      (dd/typography {:component :h2 :variant "h5"} (i18n/tr "Your approvals"))
+      (list/list {:dense true}
+        (->> proposals
+          proposal/rank
+          (map entry))))))
 
 (def ui-ballot (comp/computed-factory Ballot))
