@@ -10,8 +10,8 @@
     [decide.utils.time :as time]))
 
 (def available-features
-  #{::feature.rejects
-    ::feature.reject-popup})
+  #{:feature:rejects
+    :feature:reject-popup})
 
 (def schema
   (concat

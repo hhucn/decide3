@@ -180,8 +180,10 @@
                      {::process/keys [slug]
                       :keys [process-over?
                              card-props
-                             max-height]
-                      :or {max-height "6rem"}}]
+                             max-height
+                             features]
+                      :or {max-height "6rem"
+                           features #{}}}]
   {:query (fn []
             [::proposal/id
              ::proposal/title ::proposal/body
@@ -253,14 +255,17 @@
                                                                    :opinion (if approved? 0 1)})])})))
 
               (grid/item {} (dd/typography {} pro-votes))
-              (grid/item {}
-                (reject-toggle
-                  {:toggled? rejected?
-                   :disabled? (or (not logged-in?) process-over?)
-                   :onClick #(if-not rejected?
-                               (set-reject-open true)
-                               (comp/transact! this [(opinion/add {::proposal/id id
-                                                                   :opinion (if rejected? 0 -1)})]))}))
+              (when (features :feature:rejects)
+                (grid/item {}
+                  (reject-toggle
+                    {:toggled? rejected?
+                     :disabled? (or (not logged-in?) process-over?)
+                     :onClick
+                     (fn [_e]
+                       (if (and (features :feature:reject-popup) (not rejected?))
+                         (set-reject-open true)             ; only
+                         (comp/transact! this [(opinion/add {::proposal/id id
+                                                             :opinion (if rejected? 0 -1)})])))})))
 
               (layout/box {:ml "auto"})
               #_(grid/item {} (dom/create-element Comment #js {"fontSize" "small"}))
@@ -268,12 +273,14 @@
               (grid/item {}
                 (dd/typography {:variant :body2}
                   (i18n/trf "{count} arguments" {:count (count arguments)})))))))
-      (reject-dialog
-        this
-        {:open? reject-open?
-         :id id
-         :slug slug
-         :parents parents
-         :onClose #(set-reject-open false)}))))
+
+      (when (features :feature:reject-popup)
+        (reject-dialog
+          this
+          {:open? reject-open?
+           :id id
+           :slug slug
+           :parents parents
+           :onClose #(set-reject-open false)})))))
 
 (def ui-proposal-card (comp/computed-factory ProposalCard {:keyfn ::proposal/id}))
