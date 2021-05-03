@@ -2,15 +2,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: decide3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-05 09:35+0100\n"
-"PO-Revision-Date: 2021-03-05 09:36+0100\n"
+"POT-Creation-Date: 2021-05-03 14:08+0200\n"
+"PO-Revision-Date: 2021-05-03 14:13+0200\n"
 "Last-Translator: Björn Ebbinghaus <ebbinghaus@hhu.de>\n"
 "Language-Team: Björn Ebbinghaus\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.4.2\n"
+"X-Generator: Poedit 2.4.3\n"
 "X-Poedit-Basepath: ../public/js/main\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-SourceCharset: UTF-8\n"
@@ -130,11 +130,9 @@ msgstr "Wann?"
 msgid "Is the process public?"
 msgstr "Ist der Prozess öffentlich?"
 
-#, fuzzy
-#| msgid "Participant emails"
 msgctxt "Label for list of participants"
 msgid "Participants"
-msgstr "Teilnehmer E-Mails"
+msgstr "Teilnehmer"
 
 msgctxt "Label for input field"
 msgid "Participant emails"
@@ -188,19 +186,26 @@ msgctxt "[aria]"
 msgid "Close"
 msgstr "schließen"
 
-msgctxt "Alignment of argument"
-msgid "Pro"
-msgstr "Dafür"
+msgid "Approvals: {pros}"
+msgstr "Zustimmungen: {pros}"
 
-msgctxt "Alignment of argument"
-msgid "Con"
-msgstr "Dagegen"
+msgid "Your approvals"
+msgstr "Deine Zustimmungen"
 
-msgid "Which arguments are still relevant?"
-msgstr "Welche Argumente sind immer noch relevant?"
+msgid "by {author}"
+msgstr "von {author}"
 
-msgid "The parents of this proposal have no arguments"
-msgstr "Die Eltern von diesem Vorschlag haben keine Argumente"
+msgid "New argument"
+msgstr "Neues Argument"
+
+msgid "Submit"
+msgstr "Fertig"
+
+msgid "Cancel"
+msgstr "Abbrechen"
+
+msgid "Add argument"
+msgstr "Argument hinzufügen"
 
 msgid ""
 "Do you want to add a new proposal, fork from an existing or merge proposals?"
@@ -265,14 +270,6 @@ msgctxt "Go to the next part of the form"
 msgid "Next"
 msgstr "Weiter"
 
-msgctxt "Helper text"
-msgid "Only applicable with parents"
-msgstr "Nur mit Eltern möglich"
-
-msgctxt "Arguments of a proposal"
-msgid "Arguments"
-msgstr "Argumente"
-
 msgid "Overview"
 msgstr "Übersicht"
 
@@ -282,27 +279,6 @@ msgstr "Abgeleitet von {count} anderen Vorschlägen:"
 msgctxt "Abort form"
 msgid "Cancel"
 msgstr "Abbrechen"
-
-msgid "Pro"
-msgstr "Dafür"
-
-msgid "Con"
-msgstr "Dagegen"
-
-msgid "By "
-msgstr "Von "
-
-msgid "New argument"
-msgstr "Neues Argument"
-
-msgid "Login to add new argument"
-msgstr "Anmelden um ein neues Argument hinzuzufügen"
-
-msgid "Contra"
-msgstr "Dagegen"
-
-msgid "So far there are no arguments"
-msgstr "Bisher gibt es keine Argumente"
 
 msgid ""
 "This proposal was derived {count, plural,  =1 {one time} other {# times}}"
@@ -337,19 +313,40 @@ msgctxt "Prompt to merge or fork"
 msgid "Propose a change"
 msgstr "Änderung vorschlagen"
 
+msgid "Argumentation"
+msgstr "Argumentation"
+
 msgid "Similar proposals"
 msgstr "Ähnliche Vorschläge"
 
-msgid "by {author}"
-msgstr "von {author}"
+msgid ""
+"This proposal has a chain of {count} proposals, that lead up to this proposal"
+msgstr ""
+"Dieser Vorschlag hat eine Kette von {count} Vorschlägen, die zu diesem "
+"Vorschlag geführt haben."
+
+msgid "Gen. {generation}"
+msgstr "Gen. {generation}"
+
+msgid "This proposal is derived from one other proposal"
+msgstr "Dieser Vorschlag basiert auf einem anderen Vorschlag"
 
 msgctxt "Type of proposal"
 msgid "Fork"
 msgstr "Ableitung"
 
+msgid "This proposal is derived from two or more other proposals"
+msgstr "Dieser Vorschlag basiert auf mehreren anderen Vorschlägen"
+
 msgctxt "Type of proposal"
 msgid "Merge"
 msgstr "Koalition"
+
+msgid "Propose an improvement"
+msgstr "Schlage eine Verbesserung vor"
+
+msgid "Propose an alternative"
+msgstr "Schlage eine Alternative vor"
 
 msgctxt "Proposal has been approved"
 msgid "Approved"
@@ -359,23 +356,22 @@ msgctxt "Approve a proposal"
 msgid "Approve"
 msgstr "Zustimmen"
 
+msgctxt "Proposal has been rejected by you"
+msgid "Rejected"
+msgstr "Abgelehnt"
+
+msgctxt "Reject a proposal"
+msgid "Reject"
+msgstr "Ablehnen"
+
 msgid "{count} arguments"
 msgstr "{count, plural, =1 {# Argument} other {# Argumente}}"
-
-msgid "Approvals: {pros}"
-msgstr "Zustimmungen: {pros}"
 
 msgid "Approved"
 msgstr "Zugestimmt"
 
 msgid "Approve"
 msgstr "Zustimmen"
-
-msgid "Ballot"
-msgstr "Stimmzettel"
-
-msgid "Your approvals"
-msgstr "Deine Zustimmungen"
 
 msgid "Winner"
 msgstr "Gewinner"
@@ -408,6 +404,9 @@ msgstr "Bearbeiten"
 msgid "New proposal"
 msgstr "Neuer Vorschlag"
 
+msgid "So far there are no arguments"
+msgstr "Bisher gibt es keine Argumente"
+
 msgctxt "Label for sort order selection"
 msgid "Sort"
 msgstr "Sortierung"
@@ -428,8 +427,40 @@ msgctxt "Label for filter selection"
 msgid "Filter"
 msgstr "Filter"
 
+msgid "This is the best proposal for the moment"
+msgstr "Dies ist der bisher beste Vorschlag"
+
+msgid "Children"
+msgstr "Kinder"
+
+msgid "Login to add new argument"
+msgstr "Anmelden um ein neues Argument hinzuzufügen"
+
 msgid "Proposals: {count}"
 msgstr "Vorschläge: {count}"
+
+msgid "Approvals {pros}"
+msgstr "Zustimmungen {pros}"
+
+msgid "Proposals you approve"
+msgstr "Vorschläge denen du zustimmst"
+
+msgid "You don't approve any proposals yet."
+msgstr "Du stimmst bisher keinen Vorschlägen zu."
+
+msgid "Proposals you might be interested in"
+msgstr "Vorschläge an denen du vielleicht interessiert bist"
+
+msgid "These are proposals derived from proposals you already approved."
+msgstr ""
+"Dies sind Vorschläge, die von einem von einem Vorschlag abstammen, dem du "
+"zugestimmt hast."
+
+msgid ""
+"Here you can find a personal overview and recommendations for this process."
+msgstr ""
+"Hier findest du eine personalisierte Übersicht und Empfehlungen für diesen "
+"Prozess."
 
 msgid "Ended on the {endDatetime}!"
 msgstr "Endete am {endDatetime}!"
@@ -465,8 +496,35 @@ msgstr ""
 msgid "Participants {count}"
 msgstr "Teilnehmer {count}"
 
-#~ msgid "Children"
-#~ msgstr "Kinder"
+#~ msgctxt "Alignment of argument"
+#~ msgid "Pro"
+#~ msgstr "Dafür"
+
+#~ msgctxt "Alignment of argument"
+#~ msgid "Con"
+#~ msgstr "Dagegen"
+
+#~ msgid "Which arguments are still relevant?"
+#~ msgstr "Welche Argumente sind immer noch relevant?"
+
+#~ msgctxt "Helper text"
+#~ msgid "Only applicable with parents"
+#~ msgstr "Nur mit Eltern möglich"
+
+#~ msgid "Pro"
+#~ msgstr "Dafür"
+
+#~ msgid "Con"
+#~ msgstr "Dagegen"
+
+#~ msgid "By "
+#~ msgstr "Von "
+
+#~ msgid "Contra"
+#~ msgstr "Dagegen"
+
+#~ msgid "Ballot"
+#~ msgstr "Stimmzettel"
 
 #~ msgid "Parents"
 #~ msgstr "Eltern"
@@ -485,12 +543,6 @@ msgstr "Teilnehmer {count}"
 
 #~ msgid "So far there are no arguments."
 #~ msgstr "Bisher gibt es keine Argumente"
-
-#~ msgid "This proposal depends on {count} previous proposals"
-#~ msgstr ""
-#~ "Dieser Vorschlag {count, plural, =0 {basiert auf keinem anderen "
-#~ "Vorschlag} =1 {basiert auf einem anderen Vorschlag other {vereinigt # "
-#~ "andere Vorschläge}}}"
 
 #~ msgid "Separate addresses with commas"
 #~ msgstr "Trenne Adressen mit Kommas"
