@@ -6,6 +6,7 @@
     [com.fulcrologic.fulcro.application :as app]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.data-fetch :as df]
+    [com.fulcrologic.fulcro.dom :as dom]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr :refer [defrouter]]
@@ -24,7 +25,11 @@
     [material-ui.lab.alert :as alert]
     [material-ui.layout :as layout]
     [material-ui.navigation.tabs :as tabs]
-    [material-ui.surfaces :as surfaces]))
+    [material-ui.surfaces :as surfaces]
+    [material-ui.transitions :as transitions]
+    [material-ui.inputs :as inputs]
+    ["@material-ui/icons/ExpandMore" :default ExpandMore]
+    ["@material-ui/icons/ExpandLess" :default ExpandLess]))
 
 (defrouter ProcessRouter [_this _]
   {:router-targets
@@ -44,7 +49,30 @@
   {:query [::user/id]
    :ident ::user/id})
 
-(defsc Process [_ {::process/keys [title end-time] :as process}]
+(defn process-ends-alert [{:keys [component]}]
+  (alert/alert {:severity :success}
+    (i18n/trf "Ended on the {endDatetime}!" {:endDatetime component})))
+
+(defn process-ended-alert [{:keys [component]}]
+  (alert/alert {:severity :info}
+    (i18n/trf "Ends at {endDatetime}" {:endDatetime component})))
+
+(defn description-collapse [{:keys [open? description toggle!]}]
+  (comp/fragment
+    (transitions/collapse {:in open?}
+      (dd/typography {:variant :body1
+                      :style {:whiteSpace :pre-line}}
+        description))
+    (inputs/button {:variant :outlined
+                    :size :small
+                    :onClick #(toggle! (not open?))
+                    :endIcon (if open?
+                               (dom/create-element ExpandLess)
+                               (dom/create-element ExpandMore))}
+      "Details")))
+
+
+(defsc Process [_ {::process/keys [title end-time description] :as process}]
   {:query [::process/slug
            ::process/title
            ::process/description
@@ -56,15 +84,18 @@
      (when slug
        {::process/slug slug}))
    :use-hooks? true}
-  (layout/box {:mx 2 :my 1}
-    (dd/typography {:component "h1" :variant "h2"} title)
-    (when end-time
-      (let [end-element (time/nice-time-element end-time)]
-        (if (process/over? process)
-          (alert/alert {:severity :success}
-            (i18n/trf "Ended on the {endDatetime}!" {:endDatetime end-element}))
-          (alert/alert {:severity :info}
-            (i18n/trf "Ends at {endDatetime}" {:endDatetime end-element})))))))
+  (let [[description-open? set-description-open] (hooks/use-state false)]
+    (layout/box {:mx 2 :my 1}
+      (dd/typography {:component "h1" :variant "h2"} title)
+      (when end-time
+        (let [end-element (time/nice-time-element end-time)]
+          (if (process/over? process)
+            (process-ended-alert {:component end-element})
+            (process-ends-alert {:component end-element}))))
+      (description-collapse
+        {:open? description-open?
+         :toggle! set-description-open
+         :description description}))))
 
 (def ui-process (comp/factory Process))
 
