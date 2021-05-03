@@ -7,17 +7,16 @@
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [decide.models.process :as process]
     [decide.models.process.mutations :as process.mutations]
-    [decide.models.user :as user]
     [decide.ui.process.process-forms :as process-forms]
     [material-ui.data-display :as dd]
+    [material-ui.feedback.dialog :as dialog]
+    [material-ui.inputs :as inputs]
     [material-ui.lab :refer [skeleton]]
     [material-ui.layout :as layout]
     [material-ui.layout.grid :as grid]
+    [material-ui.surfaces :as surfaces]
     ["@material-ui/icons/EmojiObjectsOutlined" :default EmojiObjectsOutlinedIcon]
-    ["@material-ui/icons/Group" :default GroupIcon]
-    [material-ui.feedback.dialog :as dialog]
-    [material-ui.inputs :as inputs]
-    [material-ui.surfaces :as surfaces]))
+    ["@material-ui/icons/Group" :default GroupIcon]))
 
 (def page-ident [:PAGE :processes-list-page])
 
@@ -30,16 +29,6 @@
                :color "text.secondary"}
     (dd/typography {:color :inherit} value)
     (layout/box {:m 1 :color :inherit :component icon-class})))
-
-(defsc Moderator [_ {::user/keys [id display-name]}]
-  {:query [::user/id ::user/display-name]
-   :ident ::user/id})
-
-(defn- is-moderator? [moderators current-session]
-  (and
-    (:session/valid? current-session)
-    (contains? (into #{} (map (partial comp/get-ident Moderator)) moderators)
-      (:user current-session))))
 
 (defsc ProcessListEntry [_ {::process/keys [slug title description no-of-participants no-of-proposals no-of-contributors]}]
   {:query [::process/slug ::process/title ::process/description
