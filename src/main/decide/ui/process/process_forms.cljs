@@ -3,10 +3,12 @@
     [clojure.string :as str]
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.dom :as dom]
     [com.fulcrologic.fulcro.dom.events :as evt]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [decide.models.process :as process]
     [decide.models.user :as user]
+    [decide.utils.time :as time]
     [material-ui.data-display :as dd]
     [material-ui.inputs :as inputs]
     [material-ui.inputs.form :as form]
@@ -14,25 +16,10 @@
     [material-ui.layout :as layout]
     [material-ui.layout.grid :as grid]
     [taoensso.timbre :as log]
-    [decide.utils.time :as time]
-    [com.fulcrologic.fulcro.dom :as dom]
     [material-ui.transitions :as transitions]
     [material-ui.data-display.list :as list]
     [material-ui.surfaces :as surfaces]))
 
-(def slug-pattern #"^[a-z0-9]+(?:-[a-z0-9]+)*$")
-
-(defn keep-chars [s re]
-  (apply str (re-seq re s)))
-
-
-(defn slugify [s]
-  (-> s
-    str/lower-case
-    str/trim
-    (str/replace #"[\s-]+" "-")                             ; replace multiple spaces and dashes with a single dash
-    (keep-chars #"[a-z0-9-]")
-    (str/replace #"^-|" "")))                               ; remove dash prefix
 
 (def default-input-props
   {:fullWidth true
@@ -73,7 +60,7 @@
                  :onSubmit (fn [e]
                              (evt/prevent-default! e)
                              (onSubmit {::process/title title
-                                        ::process/slug (slugify (if auto-slug? title slug))
+                                        ::process/slug (process/slugify (if auto-slug? title slug))
                                         ::process/description description
                                         ::process/end-time (when with-end? end-time)
                                         ::process/type (if public? ::process/type.public ::process/type.private)
@@ -95,11 +82,11 @@
         (merge default-input-props
           {:label (i18n/trc "URL of a process" "URL")
            :helperText (i18n/tr "Allowed are: lower case letters (a-z), numbers and hyphens")
-           :value (if auto-slug? (slugify title) slug)
+           :value (if auto-slug? (process/slugify title) slug)
            :onChange (fn [e]
                        (let [value (evt/target-value e)]
                          (set-auto-slug false)
-                         (change-slug (slugify value))))
+                         (change-slug (process/slugify value))))
            :inputProps {:maxLength title-max-length}
            :InputProps {:startAdornment (input/adornment {:position :start} (str (-> js/document .-location .-host) "/decision/"))}}))
 

@@ -59,7 +59,7 @@
       :db/valueType :db.type/ref}]
     (map #(hash-map :db/ident %) available-features)))
 
-(def slug-pattern #"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+(def slug-pattern #"^[a-z0-9]+(?:[-_][a-z0-9]+)*$")
 (s/def ::slug (s/and string? (partial re-matches slug-pattern)))
 (s/def ::title (s/and string? (complement str/blank?)))
 (s/def ::description string?)
@@ -127,3 +127,15 @@
     (if (< 1 (count most-approved-proposals))
       (newest-proposal most-approved-proposals)
       (first most-approved-proposals))))
+
+(defn- keep-chars [s re]
+  (apply str (re-seq re s)))
+
+(>defn slugify [s]
+  [(s/and string? (complement str/blank?)) => ::slug]
+  (-> s
+    str/lower-case
+    str/trim
+    (str/replace #"[\s-]+" "-")                             ; replace multiple spaces and dashes with a single dash
+    (keep-chars #"[a-z0-9-]")
+    (str/replace #"^-|" "")))                               ; remove dash prefix
