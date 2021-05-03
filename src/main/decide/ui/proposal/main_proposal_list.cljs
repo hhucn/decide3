@@ -7,6 +7,7 @@
     [com.fulcrologic.fulcro.data-fetch :as df]
     [com.fulcrologic.fulcro.dom :as dom]
     [com.fulcrologic.fulcro.dom.events :as evt]
+    [com.fulcrologic.fulcro.react.error-boundaries :as error-boundaries]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [decide.models.process :as process]
@@ -25,8 +26,8 @@
     [material-ui.navigation :as navigation]
     [material-ui.surfaces :as surfaces]
     ["@material-ui/icons/Add" :default AddIcon]
-    ["@material-ui/icons/FormatListNumbered" :default FormatListNumbered]
-    ["@material-ui/icons/FormatIndentIncrease" :default FormatIndentIncrease]))
+    ["@material-ui/icons/ViewList" :default ViewList]
+    ["@material-ui/icons/ViewModule" :default ViewModule]))
 
 
 (defn add-proposal-fab [props]
@@ -168,10 +169,10 @@
    :use-hooks? true}
   (let [logged-in? (get current-session :session/valid?)
         [selected-sort set-selected-sort!] (hooks/use-state "most-approvals")
-        [selected-filters set-selected-filters!] (hooks/use-state #{})
         [selected-layout set-selected-layout!] (hooks/use-state :favorite)
         sorted-proposals (hooks/use-memo #(proposal/rank-by selected-sort proposals) [selected-sort proposals])
-        process-over? (hooks/use-memo #(boolean (some-> % end-time time/past?)) [end-time])]
+        process-over? (hooks/use-memo #(boolean (some-> % end-time time/past?)) [end-time])
+        >=-sm? (breakpoint/>=? "sm")]
     (comp/fragment
       (layout/container {:maxWidth :xl}
 
@@ -192,33 +193,34 @@
                :onChange (fn [_event new-layout]
                            (some-> new-layout keyword set-selected-layout!))}
               (toggle/button {:value :favorite}
-                (dom/create-element FormatListNumbered))
+                (dom/create-element ViewModule))
               (toggle/button {:value :hierarchy}
-                (dom/create-element FormatIndentIncrease)))
+                (dom/create-element ViewList)))
             #_(grid/item {} (filter-selector selected-filters set-selected-filters!))
             (grid/item {} (sort-selector selected-sort set-selected-sort!))))
 
         ; main list
-        (let [computed {::process/slug slug
-                        :process-over? process-over?
-                        :card-props {:variant (when (breakpoint/>=? "sm") :outlined)}}
-              list-options {:items (map #(comp/computed % computed) sorted-proposals)}]
-          (case selected-layout
-            :favorite
-            (grid/container {:spacing (if (breakpoint/>=? "sm") 2 1)
-                             :alignItems "stretch"}
-              (if (and (#{"most-approvals"} selected-sort) (not (empty? sorted-proposals)))
-                (favorite-list list-options)
-                (plain-list list-options))
-              (when-not process-over?
-                (grid/item {:xs 12 :md 6 :lg 4
-                            :style {:flexGrow 1
-                                    :minHeight "100px"}}
-                  (new-proposal-card {:disabled? (not logged-in?)
-                                      :onClick show-new-proposal-dialog}))))
+        (error-boundaries/error-boundary
+          (let [computed {::process/slug slug
+                          :process-over? process-over?
+                          :card-props {:variant (when >=-sm? :outlined)}}
+                list-options {:items (mapv #(comp/computed % computed) sorted-proposals)}]
+            (case selected-layout
+              :favorite
+              (grid/container {:spacing (if >=-sm? 2 1)
+                               :alignItems "stretch"}
+                (if (and (#{"most-approvals"} selected-sort) (not (empty? sorted-proposals)))
+                  (favorite-list list-options)
+                  (plain-list list-options))
+                (when-not process-over?
+                  (grid/item {:xs 12 :md 6 :lg 4
+                              :style {:flexGrow 1
+                                      :minHeight "100px"}}
+                    (new-proposal-card {:disabled? (not logged-in?)
+                                        :onClick show-new-proposal-dialog}))))
 
-            :hierarchy
-            (hierarchy-list list-options))))
+              :hierarchy
+              (hierarchy-list list-options)))))
 
       ; fab
       (when-not process-over?
