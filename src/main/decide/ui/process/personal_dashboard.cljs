@@ -19,7 +19,8 @@
     [taoensso.timbre :as log]
     [material-ui.inputs :as inputs]
     [decide.models.opinion :as opinion]
-    [com.fulcrologic.fulcro.dom :as dom]))
+    [com.fulcrologic.fulcro.dom :as dom]
+    [material-ui.data-display :as dd]))
 
 (defsc ProposalListItem [this {::proposal/keys [id nice-id title pro-votes my-opinion]} {:keys [compact?] :or {compact? false}}]
   {:query [::proposal/id ::proposal/title ::proposal/nice-id ::proposal/created ::proposal/pro-votes ::proposal/my-opinion]
@@ -65,10 +66,14 @@
                          (dom/create-element UnfoldMoreIcon)
                          (dom/create-element UnfoldLessIcon)))})
       (surfaces/card-content {}
-        (list/list {}
-          (->> personal-proposals
-            proposal/rank
-            (map #(ui-proposal-list-item % {:compact? compact?}))))))))
+        (if (seq personal-proposals)
+          (list/list {}
+            (->> personal-proposals
+              proposal/rank
+              (map #(ui-proposal-list-item % {:compact? compact?}))))
+          (dd/typography {:variant :body2
+                          :color :textSecondary}
+            (i18n/tr "You don't approve any proposals yet.")))))))
 
 (def ui-personal-proposal-list (comp/computed-factory PersonalProposalsList))
 
@@ -83,19 +88,20 @@
       :MY/proposal-recommendations []})
    :use-hooks? true}
   (let [[compact? set-compact] (hooks/use-state false)]
-    (surfaces/card {}
-      (surfaces/card-header
-        {:title (i18n/tr "Proposals you might be interested in")
-         :subheader (i18n/tr "These are proposals derived from proposals you already approved.")
-         #_:action #_(inputs/icon-button {:onClick #(set-compact (not compact?))}
-                       (if compact?
-                         (dom/create-element UnfoldMoreIcon)
-                         (dom/create-element UnfoldLessIcon)))})
-      (surfaces/card-content {}
-        (list/list {}
-          (->> proposal-recommendations
-            proposal/rank
-            (map #(ui-proposal-list-item % {:compact? compact?}))))))))
+    (when-not (empty? proposal-recommendations)
+      (surfaces/card {}
+        (surfaces/card-header
+          {:title (i18n/tr "Proposals you might be interested in")
+           :subheader (i18n/tr "These are proposals derived from proposals you already approved.")
+           #_:action #_(inputs/icon-button {:onClick #(set-compact (not compact?))}
+                         (if compact?
+                           (dom/create-element UnfoldMoreIcon)
+                           (dom/create-element UnfoldLessIcon)))})
+        (surfaces/card-content {}
+          (list/list {}
+            (->> proposal-recommendations
+              proposal/rank
+              (map #(ui-proposal-list-item % {:compact? compact?})))))))))
 
 (def ui-personal-recommendations-list (comp/computed-factory PersonalRecommendationsList))
 
@@ -137,6 +143,11 @@
   (layout/container {:maxWidth :xl}
     (layout/box {:m 2}
       (grid/container {:spacing 2}
+        (grid/item {:xs 12}
+          (surfaces/paper {}
+            (layout/box {:p 2}
+              (dd/typography {:variant :body1}
+                (i18n/tr "Here you can find a personal overview and recommendations for this process.")))))
         (grid/item {:xs 12 :lg 6 :xl 4}
           (ui-personal-proposal-list personal-proposal-list))
         (grid/item {:xs 12 :lg 6 :xl 4}
