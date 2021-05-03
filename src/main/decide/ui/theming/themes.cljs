@@ -3,7 +3,14 @@
             ["@material-ui/core/styles" :refer [responsiveFontSizes]]
             [decide.ui.theming.styles :as styles]))
 
-(def shared (js->clj (create-mui-theme {}) :keywordize-keys true))
+(def shared
+  (js->clj
+    (create-mui-theme
+      {:overrides
+       {:MuiCardHeader
+        {:root
+         {:padding-bottom "4px"}}}})
+    :keywordize-keys true))
 (def light-theme (merge
                    shared
                    {:palette {:type "light"
