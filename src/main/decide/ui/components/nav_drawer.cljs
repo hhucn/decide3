@@ -8,6 +8,7 @@
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [decide.application :refer [SPA]]
     [decide.routing :as r]
+    [decide.ui.login :as login]
     [decide.ui.pages.settings :as settings]
     [decide.ui.process.list :as process.list]
     [decide.ui.translations.selector :as i18n.switcher]
@@ -17,6 +18,7 @@
     [material-ui.layout :as layout]
     [material-ui.navigation :as nav]
     [material-ui.surfaces :as surfaces]
+    ["@material-ui/icons/AccountCircle" :default AccountCircle]
     ["@material-ui/icons/ChevronLeft" :default ChevronLeftIcon]
     ["@material-ui/icons/Settings" :default SettingsIcon]
     ["@material-ui/icons/DeviceHub" :default DeviceHubIcon]
@@ -74,12 +76,18 @@
               (list/item-icon {} (dom/create-element DeviceHubIcon))
               (list/item-text {} (i18n/tr "All decisions")))
             (dd/divider {})
-            (list/item {:button true
-                        :component :a
-                        :onClick toggle-navdrawer!
-                        :href (r/path-to->absolute-url settings/SettingsPage)}
-              (list/item-icon {} (dom/create-element SettingsIcon))
-              (list/item-text {} (i18n/tr "Settings")))))
+            (if (comp/shared this :logged-in?)
+              (list/item {:button true
+                          :component :a
+                          :onClick toggle-navdrawer!
+                          :href (r/path-to->absolute-url settings/SettingsPage)}
+                (list/item-icon {} (dom/create-element SettingsIcon))
+                (list/item-text {} (i18n/tr "Settings")))
+              (list/item
+                {:button true
+                 :onClick #(comp/transact! this [(login/show-signinup-dialog {:which-form :sign-in})] {})}
+                (list/item-icon {} (dom/create-element AccountCircle))
+                (list/item-text {} (i18n/tr "Login"))))))
 
         (layout/box {:px 1}
           (i18n.switcher/ui-language-switcher locale-switcher))
