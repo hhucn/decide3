@@ -17,7 +17,8 @@
     ["@material-ui/icons/ExpandMore" :default ExpandMore]
     ["@material-ui/icons/ExpandLess" :default ExpandLess]
     ["@material-ui/icons/Send" :default Send]
-    ["@material-ui/icons/AddCircleOutline" :default AddCircleOutline]))
+    ["@material-ui/icons/AddCircleOutline" :default AddCircleOutline]
+    [material-ui.data-display :as dd]))
 
 (defsc StatementAuthor [_ {::user/keys [display-name]}]
   {:query [::user/id ::user/display-name]
@@ -71,10 +72,11 @@
 
 (declare ui-argument)
 
-(defsc Argument [this {:argument/keys [premise premise->arguments]}]
+(defsc Argument [this {:argument/keys [premise premise->arguments no-of-arguments]}]
   {:query [:argument/id
            {:argument/premise (comp/get-query Statement)}
-           {:argument/premise->arguments '...}] ; TODO This is not future proof. :)
+           {:argument/premise->arguments '...}
+           :argument/no-of-arguments]
    :ident :argument/id
    :use-hooks? true}
   (let [[show-premises? set-show-premises] (hooks/use-state false)]
@@ -84,10 +86,12 @@
         {:button true
          :onClick
          (fn toggle-list [_]
-           (when-not show-premises? (df/refresh! this)) ; only refresh when going to show list
+           (when-not show-premises? (df/refresh! this))     ; only refresh when going to show list
            (set-show-premises (not show-premises?)))}
         #_(dom/create-element ArrowRight #js {:fontSize "small" :color "disabled"})
         (ui-statement premise)
+        (when (pos? no-of-arguments)
+          (dd/typography {:variant :caption :color :textSecondary} (str "(" no-of-arguments ")")))
         (if show-premises?
           (dom/create-element ExpandLess #js {:color "disabled"})
           (dom/create-element ExpandMore #js {:color "disabled"})))

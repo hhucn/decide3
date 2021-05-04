@@ -6,7 +6,6 @@
     [com.fulcrologic.fulcro.dom :as dom]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
-    [decide.models.argument :as argument]
     [decide.models.opinion :as opinion]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
@@ -14,7 +13,6 @@
     [decide.routing :as routing]
     [decide.ui.proposal.detail-page :as detail-page]
     [decide.ui.proposal.new-proposal :as new-proposal]
-    [decide.utils.breakpoint :as breakpoint]
     [decide.utils.time :as time]
     [material-ui.data-display :as dd]
     [material-ui.data-display.list :as list]
@@ -171,11 +169,7 @@
      :onClick onClick
      :icon ThumbDownAlt}))
 
-(defsc Argument [_ _]
-  {:query [::argument/id]
-   :ident ::argument/id})
-
-(defsc ProposalCard [this {::proposal/keys [id title body my-opinion arguments pro-votes parents]
+(defsc ProposalCard [this {::proposal/keys [id title body my-opinion pro-votes parents no-of-arguments]
                            :keys [root/current-session >/subheader]}
                      {::process/keys [slug]
                       :keys [process-over?
@@ -188,7 +182,7 @@
             [::proposal/id
              ::proposal/title ::proposal/body
              ::proposal/my-opinion
-             {::proposal/arguments (comp/get-query Argument)}
+             ::proposal/no-of-arguments
              ::proposal/pro-votes
              {::proposal/children 1}
              {::proposal/parents (comp/get-query Parent)}
@@ -272,7 +266,7 @@
 
               (grid/item {}
                 (dd/typography {:variant :body2}
-                  (i18n/trf "{count} arguments" {:count (count arguments)})))))))
+                  (i18n/trf "{count} arguments" {:count no-of-arguments})))))))
 
       (when (features :feature:reject-popup)
         (reject-dialog

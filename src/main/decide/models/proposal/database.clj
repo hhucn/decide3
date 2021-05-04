@@ -118,3 +118,45 @@
     (d/pull db [{::proposal/opinions [{::user/_opinions [:db/id]}]}])
     ::proposal/opinions
     (into #{} (map (comp :db/id ::user/_opinions)))))
+
+(def argument-member-rules
+  '[[(sub-argument ?argument ?sub-argument)
+     [?argument :argument/premise ?premise]
+     [?sub-argument :argument/conclusion ?premise]]
+
+    [(argument-member ?proposal ?argument)
+     [?proposal ::proposal/arguments ?first-level-argument]
+     (or
+       [(ground ?first-level-argument) ?argument]
+       (argument-member ?first-level-argument ?argument))]
+
+    [(argument-member ?argument ?flat-sub-arguments)
+     (sub-argument ?argument ?sub-arguments)
+     (or
+       [(ground ?sub-arguments) ?flat-sub-arguments]
+       (argument-member ?sub-arguments ?flat-sub-arguments))]])
+
+(>defn get-no-of-arguments [db proposal]
+  [d.core/db? (s/keys :req [::proposal/id]) => nat-int?]
+  (or (d/q
+        '[:find (count-distinct ?argument) .
+          :in $ % ?proposal
+          :where
+          (argument-member ?proposal ?argument)]
+        db
+        argument-member-rules
+        (find proposal ::proposal/id))
+    0))
+
+(>defn get-no-of-sub-arguments [db argument]
+  [d.core/db? (s/keys :req [:argument/id]) => nat-int?]
+  (or
+    (d/q
+      '[:find (count-distinct ?sub-argument) .
+        :in $ % ?argument
+        :where
+        (argument-member ?argument ?sub-argument)]
+      db
+      argument-member-rules
+      (find argument :argument/id))
+    0))

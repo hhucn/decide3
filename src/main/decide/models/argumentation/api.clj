@@ -5,8 +5,8 @@
     [datahike.api :as d]
     [decide.models.argumentation :as argumentation]
     [decide.models.proposal :as proposal]
-    [decide.models.user :as user]
-    [taoensso.timbre :as log]))
+    [decide.models.proposal.database :as proposal.db]
+    [decide.models.user :as user]))
 
 (defresolver resolve-argument [{:keys [db]} {:argument/keys [id]}]
   {::pc/output [:argument/id
@@ -14,21 +14,21 @@
                 {:argument/premise [:statement/id
                                     :statement/content]}
                 {:argument/conclusion [:statement/id
-                                       :statement/content]}]}
+                                       :statement/content]}
+                {:author [::user/id]}]}
   (d/pull db [:argument/id
               :argument/type
               {:argument/premise [:statement/id :statement/content]}
-              {:argument/conclusion [:statement/id :statement/content]}]
+              {:argument/conclusion [:statement/id :statement/content]}
+              {:author [::user/id]}]
     [:argument/id id]))
 
 (defresolver resolve-skip-statement [{:keys [db]} {:argument/keys [id]}]
   {::pc/output [{:argument/premise->arguments [:argument/id]}]}
-  (let [{:argument/keys [id premise]}
-        (d/pull db [:argument/id
-                    {:argument/premise [{:argument/_conclusion [:argument/id]}]}]
+  (let [{:argument/keys [premise]}
+        (d/pull db [{:argument/premise [{:argument/_conclusion [:argument/id]}]}]
           [:argument/id id])]
-    (log/spy :debug
-      {:argument/premise->arguments (get premise :argument/_conclusion [])})))
+    {:argument/premise->arguments (get premise :argument/_conclusion [])}))
 
 
 (defresolver resolve-statement [{:keys [db]} {:statement/keys [id]}]
@@ -48,6 +48,15 @@
   {::pc/output [{::proposal/positions [:argument/id]}]}
   (let [{:keys [::proposal/arguments]} (d/pull db [{::proposal/arguments [:argument/id]}] [::proposal/id id])]
     {::proposal/positions arguments}))
+
+(defresolver resolve-no-of-arguments [{:keys [db]} {::proposal/keys [id]}]
+  {::proposal/no-of-arguments
+   (proposal.db/get-no-of-arguments db {::proposal/id id})})
+
+(defresolver resolve-no-of-sub-arguments
+  [{:keys [db]} {:argument/keys [id]}]
+  {:argument/no-of-arguments
+   (proposal.db/get-no-of-sub-arguments db {:argument/id id})})
 
 
 (defmutation add-argument-to-statement
@@ -124,4 +133,6 @@
    resolve-statement
    resolve-argument
    resolve-proposal-arguments
-   resolve-skip-statement])
+   resolve-skip-statement
+   resolve-no-of-arguments
+   resolve-no-of-sub-arguments])
