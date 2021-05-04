@@ -49,42 +49,42 @@
    ::pc/output [::proposal/generation]}
   {::proposal/generation (proposal.db/get-generation db proposal)})
 
-(defresolver resolve-child-relations [{:keys [db]} {::keys [id]}]
-  {::pc/output [{:child-relations [{:proposal [::id]}
+(defresolver resolve-child-relations [{:keys [db]} {::proposal/keys [id]}]
+  {::pc/output [{:child-relations [{:proposal [::proposal/id]}
                                    :migration-rate]}]}
   {:child-relations
-   (for [{child-id ::id :as child} (proposal.db/get-children db [::id id])]
+   (for [{child-id ::proposal/id :as child} (proposal.db/get-children db [::proposal/id id])]
      {:proposal child
       :migration-rate (proposal.db/get-migration-rate db id child-id)})})
 
-(defresolver resolve-parent-relations [{:keys [db]} {::keys [id]}]
-  {::pc/output [{:parent-relations [{:proposal [::id]}
+(defresolver resolve-parent-relations [{:keys [db]} {::proposal/keys [id]}]
+  {::pc/output [{:parent-relations [{:proposal [::proposal/id]}
                                     :migration-rate]}]}
   {:parent-relations
-   (for [{parent-id ::id :as parent} (proposal.db/get-parents db [::id id])]
+   (for [{parent-id ::proposal/id :as parent} (proposal.db/get-parents db [::proposal/id id])]
      {:proposal parent
       :migration-rate (proposal.db/get-migration-rate db parent-id id)})})
 
-(defresolver resolve-similar [{:keys [db]} {::keys [id]}]
-  {::pc/input #{::id}
-   ::pc/output [{:similar [{:own-proposal [::id]}
+(defresolver resolve-similar [{:keys [db]} {::proposal/keys [id]}]
+  {::pc/input #{::proposal/id}
+   ::pc/output [{:similar [{:own-proposal [::proposal/id]}
                            :own-uniques
                            :common-uniques
-                           {:other-proposal [::id]}
+                           {:other-proposal [::proposal/id]}
                            :other-uniques
                            :sum-uniques]}]}
-  (let [own-approvers (proposal.db/get-pro-voting-users db [::id id])]
+  (let [own-approvers (proposal.db/get-pro-voting-users db [::proposal/id id])]
     {:similar
-     (for [other-proposal-id (proposal.db/get-proposals-with-shared-opinion db [::id id])
-           :let [other-approvers (proposal.db/get-pro-voting-users db [::id other-proposal-id])
+     (for [other-proposal-id (proposal.db/get-proposals-with-shared-opinion db [::proposal/id id])
+           :let [other-approvers (proposal.db/get-pro-voting-users db [::proposal/id other-proposal-id])
                  own-uniques (count (set/difference own-approvers other-approvers))
                  common-uniques (count (set/intersection own-approvers other-approvers))
                  other-uniques (count (set/difference other-approvers own-approvers))]]
-       {:own-proposal {::id id}
+       {:own-proposal {::proposal/id id}
         :own-uniques own-uniques
         :common-uniques common-uniques
         :other-uniques (count (set/difference other-approvers own-approvers))
-        :other-proposal {::id other-proposal-id}
+        :other-proposal {::proposal/id other-proposal-id}
         :sum-uniques (+ own-uniques common-uniques other-uniques)})}))
 
 (def full-api [resolve-proposal
@@ -92,4 +92,6 @@
                resolve-parents
 
                resolve-child-relations
-               resolve-parent-relations])
+               resolve-parent-relations
+
+               resolve-similar])
