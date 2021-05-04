@@ -25,7 +25,7 @@
     },
     "devDependencies": {
         "highlight.js": "10.7.2",
-        "intl-messageformat": "^9.6.11",
+        "intl-messageformat": "^9.6.12",
         "karma": "^6.3.2",
         "karma-chrome-launcher": "^3.1.0",
         "karma-cljs-test": "^0.1.0",
