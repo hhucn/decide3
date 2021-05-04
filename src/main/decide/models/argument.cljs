@@ -1,1 +1,2 @@
-(ns decide.models.argument)
+(ns decide.models.argument
+  "DEPRECATED see decide.models.argumentation instead")

@@ -1,4 +1,5 @@
 (ns decide.models.argument
+  "DEPRECATED see decide.models.argumentation instead"
   (:require
     [clojure.spec.alpha :as s]
     [clojure.string :as str]))
