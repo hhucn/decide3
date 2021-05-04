@@ -1,7 +1,6 @@
 (ns decide.models.proposal
   (:require
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-    [com.fulcrologic.fulcro.data-fetch :as df]
     [decide.models.user :as user]))
 
 (defsc Author [_ _]
@@ -19,9 +18,6 @@
              {::parents '...}                               ; this is a recursion
              {::original-author (comp/get-query Author)}])
    :ident ::id})
-
-(defn load-all! [app-or-comp]
-  (df/load! app-or-comp :all-proposals Proposal))
 
 (def approval-order (juxt ::pro-votes ::created))
 

@@ -9,6 +9,7 @@
     [decide.models.opinion :as opinion]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
+    [decide.models.proposal.database :as proposal.db]
     [decide.models.user :as user]))
 
 (>defn slug-in-use? [db slug]
@@ -120,11 +121,11 @@
   [d.core/db? ::process/slug => (s/spec #(<= 0 %))]
   (let [{::process/keys [proposals]} (d/pull db [{::process/proposals [:db/id]}] [::process/slug slug])
         proposal-db-ids (map :db/id proposals)
-        commenter (apply set/union (map (partial proposal/get-users-who-made-an-argument db) proposal-db-ids))
+        commenter (apply set/union (map (partial proposal.db/get-users-who-made-an-argument db) proposal-db-ids))
         authors (into #{}
                   (map (comp :db/id ::proposal/original-author))
                   (d/pull-many db [{::proposal/original-author [:db/id]}] proposal-db-ids))
-        voters (apply set/union (map (partial proposal/get-voters db) proposal-db-ids))]
+        voters (apply set/union (map (partial proposal.db/get-voters db) proposal-db-ids))]
     (count (set/union commenter authors voters))))
 
 (>defn get-number-of-participants [db slug]

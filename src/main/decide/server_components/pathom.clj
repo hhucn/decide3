@@ -6,10 +6,10 @@
     [com.wsscode.pathom.core :as p]
     [datahike.api :as d]
     [decide.models.process.resolver :as process.api]
-    [decide.models.argument :as argument]
     [decide.models.authorization :as auth]
     [decide.models.opinion :as opinion]
     [decide.models.proposal :as proposal]
+    [decide.models.proposal.api :as proposal.api]
     [decide.models.argumentation.api :as argumentation.api]
     [decide.models.user :as user]
     [decide.ui.translations.load :as translation]
@@ -120,6 +120,7 @@
    user/resolvers
    process.api/all-resolvers
    proposal/resolvers
+   proposal.api/full-api
    opinion/resolvers
 
    translation/locale-resolver
