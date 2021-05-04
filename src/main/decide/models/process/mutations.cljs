@@ -4,30 +4,31 @@
     [com.fulcrologic.fulcro.algorithms.merge :as mrg]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+    [decide.models.process :as process]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]))
 
 (defsc Process [_ _]
   {:query
-   [::slug
-    ::title
-    ::description
-    ::end-time
-    ::type
-    {::proposals (comp/get-query proposal/Proposal)}]
-   :ident ::slug})
+   [::process/slug
+    ::process/title
+    ::process/description
+    ::process/end-time
+    ::process/type
+    {::process/proposals (comp/get-query proposal/Proposal)}]
+   :ident ::process/slug})
 
 (defmutation add-proposal [{::proposal/keys [_id _title _body _parents]
-                            ::keys [slug]
+                            ::process/keys [slug]
                             :as params}]
   (action [{:keys [app]}]
     (mrg/merge-component! app proposal/Proposal params
-      :append (conj (comp/get-ident Process {::slug slug}) ::proposals)))
+      :append (conj (comp/get-ident Process {::process/slug slug}) ::process/proposals)))
   (remote [env]
     (m/returning env proposal/Proposal)))
 
 
-(defmutation add-process [{::keys [slug title description] :as process}]
+(defmutation add-process [{::process/keys [slug title description] :as process}]
   (action [{:keys [app]}]
     (mrg/merge-component! app Process process))
   (remote [env]
@@ -35,7 +36,7 @@
       (m/returning Process)
       (m/with-target (targeting/append-to [:all-processes])))))
 
-(defmutation update-process [{::keys [slug] :as process}]
+(defmutation update-process [{::process/keys [slug] :as process}]
   (action [{:keys [app]}]
     (when slug
       (mrg/merge-component! app Process process)))
@@ -43,8 +44,8 @@
     (-> env
       (m/returning Process))))
 
-(defmutation add-moderator [{::keys [slug] email ::user/email}]
+(defmutation add-moderator [{::process/keys [slug] email ::user/email}]
   (remote [env]
     (-> env
-      (m/with-target (targeting/append-to [::slug slug ::moderators]))
+      (m/with-target (targeting/append-to [::process/slug slug ::process/moderators]))
       (m/returning user/User))))
