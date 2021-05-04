@@ -68,8 +68,10 @@
 
           ; Make sole argument
           {real-argument-id :argument/id :as new-argument}
-          (argumentation/make-argument
-            (if argument-type {:argument/type argument-type} {}))
+          (-> (if argument-type {:argument/type argument-type} {})
+            argumentation/make-argument
+            (assoc :author [::user/id user-id]))
+
 
           tx-report
           (d/transact conn
@@ -98,8 +100,9 @@
 
         ; Make sole argument
         {real-argument-id :argument/id :as new-argument}
-        (argumentation/make-argument
-          (if argument-type {:argument/type argument-type} {}))
+        (-> (if argument-type {:argument/type argument-type} {})
+          argumentation/make-argument
+          (assoc :author [::user/id user-id]))
 
         tx-report
         (d/transact conn
