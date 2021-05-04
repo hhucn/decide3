@@ -24,7 +24,7 @@
     ["@material-ui/icons/RemoveCircleOutline" :default RemoveCircleIcon]))
 
 (defn- accordion [{:keys [title]} body]
-  (surfaces/accordion {}
+  (surfaces/accordion {:defaultExpanded true}
     (surfaces/accordion-panel-summary {:expandIcon (layout/box {:component ExpandMoreIcon})}
       (dd/typography {:variant "body1"} title))
     (surfaces/accordion-panel-details {} body)))
@@ -193,7 +193,6 @@
 (defsc ParticipantList [this props {{::process/keys [participants]} :process}]
   {:query []
    :use-hooks? true}
-  (log/info props)
   (let [[participants set-participants] (hooks/use-state (or participants #{}))]
     (dom/div {}
       (surfaces/paper {:variant :outlined}
