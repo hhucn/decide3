@@ -83,7 +83,7 @@
    ::s/params (s/keys :req [::process/slug ::user/email])
    ::pc/transform (comp auth/check-logged-in check-slug-exists needs-moderator)}
   (if-let [{::user/keys [id]} (and (user/email-in-db? db email) (user/get-by-email db email))]
-    (let [{:keys [db-after]} (add-moderator! conn [::process/slug] user-id [::user/id id])]
+    (let [{:keys [db-after]} (add-moderator! conn [::process/slug slug] user-id [::user/id id])]
       {::user/id id
        ::p/env (assoc env :db db-after)})
     (throw (ex-info "User with this email doesn't exist!" {:email email}))))
@@ -124,14 +124,14 @@
                                      :original-author [::user/id user-id]})
         tx-report (d/transact conn
                     (concat
-                      (process.db/->enter [::process/slug] [::user/id user-id])
+                      (process.db/->enter [::process/slug slug] [::user/id user-id])
                       [(assoc new-proposal
                          :db/id "new-proposal"
                          ::proposal/opinions
                          {:db/id "authors-opinion"
                           ::opinion/value +1})
                        [:db/add [::user/id user-id] ::user/opinions "authors-opinion"]
-                       [:db/add [::process/slug] ::process/proposals"new-proposal"]
+                       [:db/add [::process/slug slug] ::process/proposals "new-proposal"]
                        [:db/add "datomic.tx" :db/txUser [::user/id user-id]]]))]
     {::proposal/id real-id
      :tempids {id real-id}
