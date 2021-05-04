@@ -19,7 +19,7 @@
                    (let [locale (keyword (evt/target-value e))]
                      (comp/transact! this [(i18n/change-locale {:locale locale})])))
        :inputProps {:id "language-select"}}
-      (dom/option {:value "en"} (i18n/tr "English"))
-      (dom/option {:value "de"} (i18n/tr "Deutsch")))))
+      (dom/option {:value "en"} "English")
+      (dom/option {:value "de"} "Deutsch"))))
 
 (def ui-language-switcher (comp/factory LocaleSwitcher))

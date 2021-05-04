@@ -89,10 +89,7 @@
                   (section-paper {}
                     (dd/typography {:component :h2 :variant :h4}
                       (i18n/trf
-                        "{numProposals, plural,
-                        =0 {There are no proposals!}
-                        =1 {The current best proposal}
-                        other {The current best proposals}}"
+                        "{numProposals, plural, =0 {There are no proposals!} =1 {The current best proposal} other {The current best proposals}}"
                         {:numProposals (count top-proposals)}))
                     (list/list {}
                       (map ui-top-entry top-proposals)))))))

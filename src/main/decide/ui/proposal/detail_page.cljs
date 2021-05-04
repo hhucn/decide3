@@ -297,5 +297,6 @@
                   (argumentation.ui/ui-argument-list argumentation-section))))
             (grid/item {:xs 12 :lg 4 :component "section"}
               (ui-children-section children-section)
-              (section (i18n/tr "Similar proposals") (ui-similar-section similar-section {:show-add-dialog show-add-dialog
-                                                                                          :process-over? process-over?})))))))))
+              (section (i18n/tr "Possible coalitions")
+                (ui-similar-section similar-section {:show-add-dialog show-add-dialog
+                                                     :process-over? process-over?})))))))))
