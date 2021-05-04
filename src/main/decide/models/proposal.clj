@@ -3,11 +3,7 @@
     [clojure.spec.alpha :as s]
     [clojure.string :as str]
     [com.fulcrologic.guardrails.core :refer [>defn => | <-]]
-    [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
-    [datahike.api :as d]
-    [datahike.core :as d.core]
-    [decide.models.argument :as argument]
-    [decide.models.user :as user])
+    [datahike.core :as d.core])
   (:import (java.util Date)))
 
 (def schema
@@ -56,10 +52,6 @@
 (s/def ::title (s/and string? (complement str/blank?)))
 (s/def ::body string?)
 (s/def ::created inst?)
-(s/def ::arguments (s/coll-of (s/keys
-                                :req [::argument/id]
-                                :opt [::argument/content])
-                     :distinct true))
 (s/def ::pro-votes nat-int?)
 (s/def ::con-votes nat-int?)
 (s/def ::parents (s/coll-of (s/keys :req [::id]) :distinct true))
@@ -67,12 +59,6 @@
 
 (s/def ::ident (s/tuple #{::id} ::id))
 (s/def ::lookup (s/or :ident ::ident :db/id pos-int?))
-
-(>defn get-arguments [db proposal-ident]
-  [d.core/db? ::ident => (s/keys :req [::arguments])]
-  (or
-    (d/pull db [{::arguments [::argument/id]}] proposal-ident)
-    {::arguments []}))
 
 
 (defn tx-map [{::keys [id nice-id title body parents argument-idents created original-author]
@@ -106,14 +92,3 @@
       ::original-author original-author
       ::created created}
      [:db/add process-lookup :decide.models.process/proposals (str id)]]))
-
-
-;;; region Arguments
-(defresolver resolve-arguments [{:keys [db]} {::keys [id]}]
-  {::pc/input  #{::id}
-   ::pc/output [{::arguments [::argument/id]}]}
-  (get-arguments db [::id id]))
-;;; endregion
-
-(def resolvers
-  [resolve-arguments])
