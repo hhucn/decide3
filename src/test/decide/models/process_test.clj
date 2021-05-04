@@ -1,25 +1,13 @@
 (ns decide.models.process-test
   (:require
     [clojure.test :refer [deftest is use-fixtures testing are]]
-    [datahike.api :as d]
     [decide.models.process :as process]
     [decide.models.process.mutations :as process.mutations]
     [decide.models.user :as user]
-    [decide.server-components.database :as database]
     [decide.server-components.pathom :as pathom]
-    [fulcro-spec.core :refer [specification provided behavior assertions component provided! => =fn=>]]
-    [taoensso.timbre :as log]))
-
-(def ^:dynamic *conn* nil)
-
-(defn db-fixture [f]
-  (binding [*conn* (log/with-level :info (database/test-database database/dev-db))]
-    (try
-      (f)
-      (catch Exception e (throw e))
-      (finally
-        (d/release *conn*)
-        (d/delete-database)))))
+    [decide.test-utils.common :refer [db-fixture *conn*]]
+    [fulcro-spec.check :as _]
+    [fulcro-spec.core :refer [specification provided behavior assertions component provided! => =fn=> =check=>]]))
 
 (use-fixtures :each db-fixture)
 
@@ -168,23 +156,38 @@
               =>
               "Failed validation!"
 
+              "can not remove an required attributes"
+              (parser-with-moderator
+                [{`(process.mutations/update-process
+                     #::process{:slug "test" :title nil})
+                  [::process/slug ::process/end-time]}])
+              =check=>
+              (_/embeds?*
+                {`process.mutations/update-process
+                 {:com.fulcrologic.rad.pathom/errors
+                  {:message "Failed validation!"}}})
+
               "can not remove slug"
-              (get-in (parser-with-moderator
-                        [{`(process.mutations/update-process
-                             #::process{:slug nil})
-                          [::process/slug ::process/end-time]}])
-                [`process.mutations/update-process :com.fulcrologic.rad.pathom/errors :message])
-              =>
-              "Failed validation!"
+              (parser-with-moderator
+                [{`(process.mutations/update-process
+                     #::process{:slug nil})
+                  [::process/slug ::process/end-time]}])
+              =check=>
+              (_/embeds?*
+                {`process.mutations/update-process
+                 {:com.fulcrologic.rad.pathom/errors
+                  {:message "Failed validation!"}}})
 
               "can not set title to empty"
-              (get-in (parser-with-moderator
-                        [{`(process.mutations/update-process
-                             #::process{:slug "test" :title ""})
-                          [::process/slug ::process/end-time]}])
-                [`process.mutations/update-process :com.fulcrologic.rad.pathom/errors :message])
-              =>
-              "Failed validation!")))
+              (parser-with-moderator
+                [{`(process.mutations/update-process
+                     #::process{:slug "test" :title ""})
+                  [::process/slug ::process/end-time]}])
+              =check=>
+              (_/embeds?*
+                {`process.mutations/update-process
+                 {:com.fulcrologic.rad.pathom/errors
+                  {:message "Failed validation!"}}}))))
 
         (component "who is not a moderator of the process"
           (let [parser-with-non-moderator (partial parser {:ring/request {:session {:id #uuid"001e7a7e-3eb2-4226-b9ab-36dddcf64106"}}})]
@@ -204,73 +207,74 @@
 
 (specification "Malformed add-process parameters"
   (let [parser (pathom/build-parser {} *conn*)
-        parser-existing-user (partial parser {:ring/request {:session {:id #uuid"0000fb5e-a9d0-44b6-b293-bb3c506fc0cb"}}})
-        get-relevant-key
-        (fn [actual]
-          (-> actual
-            (get-in [`process.mutations/add-process :com.fulcrologic.rad.pathom/errors :message])))]
+        parser-existing-user (partial parser {:ring/request {:session {:id #uuid"0000fb5e-a9d0-44b6-b293-bb3c506fc0cb"}}})]
     (behavior "process can not be added with"
       (assertions
 
         "malformed slug"
-        (->
-          (parser-existing-user
-            [{(list `process.mutations/add-process
-                #::process{:slug "I AM NOT A CORRECT SLUG"
-                           :title "My Test-Title"
-                           :description "foobar"})
-              [::process/slug ::process/title ::process/description]}])
-          get-relevant-key)
-        =>
-        "Failed validation!"
+        (parser-existing-user
+          [{`(process.mutations/add-process
+               #::process{:slug "I AM NOT A CORRECT SLUG"
+                          :title "My Test-Title"
+                          :description "foobar"})
+            [::process/slug ::process/title ::process/description]}])
+        =check=>
+        (_/embeds?*
+          {`process.mutations/add-process
+           {:com.fulcrologic.rad.pathom/errors
+            {:message "Failed validation!"}}})
 
         "empty title"
-        (->
-          (parser-existing-user
-            [{(list `process.mutations/add-process
-                #::process{:slug "correct-slug"
-                           :title ""
-                           :description "foobar"})
-              [::process/slug ::process/title ::process/description]}])
-          get-relevant-key)
-        =>
-        "Failed validation!"
+        (parser-existing-user
+          [{(list `process.mutations/add-process
+              #::process{:slug "correct-slug"
+                         :title ""
+                         :description "foobar"})
+            [::process/slug ::process/title ::process/description]}])
+        =check=>
+        (_/embeds?*
+          {`process.mutations/add-process
+           {:com.fulcrologic.rad.pathom/errors
+            {:message "Failed validation!"}}})
 
         "missing field"
-        (->
-          (parser-existing-user
-            [{(list `process.mutations/add-process
-                #::process{:slug "correct-slug"
-                           :description "foobar"})
-              [::process/slug ::process/title ::process/description]}])
-          get-relevant-key)
-        =>
-        "Failed validation!"
+        (parser-existing-user
+          [{(list `process.mutations/add-process
+              #::process{:slug "correct-slug"
+                         :description "foobar"})
+            [::process/slug ::process/title ::process/description]}])
+        =check=>
+        (_/embeds?*
+          {`process.mutations/add-process
+           {:com.fulcrologic.rad.pathom/errors
+            {:message "Failed validation!"}}})
 
         "string as end-date"
-        (->
-          (parser-existing-user
-            [{(list `process.mutations/add-process
-                #::process{:slug "correct-slug"
-                           :title "Bla"
-                           :description "foobar"
-                           :end-time "heute"})
-              [::process/slug ::process/title ::process/description]}])
-          get-relevant-key)
-        =>
-        "Failed validation!"
+        (parser-existing-user
+          [{(list `process.mutations/add-process
+              #::process{:slug "correct-slug"
+                         :title "Bla"
+                         :description "foobar"
+                         :end-time "heute"})
+            [::process/slug ::process/title ::process/description]}])
+        =check=>
+        (_/embeds?*
+          {`process.mutations/add-process
+           {:com.fulcrologic.rad.pathom/errors
+            {:message "Failed validation!"}}})
 
         "slug is already in use"
-        (->
-          (parser-existing-user
-            [{(list `process.mutations/add-process
-                #::process{:slug "test-decision"
-                           :title "Bla"
-                           :description "foobar"})
-              [::process/slug ::process/title ::process/description]}])
-          get-relevant-key)
-        =>
-        "Slug already in use"))))
+        (parser-existing-user
+          [{(list `process.mutations/add-process
+              #::process{:slug "test-decision"
+                         :title "Bla"
+                         :description "foobar"})
+            [::process/slug ::process/title ::process/description]}])
+        =check=>
+        (_/embeds?*
+          {`process.mutations/add-process
+           {:com.fulcrologic.rad.pathom/errors
+            {:message "Slug already in use"}}})))))
 
 (specification "Moderator priviliges"
   (let [parser (pathom/build-parser {} *conn*)
@@ -278,14 +282,15 @@
     (behavior "Only a moderator can"
       (behavior "add new moderators"
         (assertions
-          (->
-            (parser-with-alex-session
-              [`(process.mutations/add-moderator
-                  {::process/slug "test-decision"
-                   ::user/email "Marc"})])
-            (get-in [`process.mutations/add-moderator :com.fulcrologic.rad.pathom/errors :message]))
-          =>
-          "Need moderation role for this operation")))))
+          (parser-with-alex-session
+            [`(process.mutations/add-moderator
+                {::process/slug "test-decision"
+                 ::user/email "Marc"})])
+          =check=>
+          (_/embeds?*
+            {`process.mutations/add-moderator
+             {:com.fulcrologic.rad.pathom/errors
+              {:message "Need moderation role for this operation"}}}))))))
 
 (specification "Private processes"
   (let [parser (pathom/build-parser {} *conn*)
