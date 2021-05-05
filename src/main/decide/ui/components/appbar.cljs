@@ -20,9 +20,6 @@
     [material-ui.inputs.form :as form]
     [clojure.string :as str]))
 
-(def appbar-theme-color
-  {:light "primary"
-   :dark "inherit"})
 
 (defsc AppBar
   [this
@@ -43,7 +40,7 @@
         [temp-nickname set-temp-nickname] (hooks/use-state "")]
     (surfaces/app-bar
       {:position "sticky"
-       :color (appbar-theme-color theme)
+       :color "primary"
        :elevation (if (= :light theme) 2 0)}
       (surfaces/toolbar {}
         (when menu-onClick
