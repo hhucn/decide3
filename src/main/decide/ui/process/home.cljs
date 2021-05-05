@@ -114,4 +114,5 @@
          (fn []
            (df/load! app [::process/slug slug] ProcessHome)
            (dr/target-ready! app ident)))))}
-  (ui-process-home current-process))
+  (layout/box {:pb 5}
+    (ui-process-home current-process)))
