@@ -6,31 +6,22 @@
     [com.fulcrologic.fulcro.application :as app]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.data-fetch :as df]
-    [com.fulcrologic.fulcro.dom :as dom]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr :refer [defrouter]]
     [decide.models.authorization :as auth]
     [decide.models.process :as process]
-    [decide.models.user :as user]
     [decide.routing :as r]
-    [decide.utils.time :as time]
+    [decide.ui.process.header :as process.header]
     [decide.ui.process.home :as process.home]
     [decide.ui.process.moderator-tab :as process.moderator]
+    [decide.ui.process.personal-dashboard :as process.dashboard]
     [decide.ui.proposal.detail-page :as proposal.detail-page]
     [decide.ui.proposal.main-proposal-list :as proposal.main-list]
-    [decide.ui.process.personal-dashboard :as process.dashboard]
     [decide.ui.proposal.new-proposal :as new-proposal]
-    [material-ui.data-display :as dd]
-    [material-ui.lab.alert :as alert]
     [material-ui.layout :as layout]
     [material-ui.navigation.tabs :as tabs]
-    [material-ui.surfaces :as surfaces]
-    [material-ui.transitions :as transitions]
-    [material-ui.inputs :as inputs]
-    ["@material-ui/icons/ExpandMore" :default ExpandMore]
-    ["@material-ui/icons/ExpandLess" :default ExpandLess]
-    [material-ui.layout.grid :as grid]))
+    [material-ui.surfaces :as surfaces]))
 
 (defrouter ProcessRouter [_this _]
   {:router-targets
@@ -45,81 +36,6 @@
     (assoc :prefix (vec (take 2 (dr/current-route c))))))
 
 (def ui-process-router (comp/computed-factory ProcessRouter))
-
-(defsc Moderator [_ _]
-  {:query [::user/id]
-   :ident ::user/id})
-
-(defn process-ends-alert [{:keys [component]}]
-  (alert/alert {:severity :success}
-    (i18n/trf "Ended on the {endDatetime}!" {:endDatetime component})))
-
-(defn process-ended-alert [{:keys [component]}]
-  (alert/alert {:severity :info}
-    (i18n/trf "Ends at {endDatetime}" {:endDatetime component})))
-
-(defn description-collapse [{:keys [open? description toggle!]}]
-  (comp/fragment
-    (transitions/collapse {:in open?}
-      (dd/typography {:variant :body1
-                      :style {:whiteSpace :pre-line}}
-        description))
-    (inputs/button {:variant :outlined
-                    :size :small
-                    :onClick #(toggle! (not open?))
-                    :endIcon (if open?
-                               (dom/create-element ExpandLess)
-                               (dom/create-element ExpandMore))}
-      "Details")))
-
-
-(defsc Process [_ {::process/keys [title end-time description] :as process}]
-  {:query [::process/slug
-           ::process/title
-           ::process/description
-           ::process/end-time
-           {::process/moderators (comp/get-query Moderator)}]
-   :ident ::process/slug
-   :initial-state
-   (fn [{:keys [slug]}]
-     (when slug
-       {::process/slug slug}))
-   :use-hooks? true}
-  (let [[description-open? set-description-open] (hooks/use-state false)
-        has-end-time? (some? end-time)]
-    (layout/box {:mx 2 :my 1}
-      (dd/typography {:component "h1" :variant "h2"} title)
-
-
-      (transitions/collapse {:in description-open?}
-        (dd/typography {:variant :body1
-                        :style {:whiteSpace :pre-line}}
-          description))
-      (grid/container {:spacing 1 :alignItems :center}
-        (grid/item {}
-          (inputs/button {:variant (if has-end-time? :text :outlined)
-                          :size (if has-end-time? :large :small)
-                          :onClick #(set-description-open (not description-open?))
-                          :endIcon (if description-open?
-                                     (dom/create-element ExpandLess)
-                                     (dom/create-element ExpandMore))}
-            "Details"))
-        (when has-end-time?
-          (grid/item {:xs true}
-            (let [end-element (time/nice-time-element end-time)]
-              (if (process/over? process)
-                (process-ended-alert {:component end-element})
-                (process-ends-alert {:component end-element})))))))))
-
-(def ui-process (comp/factory Process))
-
-(defsc ProcessHeader [_ {:keys [ui/current-process]}]
-  {:query
-   [{[:ui/current-process '_] (comp/get-query Process)}]
-   :initial-state {}}
-  (ui-process current-process))
-
-(def ui-process-header (comp/factory ProcessHeader))
 
 (defn tab-bar [{current-target :target
                 current-path :prefix} & targets]
@@ -150,7 +66,7 @@
       (if (process-already-loaded? @state ident)
         (do
           (swap! state assoc :ui/current-process process-ident)
-          (df/load! app process-ident Process
+          (df/load! app process-ident process.header/Process
             {:target (targeting/multiple-targets
                        (targeting/replace-at (conj ident :process-header))
                        (targeting/replace-at [:ui/current-process])
@@ -160,7 +76,7 @@
           (dr/target-ready! app ident))
         (do
           (mrg/merge-component! app ProcessContext (comp/get-initial-state ProcessContext {:slug slug}))
-          (df/load! app process-ident Process
+          (df/load! app process-ident process.header/Process
             {:target (targeting/multiple-targets
                        (targeting/replace-at (conj ident :process-header))
                        (targeting/replace-at [:ui/current-process])
@@ -177,15 +93,15 @@
 (defsc ProcessContext [this {:ui/keys [process-router new-proposal-dialog]
                              :keys [ui/process-header root/current-session
                                     ui/current-process]}]
-  {:query [{[:ui/current-process '_] (comp/get-query Process)}
-           {:ui/process-header (comp/get-query ProcessHeader)}
+  {:query [{[:ui/current-process '_] (comp/get-query process.header/Process)}
+           {:ui/process-header (comp/get-query process.header/ProcessHeader)}
            {:ui/process-router (comp/get-query ProcessRouter)}
            {:ui/new-proposal-dialog (comp/get-query new-proposal/NewProposalFormDialog)}
            {[:root/current-session '_] (comp/get-query auth/Session)}]
    :initial-state
    (fn [{:keys [slug]}]
      {:ui/process-router (comp/get-initial-state ProcessRouter)
-      :ui/process-header (comp/get-initial-state ProcessHeader)
+      :ui/process-header (comp/get-initial-state process.header/ProcessHeader)
       :ui/new-proposal-dialog (comp/get-initial-state new-proposal/NewProposalFormDialog {:slug slug})})
    :ident (fn [] [:SCREEN ::ProcessContext])
    :route-segment ["decision" ::process/slug]
@@ -203,7 +119,7 @@
       (surfaces/paper
         {:square true}
         (layout/container {:maxWidth :xl :disableGutters true}
-          (ui-process-header process-header)
+          (process.header/ui-process-header process-header)
           (tab-bar (current-target this)
             {:label (i18n/trc "Overview over process" "Overview") :target process.home/ProcessOverviewScreen}
             {:label (i18n/tr "All proposals") :target proposal.main-list/MainProposalList}
