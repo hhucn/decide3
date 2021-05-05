@@ -3,6 +3,7 @@
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.dom.events :as evt]
     [decide.models.opinion :as opinion]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
@@ -17,13 +18,19 @@
            ::proposal/my-opinion]
    :ident ::proposal/id}
   (let [approved? (pos? my-opinion)]
-    (list/item {}
+    (list/item
+      {:button true
+       :component :a
+       :href (str "proposal/" id)}
       (list/item-icon {}
         (inputs/checkbox
           {:edge :start
            :checked approved?
-           :onClick #(comp/transact! this [(opinion/add {::proposal/id id
-                                                         :opinion (if approved? 0 1)})])}))
+           :onClick
+           (fn [e]
+             (evt/stop-propagation! e)
+             (comp/transact! this [(opinion/add {::proposal/id id
+                                                 :opinion (if approved? 0 1)})]))}))
 
       (list/item-text
         {:primary title
