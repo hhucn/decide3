@@ -28,7 +28,7 @@
     ["@material-ui/icons/Add" :default AddIcon]
     ["@material-ui/icons/ViewList" :default ViewList]
     ["@material-ui/icons/ViewModule" :default ViewModule]
-    ["@material-ui/icons/Sync" :default Sync]))
+    ["@material-ui/icons/Refresh" :default Refresh]))
 
 
 (defn add-proposal-fab [props]
@@ -181,7 +181,7 @@
         (main-list-toolbar {}
           (grid/container {:spacing 2}
             (inputs/button {:onClick #(df/refresh! this)
-                            :startIcon (dom/create-element Sync)}
+                            :startIcon (dom/create-element Refresh)}
               (i18n/trc "Reload content" "Refresh"))
             (info-toolbar-item
               {:label (i18n/trf "Proposals: {count}" {:count (count sorted-proposals)})})
