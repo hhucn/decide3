@@ -29,7 +29,8 @@
     [material-ui.transitions :as transitions]
     [material-ui.inputs :as inputs]
     ["@material-ui/icons/ExpandMore" :default ExpandMore]
-    ["@material-ui/icons/ExpandLess" :default ExpandLess]))
+    ["@material-ui/icons/ExpandLess" :default ExpandLess]
+    [material-ui.layout.grid :as grid]))
 
 (defrouter ProcessRouter [_this _]
   {:router-targets
@@ -84,18 +85,31 @@
      (when slug
        {::process/slug slug}))
    :use-hooks? true}
-  (let [[description-open? set-description-open] (hooks/use-state false)]
+  (let [[description-open? set-description-open] (hooks/use-state false)
+        has-end-time? (some? end-time)]
     (layout/box {:mx 2 :my 1}
       (dd/typography {:component "h1" :variant "h2"} title)
-      (when end-time
-        (let [end-element (time/nice-time-element end-time)]
-          (if (process/over? process)
-            (process-ended-alert {:component end-element})
-            (process-ends-alert {:component end-element}))))
-      (description-collapse
-        {:open? description-open?
-         :toggle! set-description-open
-         :description description}))))
+
+
+      (transitions/collapse {:in description-open?}
+        (dd/typography {:variant :body1
+                        :style {:whiteSpace :pre-line}}
+          description))
+      (grid/container {:spacing 1 :alignItems :center}
+        (grid/item {}
+          (inputs/button {:variant (if has-end-time? :text :outlined)
+                          :size (if has-end-time? :large :small)
+                          :onClick #(set-description-open (not description-open?))
+                          :endIcon (if description-open?
+                                     (dom/create-element ExpandLess)
+                                     (dom/create-element ExpandMore))}
+            "Details"))
+        (when has-end-time?
+          (grid/item {:xs true}
+            (let [end-element (time/nice-time-element end-time)]
+              (if (process/over? process)
+                (process-ended-alert {:component end-element})
+                (process-ends-alert {:component end-element})))))))))
 
 (def ui-process (comp/factory Process))
 
