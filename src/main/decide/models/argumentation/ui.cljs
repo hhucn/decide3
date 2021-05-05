@@ -63,12 +63,16 @@
           (i18n/tr "Submit"))
         (inputs/button {:onClick #(set-argument-open false)} (i18n/tr "Cancel")))
 
-      (inputs/button
-        {:onClick #(set-argument-open true)
-         :color :secondary
-         :disabled (not (comp/shared this :logged-in?))
-         :startIcon (dom/create-element AddCircleOutline)}
-        (i18n/tr "Add argument")))))
+      (dd/tooltip
+        {:title (if (comp/shared this :logged-in?) "" (i18n/tr "Login to add argument"))
+         :arrow true}
+        (dom/span {}
+          (inputs/button
+            {:onClick #(set-argument-open true)
+             :color :secondary
+             :disabled (not (comp/shared this :logged-in?))
+             :startIcon (dom/create-element AddCircleOutline)}
+            (i18n/tr "Add argument")))))))
 
 (declare ui-argument)
 

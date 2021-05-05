@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: decide3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-05-05 14:36+0200\n"
-"PO-Revision-Date: 2021-05-05 14:36+0200\n"
+"POT-Creation-Date: 2021-05-05 15:43+0200\n"
+"PO-Revision-Date: 2021-05-05 15:44+0200\n"
 "Last-Translator: Björn Ebbinghaus <ebbinghaus@hhu.de>\n"
 "Language-Team: Björn Ebbinghaus\n"
 "Language: de\n"
@@ -183,6 +183,12 @@ msgctxt "[aria]"
 msgid "Close"
 msgstr "schließen"
 
+msgid "Ended on the {endDatetime}!"
+msgstr "Endete am {endDatetime}!"
+
+msgid "Ends at {endDatetime}"
+msgstr "Endet am {endDatetime}"
+
 msgid "Approvals: {pros}"
 msgstr "Zustimmungen: {pros}"
 
@@ -200,6 +206,9 @@ msgstr "Fertig"
 
 msgid "Cancel"
 msgstr "Abbrechen"
+
+msgid "Login to add argument"
+msgstr "Melde dich an um ein neues Argument hinzuzufügen"
 
 msgid "Add argument"
 msgstr "Argument hinzufügen"
@@ -396,6 +405,29 @@ msgstr "Prozess bearbeiten"
 msgid "Edit"
 msgstr "Bearbeiten"
 
+msgid "Approvals {pros}"
+msgstr "Zustimmungen {pros}"
+
+msgid "Proposals you approve"
+msgstr "Vorschläge denen du zustimmst"
+
+msgid "You don't approve any proposals yet."
+msgstr "Du stimmst bisher keinen Vorschlägen zu."
+
+msgid "Proposals you might be interested in"
+msgstr "Vorschläge an denen du vielleicht interessiert bist"
+
+msgid "These are proposals derived from proposals you already approved."
+msgstr ""
+"Dies sind Vorschläge, die von einem von einem Vorschlag abstammen, dem du "
+"zugestimmt hast."
+
+msgid ""
+"Here you can find a personal overview and recommendations for this process."
+msgstr ""
+"Hier findest du eine personalisierte Übersicht und Empfehlungen für diesen "
+"Prozess."
+
 msgid "New proposal"
 msgstr "Neuer Vorschlag"
 
@@ -437,35 +469,6 @@ msgstr "Aktualisieren"
 
 msgid "Proposals: {count}"
 msgstr "Vorschläge: {count}"
-
-msgid "Approvals {pros}"
-msgstr "Zustimmungen {pros}"
-
-msgid "Proposals you approve"
-msgstr "Vorschläge denen du zustimmst"
-
-msgid "You don't approve any proposals yet."
-msgstr "Du stimmst bisher keinen Vorschlägen zu."
-
-msgid "Proposals you might be interested in"
-msgstr "Vorschläge an denen du vielleicht interessiert bist"
-
-msgid "These are proposals derived from proposals you already approved."
-msgstr ""
-"Dies sind Vorschläge, die von einem von einem Vorschlag abstammen, dem du "
-"zugestimmt hast."
-
-msgid ""
-"Here you can find a personal overview and recommendations for this process."
-msgstr ""
-"Hier findest du eine personalisierte Übersicht und Empfehlungen für diesen "
-"Prozess."
-
-msgid "Ended on the {endDatetime}!"
-msgstr "Endete am {endDatetime}!"
-
-msgid "Ends at {endDatetime}"
-msgstr "Endet am {endDatetime}"
 
 msgctxt "Overview over process"
 msgid "Overview"
