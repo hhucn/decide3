@@ -160,7 +160,10 @@
                                 {:statement/content statement})))})]))})
           (layout/box {:ml 1}
             (list/list {}
-              (map ui-argument premise->arguments))))))))
+              (map
+                (fn [argument]
+                  (ui-argument argument {:type-feature? type-feature?}))
+                premise->arguments))))))))
 
 (def ui-argument (comp/computed-factory Argument {:keyfn :argument/id}))
 
