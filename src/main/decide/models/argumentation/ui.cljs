@@ -83,6 +83,7 @@
                 {:type :text
                  :label (i18n/tr "New argument")
                  :fullWidth true
+                 :required true
                  :color :secondary
                  :multiline true
                  :autoFocus true
