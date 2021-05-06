@@ -174,7 +174,7 @@
       (new-argument-ui this
         {:type? type-feature?
          :onSubmit
-         (fn [statement]
+         (fn [statement type]
            (comp/transact! this
              [(argumentation.api/add-argument-to-proposal
                 {:proposal {::proposal/id id}
