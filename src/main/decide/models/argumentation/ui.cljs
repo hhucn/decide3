@@ -17,8 +17,14 @@
     ["@material-ui/icons/ExpandMore" :default ExpandMore]
     ["@material-ui/icons/ExpandLess" :default ExpandLess]
     ["@material-ui/icons/Send" :default Send]
+    ["@material-ui/icons/Close" :default Close]
     ["@material-ui/icons/AddCircleOutline" :default AddCircleOutline]
-    [material-ui.data-display :as dd]))
+    [material-ui.data-display :as dd]
+    [material-ui.lab.toggle-button :as toggle]
+    [material-ui.layout.grid :as grid]
+    [taoensso.timbre :as log]
+    [material-ui.inputs.form :as form]
+    [material-ui.surfaces :as surfaces]))
 
 (defsc StatementAuthor [_ {::user/keys [display-name]}]
   {:query [::user/id ::user/display-name]
@@ -37,31 +43,60 @@
 
 (def ui-statement (comp/factory Statement {:keyfn :statement/id}))
 
-(defn new-argument-ui [this {:keys [onSubmit]}]
+(defn type-selector [{}])
+
+(defn new-argument-ui [this {:keys [onSubmit type?] :or {type? false}}]
   (let [[new-argument-open? set-argument-open] (hooks/use-state false)
-        [new-argument set-new-argument] (hooks/use-state "")]
+        [new-argument set-new-argument] (hooks/use-state "")
+        [attitude set-attitude] (hooks/use-state :neutral)]
+    (log/info type?)
     (if (and new-argument-open? (comp/shared this :logged-in?))
-      (dom/form
-        {:onSubmit (fn [e]
+      (surfaces/card
+        {:component :form
+         :onSubmit (fn [e]
                      (evt/prevent-default! e)
-                     (onSubmit new-argument)
+                     (onSubmit new-argument attitude)
                      (set-argument-open false)
                      (set-new-argument ""))}
+        (surfaces/card-header
+          {:title "New Argument"
+           :action (inputs/icon-button {:onClick #(set-argument-open false)}
+                     (dom/create-element Close))})
+        (surfaces/card-content {}
+          (grid/container
+            {:spacing 1}
 
-        (inputs/textfield
-          {:type :text
-           :label (i18n/tr "New argument")
-           :fullWidth true
-           :color :secondary
-           :size :small
-           :autoFocus true
-           :variant :filled
-           :value new-argument
-           :onKeyDown #(when (evt/escape? %) (set-argument-open false))
-           :onChange #(set-new-argument (evt/target-value %))})
-        (inputs/button {:type :submit, :color :secondary, :startIcon (dom/create-element Send)}
-          (i18n/tr "Submit"))
-        (inputs/button {:onClick #(set-argument-open false)} (i18n/tr "Cancel")))
+            (when type?
+              (grid/item {:xs 12 :sm :auto}
+                (dd/typography {:component :legend
+                                :variant :caption
+                                :color :textSecondary}
+                  (i18n/tr "What is the attitude of this argument?"))
+                (toggle/button-group
+                  {:size :small
+                   :exclusive true
+                   :value (name attitude)
+                   :onChange #(some->> %2 keyword set-attitude)}
+                  (toggle/button {:value :pro} (i18n/trc "Label for type selection" "Pro"))
+                  (toggle/button {:value :neutral} (i18n/trc "Label for type selection" "Neutral"))
+                  (toggle/button {:value :contra} (i18n/trc "Label for type selection" "Contra")))))
+
+            (grid/item {:xs 12}
+              (inputs/textfield
+                {:type :text
+                 :label (i18n/tr "New argument")
+                 :fullWidth true
+                 :color :secondary
+                 :multiline true
+                 :autoFocus true
+                 :variant :filled
+                 :value new-argument
+                 :onKeyDown #(when (evt/escape? %) (set-argument-open false))
+                 :onChange #(set-new-argument (evt/target-value %))}))))
+        (surfaces/card-actions {}
+          (inputs/button {:type :submit, :color :secondary, :startIcon (dom/create-element Send)}
+            (i18n/tr "Submit"))))
+
 
       (dd/tooltip
         {:title (if (comp/shared this :logged-in?) "" (i18n/tr "Login to add argument"))
@@ -76,8 +111,10 @@
 
 (declare ui-argument)
 
-(defsc Argument [this {:argument/keys [premise premise->arguments no-of-arguments]}]
+(defsc Argument [this {:argument/keys [type premise premise->arguments no-of-arguments]}
+                 {:keys [type-feature?]}]
   {:query [:argument/id
+           :argument/type
            {:argument/premise (comp/get-query Statement)}
            {:argument/premise->arguments '...}
            :argument/no-of-arguments]
@@ -92,7 +129,13 @@
          (fn toggle-list [_]
            (when-not show-premises? (df/refresh! this))     ; only refresh when going to show list
            (set-show-premises (not show-premises?)))}
-        #_(dom/create-element ArrowRight #js {:fontSize "small" :color "disabled"})
+        (when type-feature?
+          (layout/box {:px 1 :clone true}
+            (dd/typography {:variant :caption :color :textSecondary}
+              (case type
+                :pro (i18n/trc "Argument type" "Pro")
+                :contra (i18n/trc "Argument type" "Contra")
+                (i18n/trc "Argument type" "Neutral")))))
         (ui-statement premise)
         (when (pos? no-of-arguments)
           (dd/typography {:variant :caption :color :textSecondary} (str "(" no-of-arguments ")")))
@@ -103,34 +146,49 @@
       (layout/box {:ml 1}
         (transitions/collapse {:in show-premises?}
           (new-argument-ui this
-            {:onSubmit
-             (fn [statement]
+            {:type? type-feature?
+             :onSubmit
+             (fn [statement type]
                (comp/transact! this
                  [(argumentation.api/add-argument-to-statement
                     {:conclusion premise
                      :argument
-                     (argumentation/make-argument-with-premise {:statement/content statement})})]))})
+                     (-> {:argument/type (when-not (= :neutral type) type)}
+                       argumentation/make-argument
+                       (assoc :argument/premise
+                              (argumentation/make-statement
+                                {:statement/content statement})))})]))})
           (layout/box {:ml 1}
             (list/list {}
               (map ui-argument premise->arguments))))))))
 
-(def ui-argument (comp/factory Argument {:keyfn :argument/id}))
+(def ui-argument (comp/computed-factory Argument {:keyfn :argument/id}))
 
 (defsc ArgumentList [this {::proposal/keys [id positions]}]
   {:query [::proposal/id
            {::proposal/positions (comp/get-query Argument)}]
    :ident ::proposal/id
    :use-hooks? true}
-  (comp/fragment
-    (new-argument-ui this
-      {:onSubmit
-       (fn [statement]
-         (comp/transact! this [(argumentation.api/add-argument-to-proposal
-                                 {:proposal {::proposal/id id}
-                                  :argument
-                                  (argumentation/make-argument-with-premise {:statement/content statement})})]))})
-    (list/list {}
-      (map ui-argument positions))))
+  (let [type-feature? true]
+    (comp/fragment
+      (new-argument-ui this
+        {:type? type-feature?
+         :onSubmit
+         (fn [statement]
+           (comp/transact! this
+             [(argumentation.api/add-argument-to-proposal
+                {:proposal {::proposal/id id}
+                 :argument
+                 (-> {:argument/type (when-not (= :neutral type) type)}
+                   argumentation/make-argument
+                   (assoc :argument/premise
+                          (argumentation/make-statement
+                            {:statement/content statement})))})]))})
+      (list/list {}
+        (map
+          (fn [position]
+            (ui-argument position {:type-feature? type-feature?}))
+          positions)))))
 
 
 (def ui-argument-list (comp/factory ArgumentList {:keyfn ::proposal/id}))
