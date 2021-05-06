@@ -10,21 +10,19 @@
     [decide.models.argumentation.api :as argumentation.api]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
+    [material-ui.data-display :as dd]
     [material-ui.data-display.list :as list]
     [material-ui.inputs :as inputs]
+    [material-ui.lab.toggle-button :as toggle]
     [material-ui.layout :as layout]
+    [material-ui.layout.grid :as grid]
+    [material-ui.surfaces :as surfaces]
     [material-ui.transitions :as transitions]
     ["@material-ui/icons/ExpandMore" :default ExpandMore]
     ["@material-ui/icons/ExpandLess" :default ExpandLess]
     ["@material-ui/icons/Send" :default Send]
     ["@material-ui/icons/Close" :default Close]
-    ["@material-ui/icons/AddCircleOutline" :default AddCircleOutline]
-    [material-ui.data-display :as dd]
-    [material-ui.lab.toggle-button :as toggle]
-    [material-ui.layout.grid :as grid]
-    [taoensso.timbre :as log]
-    [material-ui.inputs.form :as form]
-    [material-ui.surfaces :as surfaces]))
+    ["@material-ui/icons/AddCircleOutline" :default AddCircleOutline]))
 
 (defsc StatementAuthor [_ {::user/keys [display-name]}]
   {:query [::user/id ::user/display-name]
@@ -49,7 +47,6 @@
   (let [[new-argument-open? set-argument-open] (hooks/use-state false)
         [new-argument set-new-argument] (hooks/use-state "")
         [attitude set-attitude] (hooks/use-state :neutral)]
-    (log/info type?)
     (if (and new-argument-open? (comp/shared this :logged-in?))
       (surfaces/card
         {:component :form
