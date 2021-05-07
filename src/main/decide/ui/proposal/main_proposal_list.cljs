@@ -144,6 +144,17 @@
   (grid/item {}
     (dd/typography {:variant :overline} label)))
 
+(defn layout-selector [{:keys [value onChange]} buttons]
+  (when (< 1 (count buttons))
+    (toggle/button-group
+      {:exclusive true
+       :size :small
+       :value value
+       :onChange (fn [_event new-layout]
+                   (some-> new-layout keyword onChange))}
+      (for [[v icon] buttons]
+        (toggle/button {:value v}
+          (dom/create-element icon))))))
 
 (defsc MainProposalList [this {::process/keys [slug proposals no-of-contributors end-time no-of-participants]
                                :keys [root/current-session]}
@@ -179,7 +190,8 @@
 
         ; sort / filter toolbar
         (main-list-toolbar {}
-          (grid/container {:spacing 2}
+          ;; left side
+          (grid/container {:spacing 2, :alignItems :center}
             (inputs/button {:onClick #(df/refresh! this)
                             :startIcon (dom/create-element Refresh)}
               (i18n/trc "Reload content" "Refresh"))
@@ -188,19 +200,16 @@
             (info-toolbar-item
               {:label (i18n/trf "Participants {count}"
                         {:count (str (max no-of-participants no-of-contributors 0))})}))
-          (grid/container {:item true :spacing 2
-                           :justify "flex-end"}
-            (toggle/button-group
-              {:exclusive true
-               :size :small
-               :value selected-layout
-               :onChange (fn [_event new-layout]
-                           (some-> new-layout keyword set-selected-layout!))}
-              (toggle/button {:value :favorite}
-                (dom/create-element ViewModule))
-              (toggle/button {:value :hierarchy}
-                (dom/create-element ViewList)))
-            #_(grid/item {} (filter-selector selected-filters set-selected-filters!))
+
+          ;; right side
+          (grid/container
+            {:spacing 2, :alignItems :center, :justify :flex-end}
+            (layout-selector
+              {:value selected-layout
+               :onChange set-selected-layout!}
+              (cond-> {:favorite ViewModule}
+                >=-sm? (assoc :hierarchy ViewList)))
+
             (grid/item {} (sort-selector selected-sort set-selected-sort!))))
 
         ; main list
