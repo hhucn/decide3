@@ -40,7 +40,7 @@
 (defsc Author [_ {::user/keys [display-name]}]
   {:query [::user/id ::user/display-name]
    :ident ::user/id}
-  (i18n/trf "by {author}" {:author (dom/address (str display-name))}))
+  (str (i18n/trf "by {author}" {:author (dom/address (str display-name))})))
 
 (def ui-author (comp/factory Author {:keyfn ::user/id}))
 
