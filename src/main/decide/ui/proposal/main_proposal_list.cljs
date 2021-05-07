@@ -94,15 +94,20 @@
       (grid/item {:xs 12 :md 6 :lg 4 :key id :style {:flexGrow 1}}
         (proposal-card/ui-proposal-card proposal card-props)))))
 
+(defn line-divider [{:keys [label]}]
+  (grid/item {:xs 12}
+    (dd/divider {})
+    (dd/typography {:variant :overline} label)))
+
 (defn favorite-list
   "Displays a list of proposal card `items` with the first element prominent at the top."
-  [{:keys [items card-props]}]
+  [{:keys [items]}]
   (comp/fragment
+    (line-divider {:label (i18n/tr "This is the best proposal for the moment")})
     (let [best-proposal (first items)]
       (grid/item {:xs 12}
         (layout/container {:maxWidth :lg :disableGutters true}
           (layout/box {:pb 5}
-            (dd/typography {:variant :overline} (i18n/tr "This is the best proposal for the moment"))
             (proposal-card/ui-proposal-card
               best-proposal
               (update
@@ -112,9 +117,7 @@
                 :variant :elevation
                 :elevation 12))))))
 
-    (grid/item {:xs 12}
-      (dd/divider {})
-      (dd/typography {:variant :overline} (i18n/tr "All other proposals")))
+    (line-divider {:label (i18n/tr "All other proposals")})
     (plain-list {:items (rest items)})))
 
 (defn hierarchy-list
