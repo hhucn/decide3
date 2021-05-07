@@ -12,11 +12,12 @@
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
-    [decide.utils.time :as time]
     [decide.ui.proposal.card :as proposal-card]
     [decide.utils.breakpoint :as breakpoint]
+    [decide.utils.time :as time]
     [material-ui.data-display :as dd]
     [material-ui.data-display.list :as list]
+    [material-ui.feedback :as feedback]
     [material-ui.inputs :as inputs]
     [material-ui.inputs.form :as form]
     [material-ui.inputs.input :as input]
@@ -26,9 +27,9 @@
     [material-ui.navigation :as navigation]
     [material-ui.surfaces :as surfaces]
     ["@material-ui/icons/Add" :default AddIcon]
+    ["@material-ui/icons/Refresh" :default Refresh]
     ["@material-ui/icons/ViewList" :default ViewList]
-    ["@material-ui/icons/ViewModule" :default ViewModule]
-    ["@material-ui/icons/Refresh" :default Refresh]))
+    ["@material-ui/icons/ViewModule" :default ViewModule]))
 
 
 (defn add-proposal-fab [props]
@@ -172,14 +173,16 @@
           (dom/create-element icon))))))
 
 (defsc MainProposalList [this {::process/keys [slug proposals no-of-contributors end-time no-of-participants]
-                               :keys [root/current-session]}
+                               :keys [root/current-session]
+                               :as props}
                          {:keys [show-new-proposal-dialog]}]
   {:query [::process/slug
            {::process/proposals (comp/get-query proposal-card/ProposalCard)}
            ::process/no-of-contributors
            ::process/no-of-participants
            ::process/end-time
-           [:root/current-session '_]]
+           [:root/current-session '_]
+           [df/marker-table ::loading-proposals]]
    :ident ::process/slug
    :route-segment ["proposals"]
    :will-enter (fn [app {::process/keys [slug]}]
@@ -195,6 +198,7 @@
                             :post-mutation-params {:target ident}}))))))
    :use-hooks? true}
   (let [logged-in? (get current-session :session/valid?)
+        loading-proposals? (df/loading? (get props [df/marker-table ::loading-proposals]))
         [selected-sort set-selected-sort!] (hooks/use-state "most-approvals")
         [selected-layout set-selected-layout!] (hooks/use-state :favorite)
         sorted-proposals (hooks/use-memo #(proposal/rank-by selected-sort proposals) [selected-sort proposals])
@@ -207,8 +211,14 @@
         (main-list-toolbar {}
           ;; left side
           (grid/container {:spacing 2, :alignItems :center}
-            (inputs/button {:onClick #(df/refresh! this)
-                            :startIcon (dom/create-element Refresh)}
+            (inputs/button
+              {:onClick #(df/refresh! this {:marker ::loading-proposals})
+               :variant :outlined
+               :disabled loading-proposals?
+               :startIcon
+               (if loading-proposals?
+                 (feedback/circular-progress {:size "20px"})
+                 (dom/create-element Refresh))}
               (i18n/trc "Reload content" "Refresh"))
             (info-toolbar-item
               {:label (i18n/trf "Proposals: {count}" {:count (count sorted-proposals)})})
