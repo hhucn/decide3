@@ -98,12 +98,24 @@
   "Displays a list of proposal card `items` with the first element prominent at the top."
   [{:keys [items card-props]}]
   (comp/fragment
-    (grid/item {:xs 12}
-      (layout/container {:maxWidth :sm :disableGutters true}
-        (dd/typography {:variant :h5} (i18n/tr "This is the best proposal for the moment"))
-        (proposal-card/ui-proposal-card (first items) card-props)))
+    (let [best-proposal (first items)]
+      (grid/item {:xs 12}
+        (layout/container {:maxWidth :lg :disableGutters true}
+          (layout/box {:pb 5}
+            (dd/typography {:variant :overline} (i18n/tr "This is the best proposal for the moment"))
+            (proposal-card/ui-proposal-card
+              best-proposal
+              (update
+                (comp/get-computed best-proposal)
+                :card-props
+                assoc
+                :variant :elevation
+                :elevation 12))))))
 
-    (plain-list {:items (rest items) :card-props card-props})))
+    (grid/item {:xs 12}
+      (dd/divider {})
+      (dd/typography {:variant :overline} (i18n/tr "All other proposals")))
+    (plain-list {:items (rest items)})))
 
 (defn hierarchy-list
   [{:keys [items card-props]}]
