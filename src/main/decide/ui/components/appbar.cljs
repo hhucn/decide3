@@ -40,8 +40,7 @@
         [temp-nickname set-temp-nickname] (hooks/use-state "")]
     (surfaces/app-bar
       {:position "sticky"
-       :color "primary"
-       :elevation (if (= :light theme) 2 0)}
+       :color "primary"}
       (surfaces/toolbar {}
         (when menu-onClick
           (inputs/icon-button
