@@ -24,8 +24,7 @@
     ["@material-ui/icons/CommentOutlined" :default Comment]
     ["@material-ui/icons/MoreVert" :default MoreVert]
     ["@material-ui/icons/ThumbDownAltOutlined" :default ThumbDownAlt]
-    ["@material-ui/icons/ThumbUpAltOutlined" :default ThumbUpAlt]
-    [taoensso.timbre :as log]))
+    ["@material-ui/icons/ThumbUpAltOutlined" :default ThumbUpAlt]))
 
 (defn id-part [proposal-id]
   (dom/data {:className "proposal-id"
@@ -37,10 +36,10 @@
     " "
     (time/nice-time-element created)))
 
-(defsc Author [_ {::user/keys [display-name]}]
+(defsc Author [_ {::user/keys [id display-name]}]
   {:query [::user/id ::user/display-name]
    :ident ::user/id}
-  (str (i18n/trf "by {author}" {:author (dom/address (str display-name))})))
+  (i18n/trf "by {author}" {:author (dom/address {:key id} (str display-name))}))
 
 (def ui-author (comp/factory Author {:keyfn ::user/id}))
 
