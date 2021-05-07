@@ -48,9 +48,10 @@
 
 
       (transitions/collapse {:in description-open?}
-        (dd/typography {:variant :body1
-                        :style {:whiteSpace :pre-line}}
-          description))
+        (layout/box {:py 2 :clone true}
+          (dd/typography {:variant :body1
+                          :style {:whiteSpace :pre-line}}
+            description)))
       (grid/container {:spacing 1 :alignItems :center}
         (grid/item {}
           (inputs/button {:variant (if has-end-time? :text :outlined)
