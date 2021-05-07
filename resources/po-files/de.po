@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: decide3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-05-05 15:43+0200\n"
-"PO-Revision-Date: 2021-05-05 15:44+0200\n"
+"POT-Creation-Date: 2021-05-07 21:58+0200\n"
+"PO-Revision-Date: 2021-05-07 21:59+0200\n"
 "Last-Translator: Björn Ebbinghaus <ebbinghaus@hhu.de>\n"
 "Language-Team: Björn Ebbinghaus\n"
 "Language: de\n"
@@ -198,14 +198,26 @@ msgstr "Deine Zustimmungen"
 msgid "by {author}"
 msgstr "von {author}"
 
+msgid "What is the attitude of this argument?"
+msgstr "Was für eine Art Argument ist es?"
+
+msgctxt "Argument type"
+msgid "Pro"
+msgstr "Dafür"
+
+msgctxt "Argument type"
+msgid "Neutral"
+msgstr "Neutral"
+
+msgctxt "Argument type"
+msgid "Contra"
+msgstr "Dagegen"
+
 msgid "New argument"
 msgstr "Neues Argument"
 
 msgid "Submit"
 msgstr "Fertig"
-
-msgid "Cancel"
-msgstr "Abbrechen"
 
 msgid "Login to add argument"
 msgstr "Melde dich an um ein neues Argument hinzuzufügen"
@@ -354,6 +366,9 @@ msgstr "Schlage eine Verbesserung vor"
 msgid "Propose an alternative"
 msgstr "Schlage eine Alternative vor"
 
+msgid "Cancel"
+msgstr "Abbrechen"
+
 msgctxt "Proposal has been approved"
 msgid "Approved"
 msgstr "Zugestimmt"
@@ -457,6 +472,9 @@ msgstr "Filter"
 msgid "This is the best proposal for the moment"
 msgstr "Dies ist der bisher beste Vorschlag"
 
+msgid "All other proposals"
+msgstr "Alle Vorschläge"
+
 msgid "Children"
 msgstr "Kinder"
 
@@ -486,7 +504,7 @@ msgid "Dismiss"
 msgstr "Ausblenden"
 
 msgid "Work in progress!"
-msgstr ""
+msgstr "In Arbeit!"
 
 msgid ""
 "Components marked with a yellow outline are in progress, and may not work "
@@ -516,17 +534,11 @@ msgstr "Teilnehmer {count}"
 #~ msgid "Only applicable with parents"
 #~ msgstr "Nur mit Eltern möglich"
 
-#~ msgid "Pro"
-#~ msgstr "Dafür"
-
 #~ msgid "Con"
 #~ msgstr "Dagegen"
 
 #~ msgid "By "
 #~ msgstr "Von "
-
-#~ msgid "Contra"
-#~ msgstr "Dagegen"
 
 #~ msgid "Ballot"
 #~ msgstr "Stimmzettel"

@@ -74,9 +74,9 @@
                    :exclusive true
                    :value (name attitude)
                    :onChange #(some->> %2 keyword set-attitude)}
-                  (toggle/button {:value :pro} (i18n/trc "Label for type selection" "Pro"))
-                  (toggle/button {:value :neutral} (i18n/trc "Label for type selection" "Neutral"))
-                  (toggle/button {:value :contra} (i18n/trc "Label for type selection" "Contra")))))
+                  (toggle/button {:value :pro} (i18n/trc "Argument type" "Pro"))
+                  (toggle/button {:value :neutral} (i18n/trc "Argument type" "Neutral"))
+                  (toggle/button {:value :contra} (i18n/trc "Argument type" "Contra")))))
 
             (grid/item {:xs 12}
               (inputs/textfield
