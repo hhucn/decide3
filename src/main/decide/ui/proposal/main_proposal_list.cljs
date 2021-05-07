@@ -222,7 +222,7 @@
                  (dom/create-element Refresh))}
               (i18n/trc "Reload content" "Refresh"))
             (info-toolbar-item
-              {:label (i18n/trf "Proposals: {count}" {:count (count sorted-proposals)})})
+              {:label (i18n/trf "Proposals {count}" {:count (count sorted-proposals)})})
             (info-toolbar-item
               {:label (i18n/trf "Participants {count}"
                         {:count (str (max no-of-participants no-of-contributors 0))})}))

@@ -170,11 +170,11 @@
                      (comp/transact! this [(sign-in #:user{::user/email email
                                                            ::user/password password})]))}
         (grid/item {:xs 12}
-          (wide-textfield {:label (i18n/tr "E-Mail")
+          (wide-textfield {:label (i18n/tr "Email")
                            :type :email
                            :error (boolean email-error)
                            :helperText email-error
-                           :inputProps {:aria-label (i18n/tr "E-Mail")
+                           :inputProps {:aria-label (i18n/tr "Email")
                                         :autoComplete :email}
                            :value email
                            :autoFocus true
