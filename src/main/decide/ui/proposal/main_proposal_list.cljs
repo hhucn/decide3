@@ -168,9 +168,10 @@
        :value value
        :onChange (fn [_event new-layout]
                    (some-> new-layout keyword onChange))}
-      (for [[v icon] buttons]
-        (toggle/button {:value v}
-          (dom/create-element icon))))))
+      (doall
+        (for [[v icon] buttons]
+          (toggle/button {:value v :key v}
+            (dom/create-element icon)))))))
 
 (defsc MainProposalList [this {::process/keys [slug proposals no-of-contributors end-time no-of-participants]
                                :keys [root/current-session]
