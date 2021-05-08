@@ -218,7 +218,7 @@
                :disabled loading-proposals?
                :startIcon
                (if loading-proposals?
-                 (feedback/circular-progress {:size "20px"})
+                 (feedback/circular-progress {:size "20px" :color :inherit})
                  (dom/create-element Refresh))}
               (i18n/trc "Reload content" "Refresh"))
             (info-toolbar-item
