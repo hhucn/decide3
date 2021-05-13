@@ -1,0 +1,46 @@
+{:tasks
+ {release:docker-github
+  {:doc "Build the docker image with the GitHub Container Registry tag."
+   :task (shell "docker build -t ghcr.io/hhucn/decide3:latest .")}
+
+  cljs:clean
+  {:requires ([babashka.fs :as fs])
+   :task (do
+           (fs/delete-tree ".shadow-cljs")
+           (fs/delete-tree "resources/public/js")
+           (fs/delete-tree "resources/public/workspaces/js"))}
+
+  cljs:install
+  {:task (shell "yarn install")}
+
+  dev:watch-cljs
+  {:depends [cljs:install]
+   :task (shell "clj -M:dev -m \"shadow.cljs.devtools.cli\" watch :main")}
+
+  i18n
+  {:task (shell "clj -M:dev -m \"shadow.cljs.devtools.cli\" release :i18n")}
+
+  test-clj
+  {:task (shell "clj -J-Dguardrails.enabled=true -M:dev:clj-tests")}
+
+  test:watch-clj
+  {:task (shell "clj -J-Dguardrails.enabled=true -M:dev:clj-tests --watch")}
+
+  release:js
+  {:task (shell "clj -M:dev -m \"shadow.cljs.devtools.cli\" release :main")}
+
+  release:uberjar
+  {:task (shell "clj -X:uberjar")}
+
+  release
+  {:depends [cljs:clean release:js release:uberjar]}
+
+  report
+  {:task
+   (shell "clj -M:dev -m \"shadow.cljs.devtools.cli\" run shadow.cljs.build-report main report.html")}
+
+  outdated
+  {:depends [cljs:install]
+   :task (do
+           (clojure {:continue true} "-Sdeps '{:deps {com.github.liquidz/antq {:mvn/version \"RELEASE\"}}}' -m antq.core")
+           (shell "yarn outdated"))}}}

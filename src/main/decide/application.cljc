@@ -1,7 +1,5 @@
 (ns decide.application
   (:require
-    [com.fulcrologic.fulcro-css.css :as css]
-    [com.fulcrologic.fulcro.components :as comp]
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.rad.application :as rad-app]
     #?(:cljs ["intl-messageformat" :default IntlMessageFormat])))
@@ -25,8 +23,4 @@
 
      :shared-fn (fn [db]
                   (-> (::i18n/current-locale db)
-                    (assoc :logged-in? (get-in db [:root/current-session :session/valid?] false))))
-     :props-middleware
-     (comp/wrap-update-extra-props
-       (fn [cls extra-props]
-         (merge extra-props (css/get-classnames cls))))}))
+                    (assoc :logged-in? (get-in db [:root/current-session :session/valid?] false))))}))

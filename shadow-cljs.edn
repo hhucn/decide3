@@ -5,15 +5,24 @@
                  :asset-path "/js/main"
 
                  :module-hash-names true
-                 :modules {:main {:init-fn decide.client/init
-                                  :entries [decide.client]
-                                  :depends-on #{:app}}
-                           :app {:entries [decide.application]}}
+                 :modules {:client {:init-fn decide.client/init
+                                    :entries [decide.client]
+                                    :depends-on #{:shared}}
+                           :shared {:entries [decide.application]}}
                  ;; guardrails enforcement only during dev
                  :dev {:compiler-options
-                       {:external-config {:guardrails {}}
-                        :closure-defines {'goog.DEBUG true}
-                        #_:warnings #_{:redef false}}}
+                       {:external-config {:guardrails {:defn-macro nil
+                                                       :expound {:show-valid-values? true
+                                                                 :print-specs? true}
+                                                       :async? true
+                                                       :throw? false
+                                                       :emit-spec? true}}
+                        :closure-defines {'goog.DEBUG true}}}
+
+                 :release
+                 {:build-options
+                  {:ns-aliases
+                   {com.fulcrologic.guardrails.core com.fulcrologic.guardrails.noop}}}
 
                  :devtools {:after-load decide.client/refresh
                             :preloads [com.fulcrologic.fulcro.inspect.websocket-preload
