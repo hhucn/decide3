@@ -64,7 +64,7 @@
        [:title "decide"]
        [:meta {:charset "utf-8"}]
        [:meta {:name "viewport" :content "width=device-width, initial-scale=1, maximum-scale=5"}]
-       [:link {:rel "icon" :type "image/svg+xml" :href "/assets/icons/favicon.svg"}]
+       [:link {:rel "icon" :type "image/svg+xml" :href (if (:dev? config) "/assets/icons/favicon_dev.svg" "/assets/icons/favicon.svg")}]
 
        [:meta {:name "mobile-web-app-capable" :content "yes"}]
        [:meta {:name "apple-mobile-web-app-capable" :content "yes"}]
