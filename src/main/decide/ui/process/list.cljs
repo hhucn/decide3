@@ -107,6 +107,16 @@
   (let [logged-in? (get current-session :session/valid? false)]
     (layout/container {}
       (dd/typography {:component :h1 :variant :h2} (i18n/tr "Active decision-processes"))
+
+      (layout/box {:my 2 :clone true}
+        (inputs/button {:variant :contained
+                        :color :primary
+                        :disabled (not logged-in?)
+                        :fullWidth true
+                        :size :large
+                        :onClick #(m/toggle! this :ui/new-process-dialog-open?)}
+          (i18n/tr "Create new decision-process")))
+
       (ui-all-process-list all-processes-list)
 
       (layout/box {:my 2 :clone true}
