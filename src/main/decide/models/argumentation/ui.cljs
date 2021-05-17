@@ -17,14 +17,14 @@
     [material-ui.layout :as layout]
     [material-ui.layout.grid :as grid]
     [material-ui.surfaces :as surfaces]
+    [material-ui.styles :as styles]
     [material-ui.transitions :as transitions]
     ["@material-ui/icons/ExpandMore" :default ExpandMore]
     ["@material-ui/icons/ExpandLess" :default ExpandLess]
     ["@material-ui/icons/Send" :default Send]
     ["@material-ui/icons/Close" :default Close]
     ["@material-ui/icons/AddCircleOutline" :default AddCircleOutline]
-    ["@material-ui/icons/Comment" :default Comment]
-    [taoensso.timbre :as log]))
+    ["@material-ui/icons/Comment" :default Comment]))
 
 (defsc StatementAuthor [_ {::user/keys [display-name]}]
   {:query [::user/id ::user/display-name]
@@ -42,8 +42,6 @@
                    :secondary (when author (ui-statement-author author))}))
 
 (def ui-statement (comp/factory Statement {:keyfn :statement/id}))
-
-(defn type-selector [{}])
 
 (defn new-argument-ui [this {:keys [onSubmit type?] :or {type? false}}]
   (let [[new-argument-open? set-argument-open] (hooks/use-state false)
@@ -115,6 +113,15 @@
 (defn hash-color [s]                                        ; TODO move to util namespace
   (str "#" (.toString (bit-and (hash s) 0xFFFFFF) 16)))
 
+(def emoji-expr #"^(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff])[\ufe0e\ufe0f]?(?:[\u0300-\u036f\ufe20-\ufe23\u20d0-\u20f0]|\ud83c[\udffb-\udfff])?(?:\u200d(?:[^\ud800-\udfff]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff])[\ufe0e\ufe0f]?(?:[\u0300-\u036f\ufe20-\ufe23\u20d0-\u20f0]|\ud83c[\udffb-\udfff])?)*")
+
+(defn emoji-first [s]
+  (if (string? s)
+    (or
+      (re-find emoji-expr s)
+      (first s))
+    \?))
+
 (defsc Argument [this {:argument/keys [type premise premise->arguments no-of-arguments]}
                  {:keys [type-feature?]}]
   {:query [:argument/id
@@ -129,7 +136,8 @@
                        (fn toggle-list [_]
                          (when-not show-premises? (df/refresh! this)) ; only refresh when going to show list
                          (set-show-premises (not show-premises?)))
-                       [this show-premises?])]
+                       [this show-premises?])
+        get-contrast-text (get-in (styles/use-theme) [:palette :getContrastText])]
     (surfaces/card {:variant :outlined
                     :elevation 0}
       (layout/box {:p 1}
@@ -139,11 +147,13 @@
                            :wrap :nowrap
                            :item true}
             (grid/item {}
-              (let [display-name (get-in premise [:statement/author ::user/display-name])]
+              (let [{::user/keys [id display-name]} (get premise :statement/author)
+                    color (hash-color id)]
                 (dd/avatar
                   {:alt display-name
-                   :style {:backgroundColor (hash-color display-name)}}
-                  (first display-name))))
+                   :style {:backgroundColor color
+                           :color (get-contrast-text color)}}
+                  (emoji-first display-name))))
             (grid/container {:item true :direction :column :spacing 1}
               (grid/container {:item true}
                 (when type-feature?
