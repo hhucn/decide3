@@ -93,7 +93,7 @@
 
 (defn index-with-credentials [csrf-token script-manifest request]
   (let [lang (keyword (first (str/split (get-in request [:headers "accept-language"]) #"[-_]")))
-        locale (or (i18n/load-locale "po-files" lang) {::i18n/locale :en})
+        locale (or #_(i18n/load-locale "po-files" lang) {::i18n/locale :en})
         initial-state
         (->
           (comp/get-initial-state Root)
