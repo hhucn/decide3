@@ -43,4 +43,6 @@
   {:depends [cljs:install]
    :task (do
            (clojure {:continue true} "-Sdeps '{:deps {com.github.liquidz/antq {:mvn/version \"RELEASE\"}}}' -m antq.core")
-           (shell "yarn outdated"))}}}
+           (shell "yarn outdated"))}
+
+  deploy (shell "ssh root@ebbinghaus.me 'cd decide ; ./deploy.sh'")}}
