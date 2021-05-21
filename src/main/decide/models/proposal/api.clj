@@ -90,6 +90,7 @@
 (def full-api [resolve-proposal
                resolve-generation
                resolve-parents
+               resolve-children
 
                resolve-child-relations
                resolve-parent-relations
