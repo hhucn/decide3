@@ -125,19 +125,21 @@
   [{:keys [items card-props]}]
   (grid/container {:spacing 5}
     (vec
-      (for [{id ::proposal/id :as proposal} items]
+      (for [{id ::proposal/id :as proposal} items
+            :let [computed (comp/get-computed proposal)]]
         (grid/container {:xs 12 :key id :style {:flexGrow 1} :item true :spacing 1}
           (layout/box {:clone true}
             (grid/item {:xs 12 :lg 4}
-              (proposal-card/ui-proposal-card proposal (assoc card-props :elevation 10))))
+              (proposal-card/ui-proposal-card proposal (assoc computed :elevation 10))))
 
-          (grid/item {:xs 12 :lg 8}
-            (dd/typography {:variant :overline} (i18n/tr "Children"))
-            (grid/container {:item true :spacing 1 :direction :row}
-              (vec
-                (for [proposal (::proposal/children proposal)]
-                  (grid/item {:xs 4 :key (::proposal/id proposal)}
-                    (proposal-card/ui-proposal-card proposal card-props)))))))))))
+          (let [children (::proposal/children proposal)]
+            (grid/item {:xs 12 :lg 8}
+              (dd/typography {:variant :overline} (i18n/tr "Children"))
+              (grid/container {:item true :spacing 1 :direction :row}
+                (vec
+                  (for [proposal children]
+                    (grid/item {:xs 4 :key (::proposal/id proposal)}
+                      (proposal-card/ui-proposal-card proposal computed))))))))))))
 
 (defn new-proposal-card [{:keys [disabled? onClick]}]
   (inputs/button {:style {:height "100%"
@@ -240,10 +242,12 @@
 
         ; main list
         (error-boundaries/error-boundary
-          (let [computed {::process/slug slug
-                          :process-over? process-over?
-                          :card-props {:variant (when >=-sm? :outlined)}}
-                list-options {:items (mapv #(comp/computed % computed) sorted-proposals)}]
+          (let [context {::process/slug slug
+                         :process-over? process-over?
+                         :card-props {:variant (when >=-sm? :outlined)}}
+                list-options (merge
+                               {:items (mapv #(comp/computed % context) sorted-proposals)}
+                               context)]
             (case selected-layout
               :favorite
               (grid/container {:spacing (if >=-sm? 2 1)
