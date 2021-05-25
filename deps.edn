@@ -29,20 +29,20 @@
         ring/ring-defaults {:mvn/version "0.3.2"}
 
         com.draines/postal {:mvn/version "2.0.4"}
-        jarohen/chime {:mvn/version "0.3.2"}
+        jarohen/chime {:mvn/version "0.3.3"}
 
         nrepl/nrepl {:mvn/version "0.8.3"}}
 
  :aliases {:clj-tests {:extra-paths ["src/test"]
                        :main-opts ["-m" "kaocha.runner"]
-                       :extra-deps {lambdaisland/kaocha {:mvn/version "1.0.829"}
+                       :extra-deps {lambdaisland/kaocha {:mvn/version "1.0.861"}
                                     lambdaisland/kaocha-junit-xml {:mvn/version "0.0.76"}}}
 
            ;; See https://github.com/clojure-emacs/cider-nrepl/blob/master/deps.edn for Emacs support
            :dev {:extra-paths ["src/test" "src/dev" "src/workspaces"]
                  :jvm-opts ["-XX:-OmitStackTraceInFastThrow"]
-                 :extra-deps {org.clojure/clojurescript {:mvn/version "1.10.844"}
-                              thheller/shadow-cljs {:mvn/version "2.13.0"}
+                 :extra-deps {org.clojure/clojurescript {:mvn/version "1.10.866"}
+                              thheller/shadow-cljs {:mvn/version "2.14.0"}
                               expound/expound {:mvn/version "0.8.9"}
                               fulcrologic/fulcro-spec {:mvn/version "3.1.12"}
                               binaryage/devtools {:mvn/version "1.0.3"}
