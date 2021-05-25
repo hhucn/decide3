@@ -47,14 +47,13 @@
 (defresolver resolve-proposal-arguments [{:keys [db]} {::proposal/keys [id]}]
   {::pc/output [{::proposal/positions [:argument/id]}]}
   (let [{:keys [::proposal/arguments]} (d/pull db [{::proposal/arguments [:argument/id]}] [::proposal/id id])]
-    {::proposal/positions arguments}))
+    {::proposal/positions (or arguments [])}))
 
 (defresolver resolve-no-of-arguments [{:keys [db]} {::proposal/keys [id]}]
   {::proposal/no-of-arguments
    (proposal.db/get-no-of-arguments db {::proposal/id id})})
 
-(defresolver resolve-no-of-sub-arguments
-  [{:keys [db]} {:argument/keys [id]}]
+(defresolver resolve-no-of-sub-arguments [{:keys [db]} {:argument/keys [id]}]
   {:argument/no-of-arguments
    (proposal.db/get-no-of-sub-arguments db {:argument/id id})})
 
