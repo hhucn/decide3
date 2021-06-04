@@ -10,6 +10,7 @@
     [decide.models.argumentation.api :as argumentation.api]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
+    [decide.models.user.ui :as user.ui]
     [material-ui.data-display :as dd]
     [material-ui.data-display.list :as list]
     [material-ui.inputs :as inputs]
@@ -110,18 +111,6 @@
 
 (declare ui-argument)
 
-(defn hash-color [s]                                        ; TODO move to util namespace
-  (str "#" (.toString (bit-and (hash s) 0xFFFFFF) 16)))
-
-(def emoji-expr #"^(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff])[\ufe0e\ufe0f]?(?:[\u0300-\u036f\ufe20-\ufe23\u20d0-\u20f0]|\ud83c[\udffb-\udfff])?(?:\u200d(?:[^\ud800-\udfff]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff])[\ufe0e\ufe0f]?(?:[\u0300-\u036f\ufe20-\ufe23\u20d0-\u20f0]|\ud83c[\udffb-\udfff])?)*")
-
-(defn emoji-first [s]
-  (if (string? s)
-    (or
-      (re-find emoji-expr s)
-      (first s))
-    \?))
-
 (defsc Argument [this {:argument/keys [type premise premise->arguments no-of-arguments]}
                  {:keys [type-feature?]}]
   {:query [:argument/id
@@ -141,19 +130,13 @@
     (surfaces/card {:variant :outlined
                     :elevation 0}
       (layout/box {:p 1}
-        (grid/container {:direct :column :spacing 2}
+        (grid/container {:direction :column :spacing 2}
           (grid/container {:spacing 2
                            :direction :row
                            :wrap :nowrap
                            :item true}
             (grid/item {}
-              (let [{::user/keys [id display-name]} (get premise :statement/author)
-                    color (hash-color id)]
-                (dd/avatar
-                  {:alt display-name
-                   :style {:backgroundColor color
-                           :color (get-contrast-text color)}}
-                  (emoji-first display-name))))
+              (user.ui/avatar (get premise :statement/author)))
             (grid/container {:item true :direction :column :spacing 1}
               (grid/container {:item true}
                 (when type-feature?
