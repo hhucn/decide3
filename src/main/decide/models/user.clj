@@ -48,7 +48,7 @@
 (s/def ::email string?)
 (s/def ::encrypted-password string?)
 (s/def ::password (s/or :encrypted ::encrypted-password :raw string?))
-(s/def ::display-name string?)
+(s/def ::display-name (s/and string? #(< 0 (count %) 50)))
 
 (>defn hash-password [password]
   [::password => ::encrypted-password]

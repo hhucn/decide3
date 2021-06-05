@@ -57,23 +57,23 @@
                  {:size "small"
                   :color "inherit"
                   :onClick handle-close
-                  :ariaLabel (i18n/trc "[aria]" "Close")}
+                  :aria-label (i18n/trc "[aria]" "Close")}
                  (comp/create-element Close #js {:fontSize "small"} nil))})))
 
 (def ui-snackbar (comp/computed-factory Snackbar))
 
-(defmutation add-snackbar [{:keys [message]}]
+(defmutation add [{:keys [message]}]
   (action [{:keys [state]}]
     (swap! state update-in ident -add-snackbar (comp/get-initial-state Snackbar {:message message}))))
 
-(defn add-snackbar!
+(defn add!
   "Queues a new snackbar to show.
   Accepts a map like:
   ```
   {:message \"Hello World\"}
   ```"
   [{:keys [message]}]
-  (comp/transact! SPA [(add-snackbar {:message message})] {:only-refresh [ident]})
+  (comp/transact! SPA [(add {:message message})] {:only-refresh [ident]})
   nil)
 
 (defsc SnackbarContainer [_this {:keys [current]}]

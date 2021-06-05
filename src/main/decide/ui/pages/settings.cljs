@@ -3,13 +3,16 @@
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.algorithms.form-state :as fs]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.data-fetch :as df]
     [com.fulcrologic.fulcro.dom.events :as evt]
-    [com.fulcrologic.fulcro.mutations :as m]
+    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+    [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [decide.models.user :as user]
-    [material-ui.data-display :as dd]
+    [decide.models.user.ui :as user.ui]
+    [decide.ui.components.snackbar :as snackbar]
     [material-ui.feedback :as feedback]
     [material-ui.inputs :as inputs]
+    [material-ui.lab :refer [skeleton]]
     [material-ui.layout :as layout]
     [material-ui.layout.grid :as grid]
     [material-ui.surfaces :as surfaces]))
@@ -83,16 +86,91 @@
 
 (def ui-new-password-form (comp/factory NewPasswordForm))
 
-(defsc SettingsPage [_this {:ui/keys [new-password-form]}]
-  {:query         [{:ui/new-password-form (comp/get-query NewPasswordForm)}]
-   :ident         (fn [] [:SCREEN :settings])
+(declare UserInformation)
+
+(defmutation save-user-info [_user]
+  (remote [env]
+    (-> env
+      (m/with-server-side-mutation 'decide.models.user.api/update-user)
+      (m/returning UserInformation)))
+  (ok-action [{:keys [app]}]
+    (comp/transact! app [(snackbar/add {:message (i18n/tr "Personal details saved")})])))
+
+(defsc UserInformation [this {::user/keys [display-name email nickname] :as props}]
+  {:query [::user/id
+           ::user/display-name
+           ::user/email
+           ::user/nickname]
+   :ident ::user/id
+   :use-hooks? true}
+  (surfaces/card {}
+    (surfaces/card-header {:title (i18n/tr "Personal Details")})
+    (surfaces/card-content {}
+      (grid/container {:spacing 1}
+        (grid/item {}
+          (user.ui/avatar props {:style {:width "70px" :height "70px" :fontSize "3rem"}}))
+        (inputs/textfield
+          {:label (i18n/tr "Display name")
+           :variant :outlined
+           :value display-name
+           :fullWidth true
+           :margin :normal
+           :error (not (< 0 (count display-name) 50))
+           :onChange #(m/set-string!! this ::user/display-name :event %)
+           :onBlur #(comp/transact! this [(save-user-info props)])
+           :inputProps {:minLength 1}})
+        (inputs/textfield
+          {:label (i18n/tr "Nickname")
+           :variant :outlined
+           :fullWidth true
+           :margin :normal
+           :disabled true
+           :value (or nickname "")
+           :inputProps {:minLength 4 :maxLength 15}})
+        (inputs/textfield
+          {:label (i18n/tr "Email")
+           :type :email
+           :variant :outlined
+           :fullWidth true
+           :margin :normal
+           :disabled true
+           :value (or email "")})))))
+
+(def ui-basic-user-info (comp/factory UserInformation {:keyfn ::user/id}))
+
+(def settings-page-ident [:SCREEN ::settings])
+
+(defmutation init-settings-page [_]
+  (action [{:keys [state app]}]
+    (when-let [user-ident (get-in @state [:root/current-session :user])]
+      (df/load! app user-ident UserInformation
+        {:target (conj settings-page-ident :ui/user-information)
+         :marker ::load-user-information}))))
+
+(defsc SettingsPage [_this {:ui/keys [new-password-form user-information] :as props}]
+  {:query [{:ui/new-password-form (comp/get-query NewPasswordForm)}
+           {:ui/user-information (comp/get-query UserInformation)}
+           [df/marker-table ::load-user-information]]
+   :ident (fn [] settings-page-ident)
    :route-segment ["settings"]
+   :will-enter (fn [app]
+                 (dr/route-deferred settings-page-ident
+                   #(comp/transact! app
+                      [(init-settings-page {})
+                       (dr/target-ready {:target settings-page-ident})])))
    :initial-state (fn [_] {:ui/new-password-form (comp/get-initial-state NewPasswordForm)})}
-  (layout/container
-    {:maxWidth "lg"}
-    (grid/container
-      {:direction :column
-       :spacing 2
-       :justify "flex-start"}
-      (grid/item {:xs 12}
-        (ui-new-password-form new-password-form)))))
+  (let [user-information-marker (get props [df/marker-table ::load-user-information])]
+    (layout/box {:mt 2}
+      (layout/container
+        {:maxWidth "lg"}
+        (grid/container
+          {:direction :column
+           :spacing 2
+           :justify "flex-start"}
+          (grid/item {}
+            (if user-information
+              (ui-basic-user-info user-information)
+              (when (df/loading? user-information-marker)
+                (skeleton {:variant "rect" :height "401px"}))))
+          (grid/item {:xs 12}
+            (ui-new-password-form new-password-form)))))))
