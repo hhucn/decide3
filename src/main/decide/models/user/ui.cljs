@@ -21,11 +21,11 @@
    (let [color (color-utils/hash-color id)
          get-contrast-text (get-in (styles/use-theme) [:palette :getContrastText])]
      (dd/avatar
-       (merge
-         avatar-props
-         {:alt display-name
-          :style {:backgroundColor color
-                  :color (get-contrast-text color)}})
+       (-> avatar-props
+         (assoc :alt display-name)
+         (update :style assoc
+           :backgroundColor color
+           :color (get-contrast-text color)))
        (or (first-char display-name) \?)))))
 
 (defn chip

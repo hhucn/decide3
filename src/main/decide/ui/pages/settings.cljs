@@ -35,55 +35,50 @@
                        :old-password-error nil
                        :new-password-error nil
                        :ui/success-open? false}}
-  (surfaces/paper {}
-    (layout/box {:p 3 :mt 2 :clone true}
-      (dom/form
-        {:onSubmit (fn submit-change-password [e]
-                     (evt/prevent-default! e)
-                     (comp/transact!! this
-                       [(m/set-props {:ui/old-password ""
-                                      :ui/new-password ""})
-                        (user/change-password {:old-password old-password :new-password new-password})]))}
+  (surfaces/card
+    {:component :form
+     :onSubmit (fn submit-change-password [e]
+                 (evt/prevent-default! e)
+                 (comp/transact!! this
+                   [(m/set-props {:ui/old-password ""
+                                  :ui/new-password ""})
+                    (user/change-password {:old-password old-password :new-password new-password})]))}
+    (surfaces/card-header {:title (i18n/tr "Change Password")})
+    (surfaces/card-content {}
+      (wide-textfield {:label (i18n/tr "Old password")
+                       :type :password
+                       :error (boolean old-password-error)
+                       :helperText old-password-error
+                       :required true
+                       :inputProps {:aria-label (i18n/tr "Old password")
+                                    :autoComplete :current-password}
+                       :value old-password
+                       :onChange (fn [e]
+                                   (m/set-value!! this :ui/old-password-error nil)
+                                   (m/set-string!! this :ui/old-password :event e))})
+      (wide-textfield {:label (i18n/tr "New password")
+                       :type :password
+                       :error (boolean new-password-error)
+                       :helperText new-password-error
+                       :required true
+                       :value new-password
+                       :inputProps {:minLength 10
+                                    :aria-label (i18n/tr "New password")
+                                    :autoComplete :new-password}
 
-        (dd/typography
-          {:component :h1
-           :variant :h6}
-          (i18n/tr "Change Password"))
-        (wide-textfield {:label (i18n/tr "Old password")
-                         :type :password
-                         :error (boolean old-password-error)
-                         :helperText old-password-error
-                         :required true
-                         :inputProps {:aria-label (i18n/tr "Old password")
-                                      :autoComplete :current-password}
-                         :value old-password
-                         :onChange (fn [e]
-                                     (m/set-value!! this :ui/old-password-error nil)
-                                     (m/set-string!! this :ui/old-password :event e))})
-        (wide-textfield {:label (i18n/tr "New password")
-                         :type :password
-                         :error (boolean new-password-error)
-                         :helperText new-password-error
-                         :required true
-                         :value new-password
-                         :inputProps {:minLength 10
-                                      :aria-label (i18n/tr "New password")
-                                      :autoComplete :new-password}
-
-                         :onChange (fn [e]
-                                     (m/set-value!! this :ui/new-password-error nil)
-                                     (m/set-string!! this :ui/new-password :event e))})
-        (layout/box {:mt 2 :clone true}
-          (inputs/button
-            {:color :primary
-             :variant :contained
-             :margin "normal"
-             :type :submit}
-            (i18n/tr "Save")))))
+                       :onChange (fn [e]
+                                   (m/set-value!! this :ui/new-password-error nil)
+                                   (m/set-string!! this :ui/new-password :event e))}))
+    (surfaces/card-actions {}
+      (inputs/button
+        {:color :primary
+         :margin "normal"
+         :type :submit}
+        (i18n/tr "Save")))
     (feedback/snackbar
       {:autoHideDuration 6000
        :open success-open?
-       :onClose #(m/set-value!! this :ui/success-open? false)
+       :onClose #(m/set-value! this :ui/success-open? false)
        :message (i18n/tr "Password changed")})))
 
 (def ui-new-password-form (comp/factory NewPasswordForm))
