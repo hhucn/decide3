@@ -27,3 +27,13 @@
           :style {:backgroundColor color
                   :color (get-contrast-text color)}})
        (or (first-char display-name) \?)))))
+
+(defn chip
+  ([user] (chip user {}))
+  ([{::user/keys [display-name] :as user} chip-props]
+   (dd/chip
+     (merge
+       {:label display-name
+        :avatar (avatar user)
+        :variant :outlined}
+       chip-props))))

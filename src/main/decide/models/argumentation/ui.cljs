@@ -18,10 +18,9 @@
     [material-ui.layout :as layout]
     [material-ui.layout.grid :as grid]
     [material-ui.surfaces :as surfaces]
-    [material-ui.styles :as styles]
     [material-ui.transitions :as transitions]
-    ["@material-ui/icons/ExpandMore" :default ExpandMore]
     ["@material-ui/icons/ExpandLess" :default ExpandLess]
+    ["@material-ui/icons/ExpandMore" :default ExpandMore]
     ["@material-ui/icons/Send" :default Send]
     ["@material-ui/icons/Close" :default Close]
     ["@material-ui/icons/AddCircleOutline" :default AddCircleOutline]
@@ -103,13 +102,29 @@
         (dom/span {}
           (inputs/button
             {:onClick #(set-argument-open true)
-             ;:color :secondary
              :size :small
              :disabled (not (comp/shared this :logged-in?))
              :startIcon (dom/create-element AddCircleOutline)}
             (i18n/tr "Add argument")))))))
 
 (declare ui-argument)
+
+(defn type-label [type]
+  (case type
+    :pro (i18n/trc "Argument type" "Pro")
+    :contra (i18n/trc "Argument type" "Contra")
+    (i18n/trc "Argument type" "Neutral")))
+
+(defn type-indicator [type]
+  (when (#{:pro :contra} type)
+    (layout/box {:clone true :mr 1}
+      (dd/chip {:label (type-label type)
+                :size :small
+                :color (case type
+                         :pro :primary
+                         :contra :secondary
+                         :default)}))))
+
 
 (defsc Argument [this {:argument/keys [type premise premise->arguments no-of-arguments]}
                  {:keys [type-feature?]}]
@@ -126,62 +141,55 @@
                          (when-not show-premises? (df/refresh! this)) ; only refresh when going to show list
                          (set-show-premises (not show-premises?)))
                        [this show-premises?])
-        get-contrast-text (get-in (styles/use-theme) [:palette :getContrastText])]
-    (surfaces/card {:variant :outlined
-                    :elevation 0}
-      (layout/box {:p 1}
-        (grid/container {:direction :column :spacing 2}
-          (grid/container {:spacing 2
-                           :direction :row
-                           :wrap :nowrap
-                           :item true}
-            (grid/item {}
-              (user.ui/avatar (get premise :statement/author)))
-            (grid/container {:item true :direction :column :spacing 1}
-              (grid/container {:item true}
-                (when type-feature?
-                  (grid/item {}
-                    (dd/typography {:variant :overline :color :textSecondary}
-                      (case type
-                        :pro (i18n/trc "Argument type" "Pro")
-                        :contra (i18n/trc "Argument type" "Contra")
-                        (i18n/trc "Argument type" "Neutral")))))
-                (grid/item {:style {:marginLeft :auto}}
-                  (inputs/icon-button {:size :small :onClick toggle-list! :color "inherit"}
-                    (if show-premises?
-                      (dom/create-element ExpandLess)
-                      (dom/create-element ExpandMore)))))
-              (grid/item {}
-                (dd/typography {:variant :body1 :color :textPrimary}
-                  (:statement/content premise)))
-              (grid/item {}
-                (inputs/button
-                  {:size :small
-                   :startIcon (dom/create-element Comment)
-                   :onClick toggle-list!}
-                  (i18n/trf "{count} arguments" {:count no-of-arguments}))
-                (new-argument-ui this
-                  {:type? type-feature?
-                   :onSubmit
-                   (fn [statement type]
-                     (comp/transact! this
-                       [(argumentation.api/add-argument-to-statement
-                          {:conclusion premise
-                           :argument
-                           (-> {:argument/type (when-not (= :neutral type) type)}
-                             argumentation/make-argument
-                             (assoc :argument/premise
-                                    (argumentation/make-statement
-                                      {:statement/content statement})))})]))}))))
-          (grid/item {:xs true}
-            (transitions/collapse {:in show-premises?}
-              (layout/box {:ml 1}
-                (grid/container {:spacing 2 :direction :column}
-                  (map
-                    (fn [argument]
-                      (grid/item {:key (:argument/id argument)}
-                        (ui-argument argument {:type-feature? type-feature?})))
-                    premise->arguments))))))))))
+        {:statement/keys [author content]} premise
+        content (apply str (interpose " " (repeat 30 content)))]
+    (surfaces/card {;:variant :outlined
+                    :elevation 0
+                    :component :article}
+      (layout/box {:clone true :ml -1}
+        (surfaces/card-header
+          {:subheader (user.ui/chip author)
+           :action (inputs/icon-button {:size :small :onClick toggle-list! :color "inherit"}
+                     (if show-premises?
+                       (dom/create-element ExpandLess)
+                       (dom/create-element ExpandMore)))}))
+
+      ; Main body
+      (surfaces/card-content {}
+        (type-indicator type)
+        content)
+
+      ; action elements
+      (surfaces/card-actions {}
+        (inputs/button
+          {:size :small
+           :startIcon (dom/create-element Comment)
+           :onClick toggle-list!}
+          (i18n/trf "{count} arguments" {:count no-of-arguments}))
+        (new-argument-ui this
+          {:type? type-feature?
+           :onSubmit
+           (fn [statement type]
+             (comp/transact! this
+               [(argumentation.api/add-argument-to-statement
+                  {:conclusion premise
+                   :argument
+                   (-> {:argument/type (when-not (= :neutral type) type)}
+                     argumentation/make-argument
+                     (assoc :argument/premise
+                            (argumentation/make-statement
+                              {:statement/content statement})))})]))}))
+
+      (when (seq premise->arguments)
+        (transitions/collapse {:in show-premises?}
+          (layout/box {:ml 1}
+            (dd/divider {:variant :middle})
+            (grid/container {:spacing 1 :direction :column}
+              (map
+                (fn [argument]
+                  (grid/item {:key (:argument/id argument)}
+                    (ui-argument argument {:type-feature? type-feature?})))
+                premise->arguments))))))))
 
 (def ui-argument (comp/computed-factory Argument {:keyfn :argument/id}))
 

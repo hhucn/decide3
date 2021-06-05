@@ -3,7 +3,6 @@
     [cljs.spec.alpha :as s]
     [clojure.string :as str]
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
-    [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
     [com.fulcrologic.fulcro.algorithms.merge :as mrg]
     [com.fulcrologic.fulcro.algorithms.normalized-state :as norm]
     [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
@@ -109,13 +108,13 @@
 
 ;; region Parent Step
 (defmutation add-parent [{:keys [::proposal/ident]}]
-  (action [{:keys [app state ref]}]
-    (swap! state targeting/integrate-ident* ident :append (conj ref :parents))))
+  (action [{:keys [state ref]}]
+    (swap! state norm/integrate-ident ident :append (conj ref :parents))))
 
 (defmutation remove-parent [{:keys [::proposal/ident]}]
   (action [{:keys [state ref]}]
     (norm/swap!-> state
-      (mrg/remove-ident* ident (conj ref :parents)))))
+      (norm/remove-ident ident (conj ref :parents)))))
 
 (>defn- id-in-parents? [parents id]
   [(s/coll-of map?) uuid? => boolean?]
