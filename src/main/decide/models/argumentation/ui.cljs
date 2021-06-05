@@ -141,8 +141,7 @@
                          (when-not show-premises? (df/refresh! this)) ; only refresh when going to show list
                          (set-show-premises (not show-premises?)))
                        [this show-premises?])
-        {:statement/keys [author content]} premise
-        content (apply str (interpose " " (repeat 30 content)))]
+        {:statement/keys [author content]} premise]
     (surfaces/card {;:variant :outlined
                     :elevation 0
                     :component :article}
