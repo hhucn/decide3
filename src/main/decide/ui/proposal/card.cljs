@@ -216,7 +216,7 @@
         (surfaces/card-header
           {:title title
            :titleTypographyProps {:component "h3"}
-           :subheader (ui-subheader subheader {:type? true :gen? true :created? true :author? true})
+           :subheader (ui-subheader subheader {:type? true :gen? true :created? true :author? false})
            :action (inputs/icon-button {:disabled true :size :small}
                      (comp/create-element MoreVert nil nil))})
 
