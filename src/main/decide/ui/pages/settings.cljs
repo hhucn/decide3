@@ -8,6 +8,7 @@
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [decide.models.user :as user]
+    [decide.models.user.api :as user.api]
     [decide.models.user.ui :as user.ui]
     [decide.ui.components.snackbar :as snackbar]
     [material-ui.feedback :as feedback]
@@ -15,17 +16,25 @@
     [material-ui.lab :refer [skeleton]]
     [material-ui.layout :as layout]
     [material-ui.layout.grid :as grid]
-    [material-ui.surfaces :as surfaces]))
+    [material-ui.surfaces :as surfaces]
+    [com.fulcrologic.fulcro.application :as app]
+    [com.fulcrologic.fulcro.react.hooks :as hooks]))
 
 (defn wide-textfield
   "Outlined textfield on full width with normal margins. Takes the same props as `material-ui.inputs/textfield`"
   [props]
   (inputs/textfield
     (merge
-      {:variant   :filled
+      {:variant :outlined
        :fullWidth true
-       :margin    :normal}
+       :margin :normal}
       props)))
+
+(defn save-button []
+  (inputs/button
+    {:color :primary
+     :type :submit}
+    (i18n/tr "Save")))
 
 (defsc NewPasswordForm [this {:ui/keys [old-password new-password
                                         old-password-error new-password-error
@@ -73,11 +82,7 @@
                                    (m/set-value!! this :ui/new-password-error nil)
                                    (m/set-string!! this :ui/new-password :event e))}))
     (surfaces/card-actions {}
-      (inputs/button
-        {:color :primary
-         :margin "normal"
-         :type :submit}
-        (i18n/tr "Save")))
+      (save-button))
     (feedback/snackbar
       {:autoHideDuration 6000
        :open success-open?
@@ -88,13 +93,17 @@
 
 (declare UserInformation)
 
-(defmutation save-user-info [_user]
+(defmutation save-user-info [user]
   (remote [env]
     (-> env
-      (m/with-server-side-mutation 'decide.models.user.api/update-user)
+      (m/with-params (select-keys user [::user/display-name ::user/email]))
+      (m/with-server-side-mutation `user.api/update-user)
       (m/returning UserInformation)))
   (ok-action [{:keys [app]}]
     (comp/transact! app [(snackbar/add {:message (i18n/tr "Personal details saved")})])))
+
+(defn valid-display-name [display-name]                     ; TODO move to user ns once it is cljc
+  (< 0 (count display-name) 50))
 
 (defsc UserInformation [this {::user/keys [display-name email nickname] :as props}]
   {:query [::user/id
@@ -103,38 +112,39 @@
            ::user/nickname]
    :ident ::user/id
    :use-hooks? true}
-  (surfaces/card {}
-    (surfaces/card-header {:title (i18n/tr "Personal Details")})
-    (surfaces/card-content {}
-      (grid/container {:spacing 1}
-        (grid/item {}
-          (user.ui/avatar props {:style {:width "70px" :height "70px" :fontSize "3rem"}}))
-        (inputs/textfield
-          {:label (i18n/tr "Display name")
-           :variant :outlined
-           :value display-name
-           :fullWidth true
-           :margin :normal
-           :error (not (< 0 (count display-name) 50))
-           :onChange #(m/set-string!! this ::user/display-name :event %)
-           :onBlur #(comp/transact! this [(save-user-info props)])
-           :inputProps {:minLength 1}})
-        (inputs/textfield
-          {:label (i18n/tr "Nickname")
-           :variant :outlined
-           :fullWidth true
-           :margin :normal
-           :disabled true
-           :value (or nickname "")
-           :inputProps {:minLength 4 :maxLength 15}})
-        (inputs/textfield
-          {:label (i18n/tr "Email")
-           :type :email
-           :variant :outlined
-           :fullWidth true
-           :margin :normal
-           :disabled true
-           :value (or email "")})))))
+  (let [[pristine-state set-pristine-state] (hooks/use-state props)]
+    (surfaces/card
+      {:component :form
+       :onSubmit
+       (fn [e]
+         (evt/prevent-default! e)
+         (comp/transact! this [(save-user-info props)]))}
+      (surfaces/card-header {:title (i18n/tr "Personal Details")})
+      (surfaces/card-content {}
+        (grid/container {:spacing 1}
+          (grid/item {}
+            (user.ui/avatar props {:style {:width "70px" :height "70px" :fontSize "3rem"}}))
+          (wide-textfield {:label (i18n/tr "Display name")
+                           :value display-name
+                           :error (not (valid-display-name display-name))
+                           :onChange #(m/set-string!! this ::user/display-name :event %)
+                           :onBlur
+                           (fn [_]
+                             (when (and (valid-display-name display-name)
+                                     (not= display-name (::user/display-name pristine-state)))
+                               (comp/transact! this [(save-user-info (select-keys props [::user/display-name ::user/email]))])
+                               (set-pristine-state props)))
+                           :inputProps {:minLength 1}})
+          (wide-textfield {:label (i18n/tr "Nickname")
+                           :value (or nickname "")
+                           :disabled true
+                           :inputProps {:minLength 4 :maxLength 15}})
+          (wide-textfield {:label (i18n/tr "Email")
+                           :value (or email "")
+                           :type :email
+                           :disabled true})))
+      (surfaces/card-actions {}
+        (save-button)))))
 
 (def ui-basic-user-info (comp/factory UserInformation {:keyfn ::user/id}))
 
@@ -153,11 +163,11 @@
            [df/marker-table ::load-user-information]]
    :ident (fn [] settings-page-ident)
    :route-segment ["settings"]
-   :will-enter (fn [app]
-                 (dr/route-deferred settings-page-ident
-                   #(comp/transact! app
-                      [(init-settings-page {})
-                       (dr/target-ready {:target settings-page-ident})])))
+   :will-enter
+   (fn [app]
+     (dr/route-deferred settings-page-ident
+       #(comp/transact! app [(init-settings-page {})
+                             (dr/target-ready {:target settings-page-ident})])))
    :initial-state (fn [_] {:ui/new-password-form (comp/get-initial-state NewPasswordForm)})}
   (let [user-information-marker (get props [df/marker-table ::load-user-information])]
     (layout/box {:mt 2}
@@ -168,9 +178,8 @@
            :spacing 2
            :justify "flex-start"}
           (grid/item {}
-            (if user-information
-              (ui-basic-user-info user-information)
-              (when (df/loading? user-information-marker)
-                (skeleton {:variant "rect" :height "401px"}))))
+            (cond
+              user-information (ui-basic-user-info user-information)
+              (df/loading? user-information-marker) (skeleton {:variant "rect" :height "401px"})))
           (grid/item {:xs 12}
             (ui-new-password-form new-password-form)))))))
