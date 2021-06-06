@@ -23,8 +23,10 @@
     [material-ui.surfaces :as surfaces]
     ["@material-ui/icons/Comment" :default Comment]
     ["@material-ui/icons/MoreVert" :default MoreVert]
-    ["@material-ui/icons/ThumbDownAltOutlined" :default ThumbDownAlt]
-    ["@material-ui/icons/ThumbUpAltOutlined" :default ThumbUpAlt]))
+    ["@material-ui/icons/ThumbDownAltOutlined" :default ThumbDownOutlined]
+    ["@material-ui/icons/ThumbDownAlt" :default ThumbDown]
+    ["@material-ui/icons/ThumbUpAltOutlined" :default ThumbUpOutlined]
+    ["@material-ui/icons/ThumbUpAlt" :default ThumbUp]))
 
 (defn id-part [proposal-id]
   (dom/data {:className "proposal-id"
@@ -152,7 +154,7 @@
      :color (if approved? "primary" "default")
      :disabled disabled?
      :onClick onClick
-     :icon ThumbUpAlt}))
+     :icon (if approved? ThumbUp ThumbUpOutlined)}))
 
 (defn reject-toggle
   [{:keys [toggled?
@@ -166,7 +168,7 @@
      :color (if toggled? "secondary" "default")
      :disabled disabled?
      :onClick onClick
-     :icon ThumbDownAlt}))
+     :icon (if toggled? ThumbDown ThumbDownOutlined)}))
 
 (defsc ProposalCard [this {::proposal/keys [id title body my-opinion pro-votes parents no-of-arguments]
                            :keys [root/current-session >/subheader]}
@@ -239,7 +241,7 @@
 
               (grid/item {}
                 (if process-over?
-                  (dom/create-element ThumbUpAlt
+                  (dom/create-element ThumbUpOutlined
                     #js {:fontSize "small"
                          :color (if approved? "primary" "disabled")})
                   (approve-toggle
