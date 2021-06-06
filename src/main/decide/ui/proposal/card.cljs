@@ -21,7 +21,7 @@
     [material-ui.layout :as layout]
     [material-ui.layout.grid :as grid]
     [material-ui.surfaces :as surfaces]
-    ["@material-ui/icons/CommentOutlined" :default Comment]
+    ["@material-ui/icons/Comment" :default Comment]
     ["@material-ui/icons/MoreVert" :default MoreVert]
     ["@material-ui/icons/ThumbDownAltOutlined" :default ThumbDownAlt]
     ["@material-ui/icons/ThumbUpAltOutlined" :default ThumbUpAlt]))
@@ -262,11 +262,13 @@
                                                              :opinion (if rejected? 0 -1)})])))})))
 
               (layout/box {:ml "auto"})
-              #_(grid/item {} (dom/create-element Comment #js {"fontSize" "small"}))
 
               (grid/item {}
-                (dd/typography {:variant :body2}
-                  (i18n/trf "{count} arguments" {:count no-of-arguments})))))))
+                (inputs/button
+                  {:startIcon (dom/create-element Comment)
+                   :size :small
+                   :href proposal-href}
+                  (str no-of-arguments)))))))
 
       (when (features :feature:reject-popup)
         (reject-dialog
