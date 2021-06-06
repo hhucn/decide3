@@ -11,6 +11,7 @@
     [decide.models.proposal.api :as proposal.api]
     [decide.models.argumentation.api :as argumentation.api]
     [decide.models.user :as user]
+    [decide.models.user.api :as user.api]
     [decide.ui.translations.load :as translation]
     [decide.server-components.config :refer [config]]
     [decide.server-components.database :refer [conn]]
@@ -123,6 +124,7 @@
 
    translation/locale-resolver
 
+   user.api/all-resolvers
    argumentation.api/full-api])
 
 (defn build-parser [config conn]

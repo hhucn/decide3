@@ -30,9 +30,13 @@
     (routing/start-history! SPA)
     (dr/initialize! SPA)
 
-    (df/load! SPA ::user/current-session auth/Session {:target [:root/current-session]})
-
-    (routing/start!)
-    (app/mount! SPA root/Root "decide"
-      {:initialize-state? false
-       :hydrate false})))
+    ;; This makes the app start without a flicker of not-logged in state.
+    ;; Does this hurt performance a lot? Think about that...
+    (df/load! SPA ::user/current-session auth/Session
+      {:target [:root/current-session]
+       :post-action
+       (fn [_]
+         (routing/start!)
+         (app/mount! SPA root/Root "decide"
+           {:initialize-state? false
+            :hydrate false}))})))
