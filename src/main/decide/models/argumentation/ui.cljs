@@ -24,7 +24,8 @@
     ["@material-ui/icons/Send" :default Send]
     ["@material-ui/icons/Close" :default Close]
     ["@material-ui/icons/AddCircleOutline" :default AddCircleOutline]
-    ["@material-ui/icons/Comment" :default Comment]))
+    ["@material-ui/icons/Comment" :default Comment]
+    ["@material-ui/icons/AddComment" :default AddComment]))
 
 (defsc StatementAuthor [_ {::user/keys [display-name]}]
   {:query [::user/id ::user/display-name]
@@ -43,6 +44,7 @@
 
 (def ui-statement (comp/factory Statement {:keyfn :statement/id}))
 
+;; REFACTOR This is bad code. It shouldn't contain logic to toggle visibility.
 (defn new-argument-ui [this {:keys [onSubmit type?] :or {type? false}}]
   (let [[new-argument-open? set-argument-open] (hooks/use-state false)
         [new-argument set-new-argument] (hooks/use-state "")
@@ -104,7 +106,7 @@
             {:onClick #(set-argument-open true)
              :size :small
              :disabled (not (comp/shared this :logged-in?))
-             :startIcon (dom/create-element AddCircleOutline)}
+             :startIcon (dom/create-element AddComment)}
             (i18n/tr "Add argument")))))))
 
 (declare ui-argument)
@@ -142,53 +144,51 @@
                          (set-show-premises (not show-premises?)))
                        [this show-premises?])
         {:statement/keys [author content]} premise]
-    (surfaces/card {;:variant :outlined
-                    :elevation 0
-                    :component :article}
-      (layout/box {:clone true :ml -1}
+    (layout/box {:clone true :borderRadius 0 :mr "-1px" :mb "-1px"}
+      (surfaces/card {:variant :outlined
+                      :elevation 0
+                      :component :article}
         (surfaces/card-header
           {:subheader (user.ui/chip author)
-           :action (inputs/icon-button {:size :small :onClick toggle-list! :color "inherit"}
+           :action (inputs/icon-button {:size :small :onClick toggle-list!}
                      (if show-premises?
                        (dom/create-element ExpandLess)
-                       (dom/create-element ExpandMore)))}))
+                       (dom/create-element ExpandMore)))})
 
-      ; Main body
-      (surfaces/card-content {}
-        (type-indicator type)
-        content)
+        (layout/box {:clone true :ml 2}
+          (surfaces/card-content {}
+            (type-indicator type)
+            content))
 
-      ; action elements
-      (surfaces/card-actions {}
-        (inputs/button
-          {:size :small
-           :startIcon (dom/create-element Comment)
-           :onClick toggle-list!}
-          (i18n/trf "{count} arguments" {:count no-of-arguments}))
-        (new-argument-ui this
-          {:type? type-feature?
-           :onSubmit
-           (fn [statement type]
-             (comp/transact! this
-               [(argumentation.api/add-argument-to-statement
-                  {:conclusion premise
-                   :argument
-                   (-> {:argument/type (when-not (= :neutral type) type)}
-                     argumentation/make-argument
-                     (assoc :argument/premise
-                            (argumentation/make-statement
-                              {:statement/content statement})))})]))}))
+        (surfaces/card-actions {}
+          (inputs/button
+            {:size :small
+             :startIcon (dom/create-element Comment)
+             :onClick toggle-list!}
+            (str no-of-arguments))
+          (new-argument-ui this
+            {:type? type-feature?
+             :onSubmit
+             (fn [statement type]
+               (comp/transact! this
+                 [(argumentation.api/add-argument-to-statement
+                    {:conclusion premise
+                     :argument
+                     (-> {:argument/type (when-not (= :neutral type) type)}
+                       argumentation/make-argument
+                       (assoc :argument/premise
+                              (argumentation/make-statement
+                                {:statement/content statement})))})]))}))
 
-      (when (seq premise->arguments)
-        (transitions/collapse {:in show-premises?}
-          (layout/box {:ml 1}
-            (dd/divider {:variant :middle})
-            (grid/container {:spacing 1 :direction :column}
-              (map
-                (fn [argument]
-                  (grid/item {:key (:argument/id argument)}
-                    (ui-argument argument {:type-feature? type-feature?})))
-                premise->arguments))))))))
+        (when (seq premise->arguments)
+          (transitions/collapse {:in show-premises?}
+            (layout/box {:ml 1}
+              (grid/container {:spacing 1 :direction :column}
+                (mapv
+                  (fn [argument]
+                    (grid/item {:key (:argument/id argument)}
+                      (ui-argument argument {:type-feature? type-feature?})))
+                  premise->arguments)))))))))
 
 (def ui-argument (comp/computed-factory Argument {:keyfn :argument/id}))
 
