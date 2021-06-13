@@ -21,7 +21,8 @@
     [material-ui.lab.alert :as alert]
     [material-ui.styles :as styles]
     [material-ui.utils :as m.utils]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [decide.ui.meta :as meta]))
 
 (defrouter RootRouter [_this {:keys [current-state]}]
   {:router-targets [process.list/ProcessesPage
@@ -38,7 +39,8 @@
     (swap! state assoc :ui/theme theme)))
 
 (defsc Root [this {:root/keys [root-router app-bar snackbar-container navdrawer]
-                   :keys [ui/theme ui/login-dialog]}]
+                   :keys [ui/theme ui/login-dialog]
+                   :as props}]
   {:query [:ui/theme
            {:ui/login-dialog (comp/get-query login/LoginDialog)}
            {:root/app-bar (comp/get-query appbar/AppBar)}
@@ -48,7 +50,8 @@
            {:root/current-session (comp/get-query auth/Session)}
            :ui/current-process
            :all-processes
-           {::i18n/current-locale (comp/get-query i18n/Locale)}]
+           {::i18n/current-locale (comp/get-query i18n/Locale)}
+           {meta/root-key (comp/get-query meta/Meta)}]
    :initial-state
    (fn [_] {:root/root-router (comp/get-initial-state RootRouter)
             :ui/login-dialog (comp/get-initial-state login/LoginDialog)
@@ -58,7 +61,8 @@
             :root/navdrawer (comp/get-initial-state nav-drawer/NavDrawer)
             :root/current-session (comp/get-initial-state auth/Session)
             :all-processes []
-            ::i18n/current-locale nil})
+            ::i18n/current-locale nil
+            meta/root-key (comp/get-initial-state meta/Meta)})
    :use-hooks? true}
   (hooks/use-lifecycle
     (fn []
@@ -68,6 +72,7 @@
                                                   [(set-theme {:theme new-theme})])))))
   (let [[show-wip-warning? set-wip-warning] (hooks/use-state true)]
     (styles/theme-provider {:theme (themes/get-mui-theme :light)}
+      (meta/ui-meta (get props meta/root-key))
       (m.utils/css-baseline {})
       (appbar/ui-appbar app-bar {:menu-onClick nav-drawer/toggle-navdrawer!})
       (snackbar/ui-snackbar-container snackbar-container)
