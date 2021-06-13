@@ -53,7 +53,7 @@
                           :style {:whiteSpace :pre-line}}
             description)))
       (grid/container {:spacing 1 :alignItems :center}
-        (grid/item {}
+        (grid/item {:xs 12 :sm :auto}
           (inputs/button {:variant (if has-end-time? :text :outlined)
                           :size (if has-end-time? :large :small)
                           :onClick #(set-description-open (not description-open?))
