@@ -8,7 +8,10 @@
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [decide.models.argumentation.ui :as argumentation.ui]
+    [decide.models.process :as process]
     [decide.models.proposal :as proposal]
+    [decide.ui.proposal.new-proposal :as new-proposal]
+    [decide.utils.breakpoint :as breakpoint]
     [material-ui.data-display :as dd]
     [material-ui.data-display.list :as list]
     [material-ui.inputs :as inputs]
@@ -16,9 +19,7 @@
     [material-ui.layout.grid :as grid]
     [material-ui.surfaces :as surfaces]
     ["@material-ui/core/LinearProgress" :default LinearProgress]
-    ["@material-ui/core/styles" :refer [withStyles useTheme]]
-    [decide.ui.proposal.new-proposal :as new-proposal]
-    [decide.models.process :as process]))
+    ["@material-ui/core/styles" :refer [withStyles useTheme]]))
 
 (declare ProposalPage)
 
@@ -259,8 +260,8 @@
                                  {:slug slug
                                   :parents (apply vector (comp/get-ident this) idents)})]))
                           [slug])]
-    (layout/container {:maxWidth :xl}
-      (layout/box {:my 2 :p 2 :clone true}
+    (layout/container {:maxWidth :xl :disableGutters (breakpoint/<=? "sm")}
+      (layout/box {:mt 2 :p 2 :clone true}
         (surfaces/paper {}
           (grid/container {:spacing 2 :component "main"}
             (grid/item {:xs 12}
@@ -273,7 +274,7 @@
                              :spacing 1}
 
               (grid/item {:xs 12 :component "section"}
-                (section (i18n/trc "Details of a proposal" "Details") (dd/typography {:variant "body1" :style {:whiteSpace "pre-line"}} body)))
+                (dd/typography {:variant "body1" :style {:whiteSpace "pre-line"}} body))
 
               (grid/item {:xs 12}
                 (surfaces/toolbar
@@ -285,8 +286,6 @@
                        :variant :contained
                        :size :small
                        :onClick #(comp/transact! this [(new-proposal/show {:parents [(comp/get-ident this)]})])}
-                      ;:startIcon (layout/box {:css {:transform "rotate(.5turn)"} :component MergeType})
-                      ;:endIcon (layout/box {:css {:transform "rotate(.5turn)"} :component CallSplit})}
                       (i18n/trc "Prompt to merge or fork" "Propose a change")))))
 
 
