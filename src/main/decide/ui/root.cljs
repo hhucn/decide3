@@ -13,6 +13,7 @@
     [decide.ui.login :as login]
     [decide.ui.pages.settings :as settings]
     [decide.ui.pages.splash :as splash]
+    [decide.ui.pages.help :as help]
     [decide.ui.process.core :as process-page]
     [decide.ui.process.list :as process.list]
     [decide.ui.theming.dark-mode :as dark-mode]
@@ -27,7 +28,8 @@
 (defrouter RootRouter [_this {:keys [current-state]}]
   {:router-targets [process.list/ProcessesPage
                     process-page/ProcessContext
-                    settings/SettingsPage]}
+                    settings/SettingsPage
+                    help/InstructionPage]}
 
   (when-not current-state
     (dom/div {:dangerouslySetInnerHTML {:__html splash/splash}})))
