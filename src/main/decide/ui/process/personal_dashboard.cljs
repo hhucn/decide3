@@ -111,8 +111,9 @@
   (mrg/merge-component state PersonalProcessDashboard
     (comp/get-initial-state PersonalProcessDashboard {::process/slug slug})))
 
-(defmutation init-dashboard [{slug ::process/slug}]
+(defmutation init-dashboard [{slug ::process/slug :as params}]
   (action [{:keys [app state]}]
+    (log/spy :warn params)
     (df/load! app [::process/slug slug] PersonalProposalsList
       {:parallel true
        :marker ::personal-proposals})
@@ -129,9 +130,10 @@
    :ident (fn [] [::PersonalProcessDashboard slug])
    :initial-state
    (fn [{slug ::process/slug}]
-     {::process/slug slug
-      ::personal-proposal-list (comp/get-initial-state PersonalProposalsList {::process/slug slug})
-      ::personal-recommendations-list (comp/get-initial-state PersonalRecommendationsList {::process/slug slug})})
+     (when slug
+       {::process/slug slug
+        ::personal-proposal-list (comp/get-initial-state PersonalProposalsList {::process/slug slug})
+        ::personal-recommendations-list (comp/get-initial-state PersonalRecommendationsList {::process/slug slug})}))
    :route-segment ["dashboard"]
    :will-enter
    (fn [app {::process/keys [slug]}]

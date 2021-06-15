@@ -48,13 +48,13 @@
 
         arguments
         (->> argument-events
-          (map :event/ref)
+          (map :event/eid)
           (d/pull-many db [::argument/content
                            {::proposal/_arguments [::proposal/id ::proposal/title]}]))
 
         proposals
         (->> proposal-events
-          (map :event/ref)
+          (map :event/eid)
           (d/pull-many db [::proposal/id ::proposal/title])
           (map #(assoc % :new? true))
 

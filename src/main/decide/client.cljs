@@ -15,7 +15,7 @@
 
 (defn ^:export refresh []
   (log/info "Hot code Remount")
-  (comp/refresh-dynamic-queries! SPA)
+  #_(comp/refresh-dynamic-queries! SPA)
   (app/mount! SPA root/Root "decide" {:initialize-state? false}))
 
 (defn ^:export init []

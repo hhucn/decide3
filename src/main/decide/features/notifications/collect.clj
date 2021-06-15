@@ -14,7 +14,7 @@
 (s/def :event/when inst?)
 (s/def :event/who :decide.models.user/id)
 (s/def :event/tx pos-int?)
-(s/def :event/ref pos-int?)
+(s/def :event/eid pos-int?)
 (s/def ::event (s/keys
                  :req [:event/what
                        :event/when
@@ -29,7 +29,7 @@
 
 (defn to-event [{:keys [entity transaction]}]
   #:event{:what (if (:decide.models.argument/id entity) :event.type/new-argument :event.type/new-proposal)
-          :ref (:db/id entity)
+          :eid (:db/id entity)
           :when (:db/txInstant transaction)
           :tx (:db/id transaction)})
 
@@ -53,14 +53,14 @@
 (defmulti enhance-with-slug (fn [_db event] (:event/what event)))
 
 (defmethod enhance-with-slug :event.type/new-argument
-  [db {:event/keys [ref] :as event}]
-  (let [slug (-> (d/pull db [{::proposal/_arguments [{::process/_proposals [::process/slug]}]}] ref)
+  [db {:event/keys [eid] :as event}]
+  (let [slug (-> (d/pull db [{::proposal/_arguments [{::process/_proposals [::process/slug]}]}] eid)
                ::proposal/_arguments first ::process/_proposals ::process/slug)]
     (assoc event ::process/slug slug)))
 
 (defmethod enhance-with-slug :event.type/new-proposal
-  [db {:event/keys [ref] :as event}]
-  (let [slug (get-in (d/pull db [{::process/_proposals [::process/slug]}] ref)
+  [db {:event/keys [eid] :as event}]
+  (let [slug (get-in (d/pull db [{::process/_proposals [::process/slug]}] eid)
                [::process/_proposals ::process/slug])]
     (assoc event ::process/slug slug)))
 

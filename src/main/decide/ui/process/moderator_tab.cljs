@@ -32,8 +32,8 @@
 (defsc Moderator [_ {::user/keys [id display-name]
                      :keys [root/current-session]} {:keys [onDelete]}]
   {:query [::user/id ::user/display-name
-           {[:root/current-session '_] 1}]; TODO Replace join with Session.
-   :ident ::user/id}
+           {[:root/current-session '_] 1}]}                 ; TODO Replace join with Session.
+
   (let [self? (= id (::user/id current-session))]
     (list/item {}
       (list/item-avatar {}
@@ -74,7 +74,12 @@
           (inputs/textfield
             {:label (i18n/tr "Email")
              :value new-moderator-email
-             :onChange #(set-new-moderator-email (evt/target-value %))
+             :onChange (fn [e]
+                         (let [value (evt/target-value e)]
+                           (set-new-moderator-email value)
+                           (when (< 2 (count value))
+                             (df/load! this :autocomplete/users Moderator {:params {:term value}
+                                                                           :target [:abc]}))))
              :fullWidth true
              :InputProps {:endAdornment (inputs/button {:type :submit} (i18n/trc "Submit new moderator form" "Add"))}}))))))
 
