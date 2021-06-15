@@ -33,23 +33,23 @@
           :when (:db/txInstant transaction)
           :tx (:db/id transaction)})
 
-(defn new-things-since [db time-point]
-  (map to-event
+(defn new-things [db]
+  (->> db
     (d/q '[:find (pull ?e [:db/id
                            :decide.models.argument/id
                            :decide.models.argument/content
                            :decide.models.proposal/id
                            ::proposal/title])
-                 (pull ?tx [:db/id :db/txInstant :db/txUser])
+           (pull ?tx [:db/id :db/txInstant :db/txUser])
            :keys entity transaction
            :where
            [?e ?a _ ?tx]
            [(contains?
               #{::argument/id ::proposal/id}
-              ?a)]]
-      (d/since db time-point))))
+              ?a)]])
+    (map to-event)))
 
-
+;; region enhance-with-slug
 (defmulti enhance-with-slug (fn [_db event] (:event/what event)))
 
 (defmethod enhance-with-slug :event.type/new-argument
@@ -63,8 +63,11 @@
   (let [slug (get-in (d/pull db [{::process/_proposals [::process/slug]}] eid)
                [::process/_proposals ::process/slug])]
     (assoc event ::process/slug slug)))
+;; endregion
 
 (defn events-by-slug [db since]
-  (->> (new-things-since db since)
+  (->>
+    (d/since db since)
+    new-things
     (map (partial enhance-with-slug db))
     (group-by ::process/slug)))
