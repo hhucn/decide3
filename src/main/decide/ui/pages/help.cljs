@@ -1,13 +1,15 @@
 (ns decide.ui.pages.help
   (:require
+    [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.dom :as dom :refer [i br]]
     [decide.utils.breakpoint :as breakpoint]
     [material-ui.data-display :as dd]
+    [material-ui.inputs :as inputs]
+    [material-ui.lab.alert :as alert]
     [material-ui.layout :as layout]
     [material-ui.layout.grid :as grid]
     [material-ui.surfaces :as surfaces]
-    [material-ui.inputs :as inputs]
     ["@material-ui/icons/Mail" :default MailIcon]))
 
 (defn content [& content]
@@ -83,15 +85,14 @@
           {:color :primary
            :variant :contained
            :component :a
-           :href "mailto:decide@hhu.de"
+           :href "mailto:decide+help@hhu.de"
            :startIcon (dom/create-element MailIcon)}
           "Mail")))))
 
-
-
-(defsc InstructionPage [_ _]
-  {:query []
+(defsc InstructionPage [_ {[_ locale] ::i18n/current-locale}]
+  {:query [::i18n/current-locale]
    :ident (fn [] [:PAGE ::InstructionPage])
+   :initial-state {}
    :route-segment ["help"]
    :use-hooks? true}
   (layout/box {:mt 2 :clone true}
@@ -99,5 +100,10 @@
       {:maxWidth :md
        :disableGutters (breakpoint/<=? "xs")}
       (surfaces/card {}
+        (alert/alert {:severity :warning}
+          (i18n/tr "The instructions are currently only available in german. Please send us a mail via the button at
+          the end of this page, if you have questions."))
         (surfaces/card-content {}
-          (help-page))))))
+          (case locale
+            :de (help-page)
+            (help-page)))))))

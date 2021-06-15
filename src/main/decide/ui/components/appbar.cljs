@@ -1,7 +1,10 @@
 (ns decide.ui.components.appbar
   (:require
+    [clojure.string :as str]
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.dom.events :as evt]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [decide.models.authorization :as auth]
@@ -13,20 +16,15 @@
     [material-ui.navigation :as navigation]
     [material-ui.surfaces :as surfaces]
     ["@material-ui/icons/AccountCircle" :default AccountCircleIcon]
-    ["@material-ui/icons/Menu" :default Menu]
-    [com.fulcrologic.fulcro.dom.events :as evt]
-    [com.fulcrologic.fulcro.dom :as dom]
-    [material-ui.inputs.input :as input]
-    [material-ui.inputs.form :as form]
-    [clojure.string :as str]))
+    ["@material-ui/icons/HelpOutline" :default HelpIcon]
+    ["@material-ui/icons/Menu" :default Menu]))
 
 
 (defsc AppBar
   [this
-   {:keys [ui/account-menu-open? ui/theme root/current-session]}
+   {:keys [ui/account-menu-open? root/current-session]}
    {:keys [menu-onClick]}]
   {:query [:ui/account-menu-open?
-           [:ui/theme '_]
            {[:root/current-session '_] (comp/get-query auth/Session)}]
    :ident (fn [] [:component/id ::AppBar])
    :initial-state {:ui/account-menu-open? false}
@@ -119,6 +117,11 @@
                                        :href "/settings"}
                   (i18n/tr "Settings"))
                 (navigation/menu-item {:onClick #(comp/transact! this [(user/sign-out nil)])}
-                  (i18n/trc "Label of logout button" "Logout"))))))))))
+                  (i18n/trc "Label of logout button" "Logout")))))
+
+          (inputs/icon-button {:color :inherit
+                               :component :a
+                               :href "/help"}
+            (dom/create-element HelpIcon)))))))
 
 (def ui-appbar (comp/computed-factory AppBar))
