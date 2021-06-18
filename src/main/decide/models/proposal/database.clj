@@ -5,7 +5,7 @@
     [com.fulcrologic.guardrails.core :refer [>defn => | <-]]
     [datahike.api :as d]
     [datahike.core :as d.core]
-    [decide.models.argument :as argument]
+    [decide.models.argumentation.database :as argumentation.db]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
     [decide.schema :as schema]))
@@ -107,10 +107,13 @@
 
 (>defn get-users-who-made-an-argument [db proposal-lookup]
   [d.core/db? ::proposal/lookup => (s/coll-of pos-int? :kind set)]
-  (->> proposal-lookup
-    (d/pull db [{::proposal/arguments [{::argument/author [:db/id]}]}])
-    ::proposal/arguments
-    (into #{} (map (comp :db/id ::argument/author)))))
+  (set (d/q '[:find [?author ...]
+              :in $ % ?proposal
+              :where
+              (belongs-to-proposal ?argument ?proposal)
+              [?argument :argument/premise ?premise]
+              [?premise :author ?author]]
+         db argumentation.db/argumentation-rules proposal-lookup)))
 
 (>defn get-voters [db proposal-lookup]
   [d.core/db? ::proposal/lookup => (s/coll-of pos-int? :kind set)]

@@ -1,19 +1,12 @@
 (ns decide.models.proposal.api
   (:require
     [clojure.set :as set]
-    [clojure.spec.alpha :as s]
-    [clojure.string :as str]
     [com.fulcrologic.guardrails.core :refer [>defn => | <-]]
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
-    [com.wsscode.pathom.core :as p]
     [datahike.api :as d]
-    [datahike.core :as d.core]
-    [decide.models.argument :as argument]
-    [decide.models.authorization :as auth]
     [decide.models.proposal :as proposal]
     [decide.models.proposal.database :as proposal.db]
-    [decide.models.user :as user]
-    [decide.schema :as schema]))
+    [decide.models.user :as user]))
 
 (defresolver resolve-proposal [{:keys [db]} input]
   {::pc/input #{::proposal/id}

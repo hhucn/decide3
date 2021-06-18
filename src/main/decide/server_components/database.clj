@@ -1,7 +1,6 @@
 (ns decide.server-components.database
   (:require
     [datahike.api :as d]
-    [decide.models.argument :as argument]
     [decide.models.opinion :as opinion]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
