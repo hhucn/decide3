@@ -19,7 +19,7 @@
   (d/q '[:find [(pull ?user [::user/email ::user/display-name
                              {::process/_participants [:db/id ::process/slug]}]) ...]
          :where
-         [?user ::user/email]
+         [?user :user/email]
          [?process ::process/participants ?user]]
     db))
 

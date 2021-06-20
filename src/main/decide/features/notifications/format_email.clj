@@ -54,8 +54,8 @@
          (format-process process payload))]]]))
 
 (defn make-message [{:keys [user] :as payload}]
-  {:to (if (str/includes? (::user/email user) "@")
-         (::user/email user)
+  {:to (if (str/includes? (:user/email user) "@")
+         (:user/email user)
          "ebbinghaus@hhu.de")
    :from "decide <decide@hhu.de>"
    :subject "News from decide!"
