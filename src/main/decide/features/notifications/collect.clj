@@ -101,11 +101,10 @@
 
 (defn all-events [db time-point]
   [d.core/db? inst? => (s/coll-of ::event :distinct true)]
-  (let [event-extractors [get-new-argument-events get-new-proposal-events]
-        execute! (->> event-extractors
-                   (map (partial comp future-call))
-                   (apply juxt))]
-    (mapcat deref (execute! db time-point))))
+  (let [event-extractors [get-new-argument-events get-new-proposal-events]]
+    (mapcat deref
+      (for [extractor event-extractors]
+        (future (extractor db time-point))))))
 
 (defn ^:deprecated events-by-slug [db since]
   (->>
