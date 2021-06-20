@@ -16,7 +16,8 @@
   (:import (java.time Instant Duration)))
 
 (defn get-all-users-with-emails [db]
-  (d/q '[:find [(pull ?user [::user/email ::user/display-name
+  (d/q '[:find [(pull ?user [::user/display-name
+                             :user/email
                              {::process/_participants [:db/id ::process/slug]}]) ...]
          :where
          [?user :user/email]
@@ -108,7 +109,7 @@
   (let [process-ids (map :db/id (get user ::process/_participants []))
         grouped-events (select-keys (group-by :event/process events) process-ids)]
     (when-not (empty? grouped-events)
-      (log/debug "Notify " (::user/email user))
+      (log/debug "Notify " (:user/email user))
       (async/put! mailer-chan
         (format/make-message
           (build-payload db grouped-events user))))))
