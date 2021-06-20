@@ -7,7 +7,8 @@
     [datahike.api :as d]
     [datahike.core :as d.core]
     [decide.models.user :as user]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [clojure.string :as str]))
 
 (>defn search-for-user [db search-term]
   [d.core/db? string? => (s/coll-of (s/keys :req [::user/id]) :distinct true)]
@@ -77,7 +78,9 @@
                 {:tx-data
                  [(-> user
                     (dissoc ::user/id)
-                    (assoc :db/id [::user/id id]))]})]
+                    (assoc :db/id [::user/id id]))
+                  (when (str/blank? email)
+                    [:db/retract [::user/id id] :user/email])]})]
           {::p/env (assoc env :db db-after)
            :user/id id})
         (throw (ex-info "Malformed user data" (select-keys (s/explain-data valid-spec user) [::s/problems])))))))

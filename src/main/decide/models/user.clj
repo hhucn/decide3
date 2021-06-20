@@ -33,7 +33,8 @@
    {:db/ident :user/email
     :db/doc "User email for contact."
     :db/cardinality :db.cardinality/one
-    :db/valueType :db.type/string}
+    :db/valueType :db.type/string
+    #_#_:db/noHistory true}                                 ; no need to keep privacy data
 
    {:db/ident ::display-name
     :db/doc "A (not unique) name to display for the public."
