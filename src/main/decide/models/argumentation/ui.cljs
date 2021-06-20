@@ -1,5 +1,6 @@
 (ns decide.models.argumentation.ui
   (:require
+    [clojure.set :as set]
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.data-fetch :as df]
@@ -137,7 +138,8 @@
                       :elevation 0
                       :component :article}
         (surfaces/card-header
-          {:subheader (user.ui/chip author)
+          {:subheader (user.ui/chip (set/rename-keys author {::user/display-name :user/display-name
+                                                             ::user/id :user/id}))
            :action (inputs/icon-button {:size :small :onClick toggle-list!}
                      (if show-premises?
                        (dom/create-element ExpandLess)

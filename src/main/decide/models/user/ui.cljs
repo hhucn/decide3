@@ -1,6 +1,5 @@
 (ns decide.models.user.ui
   (:require
-    [decide.models.user :as user]
     [decide.utils.color :as color-utils]
     [material-ui.data-display :as dd]
     [material-ui.styles :as styles]
@@ -18,7 +17,7 @@
 
 (defn avatar
   ([user] (avatar user {}))
-  ([{::user/keys [id display-name]} avatar-props]
+  ([{:user/keys [id display-name]} avatar-props]
    (let [color (color-utils/hash-color id)
          get-contrast-text (get-in (styles/use-theme) [:palette :getContrastText])]
      (dd/avatar
@@ -31,7 +30,7 @@
 
 (defn chip
   ([user] (chip user {}))
-  ([{::user/keys [display-name] :as user} chip-props]
+  ([{:user/keys [id display-name] :as user} chip-props]
    (layout/box {:clone true :border 0}                      ; TODO mui v5 shouldn't need this anymore
      (dd/chip
        (merge

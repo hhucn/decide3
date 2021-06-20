@@ -24,7 +24,14 @@
     :db/noHistory true}
 
    {:db/ident ::email
+    :db/doc "DEPRECATED - Symbolic unique identifier for a user."
     :db/unique :db.unique/identity
+    :db/cardinality :db.cardinality/one
+    :db/valueType :db.type/string}
+   #_[:db/add ::email :db/ident :user/nickname]             ; This doesn't work.. Don't know if it's a datahike issue
+
+   {:db/ident :user/email
+    :db/doc "User email for contact."
     :db/cardinality :db.cardinality/one
     :db/valueType :db.type/string}
 
@@ -46,6 +53,7 @@
 (s/def ::ident (s/tuple #{::id} ::id))
 (s/def ::lookup (s/or :ident ::ident :db/id pos-int?))
 (s/def ::email string?)
+(s/def :user/email string?)
 (s/def ::encrypted-password string?)
 (s/def ::password (s/or :encrypted ::encrypted-password :raw string?))
 (s/def ::display-name (s/and string? #(< 0 (count %) 50)))
@@ -167,10 +175,6 @@
           {})
       {:errors #{:invalid-credentials}})))
 
-(defresolver resolve-public-infos [{:keys [db]} {::keys [id]}]
-  {::pc/input #{::id}
-   ::pc/output [::display-name]}
-  (d/pull db [::display-name] [::id id]))
 
 (>defn get-session-user-id [request]
   [map? => (s/nilable ::id)]
@@ -195,4 +199,4 @@
      (get-current-session db request))})
 
 
-(def resolvers [sign-up sign-in sign-out change-password current-session-resolver resolve-public-infos])
+(def resolvers [sign-up sign-in sign-out change-password current-session-resolver])

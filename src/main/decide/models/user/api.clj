@@ -6,7 +6,8 @@
     [com.wsscode.pathom.core :as p]
     [datahike.api :as d]
     [datahike.core :as d.core]
-    [decide.models.user :as user]))
+    [decide.models.user :as user]
+    [taoensso.timbre :as log]))
 
 (>defn search-for-user [db search-term]
   [d.core/db? string? => (s/coll-of (s/keys :req [::user/id]) :distinct true)]
@@ -43,28 +44,53 @@
 
   (search-for-user @conn nil))
 
-(defresolver resolve-own-infos [{:keys [db AUTH/user-id]} {::user/keys [id]}]
-  {::pc/output [::user/email]}
-  (when (= user-id id)
-    (d/pull db [::user/email] [::user/id id])))
+(defresolver resolve-nickname-to-id [{:keys [db]} {:user/keys [nickname]}]
+  {::pc/output [:user/id]}
+  (d/pull db [[::user/id :as :user/id]] [::user/email nickname]))
 
-(defmutation update-user [{:keys [conn AUTH/user-id] :as env} {::user/keys [id display-name email] :as user}]
-  {}
-  (let [valid-spec (s/keys :req [::user/id])
-        user (select-keys user [::user/id ::user/display-name #_::user/email])] ; TODO allow changing of email once nickname and email are separate
+(defresolver resolve-public-infos [{:keys [db]} {::user/keys [id]}]
+  {::pc/input #{::user/id}
+   ::pc/output [::user/display-name :user/nickname]}
+  (d/pull db
+    [::user/display-name [::user/email :as :user/nickname]]
+    [::user/id id]))
+
+(defresolver resolve-private-infos [{:keys [db AUTH/user-id]} {::user/keys [id]}]
+  {::pc/output [:user/email]}
+  (if (= user-id id)
+    (d/pull db [:user/email] [::user/id id])
+    (do
+      (log/warn (format "%s tried to resolve :user/mail for %s" (str user-id) (str id)))
+      nil)))
+
+(defmutation update-user [{:keys [conn AUTH/user-id] :as env} {::user/keys [id display-name]
+                                                               :user/keys [email]
+                                                               :as user}]
+  {::pc/params #{::user/id ::user/display-name :user/email}
+   ::pc/output [:user/id]}
+  (let [valid-spec (s/keys :req [::user/id] :opt [:user/email ::user/display-name])
+        user (select-keys user [::user/id ::user/display-name :user/email])]
     (when (= user-id id)
       (if (s/valid? valid-spec user)
-        (let [{:keys [db-after]} (d/transact! conn
-                                   (-> user
-                                     (dissoc ::user/id)
-                                     (assoc :db/id [::user/id id])))]
-          {::p/env (assoc env :db {:db-after db-after})})
+        (let [{:keys [db-after]}
+              (d/transact conn
+                {:tx-data
+                 [(-> user
+                    (dissoc ::user/id)
+                    (assoc :db/id [::user/id id]))]})]
+          {::p/env (assoc env :db db-after)
+           :user/id id})
         (throw (ex-info "Malformed user data" (select-keys (s/explain-data valid-spec user) [::s/problems])))))))
 
 
 (def all-resolvers
   [autocomplete-user
-   resolve-own-infos
+   resolve-public-infos
+   resolve-private-infos
+
+   resolve-nickname-to-id
 
    update-user
-   (pc/alias-resolver ::user/email ::user/nickname)]) ; TODO remove once nickname and email are separate
+   (pc/alias-resolver2 ::user/display-name :user/display-name)
+   (pc/alias-resolver2 ::user/email :user/nickname)
+   (pc/alias-resolver2 ::user/id :user/id)])

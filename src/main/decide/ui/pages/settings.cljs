@@ -105,11 +105,13 @@
 (defn valid-display-name [display-name]                     ; TODO move to user ns once it is cljc
   (< 0 (count display-name) 50))
 
-(defsc UserInformation [this {::user/keys [display-name email nickname] :as props}]
+(defsc UserInformation [this {:user/keys [display-name nickname email]
+                              :as props}]
   {:query [::user/id
-           ::user/display-name
-           ::user/email
-           ::user/nickname]
+           :user/id
+           :user/display-name
+           :user/email
+           :user/nickname]
    :ident ::user/id
    :use-hooks? true}
   (let [[pristine-state set-pristine-state] (hooks/use-state props)]
@@ -127,12 +129,12 @@
           (wide-textfield {:label (i18n/tr "Display name")
                            :value display-name
                            :error (not (valid-display-name display-name))
-                           :onChange #(m/set-string!! this ::user/display-name :event %)
+                           :onChange #(m/set-string!! this :user/display-name :event %)
                            :onBlur
                            (fn [_]
                              (when (and (valid-display-name display-name)
-                                     (not= display-name (::user/display-name pristine-state)))
-                               (comp/transact! this [(save-user-info (select-keys props [::user/display-name ::user/email]))])
+                                     (not= display-name (:user/display-name pristine-state)))
+                               (comp/transact! this [(save-user-info (select-keys props [:user/display-name :user/email]))])
                                (set-pristine-state props)))
                            :inputProps {:minLength 1}})
           (wide-textfield {:label (i18n/tr "Nickname")
