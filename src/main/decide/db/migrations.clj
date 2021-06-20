@@ -1,21 +1,19 @@
 (ns decide.db.migrations
   (:require
     [datahike.api :as d]
-    [decide.models.argument :as argument]
-    [decide.models.argumentation :as argumentation]
-    [decide.server-components.database :refer [conn]]))
+    [decide.models.argumentation :as argumentation]))
 
 (defn- find-old-arguments [db]
   (d/q
     '[:find [(pull ?e [*]) ...]
       :where
-      [?e ::argument/id]]
+      [?e :decide.models.argument/id]]
     db))
 
-(defn- migrate-to-new-argument-tx [{::argument/keys [id author content type]}]
+(defn- migrate-to-new-argument-tx [{:decide.models.argument/keys [id author content type]}]
   (-> #:argument{:id id :type type}
     argumentation/make-argument
-    (assoc ::argument/id id)
+    (assoc :decide.models.argument/id id)
     (assoc :argument/premise
            (-> {:statement/content content}
              argumentation/make-statement
