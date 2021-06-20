@@ -23,9 +23,9 @@
                  :req [:event/what
                        :event/when
                        :event/who
-                       :event/tx]
-                 :opt [:event/proposal
-                       :event/process]))
+                       :event/tx
+                       :event/process]
+                 :opt [:event/proposal]))
 
 (defn yesterday []
   (Date/from (.minus (Instant/now) 24 ChronoUnit/HOURS)))
@@ -103,7 +103,7 @@
   [d.core/db? inst? => (s/coll-of ::event :distinct true)]
   (let [event-extractors [get-new-argument-events get-new-proposal-events]
         execute! (->> event-extractors
-                   (map (partial comp future))
+                   (map (partial comp future-call))
                    (apply juxt))]
     (mapcat deref (execute! db time-point))))
 
