@@ -57,8 +57,8 @@
 (>defn get-new-argument-events [db time-point]
   [d.core/db? inst? => (s/coll-of ::event)]
   (d/q
-    '[:find ?what ?when ?e ?tx ?who ?proposal ?process
-      :keys event/what event/when event/eid event/tx event/who event/proposal event/process
+    '[:find ?what ?when ?e ?tx ?who ?proposal ?process ?argument-path
+      :keys event/what event/when event/eid event/tx event/who event/proposal event/process event/arg-path
       :in $ $history %
       :where
       [(ground :event.type/new-argument) ?what]
@@ -67,7 +67,8 @@
       [?e :argument/premise ?premise]
       [?premise :author ?who]
       (belongs-to-proposal ?e ?proposal)
-      [?process ::process/proposals ?proposal]]
+      [?process ::process/proposals ?proposal]
+      (super-argument-root-path ?proposal ?e ?argument-path)]
     db (d/since db time-point) argumentation.db/argumentation-rules))
 
 
@@ -83,21 +84,6 @@
          [?process ::process/proposals ?e]]
     (d/since db time-point)))
 
-;; region enhance-with-slug
-(defmulti enhance-with-slug (fn [_db event] (:event/what event)))
-
-(defmethod enhance-with-slug :event.type/new-argument
-  [db {:event/keys [eid] :as event}]
-  (let [slug (-> (d/pull db [{::proposal/_arguments [{::process/_proposals [::process/slug]}]}] eid)
-               ::proposal/_arguments first ::process/_proposals ::process/slug)]
-    (assoc event ::process/slug slug)))
-
-(defmethod enhance-with-slug :event.type/new-proposal
-  [db {:event/keys [eid] :as event}]
-  (let [slug (get-in (d/pull db [{::process/_proposals [::process/slug]}] eid)
-               [::process/_proposals ::process/slug])]
-    (assoc event ::process/slug slug)))
-;; endregion
 
 (defn all-events [db time-point]
   [d.core/db? inst? => (s/coll-of ::event :distinct true)]
@@ -105,10 +91,3 @@
     (mapcat deref
       (for [extractor event-extractors]
         (future (extractor db time-point))))))
-
-(defn ^:deprecated events-by-slug [db since]
-  (->>
-    (d/since db since)
-    new-things
-    (map (partial enhance-with-slug db))
-    (group-by ::process/slug)))
