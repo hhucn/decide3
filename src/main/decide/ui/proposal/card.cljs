@@ -251,14 +251,14 @@
                                                                    :opinion (if approved? 0 1)})])})))
 
               (grid/item {} (dd/typography {} pro-votes))
-              (when (features :feature:rejects)
+              (when (features :feature/rejects)
                 (grid/item {}
                   (reject-toggle
                     {:toggled? rejected?
                      :disabled? (or (not logged-in?) process-over?)
                      :onClick
                      (fn [_e]
-                       (if (and (features :feature:reject-popup) (not rejected?))
+                       (if (and (features :feature/reject-popup) (not rejected?))
                          (set-reject-open true)             ; only
                          (comp/transact! this [(opinion/add {::proposal/id id
                                                              :opinion (if rejected? 0 -1)})])))})))
@@ -272,7 +272,7 @@
                    :href proposal-href}
                   (str no-of-arguments)))))))
 
-      (when (features :feature:reject-popup)
+      (when (features :feature/reject-popup)
         (reject-dialog
           this
           {:open? reject-open?
