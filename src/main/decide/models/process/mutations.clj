@@ -115,27 +115,29 @@
                 ::proposal/id ::proposal/title ::proposal/body ::proposal/parents ::proposal/arguments]
    ::pc/output [::proposal/id]
    ::pc/transform (comp auth/check-logged-in check-slug-exists)}
-  (let [{real-id ::proposal/id :as new-proposal}
-        (proposal/tx-map #::proposal{:nice-id (process.db/new-nice-id! conn slug)
-                                     :title title
-                                     :body body
-                                     :parents (map #(find % ::proposal/id) parents)
-                                     :argument-idents arguments
-                                     :original-author [::user/id user-id]})
-        tx-report (d/transact conn
-                    (concat
-                      (process.db/->enter [::process/slug slug] [::user/id user-id])
-                      [(assoc new-proposal
-                         :db/id "new-proposal"
-                         ::proposal/opinions
-                         {:db/id "authors-opinion"
-                          ::opinion/value +1})
-                       [:db/add [::user/id user-id] ::user/opinions "authors-opinion"]
-                       [:db/add [::process/slug slug] ::process/proposals "new-proposal"]
-                       [:db/add "datomic.tx" :db/txUser [::user/id user-id]]]))]
-    {::proposal/id real-id
-     :tempids {id real-id}
-     ::p/env (assoc env :db (:db-after tx-report))}))
+  (let [process (d/pull @conn [::process/slug ::process/end-time] [::process/slug slug])]
+    (when (process/over? process) (throw (ex-info "Process is already over." {})))
+    (let [{real-id ::proposal/id :as new-proposal}
+          (proposal/tx-map #::proposal{:nice-id (process.db/new-nice-id! conn slug)
+                                       :title title
+                                       :body body
+                                       :parents (map #(find % ::proposal/id) parents)
+                                       :argument-idents arguments
+                                       :original-author [::user/id user-id]})
+          tx-report (d/transact conn
+                      (concat
+                        (process.db/->enter [::process/slug slug] [::user/id user-id])
+                        [(assoc new-proposal
+                           :db/id "new-proposal"
+                           ::proposal/opinions
+                           {:db/id "authors-opinion"
+                            ::opinion/value +1})
+                         [:db/add [::user/id user-id] ::user/opinions "authors-opinion"]
+                         [:db/add [::process/slug slug] ::process/proposals "new-proposal"]
+                         [:db/add "datomic.tx" :db/txUser [::user/id user-id]]]))]
+      {::proposal/id real-id
+       :tempids {id real-id}
+       ::p/env (assoc env :db (:db-after tx-report))})))
 
 
 (def all-mutations
