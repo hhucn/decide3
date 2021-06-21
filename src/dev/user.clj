@@ -39,7 +39,7 @@
 (defn start
   "Start the web server"
   []
-  (->
+  (-> (mount/find-all-states)
     (mount/except [#'nrepl/socket-repl #'notifier/notifier])
     (mount/swap-states
       {#'email/mailer-chan {:start email/dev-mailer
