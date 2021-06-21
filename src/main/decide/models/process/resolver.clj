@@ -125,7 +125,7 @@
   [process.mutations/all-mutations
 
    resolve-all-processes (pc/alias-resolver2 :all-processes :root/all-processes)
-   (pc/constantly-resolver ::process/available-features process/available-features)
+   (pc/constantly-resolver ::process/available-features process/feature-set)
    resolve-public-processes
    resolve-private-processes
 

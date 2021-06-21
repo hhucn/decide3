@@ -1,7 +1,7 @@
 (ns decide.models.process
   (:require
     [clojure.set :as set]
-    #?(:clj [clojure.spec.alpha :as s]
+    #?(:clj  [clojure.spec.alpha :as s]
        :cljs [cljs.spec.alpha :as s])
     [clojure.string :as str]
     [com.fulcrologic.guardrails.core :refer [>defn => | <- ?]]
@@ -9,9 +9,17 @@
     [decide.models.user :as user]
     [decide.utils.time :as time]))
 
-(def available-features
-  #{:feature/rejects
-    :feature/reject-popup})
+(def features
+  [{:db/ident :feature/rejects
+    :db/doc "Participants will be able to reject a proposal."}
+   {:db/ident :feature/reject-popup
+    :db/doc "Ask the participant to give a reason for a reject."}
+
+   {:db/ident :feature/single-approve
+    :db/doc "Participants may only approve to a single proposal."}])
+
+(def feature-set
+  (set (map :db/ident features)))
 
 (def schema
   (concat
@@ -57,7 +65,7 @@
       :db/doc "Feature toggles for a process."
       :db/cardinality :db.cardinality/many
       :db/valueType :db.type/ref}]
-    (map #(hash-map :db/ident %) available-features)))
+    features))
 
 (def slug-pattern #"^[a-z0-9]+(?:[-_][a-z0-9]+)*$")
 (s/def ::slug (s/and string? (partial re-matches slug-pattern)))
@@ -66,7 +74,7 @@
 (s/def ::latest-id (s/and int? #(<= 0 %)))
 (s/def ::end-time (s/nilable inst?))
 (s/def ::type #{::type.public ::type.private})
-(s/def ::feature available-features)
+(s/def ::feature feature-set)
 (s/def ::features (s/coll-of ::feature))
 (s/def ::moderators (s/coll-of (s/keys :req [::user/id])))
 

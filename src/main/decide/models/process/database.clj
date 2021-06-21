@@ -39,10 +39,10 @@
         ::process/title title
         ::process/description description
         ::process/type type
-        ::process/proposals []                                      ; Do not allow to set initial proposals as this may create conflicts with the nice id
+        ::process/proposals []                              ; Do not allow to set initial proposals as this may create conflicts with the nice id
         ::process/latest-id 0
         ::process/moderators (map #(find % ::user/id) moderators)
-        ::process/features (filter process/available-features features)
+        ::process/features (filter process/feature-set features)
         ::process/participants participants}
        end-time (assoc ::process/end-time end-time))]))
 
