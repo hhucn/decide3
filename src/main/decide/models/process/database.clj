@@ -116,8 +116,9 @@
     (inc latest-id)))
 
 
-
-(>defn get-no-of-contributors [db slug]
+(>defn ^:deprecated get-no-of-contributors
+  "DEPRECATED - This is way too slow. Use `get-number-of-participants` instead."
+  [db slug]
   [d.core/db? ::process/slug => (s/spec #(<= 0 %))]
   (let [{::process/keys [proposals]} (d/pull db [{::process/proposals [:db/id]}] [::process/slug slug])
         proposal-db-ids (map :db/id proposals)
