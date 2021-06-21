@@ -30,9 +30,9 @@
     (dd/typography {:color :inherit} value)
     (layout/box {:m 1 :color :inherit :component icon-class})))
 
-(defsc ProcessListEntry [_ {::process/keys [slug title description no-of-participants no-of-proposals no-of-contributors]}]
+(defsc ProcessListEntry [_ {::process/keys [slug title description no-of-participants no-of-proposals]}]
   {:query [::process/slug ::process/title ::process/description
-           ::process/no-of-participants ::process/no-of-contributors
+           ::process/no-of-participants
            ::process/no-of-proposals]
    :ident ::process/slug
    :use-hooks? true}
@@ -45,7 +45,7 @@
       (dd/divider {})
       (surfaces/card-actions {}
         (icon-badge (i18n/tr "Number of proposals") (or no-of-proposals 0) EmojiObjectsOutlinedIcon)
-        (icon-badge (i18n/tr "Number of participants") (max no-of-participants no-of-contributors 0) GroupIcon)))))
+        (icon-badge (i18n/tr "Number of participants") (max no-of-participants 0) GroupIcon)))))
 
 
 (def ui-process-list-entry (comp/computed-factory ProcessListEntry {:keyfn ::process/slug}))
