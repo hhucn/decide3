@@ -1,4 +1,4 @@
-(ns decide.models.opinion
+(ns decide.models.opinion.api
   (:require
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [decide.models.proposal :as proposal]))

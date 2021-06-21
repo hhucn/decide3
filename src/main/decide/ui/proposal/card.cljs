@@ -6,7 +6,7 @@
     [com.fulcrologic.fulcro.dom :as dom]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
-    [decide.models.opinion :as opinion]
+    [decide.models.opinion.api :as opinion.api]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
@@ -108,8 +108,8 @@
                       [(new-proposal/show
                          {:slug slug
                           :parents [[::proposal/id id]]})
-                       (opinion/add {::proposal/id id
-                                     :opinion -1})])
+                       (opinion.api/add {::proposal/id id
+                                         :opinion -1})])
                     (onClose))}
         (list/item-text {:primary "I nearly like it"
                          :secondary (i18n/tr "Propose an improvement")}))
@@ -119,16 +119,16 @@
                                [(new-proposal/show
                                   {:slug slug
                                    :parents (mapv #(find % ::proposal/id) parents)})
-                                (opinion/add {::proposal/id id
-                                              :opinion -1})])
+                                (opinion.api/add {::proposal/id id
+                                                  :opinion -1})])
                              (onClose))}
         (list/item-text {:primary "I hate it"
                          :secondary (i18n/tr "Propose an alternative")}))
       (list/item {:button true
                   :onClick (fn []
                              (comp/transact! this
-                               [(opinion/add {::proposal/id id
-                                              :opinion -1})])
+                               [(opinion.api/add {::proposal/id id
+                                                  :opinion -1})])
                              (onClose))}
         (list/item-text {:primary "Just reject it"
                          :secondary "Hate it and don't be constructive. :-("})))
@@ -247,8 +247,8 @@
                   (approve-toggle
                     {:approved? approved?
                      :disabled? (or (not logged-in?) process-over?)
-                     :onClick #(comp/transact! this [(opinion/add {::proposal/id id
-                                                                   :opinion (if approved? 0 1)})])})))
+                     :onClick #(comp/transact! this [(opinion.api/add {::proposal/id id
+                                                                       :opinion (if approved? 0 1)})])})))
 
               (grid/item {} (dd/typography {} pro-votes))
               (when (features :feature/rejects)
@@ -260,8 +260,8 @@
                      (fn [_e]
                        (if (and (features :feature/reject-popup) (not rejected?))
                          (set-reject-open true)             ; only
-                         (comp/transact! this [(opinion/add {::proposal/id id
-                                                             :opinion (if rejected? 0 -1)})])))})))
+                         (comp/transact! this [(opinion.api/add {::proposal/id id
+                                                                 :opinion (if rejected? 0 -1)})])))})))
 
               (layout/box {:ml "auto"})
 

@@ -4,7 +4,7 @@
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.dom :as dom]
     [com.fulcrologic.fulcro.dom.events :as evt]
-    [decide.models.opinion :as opinion]
+    [decide.models.opinion.api :as opinion.api]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
     [material-ui.data-display :as dd]
@@ -29,8 +29,8 @@
            :onClick
            (fn [e]
              (evt/stop-propagation! e)
-             (comp/transact! this [(opinion/add {::proposal/id id
-                                                 :opinion (if approved? 0 1)})]))}))
+             (comp/transact! this [(opinion.api/add {::proposal/id id
+                                                     :opinion (if approved? 0 1)})]))}))
 
       (list/item-text
         {:primary title

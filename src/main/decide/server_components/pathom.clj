@@ -7,7 +7,7 @@
     [datahike.api :as d]
     [decide.models.process.resolver :as process.api]
     [decide.models.authorization :as auth]
-    [decide.models.opinion :as opinion]
+    [decide.models.opinion.api :as opinion.api]
     [decide.models.proposal.api :as proposal.api]
     [decide.models.argumentation.api :as argumentation.api]
     [decide.models.user :as user]
@@ -120,7 +120,7 @@
    user/resolvers
    process.api/all-resolvers
    proposal.api/full-api
-   opinion/resolvers
+   opinion.api/resolvers
 
    translation/locale-resolver
 

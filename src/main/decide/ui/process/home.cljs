@@ -4,7 +4,7 @@
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.data-fetch :as df]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr :refer [defrouter]]
-    [decide.models.opinion :as opinion]
+    [decide.models.opinion.api :as opinion.api]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
     [decide.ui.process.ballot :as ballot]
@@ -34,8 +34,8 @@
             (layout/box {:color "success.main"} (dd/typography {:color :inherit} (i18n/tr "Approved")))
             (inputs/button
               {:color :primary
-               :onClick #(comp/transact! this [(opinion/add {::proposal/id id
-                                                             :opinion (if approved? 0 1)})])}
+               :onClick #(comp/transact! this [(opinion.api/add {::proposal/id id
+                                                                 :opinion (if approved? 0 1)})])}
 
               (i18n/tr "Approve"))))))))
 

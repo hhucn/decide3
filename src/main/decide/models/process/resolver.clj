@@ -4,6 +4,7 @@
     [datahike.api :as d]
     [decide.features.recommendations.api :as recommendations.api]
     [decide.models.opinion :as opinion]
+    [decide.models.opinion.database :as opinion.db]
     [decide.models.process :as process]
     [decide.models.process.database :as process.db]
     [decide.models.process.mutations :as process.mutations]
@@ -117,7 +118,7 @@
             [?process ::process/proposals ?proposal]
             (approves? ?user ?proposal)]
        db
-       opinion/approves-rule
+       opinion.db/approves-rule
        (find process ::process/slug)
        [::user/id user-id])}))
 

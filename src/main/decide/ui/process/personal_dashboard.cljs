@@ -7,6 +7,7 @@
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
+    [decide.models.opinion.api :as opinion.api]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
     [material-ui.data-display.list :as list]
@@ -18,7 +19,6 @@
     ["@material-ui/icons/ThumbUpAltTwoTone" :default ThumbUpAltTwoTone]
     [taoensso.timbre :as log]
     [material-ui.inputs :as inputs]
-    [decide.models.opinion :as opinion]
     [com.fulcrologic.fulcro.dom :as dom]
     [material-ui.data-display :as dd]))
 
@@ -40,8 +40,8 @@
              (i18n/trc "Proposal has been approved" "Approved")
              (i18n/trc "Approve a proposal" "Approve"))
            :color (if approved? "primary" "default")
-           :onClick #(comp/transact! this [(opinion/add {::proposal/id id
-                                                         :opinion (if approved? 0 1)})])}
+           :onClick #(comp/transact! this [(opinion.api/add {::proposal/id id
+                                                             :opinion (if approved? 0 1)})])}
           (dom/create-element ThumbUpAltTwoTone #js {"fontSize" "small"}))))))
 
 
