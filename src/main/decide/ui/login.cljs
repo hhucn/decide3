@@ -79,6 +79,7 @@
        :fullWidth true}
       props)))
 
+;; TODO Rename email to nickname and add "real" optional contact email
 (defsc SignUpForm [this {::user/keys [email password]
                          :ui/keys [email-error password-error]}]
   {:query [::user/email ::user/password
@@ -103,14 +104,15 @@
                      (evt/prevent-default! e)
                      (comp/transact! this [(sign-up #:user{::user/email email ::user/password password})]))}
         (grid/item {:xs 12}
-          (wide-textfield {:label (i18n/tr "Email")
-                           :type :email
+          (wide-textfield {:label (i18n/tr "Nickname")
                            :value email
                            :error (boolean email-error)
                            :helperText email-error
                            :autoFocus true
-                           :inputProps {:aria-label (i18n/tr "Email")
-                                        :autoComplete :email}
+                           :inputProps {:aria-label (i18n/tr "Nickname")
+                                        :autoComplete :username
+                                        :minLength 4 :maxLength 15
+                                        :required true}
                            :onChange (fn [e]
                                        (when email-error (m/set-value!! this :ui/email-error nil))
                                        (m/set-string!! this ::user/email :event e))}))
@@ -121,7 +123,8 @@
                            :error (boolean password-error)
                            :helperText password-error
                            :inputProps {:aria-label (i18n/tr "Password")
-                                        :autoComplete :new-password}
+                                        :autoComplete :new-password
+                                        :required true}
                            :onChange (fn [e]
                                        (when password-error (m/set-value!! this :ui/password-error nil))
                                        (m/set-string!! this ::user/password :event e))}))
@@ -142,6 +145,7 @@
 
 (def ui-signup-form (comp/computed-factory SignUpForm))
 
+;; TODO Rename email to nickname and add "real" optional contact email
 (defsc LoginForm [this {:keys [::user/email ::user/password]
                         :ui/keys [email-error password-error]}]
   {:query [::user/email
@@ -170,12 +174,13 @@
                      (comp/transact! this [(sign-in #:user{::user/email email
                                                            ::user/password password})]))}
         (grid/item {:xs 12}
-          (wide-textfield {:label (i18n/tr "Email")
-                           :type :email
+          (wide-textfield {:label (i18n/tr "Nickname")
                            :error (boolean email-error)
                            :helperText email-error
-                           :inputProps {:aria-label (i18n/tr "Email")
-                                        :autoComplete :email}
+                           :inputProps {:aria-label (i18n/tr "Nickname")
+                                        :autoComplete :username
+                                        :minLength 4 :maxLength 15
+                                        :required true}
                            :value email
                            :autoFocus true
                            :onChange (fn [e]
