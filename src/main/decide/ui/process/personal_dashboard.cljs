@@ -113,7 +113,6 @@
 
 (defmutation init-dashboard [{slug ::process/slug :as params}]
   (action [{:keys [app state]}]
-    (log/spy :warn params)
     (df/load! app [::process/slug slug] PersonalProposalsList
       {:parallel true
        :marker ::personal-proposals})

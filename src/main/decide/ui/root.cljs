@@ -51,7 +51,7 @@
            {:root/navdrawer (comp/get-query nav-drawer/NavDrawer)}
            {:root/current-session (comp/get-query auth/Session)}
            :ui/current-process
-           :all-processes
+           :root/all-processes
            {::i18n/current-locale (comp/get-query i18n/Locale)}
            {meta/root-key (comp/get-query meta/Meta)}]
    :initial-state
@@ -62,7 +62,7 @@
             :root/snackbar-container (comp/get-initial-state snackbar/SnackbarContainer)
             :root/navdrawer (comp/get-initial-state nav-drawer/NavDrawer)
             :root/current-session (comp/get-initial-state auth/Session)
-            :all-processes []
+            :root/all-processes []
             ::i18n/current-locale nil
             meta/root-key (comp/get-initial-state meta/Meta)})
    :use-hooks? true}

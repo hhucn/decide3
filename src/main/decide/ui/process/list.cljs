@@ -57,14 +57,14 @@
       entry
       entry)))
 
-(defsc AllProcessesList [this {:keys [all-processes] :as props}]
-  {:query [{[:all-processes '_] (comp/get-query ProcessListEntry)}
+(defsc AllProcessesList [this {:root/keys [all-processes] :as props}]
+  {:query [{[:root/all-processes '_] (comp/get-query ProcessListEntry)}
            [df/marker-table :all-processes]]
    :initial-state (fn [_] {})
    :use-hooks? true}
-  (hooks/use-lifecycle
-    #(df/load! this :all-processes ProcessListEntry {:marker :all-processes}))
-  (let [loading? (#{:loading} (get-in props [[df/marker-table :all-processes] :status]))]
+  (hooks/use-lifecycle ; TODO This feels bad... Better to load somewhere before this even gets rendered.
+    #(df/load! this :root/all-processes ProcessListEntry {:marker :all-processes}))
+  (let [loading? (df/loading? (get props [df/marker-table :all-processes]))]
     (comp/fragment
       (grid/container {:spacing 1}
         (map ui-process-list-entry all-processes))

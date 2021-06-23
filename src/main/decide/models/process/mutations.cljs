@@ -34,7 +34,7 @@
   (remote [env]
     (-> env
       (m/returning Process)
-      (m/with-target (targeting/append-to [:all-processes])))))
+      (m/with-target (targeting/append-to [:root/all-processes])))))
 
 (defmutation update-process [{::process/keys [slug] :as process}]
   (action [{:keys [app]}]

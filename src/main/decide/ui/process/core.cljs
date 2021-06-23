@@ -21,7 +21,8 @@
     [decide.ui.proposal.new-proposal :as new-proposal]
     [material-ui.layout :as layout]
     [material-ui.navigation.tabs :as tabs]
-    [material-ui.surfaces :as surfaces]))
+    [material-ui.surfaces :as surfaces]
+    [taoensso.timbre :as log]))
 
 (defrouter ProcessRouter [_this _]
   {:router-targets
@@ -60,6 +61,10 @@
 (defn process-already-loaded? [db ident]
   (boolean (get-in db ident)))
 
+(defmutation ensure-process-basics [{:keys [slug]}]
+  (action [{:keys [app]}]
+    (df/load! app [::process/slug slug] process/Basics)))
+
 (defmutation set-current-process [{:keys [ident slug]}]
   (action [{:keys [app state]}]
     (let [process-ident [::process/slug slug]]
@@ -70,7 +75,6 @@
             {:target (targeting/multiple-targets
                        (targeting/replace-at (conj ident :process-header))
                        (targeting/replace-at [:ui/current-process])
-                       (targeting/prepend-to [:all-processes])
                        (targeting/prepend-to [:root/all-processes]))
              :parallel true})
           (dr/target-ready! app ident))
@@ -80,15 +84,23 @@
             {:target (targeting/multiple-targets
                        (targeting/replace-at (conj ident :process-header))
                        (targeting/replace-at [:ui/current-process])
-                       (targeting/prepend-to [:all-processes])
                        (targeting/prepend-to [:root/all-processes]))
              :post-mutation `dr/target-ready
              :post-mutation-params {:target ident}}))))))
 
+(defmutation leave-current-process [_]
+  (action [{:keys [state]}]
+    ;; THOUGHT Maybe keep the process, even if it is not on screen anymore?
+    ;; This could allow us to present a "back to the decision" button.
+    (swap! state assoc :ui/current-process nil)))
 
 (defn current-process-already-set? [state ident]
   (= ident (get state :ui/current-process)))
 
+(defn header-container [& children]
+  (surfaces/paper
+    {:square true}
+    (apply layout/container {:maxWidth :xl :disableGutters true} children)))
 
 (defsc ProcessContext [this {:ui/keys [process-router new-proposal-dialog]
                              :keys [ui/process-header root/current-session
@@ -106,7 +118,8 @@
    :ident (fn [] [:SCREEN ::ProcessContext])
    :route-segment ["decision" ::process/slug]
    :will-enter
-   (fn will-enter-ProcessContext [app {slug ::process/slug}]
+   (fn will-enter-ProcessContext [app {slug ::process/slug :as route-params}]
+     (log/trace "Will enter " 'ProcessContext " with: " route-params)
      (let [ident (comp/get-ident ProcessContext {})]
        (if (current-process-already-set? (app/current-state app) [::process/slug slug])
          (dr/route-immediate ident)
@@ -116,16 +129,14 @@
   (let [{::process/keys [slug end-time moderators]} current-process
         show-new-proposal-dialog (hooks/use-callback #(comp/transact! this [(new-proposal/show {:slug slug})]))]
     (comp/fragment
-      (surfaces/paper
-        {:square true}
-        (layout/container {:maxWidth :xl :disableGutters true}
-          (process.header/ui-process-header process-header)
-          (tab-bar (current-target this)
-            {:label (i18n/trc "Overview over process" "Overview") :target process.home/ProcessOverviewScreen}
-            {:label (i18n/tr "All proposals") :target proposal.main-list/MainProposalList}
-            {:label "Dashboard" :target process.dashboard/PersonalProcessDashboard}
-            (when (process/moderator? current-process (:user current-session))
-              {:label (i18n/trc "Link to moderation page" "Moderation") :target process.moderator/ProcessModeratorTab}))))
+      (header-container
+        (process.header/ui-process-header process-header)
+        (tab-bar (current-target this)
+          {:label (i18n/trc "Overview over process" "Overview") :target process.home/ProcessOverviewScreen}
+          {:label (i18n/tr "All proposals") :target proposal.main-list/MainProposalList}
+          {:label (i18n/tr "Dashboard") :target process.dashboard/PersonalProcessDashboard}
+          (when (process/moderator? current-process (:user current-session))
+            {:label (i18n/trc "Link to moderation page" "Moderation") :target process.moderator/ProcessModeratorTab})))
       (ui-process-router process-router
         {:show-new-proposal-dialog show-new-proposal-dialog})
       (new-proposal/ui-new-proposal-form new-proposal-dialog))))

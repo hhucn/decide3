@@ -55,7 +55,7 @@
   (fulcro-theme-card
     {::ct.fulcro/root list/AllProcessesList
      ::ct.fulcro/root-state
-     {:all-processes [[::process/slug "test"] [::process/slug "test2"]]
+     {:root/all-processes [[::process/slug "test"] [::process/slug "test2"]]
       ::process/slug {"test"
                       {::process/slug "test"
                        ::process/title "This is a test"
