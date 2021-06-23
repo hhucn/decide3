@@ -23,7 +23,8 @@
     [material-ui.styles :as styles]
     [material-ui.utils :as m.utils]
     [taoensso.timbre :as log]
-    [decide.ui.meta :as meta]))
+    [decide.ui.meta :as meta]
+    [com.fulcrologic.fulcro.algorithms.react-interop :as interop]))
 
 (defrouter RootRouter [_this {:keys [current-state]}]
   {:router-targets [process.list/ProcessesPage
@@ -39,6 +40,16 @@
 (defmutation set-theme [{:keys [theme]}]
   (action [{:keys [state]}]
     (swap! state assoc :ui/theme theme)))
+
+(defn WipWarning []
+  (let [[show-wip-warning? set-wip-warning] (hooks/use-state true)]
+    (when show-wip-warning?
+      (alert/alert
+        {:severity :warning
+         :action (inputs/button {:onClick #(set-wip-warning false)} (i18n/trc "Dismiss warning alert" "Dismiss"))}
+        (dom/strong {} (i18n/tr "Work in progress!")) " " (i18n/tr "Components marked with a yellow outline are in progress, and may not work yet!")))))
+
+(def ui-wip-warning (interop/react-factory WipWarning))
 
 (defsc Root [this {:root/keys [root-router app-bar snackbar-container navdrawer]
                    :keys [ui/theme ui/login-dialog]
@@ -73,19 +84,14 @@
       (dark-mode/register-dark-mode-listener #(let [new-theme (if (.-matches %) :dark :light)]
                                                 (comp/transact! (comp/any->app this)
                                                   [(set-theme {:theme new-theme})])))))
-  (let [[show-wip-warning? set-wip-warning] (hooks/use-state true)]
-    (styles/theme-provider {:theme (themes/get-mui-theme :light)}
-      (meta/ui-meta (get props meta/root-key))
-      (m.utils/css-baseline {})
-      (appbar/ui-appbar app-bar {:menu-onClick nav-drawer/toggle-navdrawer!})
-      (snackbar/ui-snackbar-container snackbar-container)
+  (styles/theme-provider {:theme (themes/get-mui-theme :light)}
+    (meta/ui-meta (get props meta/root-key))
+    (m.utils/css-baseline {})
+    (appbar/ui-appbar app-bar {:menu-onClick nav-drawer/toggle-navdrawer!})
+    (snackbar/ui-snackbar-container snackbar-container)
 
-      (nav-drawer/ui-navdrawer navdrawer)
-      (login/ui-login-modal login-dialog)
+    (nav-drawer/ui-navdrawer navdrawer)
+    (login/ui-login-modal login-dialog)
 
-      (when show-wip-warning?
-        (alert/alert
-          {:severity :warning
-           :action (inputs/button {:onClick #(set-wip-warning false)} (i18n/trc "Dismiss warning alert" "Dismiss"))}
-          (dom/strong {} (i18n/tr "Work in progress!")) " " (i18n/tr "Components marked with a yellow outline are in progress, and may not work yet!")))
-      (ui-root-router root-router))))
+    (ui-wip-warning)
+    (ui-root-router root-router)))
