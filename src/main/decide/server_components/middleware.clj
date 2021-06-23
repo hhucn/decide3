@@ -1,6 +1,7 @@
 (ns decide.server-components.middleware
   (:require
     [clojure.string :as str]
+    [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.algorithms.denormalize :as dn]
     [com.fulcrologic.fulcro.algorithms.server-render :as ssr]
     [com.fulcrologic.fulcro.components :as comp]
@@ -9,22 +10,20 @@
                                                           wrap-transit-params
                                                           wrap-transit-response]]
     [decide.models.authorization :as auth]
-    [decide.models.user :as user]
     [decide.server-components.config :refer [config]]
     [decide.server-components.pathom :refer [parser]]
-    [decide.server-components.database :refer [conn]]
     [decide.ui.pages.splash :as splash]
     [decide.ui.theming.styles :as styles]
+    [decide.utils.header :as utils.header]
     [garden.core :as garden]
     [hiccup.page :refer [html5 include-js include-css]]
     [mount.core :refer [defstate]]
-    [ring.middleware.resource :refer [wrap-resource]]
     [ring.middleware.defaults :refer [wrap-defaults]]
     [ring.middleware.gzip :refer [wrap-gzip]]
+    [ring.middleware.resource :refer [wrap-resource]]
     [ring.middleware.session.cookie :refer [cookie-store]]
     [ring.util.response :as resp :refer [response file-response resource-response]]
-    [taoensso.timbre :as log]
-    [com.fulcrologic.fulcro-i18n.i18n :as i18n]))
+    [taoensso.timbre :as log]))
 
 
 (def ^:private not-found-handler
@@ -92,8 +91,8 @@
            {:root/current-session (comp/get-query auth/Session)}]})
 
 (defn index-with-credentials [csrf-token script-manifest request]
-  (let [lang (keyword (first (str/split (get-in request [:headers "accept-language"]) #"[-_]")))
-        locale (or #_(i18n/load-locale "po-files" lang) {::i18n/locale :en})
+  (let [lang (-> request (get-in [:headers "accept-language"] "en") utils.header/preferred-language keyword)
+        locale (or (i18n/load-locale "po-files" lang) {::i18n/locale :en})
         initial-state
         (->
           (comp/get-initial-state Root)
