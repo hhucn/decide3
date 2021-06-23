@@ -2,6 +2,7 @@
   (:require
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.dom :as dom]
     [com.fulcrologic.fulcro.mutations :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [decide.application :refer [SPA]]
@@ -9,7 +10,7 @@
     [material-ui.inputs :as inputs]
     ["@material-ui/icons/Close" :default Close]))
 
-(def ident [:component/id ::Snackbar])
+(def container-ident [:component/id ::Snackbar])
 
 (defn- -next-snackbar [snackbar-container]
   (assoc snackbar-container
@@ -18,12 +19,12 @@
 
 (defmutation next-snackbar [_]
   (action [{:keys [state]}]
-    (swap! state update-in ident -next-snackbar)))
+    (swap! state update-in container-ident -next-snackbar)))
 
 (defmutation close-first-snackbar [_]
   (action [{:keys [state]}]
     (swap! state
-      update-in ident
+      update-in container-ident
       update :current
       assoc :open? false)))
 
@@ -51,20 +52,20 @@
        :onClose handle-close
        :autoHideDuration 6000
        :onExited
-       #(comp/transact! this [(next-snackbar nil)] {:only-refresh [ident]})
+       #(comp/transact! this [(next-snackbar {})] {:only-refresh [container-ident]})
        :message message
        :action (inputs/icon-button
                  {:size "small"
                   :color "inherit"
                   :onClick handle-close
                   :aria-label (i18n/trc "[aria]" "Close")}
-                 (comp/create-element Close #js {:fontSize "small"} nil))})))
+                 (dom/create-element Close #js {:fontSize "small"}))})))
 
 (def ui-snackbar (comp/computed-factory Snackbar))
 
 (defmutation add [{:keys [message]}]
   (action [{:keys [state]}]
-    (swap! state update-in ident -add-snackbar (comp/get-initial-state Snackbar {:message message}))))
+    (swap! state update-in container-ident -add-snackbar (comp/get-initial-state Snackbar {:message message}))))
 
 (defn add!
   "Queues a new snackbar to show.
@@ -73,13 +74,12 @@
   {:message \"Hello World\"}
   ```"
   [{:keys [message]}]
-  (comp/transact! SPA [(add {:message message})] {:only-refresh [ident]})
-  nil)
+  (comp/transact! SPA [(add {:message message})] {:only-refresh [container-ident]}))
 
 (defsc SnackbarContainer [_this {:keys [current]}]
   {:query [{:current (comp/get-query Snackbar)}
            {:next (comp/get-query Snackbar)}]
-   :ident (fn [] ident)
+   :ident (fn [] container-ident)
    :initial-state (fn [_] {:next [] :current nil})
    :use-hooks? true}
   (when current
