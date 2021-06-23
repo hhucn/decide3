@@ -80,7 +80,7 @@
   {:query [{:current (comp/get-query Snackbar)}
            {:next (comp/get-query Snackbar)}]
    :ident (fn [] ident)
-   :initial-state {:next []}
+   :initial-state (fn [_] {:next [] :current nil})
    :use-hooks? true}
   (when current
     (ui-snackbar current)))
