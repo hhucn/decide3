@@ -64,10 +64,11 @@
             :root/current-session (comp/get-initial-state auth/Session)
             :root/all-processes []
             ::i18n/current-locale nil
-            meta/root-key (comp/get-initial-state meta/Meta)})
+            meta/root-key (comp/get-initial-state meta/Meta {:title "decide"})})
    :use-hooks? true}
   (hooks/use-lifecycle
     (fn []
+      (comp/transact! this [(meta/set-meta {:lang (name (get-in props [::i18n/current-locale ::i18n/locale]))})])
       (log/debug "Register dark-mode listener")
       (dark-mode/register-dark-mode-listener #(let [new-theme (if (.-matches %) :dark :light)]
                                                 (comp/transact! (comp/any->app this)

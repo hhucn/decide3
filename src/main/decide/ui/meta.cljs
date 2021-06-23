@@ -6,23 +6,29 @@
 
 (def root-key ::meta)
 
-(defmutation set-meta [{:keys [title]}]
+(defmutation set-meta [props]
   (action [{:keys [state]}]
     (swap! state
-      update root-key ; swap this out for an ident in meta?
-      assoc ::title title)))
+      update root-key
+      merge props)))
 
 (defn set-title [title]
   (set-meta {:title title}))
 
 (defsc Meta [_ _]
-  {:query [::title]
-   :initial-state {::title "decide"}
+  {:query [:title :lang]
+   :initial-state
+   (fn [params]
+     (merge
+       {:title (.-title js/document)
+        :lang (.. js/document -documentElement -lang)}
+       params))
    :shouldComponentUpdate
-   (fn [this]
-     (let [{::keys [title]} (comp/props this)]
-       (when-not (= title (.-title js/document))
-         (set! (.-title js/document) title)))
+   (fn [_this {:keys [title lang]}]
+     (when-not (= title (.-title js/document))
+       (set! (.-title js/document) title))
+     (when-not (= lang (.. js/document -documentElement -lang))
+       (set! (.. js/document -documentElement -lang) lang))
      false)})
 
 (def ui-meta (comp/factory Meta))

@@ -4,6 +4,7 @@
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.dom :as dom]
     [com.fulcrologic.fulcro.dom.events :as evt]
+    [decide.ui.meta :as meta]
     [material-ui.inputs :as inputs]
     [material-ui.inputs.form :as form]
     [material-ui.inputs.input :as input]))
@@ -17,7 +18,9 @@
       {:value (name (::i18n/locale current-locale :en))
        :onChange (fn [e]
                    (let [locale (keyword (evt/target-value e))]
-                     (comp/transact! this [(i18n/change-locale {:locale locale})])))
+                     (comp/transact! this [(i18n/change-locale {:locale locale})
+                                           (meta/set-meta {:lang (str locale)})]
+                       {:optimistic? false})))
        :inputProps {:id "language-select"}}
       (dom/option {:value "en"} "English")
       (dom/option {:value "de"} "Deutsch"))))
