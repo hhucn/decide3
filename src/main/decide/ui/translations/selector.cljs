@@ -19,7 +19,7 @@
        :onChange (fn [e]
                    (let [locale (keyword (evt/target-value e))]
                      (comp/transact! this [(i18n/change-locale {:locale locale})
-                                           (meta/set-meta {:lang (str locale)})]
+                                           (meta/set-meta {:lang (name locale)})]
                        {:optimistic? false})))
        :inputProps {:id "language-select"}}
       (dom/option {:value "en"} "English")
