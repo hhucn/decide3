@@ -1,6 +1,7 @@
 {:defn-macro nil
  :expound {:show-valid-values? true
-           :print-specs? true}
+           :print-specs? true
+           :theme :figwheel-theme}
  :async? true
  :throw? false
  :emit-spec? true}
