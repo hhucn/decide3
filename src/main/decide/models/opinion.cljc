@@ -25,7 +25,9 @@
 (s/def ::opinion (s/keys :req [::value]))
 (s/def ::proposal/opinions (s/coll-of ::opinion))
 
-(>defn votes [{::proposal/keys [opinions] :as proposal}]
+(>defn votes
+  "Provided a proposal with opinions, enhances the proposal with a total of pro- and con-votes."
+  [{::proposal/keys [opinions] :as proposal}]
   [(s/keys :opt [::proposal/opinions])
    => (s/keys :req [::proposal/pro-votes ::proposal/con-votes])]
   (let [freqs (frequencies (map ::value opinions))]
