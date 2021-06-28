@@ -4,6 +4,7 @@
     #?(:clj  [clojure.spec.alpha :as s]
        :cljs [cljs.spec.alpha :as s])
     [clojure.string :as str]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.guardrails.core :refer [>defn => | <- ?]]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
@@ -147,3 +148,14 @@
     (str/replace #"[\s-]+" "-")                             ; replace multiple spaces and dashes with a single dash
     (keep-chars #"[a-z0-9-]")
     (str/replace #"^-|" "")))                               ; remove dash prefix
+
+(defsc Basics [_ _]
+  {:query
+   [::slug
+    ::title
+    ::description
+    ::type
+    ::end-time
+    ::features
+    {::moderators [::user/id]}]
+   :ident ::slug})

@@ -3,7 +3,6 @@
     [com.fulcrologic.fulcro.algorithms.server-render :as ssr]
     [com.fulcrologic.fulcro.algorithms.timbre-support :refer [console-appender prefix-output-fn]]
     [com.fulcrologic.fulcro.application :as app]
-    [com.fulcrologic.fulcro.components :as comp]
     [com.fulcrologic.fulcro.data-fetch :as df]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [decide.application :refer [SPA]]
@@ -25,10 +24,12 @@
        :appenders {:console (console-appender)}})
     (log/info "Application starting.")
     (app/set-root! SPA root/Root {:initialize-state? true})
+    (log/trace "Swap in server provided state")
     (swap! (::app/state-atom SPA) merge db)
 
-    (routing/start-history! SPA)
+    (log/trace "Initialize client routing")
     (dr/initialize! SPA)
+    (routing/start-history! SPA)
 
     ;; This makes the app start without a flicker of not-logged in state.
     ;; Does this hurt performance a lot? Think about that...
