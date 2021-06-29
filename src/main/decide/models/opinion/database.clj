@@ -1,10 +1,11 @@
 (ns decide.models.opinion.database
   (:require
     [clojure.spec.alpha :as s]
-    [com.fulcrologic.guardrails.core :refer [>defn =>]]
+    [com.fulcrologic.guardrails.core :refer [>defn >defn- =>]]
     [datahike.api :as d]
     [datahike.core :as d.core]
     [decide.models.opinion :as opinion]
+    [decide.models.process :as process]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]))
 
@@ -34,17 +35,37 @@
     user-ident
     proposal-ident))
 
-(>defn set-opinion! [conn user-ident proposal-ident opinion-value]
-  [d.core/conn? ::user/lookup ::proposal/lookup ::opinion/value => map?]
-  (if-let [opinion-id (get-opinion @conn user-ident proposal-ident)]
-    (d/transact conn
-      [{:db/id  opinion-id
-        ::opinion/value opinion-value}])
-    (d/transact conn
-      [[:db/add proposal-ident ::proposal/opinions "temp"]
-       [:db/add user-ident ::user/opinions "temp"]
-       {:db/id  "temp"
-        ::opinion/value opinion-value}])))
+(>defn- ->set-value
+  "Generate a transaction to set `value` as an opinion of a user for a proposal.
+  DOES NOT VALIDATE ANYTHING!"
+  [db user-ref proposal-ref value]
+  [d.core/db? ::user/ident ::proposal/ident ::value => vector?]
+  (if-let [id (get-opinion db user-ref proposal-ref)]
+    [{:db/id id ::opinion/value value}]
+    [[:db/add proposal-ref ::proposal/opinions "temp"]
+     [:db/add user-ref ::user/opinions "temp"]
+     {:db/id "temp" ::opinion/value value}]))
+
+(>defn ->all-neutral
+  "Generate a transaction to set `value` of all proposals by a user for a process to the neutral value (0)."
+  [db user-ref process-ref]
+  [d.core/db? ::user/ident ::process/ident ::value => vector?]
+  (mapv #(hash-map :db/id % ::opinion/value 0)
+    (d/q '[:find [?e ...]
+           :in $ ?user ?process
+           :where
+           [?user ::user/opinions ?e]
+           [?process ::process/proposals ?proposal]
+           [?proposal ::proposal/opinions ?e]]
+      db user-ref process-ref)))
+
+(>defn ->set [db user-ref proposal-ref value]
+  [d.core/db? ::user/ident ::proposal/ident ::value => vector?]
+  (let [process (::process/_proposals (d/pull db [{::process/_proposals [::process/slug ::process/features]}] proposal-ref))]
+    (into [] cat
+      [(when (process/single-approve? process)
+         (->all-neutral db user-ref (find process ::process/slug)))
+       (->set-value db user-ref proposal-ref value)])))
 
 (defn get-values-for-proposal [db proposal-ident]
   (merge

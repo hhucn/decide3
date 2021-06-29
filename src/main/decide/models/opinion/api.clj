@@ -1,26 +1,28 @@
 (ns decide.models.opinion.api
   (:require
-    [clojure.spec.alpha :as s]
-    [com.fulcrologic.guardrails.core :refer [>defn =>]]
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
     [com.wsscode.pathom.core :as p]
     [datahike.api :as d]
-    [datahike.core :as d.core]
     [decide.models.authorization :as auth]
-    [decide.models.proposal :as proposal]
-    [decide.models.user :as user]
     [decide.models.opinion :as opinion]
-    [decide.models.opinion.database :as opinion.db]))
+    [decide.models.opinion.database :as opinion.db]
+    [decide.models.proposal :as proposal]
+    [decide.models.user :as user]))
 
 
 (defmutation add [{:keys [conn AUTH/user-id] :as env} {::proposal/keys [id]
-                                                       :keys           [opinion]}]
-  {::pc/params    [::proposal/id :opinion]
+                                                       :keys [opinion]}]
+  {::pc/params [::proposal/id :opinion]
    ::pc/transform auth/check-logged-in}
-  (let [tx-report (opinion.db/set-opinion! conn
-                    [::user/id user-id]
-                    [::proposal/id id]
-                    opinion)]
+  (let [tx-report
+        (d/transact conn
+          {:tx-data
+           (conj
+             (opinion.db/->set @conn
+               [::user/id user-id]
+               [::proposal/id id]
+               opinion)
+             [:db/add "datomic.tx" :db/txUser [::user/id user-id]])})]
     {::p/env (assoc env :db (:db-after tx-report))}))
 
 (defresolver resolve-personal-opinion [{:keys [db AUTH/user-id]} {::proposal/keys [id]}]

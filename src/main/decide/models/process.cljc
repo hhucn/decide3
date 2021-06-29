@@ -159,3 +159,8 @@
     ::features
     {::moderators [::user/id]}]
    :ident ::slug})
+
+(>defn single-approve? [{::keys [features]}]
+  [(s/keys :opt [::features]) => boolean?]
+  (contains? features :feature/single-approve))
+
