@@ -170,6 +170,11 @@
      :onClick onClick
      :icon (if toggled? ThumbDown ThumbDownOutlined)}))
 
+(defn disabled-approve-toggle [{:keys [approved?]}]
+  (dom/create-element ThumbUpOutlined
+    #js {:fontSize "small"
+         :color (if approved? "primary" "disabled")}))
+
 (defsc ProposalCard [this {::proposal/keys [id title body my-opinion pro-votes parents no-of-arguments]
                            :keys [root/current-session >/subheader]}
                      {::process/keys [slug]
@@ -234,16 +239,14 @@
       (dd/divider {:variant :middle})
       (surfaces/card-actions {}
         (let [[approved? rejected?] ((juxt pos? neg?) my-opinion)]
-          (layout/box {:mx 1 :clone true}
+          (layout/box {:ml 1 :clone true}
             (grid/container
               {:alignItems :center
                :spacing 1}
 
               (grid/item {}
                 (if process-over?
-                  (dom/create-element ThumbUpOutlined
-                    #js {:fontSize "small"
-                         :color (if approved? "primary" "disabled")})
+                  (disabled-approve-toggle approved?)
                   (approve-toggle
                     {:approved? approved?
                      :disabled? (or (not logged-in?) process-over?)
