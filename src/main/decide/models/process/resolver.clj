@@ -31,12 +31,12 @@
 
 (defresolver resolve-process [{:keys [db]} {::process/keys [slug]}]
   {::pc/input #{::process/slug}
-   ::pc/output [::process/title ::process/description ::process/end-time ::process/type ::process/features]}
+   ::pc/output [::process/title ::process/description ::process/end-time ::process/type :process/features]}
   (d/pull db
     [::process/title
      ::process/description
      ::process/end-time
-     ::process/features
+     :process/features
      [::process/type :default ::process/type.public]]
     [::process/slug slug]))
 
@@ -131,6 +131,7 @@
    resolve-private-processes
 
    resolve-process
+   (pc/alias-resolver2 :process/features :process/features)
    resolve-process-moderators
    resolve-user-moderated-processes
    resolve-no-of-contributors

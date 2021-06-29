@@ -10,7 +10,8 @@
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
     [decide.models.proposal.database :as proposal.db]
-    [decide.models.user :as user]))
+    [decide.models.user :as user]
+    [taoensso.timbre :as log]))
 
 (>defn slug-in-use? [db slug]
   [d.core/db? ::process/slug => boolean?]
@@ -22,9 +23,9 @@
 
 (>defn ->add
   "Returns a transaction as data, ready to be transacted."
-  [db {::process/keys [slug title description
-                       type end-time moderators
-                       participants features]
+  [db {:keys [::process/slug ::process/title ::process/description
+              ::process/type ::process/end-time ::process/moderators
+              ::process/participants :process/features]
        :or {type ::process/type.public
             moderators []
             participants []
@@ -42,28 +43,40 @@
         ::process/proposals []                              ; Do not allow to set initial proposals as this may create conflicts with the nice id
         ::process/latest-id 0
         ::process/moderators (map #(find % ::user/id) moderators)
-        ::process/features (filter process/feature-set features)
+        :process/features (filter process/feature-set features)
         ::process/participants participants}
        end-time (assoc ::process/end-time end-time))]))
 
+(defn ->set-feature-set [db process-ref features]
+  [d.core/db? ::process/ident (s/coll-of ::process/feature :kind set?)]
+  (let [features (into #{} (filter process/feature-set) features)
+        current-features (set (:process/features (d/pull db [:process/features] process-ref)))
+        features-to-add (set/difference features current-features)
+        features-to-remove (set/difference current-features features)]
+    (into [] cat
+      [[{:db/id process-ref :process/features (vec features-to-add)}]
+       (map #(vector :db/retract process-ref :process/features %) features-to-remove)])))
+
 (>defn ->update
   "Generates a transaction data to update an existing process.
-  Any falsy key will be retracted."
-  [{::process/keys [slug] :as process}]
-  [(s/keys :req [::process/slug]) => vector?]
+  Any explicit nil key will be retracted."
+  [db {::process/keys [slug] :as process}]
+  [d.core/db? (s/keys :req [::process/slug]) => vector?]
   (let [process-ident [::process/slug slug]]
-    (mapv
-      (fn [[k v]]
-        (if v
-          [:db/add process-ident k v]
-          [:db/retract process-ident k]))
-      (dissoc process ::process/slug))))
+    (into [] cat
+      [(mapv
+         (fn [[k v]]
+           (if (some? v)
+             [:db/add process-ident k v]
+             [:db/retract process-ident k]))
+         (dissoc process ::process/slug :process/features))
+       (when (contains? process :process/features) (->set-feature-set db process-ident (:process/features process)))])))
 
 (>defn ->upsert [db {::process/keys [slug] :as process}]
   [d.core/db? (s/keys :req [::process/slug])
    => vector?]
   (if (slug-in-use? db slug)
-    (->update process)
+    (->update db process)
     (->add db process)))
 
 (defn ->enter [process-lookup user-lookups]

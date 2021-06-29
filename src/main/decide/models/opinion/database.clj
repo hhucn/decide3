@@ -39,7 +39,7 @@
   "Generate a transaction to set `value` as an opinion of a user for a proposal.
   DOES NOT VALIDATE ANYTHING!"
   [db user-ref proposal-ref value]
-  [d.core/db? ::user/ident ::proposal/ident ::value => vector?]
+  [d.core/db? ::user/ident ::proposal/ident ::opinion/value => vector?]
   (if-let [id (get-opinion db user-ref proposal-ref)]
     [{:db/id id ::opinion/value value}]
     [[:db/add proposal-ref ::proposal/opinions "temp"]
@@ -49,7 +49,7 @@
 (>defn ->all-neutral
   "Generate a transaction to set `value` of all proposals by a user for a process to the neutral value (0)."
   [db user-ref process-ref]
-  [d.core/db? ::user/ident ::process/ident ::value => vector?]
+  [d.core/db? ::user/ident ::process/ident => vector?]
   (mapv #(hash-map :db/id % ::opinion/value 0)
     (d/q '[:find [?e ...]
            :in $ ?user ?process
@@ -60,8 +60,8 @@
       db user-ref process-ref)))
 
 (>defn ->set [db user-ref proposal-ref value]
-  [d.core/db? ::user/ident ::proposal/ident ::value => vector?]
-  (let [process (::process/_proposals (d/pull db [{::process/_proposals [::process/slug ::process/features]}] proposal-ref))]
+  [d.core/db? ::user/ident ::proposal/ident ::opinion/value => vector?]
+  (let [process (::process/_proposals (d/pull db [{::process/_proposals [::process/slug :process/features]}] proposal-ref))]
     (into [] cat
       [(when (process/single-approve? process)
          (->all-neutral db user-ref (find process ::process/slug)))

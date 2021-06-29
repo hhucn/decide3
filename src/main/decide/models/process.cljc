@@ -10,17 +10,14 @@
     [decide.models.user :as user]
     [decide.utils.time :as time]))
 
-(def features
-  [{:db/ident :feature/rejects
-    :db/doc "Participants will be able to reject a proposal."}
-   {:db/ident :feature/reject-popup
-    :db/doc "Ask the participant to give a reason for a reject."}
-
-   {:db/ident :feature/single-approve
-    :db/doc "Participants may only approve to a single proposal."}])
-
 (def feature-set
-  (set (map :db/ident features)))
+  #{;;Participants may only approve to a single proposal.
+    :process.feature/single-approve
+
+    ;; Participants will be able to reject a proposal.
+    :process.feature/rejects
+    ;; Ask the participant to give a reason for a reject.
+    :process.feature/reject-popup})
 
 (def schema
   (concat
@@ -62,11 +59,10 @@
       :db/cardinality :db.cardinality/one
       :db/valueType :db.type/instant}
 
-     {:db/ident ::features
+     {:db/ident :process/features
       :db/doc "Feature toggles for a process."
       :db/cardinality :db.cardinality/many
-      :db/valueType :db.type/ref}]
-    features))
+      :db/valueType :db.type/keyword}]))
 
 (def slug-pattern #"^[a-z0-9]+(?:[-_][a-z0-9]+)*$")
 (s/def ::slug (s/and string? (partial re-matches slug-pattern)))
@@ -76,7 +72,7 @@
 (s/def ::end-time (s/nilable inst?))
 (s/def ::type #{::type.public ::type.private})
 (s/def ::feature feature-set)
-(s/def ::features (s/coll-of ::feature))
+(s/def :process/features (s/coll-of ::feature))
 (s/def ::moderators (s/coll-of (s/keys :req [::user/id])))
 
 (s/def ::ident (s/tuple #{::slug} ::slug))
@@ -156,11 +152,11 @@
     ::description
     ::type
     ::end-time
-    ::features
+    :process/features
     {::moderators [::user/id]}]
    :ident ::slug})
 
-(>defn single-approve? [{::keys [features]}]
-  [(s/keys :opt [::features]) => boolean?]
-  (contains? features :feature/single-approve))
+(>defn single-approve? [{:process/keys [features]}]
+  [(s/keys) => boolean?]
+  (contains? (set features) :process.feature/single-approve))
 

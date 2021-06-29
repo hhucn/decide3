@@ -41,7 +41,7 @@
 
 (defmutation add-process [{:keys [conn db AUTH/user-id] :as env}
                           {::process/keys [slug] :keys [participant-emails] :as process}]
-  {::pc/params [::process/title ::process/slug ::process/description ::process/end-time ::process/type ::process/features
+  {::pc/params [::process/title ::process/slug ::process/description ::process/end-time ::process/type :process/features
                 :participant-emails]
    ::pc/output [::process/slug]
    ::s/params (s/keys
@@ -61,7 +61,7 @@
     {::process/slug slug
      ::p/env (assoc env :db db-after)}))
 
-(defmutation update-process [{:keys [conn AUTH/user-id] :as env} {::process/keys [slug] :as process}]
+(defmutation update-process [{:keys [conn db AUTH/user-id] :as env} {::process/keys [slug] :as process}]
   {::pc/params [::process/slug ::process/title ::process/description ::process/end-time ::process/type]
    ::pc/output [::process/slug]
    ::s/params (s/keys :req [::process/slug] :opt [::process/title ::process/description ::process/end-time ::process/type])
@@ -69,7 +69,7 @@
   (let [{:keys [db-after]}
         (d/transact conn
           {:tx-data
-           (-> process process.db/->update (conj [:db/add "datomic.tx" :db/txUser [::user/id user-id]]))})]
+           (-> (process.db/->update db process) (conj [:db/add "datomic.tx" :db/txUser [::user/id user-id]]))})]
     {::process/slug slug
      ::p/env (assoc env :db db-after)}))
 

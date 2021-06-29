@@ -163,14 +163,15 @@
 (def ui-new-process-form (comp/computed-factory NewProcessForm))
 
 (defsc Process [_ _]
-  {:query [::process/slug ::process/title ::process/moderators ::process/description]
+  {:query [::process/slug ::process/title ::process/moderators ::process/description
+           :process/features]
    :ident ::process/slug})
 
 
 (defsc EditProcessForm
   "The form a moderator can use to edit a process. Duh."
   [_
-   {{::process/keys [slug title moderators description end-time]} :process}
+   {{:keys [::process/slug ::process/title ::process/moderators ::process/description ::process/end-time :process/features]} :process}
    {:keys [onSubmit]}]
   {:query [{:process (comp/get-query Process)}]
    :initial-state

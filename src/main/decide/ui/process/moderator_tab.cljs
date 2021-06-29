@@ -1,5 +1,6 @@
 (ns decide.ui.process.moderator-tab
   (:require
+    [clojure.data :refer [diff]]
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
@@ -21,7 +22,8 @@
     [material-ui.layout.grid :as grid]
     [material-ui.surfaces :as surfaces]
     ["@material-ui/icons/ExpandMore" :default ExpandMoreIcon]
-    ["@material-ui/icons/RemoveCircleOutline" :default RemoveCircleIcon]))
+    ["@material-ui/icons/RemoveCircleOutline" :default RemoveCircleIcon]
+    [taoensso.timbre :as log]))
 
 (defn- accordion [{:keys [title]} body]
   (surfaces/accordion {:defaultExpanded true}
@@ -91,25 +93,29 @@
    :autoComplete "off"
    :margin "normal"})
 
-(defsc ProcessEdit [this {::process/keys [slug title description end-time type]}]
-  {:query [::process/slug ::process/title ::process/description ::process/end-time ::process/type]
+(defsc ProcessEdit [this {::process/keys [slug title description end-time type] :as props}]
+  {:query [::process/slug ::process/title ::process/description ::process/end-time ::process/type :process/features]
    :ident ::process/slug
    :use-hooks? true}
-  (accordion {:title (i18n/tr "Edit process")}
-    (let [[mod-title change-title] (hooks/use-state title)
-          [mod-description change-description] (hooks/use-state description)
-          [with-end? set-with-end?] (hooks/use-state (boolean end-time))
-          [mod-end-time set-end-time] (hooks/use-state end-time)
-          [mod-type set-type] (hooks/use-state type)]
+  (let [[mod-title change-title] (hooks/use-state title)
+        [mod-description change-description] (hooks/use-state description)
+        [with-end? set-with-end?] (hooks/use-state (boolean end-time))
+        [mod-end-time set-end-time] (hooks/use-state end-time)
+        [mod-type set-type] (hooks/use-state type)
+        [form-state set-form-state] (hooks/use-state (-> props (update :process/features set)))]
+    (accordion {:title (i18n/tr "Edit process")}
       (grid/container
         {:component :form
+         :spacing 1
          :onSubmit
          (fn [evt]
            (evt/prevent-default! evt)
 
            (comp/transact! this [(process.mutations/update-process
                                    ;; calculate diff ;; NOTE have a look at clojure.data/diff
-                                   (cond-> {::process/slug slug}
+                                   (cond->
+                                     (merge (first (diff form-state props)) {::process/slug slug})
+
                                      (not= mod-title title)
                                      (assoc ::process/title mod-title)
 
@@ -121,46 +127,78 @@
 
                                      (not= (when with-end? mod-end-time) end-time)
                                      (assoc ::process/end-time (when with-end? mod-end-time))))]))}
-        (inputs/textfield
-          (merge default-input-props
-            {:label (i18n/trc "Title of a process" "Title")
-             :value mod-title
-             :helperText (when (not= title mod-title) (i18n/tr "Edit"))
-             :onChange #(change-title (evt/target-value %))
-             :inputProps {:maxLength 140}}))
+        (grid/item {:xs 12}
+          (inputs/textfield
+            (merge default-input-props
+              {:label (i18n/trc "Title of a process" "Title")
+               :value mod-title
+               :helperText (when (not= title mod-title) (i18n/tr "Edit"))
+               :onChange #(change-title (evt/target-value %))
+               :inputProps {:maxLength 140}})))
 
-        (inputs/textfield
-          (merge default-input-props
-            {:label (i18n/trc "Description of a process" "Description")
-             :helperText (when (not= description mod-description) (i18n/tr "Edit"))
-             :multiline true
-             :rows 7
-             :value mod-description
-             :onChange #(change-description (evt/target-value %))}))
+        (grid/item {:xs 12}
+          (inputs/textfield
+            (merge default-input-props
+              {:label (i18n/trc "Description of a process" "Description")
+               :helperText (when (not= description mod-description) (i18n/tr "Edit"))
+               :multiline true
+               :rows 7
+               :value mod-description
+               :onChange #(change-description (evt/target-value %))})))
 
-        (form/group {:row true}
-          (form/control-label
-            {:label (i18n/tr "Is the process public?")
-             :control
-             (inputs/switch
-               {:checked (= mod-type ::process/type.public)
-                :onChange #(set-type (if (= mod-type ::process/type.public) ::process/type.private ::process/type.public))})}))
+        (grid/item {:xs 12}
+          (form/group {:row true}
+            (form/control-label
+              {:label (i18n/tr "Is the process public?")
+               :control
+               (inputs/switch
+                 {:checked (= mod-type ::process/type.public)
+                  :onChange #(set-type (if (= mod-type ::process/type.public) ::process/type.private ::process/type.public))})})))
 
-        (form/group {:row true}
-          (form/control-label
-            {:label (i18n/tr "Does the process end?")
-             :control
-             (inputs/switch
-               {:checked with-end?
-                :onChange #(set-with-end? (not with-end?))})}))
+        (grid/item {:xs 12}
+          (form/group {:row true}
+            (form/control-label
+              {:label (i18n/tr "Does the process end?")
+               :control
+               (inputs/switch
+                 {:checked with-end?
+                  :onChange #(set-with-end? (not with-end?))})})))
 
-        (time/datetime-picker
-          {:label (i18n/trc "End of a process" "End")
-           :value mod-end-time
-           :disabled (not with-end?)
-           :inputVariant "filled"
-           :onChange set-end-time
-           :fullWidth true})
+        (grid/item {:xs 12}
+          (time/datetime-picker
+            {:label (i18n/trc "End of a process" "End")
+             :value mod-end-time
+             :disabled (not with-end?)
+             :inputVariant "filled"
+             :onChange set-end-time
+             :fullWidth true}))
+
+        (grid/item {:xs 12}
+          (surfaces/accordion {:variant :outlined}
+            (surfaces/accordion-panel-summary {:expandIcon (dom/create-element ExpandMoreIcon)}
+              (i18n/tr "Advanced"))
+            (surfaces/accordion-panel-details {}
+              (form/control {:component :fieldset}
+                (form/label {:component :legend}
+                  (i18n/tr "Features"))
+                (for [{:keys [key label help]}
+                      [{:key :process.feature/single-approve
+                        :label (i18n/tr "Single approval")
+                        :help (i18n/tr "Participants can approve at most one proposal")}
+                       #_{:key :process.feature/rejects :label (i18n/tr "Rejects") :help (i18n/tr "Participants can reject proposals.")}]
+                      :let [active? (contains? (:process/features form-state) key)]] ; TODO Move somewhere sensible
+                  (comp/fragment
+                    (form/group {:row true :key key}
+                      (form/control-label
+                        {:label label
+                         :control
+                         (inputs/checkbox
+                           {:checked active?
+                            :onChange
+                            #(set-form-state
+                               (update form-state
+                                 :process/features (if active? disj conj) key))})}))
+                    (form/helper-text {} help)))))))
 
         (grid/item {:xs 12}
           (inputs/button {:color :primary :type "submit"} (i18n/trc "Submit form" "Submit")))))))
