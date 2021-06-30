@@ -32,13 +32,15 @@
 (defresolver resolve-process [{:keys [db]} {::process/keys [slug]}]
   {::pc/input #{::process/slug}
    ::pc/output [::process/title ::process/description ::process/end-time ::process/type :process/features]}
-  (d/pull db
-    [::process/title
-     ::process/description
-     ::process/end-time
-     :process/features
-     [::process/type :default ::process/type.public]]
-    [::process/slug slug]))
+  (-> db
+    (d/pull
+      [::process/title
+       [::process/description :default ""]
+       ::process/end-time
+       [:process/features :default #{}]
+       [::process/type :default ::process/type.public]]
+      [::process/slug slug])
+    (update :process/features set)))
 
 (defresolver resolve-process-moderators [{:keys [db]} {::process/keys [slug]}]
   {::pc/input #{::process/slug}
