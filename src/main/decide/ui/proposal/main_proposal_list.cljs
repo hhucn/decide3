@@ -12,8 +12,9 @@
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
-    [decide.ui.components.flip-move :as flip-move]
     [decide.ui.proposal.card :as proposal-card]
+    [decide.ui.proposal.favorite-list :as favorite-list]
+    [decide.ui.proposal.plain-list :as plain-list]
     [decide.utils.breakpoint :as breakpoint]
     [decide.utils.time :as time]
     [material-ui.data-display :as dd]
@@ -30,17 +31,15 @@
     ["@material-ui/icons/Add" :default AddIcon]
     ["@material-ui/icons/Refresh" :default Refresh]
     ["@material-ui/icons/ViewList" :default ViewList]
-    ["@material-ui/icons/ViewModule" :default ViewModule]
-    [taoensso.timbre :as log]
-    [com.fulcrologic.fulcro.algorithms.react-interop :as interop]))
+    ["@material-ui/icons/ViewModule" :default ViewModule]))
 
 
 (defn add-proposal-fab [props]
   (let [extended? (breakpoint/>=? "sm")]
     (layout/box
       {:position "fixed"
-       :bottom   "16px"
-       :right    "16px"}
+       :bottom "16px"
+       :right "16px"}
       (inputs/fab
         (merge
           {:aria-label (i18n/tr "New proposal")
@@ -91,46 +90,6 @@
         (navigation/menu-item {:key value :value value}
           (inputs/checkbox {:checked (contains? selected value)})
           (list/item-text {:primary label}))))))
-
-(def flip-move-item
-  (js/React.forwardRef
-    (fn [props ref]
-      (grid/item {:xs 12 :md 6 :lg 4 :style {:flexGrow 1} :ref ref}
-        (.-children props)))))
-
-(def ui-flip-move-item (interop/react-factory flip-move-item))
-
-(defn plain-list [{:keys [items card-props]}]
-  (apply flip-move/flip-move {:typeName nil}
-    (for [{id ::proposal/id :as proposal} items]
-      (ui-flip-move-item {:key id}
-        (proposal-card/ui-proposal-card proposal card-props)))))
-
-(defn line-divider [{:keys [label]}]
-  (grid/item {:xs 12}
-    (dd/divider {})
-    (dd/typography {:variant :overline} label)))
-
-(defn favorite-list
-  "Displays a list of proposal card `items` with the first element prominent at the top."
-  [{:keys [items]}]
-  (comp/fragment
-    (line-divider {:label (i18n/tr "This is the best proposal for the moment")})
-    (let [best-proposal (first items)]
-      (grid/item {:xs 12}
-        (layout/container {:maxWidth :lg :disableGutters true}
-          (layout/box {:pb 5}
-            (proposal-card/ui-proposal-card
-              best-proposal
-              (update
-                (comp/get-computed best-proposal)
-                :card-props
-                assoc
-                :variant :elevation
-                :elevation 12))))))
-
-    (line-divider {:label (i18n/tr "All other proposals")})
-    (plain-list {:items (rest items)})))
 
 (defn hierarchy-list
   [{:keys [items card-props]}]
@@ -187,7 +146,7 @@
             (dom/create-element icon)))))))
 
 (defsc MainProposalList [this {::process/keys [slug proposals no-of-contributors end-time no-of-participants]
-                               :keys [root/current-session]
+                               :keys [root/current-session >/favorite-list]
                                :as props}
                          {:keys [show-new-proposal-dialog]}]
   {:query [::process/slug
@@ -195,6 +154,9 @@
            ::process/no-of-contributors
            ::process/no-of-participants
            ::process/end-time
+
+           {:>/favorite-list (comp/get-query favorite-list/FavoriteList)}
+
            [:root/current-session '_]
            [df/marker-table ::loading-proposals]]
    :ident ::process/slug
@@ -265,8 +227,8 @@
                                :alignItems "stretch"
                                :style {:position "relative"}}
                 (if (and (#{"most-approvals"} selected-sort) (not (empty? sorted-proposals)))
-                  (favorite-list list-options)
-                  (plain-list list-options))
+                  (favorite-list/ui-favorite-list favorite-list)
+                  (plain-list/plain-list list-options))
                 (when-not process-over?
                   (grid/item {:xs 12 :md 6 :lg 4
                               :style {:flexGrow 1

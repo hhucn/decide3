@@ -49,3 +49,6 @@
   (first (rank proposals)))
 
 (def add-argument `add-argument)
+
+(defn my-approved [proposals]
+  (filter #(-> % ::my-opinion pos?) proposals))
