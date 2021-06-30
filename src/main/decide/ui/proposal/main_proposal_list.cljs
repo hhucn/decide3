@@ -30,7 +30,9 @@
     ["@material-ui/icons/Add" :default AddIcon]
     ["@material-ui/icons/Refresh" :default Refresh]
     ["@material-ui/icons/ViewList" :default ViewList]
-    ["@material-ui/icons/ViewModule" :default ViewModule]))
+    ["@material-ui/icons/ViewModule" :default ViewModule]
+    [taoensso.timbre :as log]
+    [com.fulcrologic.fulcro.algorithms.react-interop :as interop]))
 
 
 (defn add-proposal-fab [props]
@@ -90,11 +92,19 @@
           (inputs/checkbox {:checked (contains? selected value)})
           (list/item-text {:primary label}))))))
 
+(def flip-move-item
+  (js/React.forwardRef
+    (fn [props ref]
+      (grid/item {:xs 12 :md 6 :lg 4 :style {:flexGrow 1} :ref ref #_#_:key (:id props)}
+        (.-children props)))))
+
+(def ui-flip-move-item (interop/react-factory flip-move-item))
+
 (defn plain-list [{:keys [items card-props]}]
   (apply flip-move/flip-move {:typeName nil}
     (for [{id ::proposal/id :as proposal} items]
-      (grid/item {:xs 12 :md 6 :lg 4 :key id :style {:flexGrow 1}
-                  :ref (hooks/use-ref id)}
+      (ui-flip-move-item {:key id
+                          :id id}
         (proposal-card/ui-proposal-card proposal card-props)))))
 
 (defn line-divider [{:keys [label]}]
