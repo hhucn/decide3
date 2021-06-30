@@ -187,8 +187,8 @@
                         :help (i18n/tr "Participants can approve at most one proposal")}
                        #_{:key :process.feature/rejects :label (i18n/tr "Rejects") :help (i18n/tr "Participants can reject proposals.")}]
                       :let [active? (contains? (:process/features form-state) key)]] ; TODO Move somewhere sensible
-                  (comp/fragment
-                    (form/group {:row true :key key}
+                  (comp/fragment {:key key}
+                    (form/group {:row true}
                       (form/control-label
                         {:label label
                          :control
