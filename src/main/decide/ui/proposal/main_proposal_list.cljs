@@ -12,6 +12,7 @@
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
+    [decide.ui.components.flip-move :as flip-move]
     [decide.ui.proposal.card :as proposal-card]
     [decide.utils.breakpoint :as breakpoint]
     [decide.utils.time :as time]
@@ -90,9 +91,10 @@
           (list/item-text {:primary label}))))))
 
 (defn plain-list [{:keys [items card-props]}]
-  (vec
+  (apply flip-move/flip-move {:typeName nil}
     (for [{id ::proposal/id :as proposal} items]
-      (grid/item {:xs 12 :md 6 :lg 4 :key id :style {:flexGrow 1}}
+      (grid/item {:xs 12 :md 6 :lg 4 :key id :style {:flexGrow 1}
+                  :ref (hooks/use-ref id)}
         (proposal-card/ui-proposal-card proposal card-props)))))
 
 (defn line-divider [{:keys [label]}]
