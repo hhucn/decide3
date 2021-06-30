@@ -95,7 +95,7 @@
 (def flip-move-item
   (js/React.forwardRef
     (fn [props ref]
-      (grid/item {:xs 12 :md 6 :lg 4 :style {:flexGrow 1} :ref ref #_#_:key (:id props)}
+      (grid/item {:xs 12 :md 6 :lg 4 :style {:flexGrow 1} :ref ref}
         (.-children props)))))
 
 (def ui-flip-move-item (interop/react-factory flip-move-item))
@@ -103,8 +103,7 @@
 (defn plain-list [{:keys [items card-props]}]
   (apply flip-move/flip-move {:typeName nil}
     (for [{id ::proposal/id :as proposal} items]
-      (ui-flip-move-item {:key id
-                          :id id}
+      (ui-flip-move-item {:key id}
         (proposal-card/ui-proposal-card proposal card-props)))))
 
 (defn line-divider [{:keys [label]}]
@@ -263,7 +262,8 @@
             (case selected-layout
               :favorite
               (grid/container {:spacing (if >=-sm? 2 1)
-                               :alignItems "stretch"}
+                               :alignItems "stretch"
+                               :style {:position "relative"}}
                 (if (and (#{"most-approvals"} selected-sort) (not (empty? sorted-proposals)))
                   (favorite-list list-options)
                   (plain-list list-options))
