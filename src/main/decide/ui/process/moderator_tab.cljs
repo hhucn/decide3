@@ -93,6 +93,17 @@
    :autoComplete "off"
    :margin "normal"})
 
+(defn- dissoc-equal-vals
+  "Dissocs all keys from `m1` that have the same value in `m2` or aren't present."
+  [m1 m2]
+  (reduce-kv
+    (fn [m k v]
+      (if (and (contains? m2 k) (= v (k m2)))
+        m
+        (assoc m k v)))
+    {}
+    m1))
+
 (defsc ProcessEdit [this {::process/keys [slug title description end-time type] :as props}]
   {:query [::process/slug ::process/title ::process/description ::process/end-time ::process/type :process/features]
    :ident ::process/slug
@@ -102,7 +113,7 @@
         [with-end? set-with-end?] (hooks/use-state (boolean end-time))
         [mod-end-time set-end-time] (hooks/use-state end-time)
         [mod-type set-type] (hooks/use-state type)
-        [form-state set-form-state] (hooks/use-state (-> props (update :process/features set)))]
+        [form-state set-form-state] (hooks/use-state props)]
     (accordion {:title (i18n/tr "Edit process")}
       (grid/container
         {:component :form
@@ -110,11 +121,10 @@
          :onSubmit
          (fn [evt]
            (evt/prevent-default! evt)
-
            (comp/transact! this [(process.mutations/update-process
                                    ;; calculate diff ;; NOTE have a look at clojure.data/diff
                                    (cond->
-                                     (merge (first (diff form-state props)) {::process/slug slug})
+                                     (merge (dissoc-equal-vals form-state props) {::process/slug slug})
 
                                      (not= mod-title title)
                                      (assoc ::process/title mod-title)
