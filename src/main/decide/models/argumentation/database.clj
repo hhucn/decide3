@@ -1,4 +1,9 @@
-(ns decide.models.argumentation.database)
+(ns decide.models.argumentation.database
+  (:require
+    [com.fulcrologic.guardrails.core :refer [>defn =>]]
+    [datahike.api :as d]
+    [datahike.core :as d.core]
+    [decide.models.process :as process]))
 
 (def argumentation-rules
   '[[(sub-argument ?argument ?sub-argument)
@@ -50,4 +55,21 @@
      (sub-argument ?super-argument ?argument)
      (super-argument-root-path ?proposal ?super-argument ?super-argument-path)
      [(clojure.core/conj ?super-argument-path ?argument) ?argument-path]]])
+
+(defn exists? [db argument-id]
+  [d.core/db? :argument/id => boolean?]
+  (some? (d/q '[:find ?e . :in $ ?argument-id :where [?e :argument/id ?argument-id]] db argument-id)))
+
+(defn belongs-to-process? [db process argument]
+  (some?
+    (d/q '[:find ?proposal
+           :in $ % ?process ?argument
+           :where
+           [?process ::process/proposals ?proposal]
+           (belongs-to-proposal ?proposal ?argument)]
+      db
+      argumentation-rules
+      (:db/id process)
+      (:db/id argument))))
+
 
