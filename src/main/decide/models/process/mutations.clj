@@ -16,7 +16,7 @@
     ::pc/mutate
     (fn [{:keys [db] :as env} {::process/keys [slug] :as params}]
       (if (process.db/slug-in-use? db slug)
-        (mutate env params)
+        (mutate (assoc env :process (d/entity db [::process/slug slug])) params)
         (throw (ex-info "Slug is not in use!" {:slug slug}))))))
 
 (defn needs-moderator [{::pc/keys [mutate] :as mutation}]
