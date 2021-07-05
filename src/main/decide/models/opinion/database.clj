@@ -24,32 +24,32 @@
          [?proposal ::proposal/opinions ?opinion]
          [?opinion ::opinion/value 0]))]])
 
-(>defn get-opinion [db user-ident proposal-ident]
-  [d.core/db? ::user/lookup ::proposal/ident => (s/nilable nat-int?)]
+(>defn get-opinion [db user proposal]
+  [d.core/db? (s/keys :req [:db/id]) (s/keys :req [:db/id]) => (s/nilable nat-int?)]
   (d/q '[:find ?opinion .
          :in $ ?user ?proposal
          :where
          [?user ::user/opinions ?opinion]
          [?proposal ::proposal/opinions ?opinion]]
     db
-    user-ident
-    proposal-ident))
+    (:db/id user)
+    (:db/id proposal)))
 
 (>defn- ->set-value
   "Generate a transaction to set `value` as an opinion of a user for a proposal.
   DOES NOT VALIDATE ANYTHING!"
-  [db user-ref proposal-ref value]
-  [d.core/db? ::user/ident ::proposal/ident ::opinion/value => vector?]
-  (if-let [id (get-opinion db user-ref proposal-ref)]
+  [db user proposal value]
+  [d.core/db? (s/keys :req [:db/id]) (s/keys :req [:db/id]) ::opinion/value => vector?]
+  (if-let [id (get-opinion db user proposal)]
     [{:db/id id ::opinion/value value}]
-    [[:db/add proposal-ref ::proposal/opinions "temp"]
-     [:db/add user-ref ::user/opinions "temp"]
+    [[:db/add (:db/id proposal) ::proposal/opinions "temp"]
+     [:db/add (:db/id user) ::user/opinions "temp"]
      {:db/id "temp" ::opinion/value value}]))
 
 (>defn ->all-neutral
   "Generate a transaction to set `value` of all proposals by a user for a process to the neutral value (0)."
-  [db user-ref process-ref]
-  [d.core/db? ::user/ident ::process/ident => vector?]
+  [db user process]
+  [d.core/db? (s/keys :req [:db/id]) (s/keys :req [:db/id]) => vector?]
   (mapv #(hash-map :db/id % ::opinion/value 0)
     (d/q '[:find [?e ...]
            :in $ ?user ?process
@@ -57,15 +57,14 @@
            [?user ::user/opinions ?e]
            [?process ::process/proposals ?proposal]
            [?proposal ::proposal/opinions ?e]]
-      db user-ref process-ref)))
+      db (:db/id user) (:db/id process))))
 
-(>defn ->set [db user-ref proposal-ref value]
-  [d.core/db? ::user/ident ::proposal/ident ::opinion/value => vector?]
-  (let [process (::process/_proposals (d/pull db [{::process/_proposals [::process/slug :process/features]}] proposal-ref))]
-    (into [] cat
-      [(when (process/single-approve? process)
-         (->all-neutral db user-ref (find process ::process/slug)))
-       (->set-value db user-ref proposal-ref value)])))
+(defn ->set [db user process proposal value]
+  [d.core/db? (s/keys :req [:db/id]) (s/keys :req [:db/id]) (s/keys :req [:db/id]) ::opinion/value => vector?]
+  (concat
+    (when (process/single-approve? process)
+      (->all-neutral db user (find process ::process/slug)))
+    (->set-value db user proposal value)))
 
 (defn get-values-for-proposal [db proposal-ident]
   (merge

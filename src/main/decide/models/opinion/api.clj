@@ -6,21 +6,27 @@
     [decide.models.authorization :as auth]
     [decide.models.opinion :as opinion]
     [decide.models.opinion.database :as opinion.db]
+    [decide.models.process :as process]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]))
 
 
-(defmutation add [{:keys [conn AUTH/user-id] :as env} {::proposal/keys [id]
-                                                       :keys [opinion]}]
+(defmutation add [{:keys [conn db AUTH/user-id] :as env} {::proposal/keys [id]
+                                                          :keys [opinion]}]
   {::pc/params [::proposal/id :opinion]
    ::pc/transform auth/check-logged-in}
-  (let [tx-report
+  (let [proposal (d/entity db [::proposal/id id])
+        process (::process/_proposals proposal)
+        user (d/entity db [::user/id user-id])
+
+        tx-report
         (d/transact conn
           {:tx-data
            (conj
              (opinion.db/->set @conn
-               [::user/id user-id]
-               [::proposal/id id]
+               user
+               process
+               proposal
                opinion)
              [:db/add "datomic.tx" :db/txUser [::user/id user-id]])})]
     {::p/env (assoc env :db (:db-after tx-report))}))
@@ -29,10 +35,13 @@
   {::pc/input #{::proposal/id}
    ::pc/output [::proposal/my-opinion]}
   (when user-id
-    (if-let [opinion (opinion.db/get-opinion db [::user/id user-id] [::proposal/id id])]
-      (let [{::opinion/keys [value]} (d/pull db [[::opinion/value :default 0]] opinion)]
-        {::proposal/my-opinion value})
-      {::proposal/my-opinion 0})))
+    (let [user (d/entity db [::user/id user-id])
+          proposal (d/entity db [::proposal/id id])
+          opinion (opinion.db/get-opinion db user proposal)]
+      (if opinion
+        (let [{::opinion/keys [value]} (d/pull db [[::opinion/value :default 0]] opinion)]
+          {::proposal/my-opinion value})
+        {::proposal/my-opinion 0}))))
 
 
 (defresolver resolve-proposal-opinions [{:keys [db]} {::proposal/keys [id]}]
