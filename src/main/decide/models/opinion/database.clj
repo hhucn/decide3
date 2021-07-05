@@ -25,7 +25,7 @@
          [?opinion ::opinion/value 0]))]])
 
 (>defn get-opinion [db user proposal]
-  [d.core/db? (s/keys :req [:db/id]) (s/keys :req [:db/id]) => (s/nilable nat-int?)]
+  [d.core/db? ::user/entity ::proposal/entity => (s/nilable nat-int?)]
   (d/q '[:find ?opinion .
          :in $ ?user ?proposal
          :where
@@ -39,7 +39,7 @@
   "Generate a transaction to set `value` as an opinion of a user for a proposal.
   DOES NOT VALIDATE ANYTHING!"
   [db user proposal value]
-  [d.core/db? (s/keys :req [:db/id]) (s/keys :req [:db/id]) ::opinion/value => vector?]
+  [d.core/db? ::user/entity ::proposal/entity ::opinion/value => vector?]
   (if-let [id (get-opinion db user proposal)]
     [{:db/id id ::opinion/value value}]
     [[:db/add (:db/id proposal) ::proposal/opinions "temp"]
@@ -49,7 +49,7 @@
 (>defn ->all-neutral
   "Generate a transaction to set `value` of all proposals by a user for a process to the neutral value (0)."
   [db user process]
-  [d.core/db? (s/keys :req [:db/id]) (s/keys :req [:db/id]) => vector?]
+  [d.core/db? ::user/entity ::process/entity => vector?]
   (mapv #(hash-map :db/id % ::opinion/value 0)
     (d/q '[:find [?e ...]
            :in $ ?user ?process
@@ -60,10 +60,10 @@
       db (:db/id user) (:db/id process))))
 
 (defn ->set [db user process proposal value]
-  [d.core/db? (s/keys :req [:db/id]) (s/keys :req [:db/id]) (s/keys :req [:db/id]) ::opinion/value => vector?]
+  [d.core/db? ::user/entity ::process/entity ::proposal/entity ::opinion/value => vector?]
   (concat
     (when (process/single-approve? process)
-      (->all-neutral db user (find process ::process/slug)))
+      (->all-neutral db user process))
     (->set-value db user proposal value)))
 
 (defn get-values-for-proposal [db proposal-ident]

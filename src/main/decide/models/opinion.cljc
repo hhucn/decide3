@@ -24,6 +24,7 @@
 (s/def ::value #{-1 0 +1})
 (s/def ::opinion (s/keys :req [::value]))
 (s/def ::proposal/opinions (s/coll-of ::opinion))
+(s/def ::entity (s/and associative? #(contains? % :db/id)))
 
 (>defn votes
   "Provided a proposal with opinions, enhances the proposal with a total of pro- and con-votes."

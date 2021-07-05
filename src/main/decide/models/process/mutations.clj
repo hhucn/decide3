@@ -4,11 +4,13 @@
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
     [com.wsscode.pathom.core :as p]
     [datahike.api :as d]
+    [decide.models.argumentation.database :as argumentation.db]
     [decide.models.authorization :as auth]
-    [decide.models.opinion :as opinion]
     [decide.models.process :as process]
     [decide.models.process.database :as process.db]
     [decide.models.proposal :as proposal]
+    [decide.models.proposal.core :as proposal.core]
+    [decide.models.proposal.database :as proposal.db]
     [decide.models.user :as user]))
 
 (defn check-slug-exists [{::pc/keys [mutate] :as mutation}]
@@ -95,20 +97,22 @@
    ::pc/output [::process/slug]
    ::s/params (s/keys :req [::process/slug])
    ::pc/transform (comp auth/check-logged-in check-slug-exists needs-moderator)}
-  (let [user-lookups
+  (let [process (d/entity db [::process/slug slug])
+        users
         (for [user-email user-emails
               :when (user/email-in-db? db user-email)]
-          [::user/email user-email])
+          (d/entity db [::user/email user-email]))
 
         {:keys [db-after]}
         (d/transact conn
           (conj
-            (process.db/->enter [::process/slug] user-lookups)
+            (mapcat #(process.db/->enter process %) users)
             [:db/add "datomic.tx" :db/txUser [::user/id user-id]]))]
     {::process/slug slug
      ::p/env (assoc env :db db-after)}))
 
-(defmutation add-proposal [{:keys [conn AUTH/user-id] :as env}
+
+(defmutation add-proposal [{:keys [conn db AUTH/user-id] :as env}
                            {::proposal/keys [id title body parents arguments]
                             ::process/keys [slug]
                             :or {parents [] arguments []}}]
@@ -116,28 +120,31 @@
                 ::proposal/id ::proposal/title ::proposal/body ::proposal/parents ::proposal/arguments]
    ::pc/output [::proposal/id]
    ::pc/transform (comp auth/check-logged-in check-slug-exists)}
-  (let [process (d/pull @conn [::process/slug ::process/end-time] [::process/slug slug])]
-    (when (process/over? process) (throw (ex-info "Process is already over." {})))
-    (let [{real-id ::proposal/id :as new-proposal}
-          (proposal/tx-map #::proposal{:nice-id (process.db/new-nice-id! conn slug)
-                                       :title title
-                                       :body body
-                                       :parents (map #(find % ::proposal/id) parents)
-                                       :argument-idents arguments
-                                       :original-author [::user/id user-id]})
-          tx-report (d/transact conn
-                      (concat
-                        (process.db/->enter [::process/slug slug] [::user/id user-id])
-                        [(assoc new-proposal
-                           :db/id "new-proposal"
-                           ::proposal/opinions
-                           {:db/id "authors-opinion"
-                            ::opinion/value +1})
-                         [:db/add [::user/id user-id] ::user/opinions "authors-opinion"]
-                         [:db/add [::process/slug slug] ::process/proposals "new-proposal"]
-                         [:db/add "datomic.tx" :db/txUser [::user/id user-id]]]))]
+  (let [tempid id
+        process (d/entity db [::process/slug slug])
+        user (d/entity db [::user/id user-id])]
+
+    (cond
+      (not-every? #(proposal.db/exists? db %) (map ::proposal/id parents))
+      (throw (ex-info "Not every parent exists" {}))
+
+      (not-every? #(argumentation.db/exists? db %) (map ::proposal/id arguments))
+      (throw (ex-info "Not every argument exists" {})))
+
+    (let [parents (map #(d/entity db (find % ::proposal/id)) parents) ; get :db/ids
+          arguments (map #(d/entity db (find % :argument/id)) arguments)
+          new-proposal (assoc (proposal.db/new-base {:title title :body body})
+                         :db/id "new-proposal"              ; tempid
+                         ::proposal/original-author (:db/id user)
+                         ::proposal/parents parents
+                         ::proposal/arguments arguments)
+          real-id (::proposal/id new-proposal)
+
+          tx-report
+          (proposal.core/add! conn user process new-proposal)]
+
       {::proposal/id real-id
-       :tempids {id real-id}
+       :tempids {tempid real-id}
        ::p/env (assoc env :db (:db-after tx-report))})))
 
 

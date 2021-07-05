@@ -59,6 +59,8 @@
 (s/def ::password (s/or :encrypted ::encrypted-password :raw string?))
 (s/def ::display-name (s/and string? #(< 0 (count %) 50)))
 
+(s/def ::entity (s/and associative? #(contains? % :db/id)))
+
 (>defn hash-password [password]
   [::password => ::encrypted-password]
   (hs/derive password))

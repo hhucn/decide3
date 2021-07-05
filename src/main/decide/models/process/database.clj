@@ -79,8 +79,8 @@
     (->update db process)
     (->add db process)))
 
-(defn ->enter [process-lookup user-lookups]
-  [[:db/add process-lookup ::process/participants user-lookups]])
+(defn ->enter [process user]
+  [[:db/add (:db/id process) ::process/participants (:db/id user)]])
 
 (defn get-public-processes [db]
   [d.core/db? => (s/coll-of (s/keys :req [::process/slug ::process/type]) :kind set?)]
@@ -117,6 +117,7 @@
      (get-public-processes db)
      (get-private-processes db user-lookup))))
 
+;; TODO Make a transaction function out of this.
 (>defn new-nice-id! [conn slug]
   [d.core/conn? ::process/slug => ::proposal/nice-id]
   (let [{::process/keys [latest-id]

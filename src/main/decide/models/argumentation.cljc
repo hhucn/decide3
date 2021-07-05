@@ -45,9 +45,11 @@
 (s/def :argument/id (s/or :uuid uuid? :tempid ::tempid/tempid))
 (s/def :argument/type #{:pro :contra})
 (s/def :argument/premise (s/keys :req [:statement/id]))
+(s/def :argument/entity (s/and associative? #(contains? % :db/id)))
 
 (s/def :statement/id (s/or :uuid uuid? :tempid ::tempid/tempid))
 (s/def :statement/content (s/and string? (complement str/blank?)))
+(s/def :statement/entity (s/and associative? #(contains? % :db/id)))
 
 (defn validate [spec x msg] ; move this to a util ns
   (when-not (s/valid? spec x)

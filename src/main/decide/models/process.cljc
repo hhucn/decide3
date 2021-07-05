@@ -77,17 +77,18 @@
 
 (s/def ::ident (s/tuple #{::slug} ::slug))
 (s/def ::lookup (s/or :ident ::ident :db/id pos-int?))
+(s/def ::entity (s/and associative? #(contains? % :db/id)))
 
 (>defn moderator? [{::keys [moderators]} {::user/keys [id]}]
   [(s/keys :req [::moderators]) (s/keys :req [::user/id]) => boolean?]
   (let [moderator-ids (set (map ::user/id moderators))]
     (contains? moderator-ids id)))
 
-(>defn over?
+(defn over?
   "Checks if a processes is over based on its end-time and the current datetime.
    Returns false if process has no end-time"
   [{::keys [end-time]}]
-  [(s/keys :opt [::end-time]) => boolean?]
+  [::entity => boolean?]
   (if end-time
     (time/past? end-time)
     false))
@@ -156,7 +157,7 @@
     {::moderators [::user/id]}]
    :ident ::slug})
 
-(>defn single-approve? [{:process/keys [features]}]
-  [(s/keys) => boolean?]
+(defn single-approve? [{:process/keys [features]}]
+  [::entity => boolean?]
   (contains? (set features) :process.feature/single-approve))
 
