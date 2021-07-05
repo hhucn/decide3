@@ -6,9 +6,12 @@
     [datahike.api :as d]
     [datahike.core :as d.core]
     [decide.models.argumentation.database :as argumentation.db]
+    [decide.models.process :as process]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
-    [decide.schema :as schema]))
+    [decide.schema :as schema]
+    [decide.utils.validation :as utils.validation])
+  (:import (java.util Date)))
 
 (>defn get-children [db proposal-ident]
   [d.core/db? ::proposal/ident => (s/coll-of (s/keys :req [::proposal/id]) :distinct true)]
@@ -163,3 +166,24 @@
       argument-member-rules
       (find argument :argument/id))
     0))
+
+(>defn exists?
+  [db proposal-id]
+  [d.core/db? ::proposal/id => boolean?]
+  (some? (d/q '[:find ?e . :in $ ?proposal-id :where [?e ::proposal/id ?proposal-id]] db proposal-id)))
+
+(defn belongs-to-process? [proposal process]
+  (contains? (::process/proposals process) proposal))
+
+(defn new-base [{:keys [id title body created]}]
+  (utils.validation/validate ::proposal/title title "Title not valid")
+  (utils.validation/validate ::proposal/body body "Body not valid")
+
+  (let [created (or created (Date.))
+        id (or id (d.core/squuid (inst-ms created)))]
+    #::proposal{:db/id (str id) ; tempid
+                :id (or id (d.core/squuid (inst-ms created)))
+                :title title
+                :body body
+                :created created}))
+
