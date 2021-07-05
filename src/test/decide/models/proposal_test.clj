@@ -25,7 +25,8 @@
                 {::proposal/id (UUID/randomUUID)
                  ::proposal/title "My first proposal"
                  ::proposal/body "This is a body!"
-                 ::process/slug "test-decision"})
+                 ::process/slug "test-decision"
+                 ::process/proposals [{::proposal/id #uuid"5fdc8014-bd58-43f6-990f-00000000000a"}]})
               [::proposal/id]}])
           =check=>
           (_/embeds?*
