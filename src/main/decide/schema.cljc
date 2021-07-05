@@ -1,4 +1,8 @@
-(ns decide.schema)
+(ns decide.schema
+  (:require
+    [com.fulcrologic.guardrails.core :refer [>def]]))
+
+(>def :db/id pos-int?)
 
 (def schema
   [{:db/ident ::author
