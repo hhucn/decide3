@@ -144,7 +144,7 @@
     <orderEntry type="library" name="Deps: io.replikativ/superv.async:0.2.11" level="project" />
     <orderEntry type="library" name="Deps: com.wsscode/fuzzy:1.0.0" level="project" />
     <orderEntry type="library" name="Deps: com.taoensso/nippy:2.14.0" level="project" />
-    <orderEntry type="library" name="Deps: com.github.mrebbinghaus/fulcro-material-ui-wrapper:8e3a59" level="project" />
+    <orderEntry type="library" name="Deps: com.github.mrebbinghaus/fulcro-material-ui-wrapper:d8e0d8" level="project" />
     <orderEntry type="library" name="Deps: javax.servlet/javax.servlet-api:3.1.0" level="project" />
     <orderEntry type="library" name="Deps: io.replikativ/datahike:0.3.6" level="project" />
     <orderEntry type="library" name="Deps: nrepl:0.8.3" level="project" />

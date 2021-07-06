@@ -6,6 +6,7 @@
     [com.fulcrologic.fulcro.dom :as dom]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
+    [decide.models.opinion :as opinion]
     [decide.models.opinion.api :as opinion.api]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
@@ -26,7 +27,8 @@
     ["@material-ui/icons/ThumbDownAltOutlined" :default ThumbDownOutlined]
     ["@material-ui/icons/ThumbDownAlt" :default ThumbDown]
     ["@material-ui/icons/ThumbUpAltOutlined" :default ThumbUpOutlined]
-    ["@material-ui/icons/ThumbUpAlt" :default ThumbUp]))
+    ["@material-ui/icons/ThumbUpAlt" :default ThumbUp]
+    [decide.models.user.ui :as user.ui]))
 
 (defn id-part [proposal-id]
   (dom/data {:className "proposal-id"
@@ -175,7 +177,27 @@
     #js {:fontSize "small"
          :color (if approved? "primary" "disabled")}))
 
-(defsc ProposalCard [this {::proposal/keys [id title body my-opinion pro-votes parents no-of-arguments]
+(defsc User [_ {::user/keys [id display-name]}]
+  {:query [::user/id ::user/display-name]
+   :ident ::user/id
+   :use-hooks? true}
+  (user.ui/avatar
+    {:user/id id
+     :user/display-name display-name}))
+
+(def ui-user (comp/factory User {:keyfn ::user/id}))
+
+(defsc Opinion [_ {::opinion/keys [user]}]
+  {:query [::opinion/value
+           {::opinion/user (comp/get-query User)}]
+   :use-hooks? true}
+  (user.ui/avatar
+    {:user/id (::user/id user)
+     :user/display-name (::user/display-name user)}))
+
+(def ui-opinion (comp/factory Opinion {:keyfn (comp ::user/id ::opinion/user)}))
+
+(defsc ProposalCard [this {::proposal/keys [id title body my-opinion pro-votes parents no-of-arguments opinions]
                            :keys [root/current-session >/subheader]}
                      {::process/keys [slug]
                       :keys [process-over?
@@ -190,6 +212,7 @@
              ::proposal/my-opinion
              ::proposal/no-of-arguments
              ::proposal/pro-votes
+             {::proposal/opinions (comp/get-query Opinion)}
              ::proposal/created
              {::proposal/parents (comp/get-query Parent)}
              [:root/current-session '_]
@@ -252,7 +275,18 @@
                      :onClick #(comp/transact! this [(opinion.api/add {::proposal/id id
                                                                        :opinion (if approved? 0 1)})])})))
 
-              (grid/item {} (dd/typography {} pro-votes))
+
+              (grid/item {}
+                (if (features :process.feature/voting.public)
+                  (dd/avatar-group {:max 3}
+                    (for [opinion opinions
+                          :when (pos? (::opinion/value opinion))
+                          :let [user (::opinion/user opinion)]]
+                      (user.ui/avatar
+                        {:user/id (::user/id user)
+                         :user/display-name (::user/display-name user)})))
+                  (dd/typography {} pro-votes)))
+
               (when (features :process.feature/rejects)
                 (grid/item {}
                   (reject-toggle

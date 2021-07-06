@@ -45,10 +45,31 @@
 
 
 (defresolver resolve-proposal-opinions [{:keys [db]} {::proposal/keys [id]}]
-  {::pc/input  #{::proposal/id}
+  {::pc/input #{::proposal/id}
    ::pc/output [::proposal/pro-votes ::proposal/con-votes]}
   (let [opinions (opinion.db/get-values-for-proposal db [::proposal/id id])]
     {::proposal/pro-votes (get opinions 1 0)
      ::proposal/con-votes (get opinions -1 0)}))
 
-(def resolvers [resolve-personal-opinion resolve-proposal-opinions add])
+(defn- get-public-opinions [proposal]
+  (let [features (set (get-in proposal [::process/_proposals :process/features] #{}))]
+    (if (or true (contains? features :process.feature/voting.public))
+      {::proposal/opinions
+       (for [opinion (get proposal ::proposal/opinions)
+             :when (not (zero? (::opinion/value opinion)))]
+         {::opinion/value (::opinion/value opinion)
+          ::opinion/user (select-keys (::user/_opinions opinion) [::user/id ::user/display-name])})}
+      nil)))
+
+(defresolver resolve-public-opinions [{:keys [db] :as env} {::proposal/keys [id]}]
+  {::pc/input #{::proposal/id}
+   ::pc/output [{::proposal/opinions [::opinion/value {::opinion/user [::user/id]}]}]}
+  (let [proposal (d/entity db [::proposal/id id])]
+    (get-public-opinions proposal)))
+
+(def resolvers
+  [resolve-personal-opinion
+   resolve-proposal-opinions
+   resolve-public-opinions
+
+   add])

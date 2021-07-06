@@ -14,6 +14,9 @@
   #{;;Participants may only approve to a single proposal.
     :process.feature/single-approve
 
+    :process.feature/voting.public
+    :process.feature/voting.show-nothing
+
     ;; Participants will be able to reject a proposal.
     :process.feature/rejects
     ;; Ask the participant to give a reason for a reject.
