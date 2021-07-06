@@ -191,7 +191,6 @@
              ::proposal/no-of-arguments
              ::proposal/pro-votes
              ::proposal/created
-             {::proposal/children 1}
              {::proposal/parents (comp/get-query Parent)}
              [:root/current-session '_]
              {:>/subheader (comp/get-query Subheader)}])
