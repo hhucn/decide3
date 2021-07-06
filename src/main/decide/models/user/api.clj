@@ -67,7 +67,7 @@
 (defmutation update-user [{:keys [conn AUTH/user-id] :as env} {::user/keys [id display-name]
                                                                :user/keys [email]
                                                                :as user}]
-  {::pc/params #{::user/id ::user/display-name :user/email}
+  {::pc/params [::user/id ::user/display-name :user/email]
    ::pc/output [:user/id]}
   (let [valid-spec (s/keys :req [::user/id] :opt [:user/email ::user/display-name])
         user (select-keys user [::user/id ::user/display-name :user/email])]
