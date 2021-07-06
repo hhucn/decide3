@@ -37,3 +37,7 @@
           [:db/add (:db/id process) ::process/proposals new-proposal-id]
           [:db/add "datomic.tx" :db/txUser (:db/id user)]]
          (opinion.db/->set db user process new-proposal +1))})))
+
+(defn has-access? [proposal user]
+  (let [process (::process/_proposals proposal)]
+    (process.db/has-access? process user)))

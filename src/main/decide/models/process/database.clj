@@ -10,8 +10,7 @@
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
     [decide.models.proposal.database :as proposal.db]
-    [decide.models.user :as user]
-    [taoensso.timbre :as log]))
+    [decide.models.user :as user]))
 
 (>defn slug-in-use? [db slug]
   [d.core/db? ::process/slug => boolean?]
@@ -162,3 +161,13 @@
           ::process/proposals
           (map opinion/votes))]
     (process/winner proposals-with-votes)))
+
+(defn has-access? [process user]
+  (or
+    (= ::process/type.public (::process/type process))
+    (contains? (::process/participants process) user)
+    (contains? (::process/moderators process) user)))
+
+(defn get-entity [db process-ident]
+  (d/entity db process-ident))
+

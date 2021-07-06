@@ -9,7 +9,8 @@
     [decide.models.process.database :as process.db]
     [decide.models.process.mutations :as process.mutations]
     [decide.models.proposal :as proposal]
-    [decide.models.user :as user]))
+    [decide.models.user :as user]
+    [decide.server-components.access-plugin :as access]))
 
 
 (defresolver resolve-all-processes [{:root/keys [public-processes private-processes]}]
@@ -17,9 +18,11 @@
   {:root/all-processes
    (concat public-processes private-processes)})
 
-(defresolver resolve-public-processes [{:keys [db]} _]
+(defresolver resolve-public-processes [{:keys [db] :as env} _]
   {::pc/output [{:root/public-processes [::process/slug ::process/type]}]}
-  {:root/public-processes (vec (process.db/get-public-processes db))})
+  (let [processes (vec (process.db/get-public-processes db))]
+    (access/allow-many! env (map #(find % ::process/slug) processes))
+    {:root/public-processes processes}))
 
 (defresolver resolve-private-processes [{:keys [db AUTH/user-id]} _]
   {::pc/output [{:root/private-processes [::process/slug ::process/type]}]}
@@ -78,10 +81,12 @@
   {::pc/output [::process/no-of-participants]}
   {::process/no-of-participants (process.db/get-number-of-participants db slug)})
 
-(defresolver resolve-proposals [{:keys [db]} {::process/keys [slug]}]
+(defresolver resolve-proposals [{:keys [db] :as env} {::process/keys [slug]}]
   {::pc/output [{::process/proposals [::proposal/id]}]}
-  (or
-    (d/pull db [{::process/proposals [::proposal/id]}] [::process/slug slug])
+  (if-let [response (d/pull db [{::process/proposals [::proposal/id]}] [::process/slug slug])]
+    (do
+      (access/allow-many! env (map #(find % ::proposal/id) (::process/proposals response)))
+      response)
     {::process/proposals []}))
 
 (defresolver resolve-no-of-proposals [_ {::process/keys [proposals]}]

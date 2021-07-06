@@ -187,3 +187,6 @@
                 :body body
                 :created created}))
 
+(defn get-entity [db proposal-id-or-ref]
+  (d/entity db
+    (cond->> proposal-id-or-ref (not (vector? proposal-id-or-ref)) (vector ::proposal/id))))

@@ -13,6 +13,8 @@
     [decide.models.user :as user]
     [decide.models.user.api :as user.api]
     [decide.ui.translations.load :as translation]
+    [decide.server-components.access-plugin :as access-plugin]
+    [decide.server-components.access-checker :as access-checker]
     [decide.server-components.config :refer [config]]
     [decide.server-components.database :refer [conn]]
     [mount.core :refer [defstate]]
@@ -83,6 +85,7 @@
                        [(pc/connect-plugin {::pc/register resolvers})]
                        plugins
                        [spec-plugin
+                        (access-plugin/access-plugin access-checker/check-access!)
                         (p/env-plugin {::p/process-error process-error})
                         (when log-requests? (p/pre-process-parser-plugin rad-pathom/log-request!))
                         ;; TODO: Do we need this, and if so, we need to pass the attribute map
