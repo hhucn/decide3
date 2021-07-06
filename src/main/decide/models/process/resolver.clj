@@ -3,7 +3,6 @@
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
     [datahike.api :as d]
     [decide.features.recommendations.api :as recommendations.api]
-    [decide.models.opinion :as opinion]
     [decide.models.opinion.database :as opinion.db]
     [decide.models.process :as process]
     [decide.models.process.database :as process.db]
@@ -74,9 +73,6 @@
     {::process/authors authors
      ::process/no-of-authors (count authors)}))
 
-(defresolver resolve-no-of-contributors [{:keys [db]} {::process/keys [slug]}]
-  {::process/no-of-contributors (process.db/get-no-of-contributors db slug)})
-
 (defresolver resolve-no-of-participants [{:keys [db]} {::process/keys [slug]}]
   {::pc/output [::process/no-of-participants]}
   {::process/no-of-participants (process.db/get-number-of-participants db slug)})
@@ -141,7 +137,6 @@
    (pc/alias-resolver2 :process/features :process/features)
    resolve-process-moderators
    resolve-user-moderated-processes
-   resolve-no-of-contributors
    resolve-no-of-participants
    resolve-winner
 

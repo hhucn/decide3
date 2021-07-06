@@ -145,13 +145,12 @@
           (toggle/button {:value v :key v}
             (dom/create-element icon)))))))
 
-(defsc MainProposalList [this {::process/keys [slug proposals no-of-contributors end-time no-of-participants]
+(defsc MainProposalList [this {::process/keys [slug proposals end-time no-of-participants]
                                :keys [root/current-session >/favorite-list]
                                :as props}
                          {:keys [show-new-proposal-dialog]}]
   {:query [::process/slug
            {::process/proposals (comp/get-query proposal-card/ProposalCard)}
-           ::process/no-of-contributors
            ::process/no-of-participants
            ::process/end-time
 
@@ -200,7 +199,7 @@
               {:label (i18n/trf "Proposals {count}" {:count (count sorted-proposals)})})
             (info-toolbar-item
               {:label (i18n/trf "Participants {count}"
-                        {:count (str (max no-of-participants no-of-contributors 0))})}))
+                        {:count (str (max no-of-participants 0))})}))
 
           ;; right side
           (grid/container

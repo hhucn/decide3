@@ -128,20 +128,6 @@
     (d/transact conn [[:db/add id ::process/latest-id (inc latest-id)]])
     (inc latest-id)))
 
-
-(>defn ^:deprecated get-no-of-contributors
-  "DEPRECATED - This is way too slow. Use `get-number-of-participants` instead."
-  [db slug]
-  [d.core/db? ::process/slug => (s/spec #(<= 0 %))]
-  (let [{::process/keys [proposals]} (d/pull db [{::process/proposals [:db/id]}] [::process/slug slug])
-        proposal-db-ids (map :db/id proposals)
-        commenter (apply set/union (map (partial proposal.db/get-users-who-made-an-argument db) proposal-db-ids))
-        authors (into #{}
-                  (map (comp :db/id ::proposal/original-author))
-                  (d/pull-many db [{::proposal/original-author [:db/id]}] proposal-db-ids))
-        voters (apply set/union (map (partial proposal.db/get-voters db) proposal-db-ids))]
-    (count (set/union commenter authors voters))))
-
 (>defn get-number-of-participants [db slug]
   [d.core/db? ::process/slug => nat-int?]
   (-> db
