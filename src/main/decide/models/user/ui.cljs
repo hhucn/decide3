@@ -20,13 +20,15 @@
   ([{:user/keys [id display-name]} avatar-props]
    (let [color (color-utils/hash-color id)
          get-contrast-text (get-in (styles/use-theme) [:palette :getContrastText])]
-     (dd/avatar
-       (-> avatar-props
-         (assoc :alt display-name)
-         (update :style assoc
-           :backgroundColor color
-           :color (get-contrast-text color)))
-       (or (first-char display-name) \?)))))
+     (dd/tooltip {:title display-name :arrow true}
+       (dd/avatar
+         (-> avatar-props
+           (assoc :alt display-name
+                  :title display-name)
+           (update :style assoc
+             :backgroundColor color
+             :color (get-contrast-text color)))
+         (or (first-char display-name) \?))))))
 
 (defn chip
   ([user] (chip user {}))
