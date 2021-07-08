@@ -7,6 +7,7 @@
     [com.fulcrologic.fulcro.data-fetch :as df]
     [com.fulcrologic.fulcro.dom.events :as evt]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+    [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [decide.models.user :as user]
     [decide.models.user.api :as user.api]
@@ -17,8 +18,7 @@
     [material-ui.lab :refer [skeleton]]
     [material-ui.layout :as layout]
     [material-ui.layout.grid :as grid]
-    [material-ui.surfaces :as surfaces]
-    [com.fulcrologic.fulcro.react.hooks :as hooks]))
+    [material-ui.surfaces :as surfaces]))
 
 (defn wide-textfield
   "Outlined textfield on full width with normal margins. Takes the same props as `material-ui.inputs/textfield`"
@@ -107,12 +107,13 @@
   (< 0 (count display-name) 50))
 
 (defsc UserInformation [this {:user/keys [display-name nickname email]
+                              :keys [>/avatar]
                               :as props}]
   {:query [::user/id
-           :user/id
            :user/display-name
            :user/email
-           :user/nickname]
+           :user/nickname
+           {:>/avatar (comp/get-query user.ui/Avatar)}]
    :ident ::user/id
    :use-hooks? true}
   (let [[pristine-state set-pristine-state] (hooks/use-state props)]
@@ -127,7 +128,7 @@
       (surfaces/card-content {}
         (grid/container {:spacing 1}
           (grid/item {}
-            (user.ui/avatar props {:style {:width "70px" :height "70px" :fontSize "3rem"}}))
+            (user.ui/ui-avatar avatar {:avatar-props {:style {:width "70px" :height "70px" :fontSize "3rem"}}}))
           (wide-textfield {:label (i18n/tr "Display name")
                            :value display-name
                            :error (not (valid-display-name display-name))
