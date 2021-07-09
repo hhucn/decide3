@@ -4,14 +4,19 @@
     [com.wsscode.pathom.core :as p]))
 
 (defn allow-many! [env inputs]
-  (swap! (::access-cache env) #(apply conj % inputs))
+  (some-> env
+    ::access-cache
+    (swap! #(apply conj % inputs)))
   env)
 
 (defn allow! [env & inputs]
   (allow-many! env inputs))
 
 (defn allowed? [env input]
-  (contains? @(::access-cache env) input))
+  (some-> env
+    ::access-cache
+    deref
+    (contains? input)))
 
 (defn- initial-cache [_env]
   (atom #{}))
@@ -22,8 +27,8 @@
   ([check-fn {:keys [initial-cache-fn]
               :or {initial-cache-fn initial-cache}}]
    {::p/wrap-parser
-    (fn [parser]
-      (fn [env tx]
+    (fn wrap-parser-creation [parser]
+      (fn wrap-parser-call [env tx]
         (-> env
           (assoc ::access-cache (initial-cache-fn env))
           (parser tx))))
@@ -33,10 +38,10 @@
               (or
                 (allowed? env input)
                 (check-fn env input)))]
-      (fn [resolve]
-        (fn [env input]
+      (fn wrap-resolver-creation [resolve]
+        (fn wrap-resolver-call [env input]
           (let [allowed?
-                (if (seq? input)                               ; batched?
+                (if (seq? input)                            ; batched?
                   (every? (fn [input] (every? #(has-access? env %) input)) input)
                   (every? #(has-access? env %) input))]
             (when allowed?
