@@ -9,7 +9,6 @@
     [decide.models.opinion :as opinion]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
-    [decide.models.proposal.database :as proposal.db]
     [decide.models.user :as user]))
 
 (>defn slug-in-use? [db slug]
@@ -150,7 +149,7 @@
 
 (defn has-access? [process user]
   (or
-    (= ::process/type.public (::process/type process))
+    (not= ::process/type.private (::process/type process))
     (contains? (::process/participants process) user)
     (contains? (::process/moderators process) user)))
 
