@@ -188,37 +188,38 @@
             (surfaces/accordion-panel-summary {:expandIcon (dom/create-element ExpandMoreIcon)}
               (i18n/tr "Advanced"))
             (surfaces/accordion-panel-details {}
-              (form/control {:component :fieldset}
-                (form/label {:component :legend}
-                  (i18n/tr "Features"))
-                (for [{:keys [key label help]}
-                      [{:key :process.feature/single-approve
-                        :label (i18n/tr "Single approval")
-                        :help (i18n/tr "Participants can approve at most one proposal")}
-                       #_{:key :process.feature/rejects :label (i18n/tr "Rejects") :help (i18n/tr "Participants can reject proposals.")}]
-                      :let [active? (contains? (:process/features form-state) key)]] ; TODO Move somewhere sensible
-                  (comp/fragment {:key key}
-                    (form/group {:row true}
-                      (form/control-label
-                        {:label label
-                         :control
-                         (inputs/checkbox
-                           {:checked active?
-                            :onChange
-                            #(set-form-state
-                               (update form-state
-                                 :process/features (if active? disj conj) key))})}))
-                    (form/helper-text {} help)))))))
+              (grid/container {}
+                (grid/item {:xs 12}
+                  (form/group {:row true}
+                    (form/control {:component :fieldset}
+                      (form/label {:component :legend}
+                        (i18n/tr "Features"))
+                      (for [{:keys [key label help]}
+                            [{:key :process.feature/single-approve
+                              :label (i18n/tr "Single approval")
+                              :help (i18n/tr "Participants can approve at most one proposal")}
+                             {:key :process.feature/voting.public
+                              :label (i18n/tr "Public votes")
+                              :help (i18n/tr "Everyone can see who voted for what")}
+                             #_{:key :process.feature/rejects :label (i18n/tr "Rejects") :help (i18n/tr "Participants can reject proposals.")}]
+                            :let [active? (contains? (:process/features form-state) key)]] ; TODO Move somewhere sensible
+                        (comp/fragment {:key key}
+                          (form/helper-text {} help)
+                          (form/group {:row true}
+                            (form/control-label
+                              {:label label
+                               :control
+                               (inputs/checkbox
+                                 {:checked active?
+                                  :onChange
+                                  #(set-form-state
+                                     (update form-state
+                                       :process/features (if active? disj conj) key))})})))))))))))
 
         (grid/item {:xs 12}
           (inputs/button {:color :primary :type "submit"} (i18n/trc "Submit form" "Submit")))))))
 
 (def ui-process-edit (comp/computed-factory ProcessEdit))
-
-(defsc ParticipantChip [_ {::user/keys [display-name]}]
-  {:query [::user/id ::user/display-name]
-   :ident ::user/id}
-  (dd/chip {:label display-name}))
 
 (defsc Process [_ _]
   {:query (fn []

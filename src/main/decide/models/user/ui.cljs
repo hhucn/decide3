@@ -34,7 +34,7 @@
 
 (def ui-colored-avatar (interop/react-factory ColoredAvatar))
 
-(defn ^:deprecated avatar
+(defn avatar
   "DEPRECTATED - Use `ui-avatar` or `ui-colored-avatar`"
   [{:user/keys [id display-name]}]
   (ui-colored-avatar {:color (color-utils/hash-color id)
