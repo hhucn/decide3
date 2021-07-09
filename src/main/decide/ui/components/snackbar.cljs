@@ -51,8 +51,8 @@
        :open open?
        :onClose handle-close
        :autoHideDuration 6000
-       :onExited
-       #(comp/transact! this [(next-snackbar {})] {:only-refresh [container-ident]})
+       :TransitionProps {:onExited
+                         #(comp/transact! this [(next-snackbar {})] {:only-refresh [container-ident]})}
        :message message
        :action (inputs/icon-button
                  {:size "small"

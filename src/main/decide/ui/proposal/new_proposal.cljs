@@ -97,7 +97,7 @@
       (grid/item {:sm 6 :xs 12}
         (button-card
           {:onClick #(to-step :parents)
-           :startIcon (layout/box {:clone true :css {:transform "rotate(.5turn)"}}
+           :startIcon (layout/box {:clone true :sx {:transform "rotate(.5turn)"}}
                         (comp/create-element MergeType nil nil))}
           (i18n/tr "Fork / Merge")
           (dd/typography {:variant "caption" :color "textSecondary"}
