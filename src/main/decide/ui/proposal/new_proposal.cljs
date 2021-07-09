@@ -235,7 +235,7 @@
        :fullScreen (breakpoint/<=? "xs")
        :maxWidth "md"
        :onClose close-dialog
-       :onExit reset-form
+       :TransitionProps {:onExit reset-form}
        :PaperProps {:component "form"
                     :onSubmit (fn submit-new-proposal-form [e]
                                 (evt/prevent-default! e)

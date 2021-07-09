@@ -1,6 +1,6 @@
 (ns decide.ui.theming.themes
   (:require [material-ui.styles :refer [create-mui-theme]]
-            ["@material-ui/core/styles" :refer [responsiveFontSizes createMuiTheme]]
+            ["@material-ui/core/styles" :refer [responsiveFontSizes createTheme]]
             [decide.ui.theming.styles :as styles]))
 
 (def shared
@@ -39,6 +39,6 @@
   (memoize
     (fn [theme-key]
       (responsiveFontSizes
-        (createMuiTheme
+        (createTheme
           (clj->js (get themes theme-key light-theme))
           (clj->js shared))))))

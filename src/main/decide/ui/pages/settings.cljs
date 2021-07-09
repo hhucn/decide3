@@ -184,7 +184,7 @@
         (grid/container
           {:direction :column
            :spacing 2
-           :justify "flex-start"}
+           :justifyContent "flex-start"}
           (grid/item {}
             (cond
               user-information (ui-basic-user-info user-information)

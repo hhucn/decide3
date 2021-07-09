@@ -45,7 +45,7 @@
           {:aria-label (i18n/tr "New proposal")
            :title (i18n/tr "New proposal")
            :color "secondary"
-           :variant (if extended? "extended" "round")}
+           :variant (if extended? "extended" "circular")}
           props)
         (comp/create-element AddIcon nil nil)
         (when extended?
@@ -203,7 +203,7 @@
 
           ;; right side
           (grid/container
-            {:spacing 2, :alignItems :center, :justify :flex-end}
+            {:spacing 2, :alignItems :center, :justifyContent :flex-end}
             (layout-selector
               {:value selected-layout
                :onChange set-selected-layout!}
