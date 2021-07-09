@@ -14,7 +14,7 @@
 (deftest unauthorized-user-integration-test
   (let [parser (pathom/build-parser {} *conn*)]
     (component "Someone not authorized"
-      (let [parser-without-session (partial parser {})]
+      (let [parser-without-session #(parser {:ring/request {}} %)]
         (assertions
           "can query for an existing process."
           (parser-without-session
