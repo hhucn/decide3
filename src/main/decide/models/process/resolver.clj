@@ -1,6 +1,7 @@
 (ns decide.models.process.resolver
   (:require
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
+    [com.wsscode.pathom.core :as p]
     [datahike.api :as d]
     [decide.features.recommendations.api :as recommendations.api]
     [decide.models.opinion.database :as opinion.db]
@@ -11,6 +12,10 @@
     [decide.models.user :as user]
     [decide.server-components.access-plugin :as access]))
 
+(defn get-process-entity [{:keys [db] :as env} slug]
+  (let [process-ident [::process/slug slug]]
+    (p/cached env process-ident
+      (d/entity db process-ident))))
 
 (defresolver resolve-all-processes [{:root/keys [public-processes private-processes]}]
   {::pc/output [{:root/all-processes [::process/slug ::process/type]}]}
@@ -31,18 +36,17 @@
        (process.db/get-private-processes db [::user/id user-id])
        []))})
 
-(defresolver resolve-process [{:keys [db]} {::process/keys [slug]}]
+(defresolver resolve-process [env {::process/keys [slug]}]
   {::pc/input #{::process/slug}
    ::pc/output [::process/title ::process/description ::process/end-time ::process/type :process/features]}
-  (-> db
-    (d/pull
-      [::process/title
-       [::process/description :default ""]
-       ::process/end-time
-       [:process/features :default #{}]
-       [::process/type :default ::process/type.public]]
-      [::process/slug slug])
-    (update :process/features set)))
+  (let [process (get-process-entity env slug)]
+    (-> process
+      (select-keys [::process/title ::process/description ::process/end-time ::process/type :process/features])
+      (update :process/features set)
+      (merge
+        {::process/description ""
+         ::process/end-time nil
+         ::process/type ::process/type.public}))))
 
 (defresolver resolve-process-moderators [{:keys [db]} {::process/keys [slug]}]
   {::pc/input #{::process/slug}
