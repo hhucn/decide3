@@ -129,10 +129,11 @@
 
 (>defn get-number-of-participants [db slug]
   [d.core/db? ::process/slug => nat-int?]
-  (-> db
-    (d/pull [::process/participants] [::process/slug slug])
-    ::process/participants
-    count))
+  (d/q '[:find (count ?e) .
+         :in $ ?process
+         :where
+         [?process ::process/participants ?e]]
+    db [::process/slug slug]))
 
 (>defn get-winner [db process]
   [d.core/db? (s/keys :req [::process/slug]) => (? ::proposal/proposal)]
