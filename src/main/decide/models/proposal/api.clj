@@ -32,6 +32,14 @@
   (let [proposal (or (d/pull db [{::proposal/parents [::proposal/id]}] [::proposal/id id]) {::proposal/parents []})]
     (assoc proposal ::proposal/no-of-parents (count (::proposal/parents proposal)))))
 
+(defresolver resolve-no-of-parents [{:keys [db]} {::proposal/keys [id]}]
+  {::proposal/no-of-parents
+   (d/q '[:find (count ?e)
+          :in $ ?proposal
+          :where
+          [?proposal ::proposal/parents ?e]]
+     db [::proposal/id id])})
+
 (defresolver resolve-children [{:keys [db]} {::proposal/keys [id]}]
   {::pc/input #{::proposal/id}
    ::pc/output [{::proposal/children [::proposal/id]}]}
@@ -82,6 +90,7 @@
 
 (def full-api [resolve-proposal
                resolve-generation
+               resolve-no-of-parents
                resolve-parents
                resolve-children
 
