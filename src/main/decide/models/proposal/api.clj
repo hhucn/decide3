@@ -48,10 +48,11 @@
     {::proposal/children children
      ::proposal/no-of-children (count children)}))
 
+;; Todo get-generation is really slow.
 (defresolver resolve-generation [{:keys [db]} proposal]
   {::pc/input #{::proposal/id}
    ::pc/output [::proposal/generation]}
-  {::proposal/generation (proposal.db/get-generation db proposal)})
+  {::proposal/generation nil #_(proposal.db/get-generation db proposal)})
 
 (defresolver resolve-child-relations [{:keys [db]} {::proposal/keys [id]}]
   {::pc/output [{:child-relations [{:proposal [::proposal/id]}

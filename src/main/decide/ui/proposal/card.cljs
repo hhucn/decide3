@@ -75,7 +75,7 @@
     " · "
     (when (and created? (instance? js/Date created))
       (time-part created))
-    (when gen?
+    (when (and gen? generation)
       (comp/fragment
         " · "
         (dd/tooltip

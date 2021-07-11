@@ -25,6 +25,8 @@
     (d/pull [{::proposal/parents [::proposal/id]}] proposal-lookup)
     (get ::proposal/parents [])))
 
+
+;; TODO This is slow. We could save the generation on proposal creation.
 (>defn get-generation
   "Query for the generation of a proposal.
 
