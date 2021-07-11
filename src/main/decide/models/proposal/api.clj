@@ -42,8 +42,11 @@
 
 (defresolver resolve-children [{:keys [db]} {::proposal/keys [id]}]
   {::pc/input #{::proposal/id}
-   ::pc/output [{::proposal/children [::proposal/id]}]}
-  {::proposal/children (proposal.db/get-children db [::proposal/id id])})
+   ::pc/output [{::proposal/children [::proposal/id]}
+                ::proposal/no-of-children]}
+  (let [children (proposal.db/get-children db [::proposal/id id])]
+    {::proposal/children children
+     ::proposal/no-of-children (count children)}))
 
 (defresolver resolve-generation [{:keys [db]} proposal]
   {::pc/input #{::proposal/id}
