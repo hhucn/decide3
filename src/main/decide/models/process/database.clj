@@ -155,6 +155,7 @@
       (contains? (::process/participants process) user)
       (contains? (::process/moderators process) user))))
 
-(defn get-entity [db process-ident]
-  (d/entity db process-ident))
+(defn get-by-slug [db slug]
+  (when-let [process-eid (d/q '[:find ?e . :in $ ?slug :where [?e ::process/slug ?slug]] db slug)]
+    (d/entity db process-eid)))
 

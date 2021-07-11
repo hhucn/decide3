@@ -20,12 +20,13 @@
 
 (defmethod *check-access! :decide.models.process/slug
   [{:keys [db AUTH/user-id] :as env} input]
-  (let [allowed? (process.db/has-access?
-                   (process.db/get-entity db input)
-                   (user.db/get-entity db user-id))]
-    (when allowed?
-      (access/allow! env input))
-    allowed?))
+  (when-let [process (process.db/get-by-slug db (second input))]
+    (let [allowed? (process.db/has-access?
+                     process
+                     (user.db/get-entity db user-id))]
+      (when allowed?
+        (access/allow! env input))
+      allowed?)))
 
 (defmethod *check-access! :default [_ _] true)
 
