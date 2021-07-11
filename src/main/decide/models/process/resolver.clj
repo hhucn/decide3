@@ -78,15 +78,24 @@
   {::process/no-of-participants (process.db/get-number-of-participants db slug)})
 
 (defresolver resolve-proposals [{:keys [db] :as env} {::process/keys [slug]}]
-  {::pc/output [{::process/proposals [::proposal/id]}]}
-  (if-let [response (d/pull db [{::process/proposals [::proposal/id]}] [::process/slug slug])]
+  {::pc/output [{::process/proposals [::proposal/id]}
+                ::process/no-of-proposals]}
+  (if-let [{::process/keys [proposals]} (d/pull db [{::process/proposals [::proposal/id]}] [::process/slug slug])]
     (do
-      (access/allow-many! env (map #(find % ::proposal/id) (::process/proposals response)))
-      response)
-    {::process/proposals []}))
+      (access/allow-many! env (map #(find % ::proposal/id) proposals))
+      {::process/proposals proposals
+       ::process/no-of-proposals (count proposals)})
+    {::process/proposals []
+     ::process/no-of-proposals 0}))
 
-(defresolver resolve-no-of-proposals [_ {::process/keys [proposals]}]
-  {::process/no-of-proposals (count proposals)})
+(defresolver resolve-no-of-proposals [{:keys [db]} {::process/keys [slug]}]
+  {::process/no-of-proposals
+   (or (d/q '[:find (count ?e) .
+              :in $ ?process
+              :where
+              [?process ::process/proposals ?e]]
+         db [::process/slug slug])
+     0)})
 
 (defresolver resolve-nice-proposal [{:keys [db]} {::proposal/keys [nice-ident]}]
   {::pc/output [::proposal/id]}
