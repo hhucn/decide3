@@ -59,8 +59,9 @@ build_latest_images:
   stage: build-images
   needs: [ "clj-test", "cljs-test" ]
   image: docker
-  script:
+  before_script:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+  script:
     - docker build -t $CI_REGISTRY_IMAGE:latest .
     - docker push $CI_REGISTRY_IMAGE:latest
   only:
