@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: decide3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-09 22:52+0200\n"
-"PO-Revision-Date: 2021-06-09 22:53+0200\n"
+"POT-Creation-Date: 2021-07-11 23:43+0200\n"
+"PO-Revision-Date: 2021-07-11 23:48+0200\n"
 "Last-Translator: Björn Ebbinghaus <ebbinghaus@hhu.de>\n"
 "Language-Team: Björn Ebbinghaus\n"
 "Language: de\n"
@@ -31,8 +31,8 @@ msgctxt "Dialog header"
 msgid "Sign up"
 msgstr "Registrierung"
 
-msgid "Email"
-msgstr "E-Mail"
+msgid "Nickname"
+msgstr "Nickname"
 
 msgid "Password"
 msgstr "Passwort"
@@ -106,8 +106,20 @@ msgstr "Persönliche Details"
 msgid "Display name"
 msgstr "Anzeigename"
 
-msgid "Nickname"
-msgstr "Nickname"
+#, fuzzy
+msgctxt "Nickname"
+msgid "Public, unique identifier"
+msgstr "Öffentlicher Name zur eindeutigen Identifikation"
+
+msgid "Email"
+msgstr "E-Mail"
+
+#, fuzzy
+msgctxt "Email field"
+msgid "This is private. Leave empty if you don't want notification mails."
+msgstr ""
+"Diese bleibt geheim. Lasse das Feld leer, wenn du keine Benachrichtigungen "
+"möchtest."
 
 msgid "today at {time}"
 msgstr "heute um {time}"
@@ -191,6 +203,12 @@ msgstr "Alle Entscheidungen"
 
 msgid "Login"
 msgstr "Anmelden"
+
+msgid ""
+"The instructions are currently only available in german. Please send us a "
+"mail via the button at\n"
+"          the end of this page, if you have questions."
+msgstr ""
 
 msgid "Ended on the {endDatetime}!"
 msgstr "Endete am {endDatetime}!"
@@ -426,6 +444,24 @@ msgstr "Prozess bearbeiten"
 msgid "Edit"
 msgstr "Bearbeiten"
 
+msgid "Advanced"
+msgstr "Erweitert"
+
+msgid "Features"
+msgstr "Funktionen"
+
+msgid "Single approval"
+msgstr "Einzelne Zustimmungen"
+
+msgid "Participants can approve at most one proposal"
+msgstr "Teilnehmer können nur einem Vorschlag zustimmen"
+
+msgid "Public votes"
+msgstr "Öffentlkiche Stimmen"
+
+msgid "Everyone can see who voted for what"
+msgstr "Jeder kann sehen, wer für was gestimmt hat"
+
 msgid "Approvals {pros}"
 msgstr "Zustimmungen {pros}"
 
@@ -448,6 +484,22 @@ msgid ""
 msgstr ""
 "Hier findest du eine personalisierte Übersicht und Empfehlungen für diesen "
 "Prozess."
+
+msgid "Propose coalition"
+msgstr "Koalition vorschlagen"
+
+msgid ""
+"Your favourite proposal is not winning right now. Can you propose a "
+"coalition?"
+msgstr ""
+"Dein Favorit würde gerade nicht gewinnen. Kannst du eine Koalition "
+"vorschlagen?"
+
+msgid "This is the best proposal for the moment"
+msgstr "Dies ist der bisher beste Vorschlag"
+
+msgid "All other proposals"
+msgstr "Alle Vorschläge"
 
 msgid "New proposal"
 msgstr "Neuer Vorschlag"
@@ -475,12 +527,6 @@ msgctxt "Label for filter selection"
 msgid "Filter"
 msgstr "Filter"
 
-msgid "This is the best proposal for the moment"
-msgstr "Dies ist der bisher beste Vorschlag"
-
-msgid "All other proposals"
-msgstr "Alle Vorschläge"
-
 msgid "Children"
 msgstr "Kinder"
 
@@ -494,12 +540,18 @@ msgstr "Aktualisieren"
 msgid "Proposals {count}"
 msgstr "Vorschläge {count}"
 
+msgid "Participants {count}"
+msgstr "Teilnehmer {count}"
+
 msgctxt "Overview over process"
 msgid "Overview"
 msgstr "Übersicht"
 
 msgid "All proposals"
 msgstr "Alle Vorschläge"
+
+msgid "Dashboard"
+msgstr "Dashboard"
 
 msgctxt "Link to moderation page"
 msgid "Moderation"
@@ -518,9 +570,6 @@ msgid ""
 msgstr ""
 "Gelb markierte Bereich werden aktiv bearbeitet und funktionieren eventuell "
 "nicht richtig!"
-
-msgid "Participants {count}"
-msgstr "Teilnehmer {count}"
 
 #~ msgid "New argument"
 #~ msgstr "Neues Argument"
