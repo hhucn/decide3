@@ -148,10 +148,11 @@
     (process/winner proposals-with-votes)))
 
 (defn has-access? [process user]
-  (or
-    (not= ::process/type.private (::process/type process))
-    (contains? (::process/participants process) user)
-    (contains? (::process/moderators process) user)))
+  (and process
+    (or
+      (not= ::process/type.private (::process/type process))
+      (contains? (::process/participants process) user)
+      (contains? (::process/moderators process) user))))
 
 (defn get-entity [db process-ident]
   (d/entity db process-ident))
