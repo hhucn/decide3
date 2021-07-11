@@ -1,6 +1,5 @@
 (ns decide.server-components.pathom
   (:require
-    [clojure.core.async :as async]
     [clojure.spec.alpha :as s]
     [clojure.string :as str]
     [com.fulcrologic.rad.pathom :as rad-pathom]
@@ -79,7 +78,6 @@
      ::p/env {::p/reader [p/map-reader pc/reader2 pc/index-reader
                           pc/open-ident-reader p/env-placeholder-reader]
               ::p/placeholder-prefixes #{">"}
-              ::pc/thread-pool         (pc/create-thread-pool (async/chan 200))
               ::pc/mutation-join-globals [(when-not no-tempids? :tempids) :errors]}
      ::p/plugins (into []
                    (keep identity
@@ -113,12 +111,12 @@
   - `:log-requests? boolean` Enable logging of incoming queries/mutations.
   - `:log-responses? boolean` Enable logging of parser results."
   [config extra-plugins resolvers]
-  (let [real-parser (p/parallel-parser (parser-args config extra-plugins resolvers))
+  (let [real-parser (p/parser (parser-args config extra-plugins resolvers))
         {:keys [trace?]} (get config ::rad-pathom/config {})]
     (fn wrapped-parser [env tx]
-      (async/<!! (real-parser env (if trace?
-                                    (conj tx :com.wsscode.pathom/trace)
-                                    tx))))))
+      (real-parser env (if trace?
+                         (conj tx :com.wsscode.pathom/trace)
+                         tx)))))
 
 (def all-resolvers
   [index-explorer
