@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="CLJ" type="ClojureREPL" factoryName="Local" activateToolWindowBeforeRun="false" singleton="true">
+  <configuration default="false" name="CLJ:dev" type="ClojureREPL" factoryName="Local" activateToolWindowBeforeRun="false" singleton="false">
     <module name="decide3" />
-    <setting name="displayName" value="CLJ" />
+    <setting name="displayName" value="CLJ:dev" />
     <setting name="replType" value="NREPL" />
     <setting name="execution" value="DEPS" />
     <setting name="jvmArgs" value="-Dtrace -Dguardrails.enabled=true" />
