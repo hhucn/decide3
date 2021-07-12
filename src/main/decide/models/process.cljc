@@ -62,6 +62,10 @@
       :db/cardinality :db.cardinality/one
       :db/valueType :db.type/instant}
 
+     {:db/ident ::start-time
+      :db/cardinality :db.cardinality/one
+      :db/valueType :db.type/instant}
+
      {:db/ident :process/features
       :db/doc "Feature toggles for a process."
       :db/cardinality :db.cardinality/many
@@ -73,6 +77,7 @@
 (s/def ::description string?)
 (s/def ::latest-id (s/and int? #(<= 0 %)))
 (s/def ::end-time (s/nilable inst?))
+(s/def ::start-time (s/nilable inst?))
 (s/def ::type #{::type.public ::type.private})
 (s/def ::feature feature-set)
 (s/def :process/features (s/coll-of ::feature))
@@ -155,6 +160,7 @@
     ::title
     ::description
     ::type
+    ::start-time
     ::end-time
     :process/features
     {::moderators [::user/id]}]

@@ -65,9 +65,12 @@
 
 ;; TODO Fix this up... Proper validation and everything.
 (defmutation update-process [{:keys [conn db AUTH/user-id] :as env} {::process/keys [slug] :as process}]
-  {::pc/params [::process/slug ::process/title ::process/description ::process/end-time ::process/type]
+  {::pc/params [::process/slug ::process/title ::process/description ::process/start-time ::process/end-time ::process/type]
    ::pc/output [::process/slug]
-   ::s/params (s/keys :req [::process/slug] :opt [::process/title ::process/description ::process/end-time ::process/type])
+   ::s/params
+   (s/keys
+     :req [::process/slug]
+     :opt [::process/title ::process/description ::process/start-time ::process/end-time ::process/type])
    ::pc/transform (comp auth/check-logged-in check-slug-exists needs-moderator)}
   (let [{:keys [db-after]}
         (d/transact conn

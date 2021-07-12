@@ -95,5 +95,5 @@
       (clj->js
         (merge
           {:ampm false
-           :labelFunc (fn [date _invalidLabel] (nice-string date))}
+           :labelFunc (fn [date _invalidLabel] (or date ""))}
           props)))))

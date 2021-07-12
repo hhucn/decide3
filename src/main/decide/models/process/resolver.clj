@@ -38,12 +38,12 @@
 
 (defresolver resolve-process [env {::process/keys [slug]}]
   {::pc/input #{::process/slug}
-   ::pc/output [::process/title ::process/description ::process/end-time ::process/type :process/features]}
+   ::pc/output [::process/title ::process/description ::process/start-time ::process/end-time ::process/type :process/features]}
   (let [process (get-process-entity env slug)]
     (merge
       {::process/type ::process/type.public}
       (-> process
-        (select-keys [::process/title ::process/description ::process/end-time ::process/type :process/features])
+        (select-keys [::process/title ::process/description ::process/start-time ::process/end-time ::process/type :process/features])
         (update :process/features set)))))
 
 (defresolver resolve-process-moderators [{:keys [db]} {::process/keys [slug]}]

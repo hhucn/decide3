@@ -31,7 +31,9 @@
     ["@material-ui/icons/Add" :default AddIcon]
     ["@material-ui/icons/Refresh" :default Refresh]
     ["@material-ui/icons/ViewList" :default ViewList]
-    ["@material-ui/icons/ViewModule" :default ViewModule]))
+    ["@material-ui/icons/ViewModule" :default ViewModule]
+    [taoensso.timbre :as log]
+    [com.wsscode.pathom.core :as p]))
 
 
 (defn add-proposal-fab [props]
@@ -145,12 +147,14 @@
           (toggle/button {:value v :key v}
             (dom/create-element icon)))))))
 
-(defsc MainProposalList [this {::process/keys [slug proposals end-time no-of-participants]
+; TODO This component has become way to big.
+(defsc MainProposalList [this {::process/keys [slug proposals end-time no-of-participants no-of-proposals]
                                :keys [root/current-session >/favorite-list]
                                :as props}
                          {:keys [show-new-proposal-dialog]}]
   {:query [::process/slug
            {::process/proposals (comp/get-query proposal-card/ProposalCard)}
+           ::process/no-of-proposals
            ::process/no-of-participants
            ::process/end-time
 
@@ -196,7 +200,7 @@
                  (dom/create-element Refresh))}
               (i18n/trc "Reload content" "Refresh"))
             (info-toolbar-item
-              {:label (i18n/trf "Proposals {count}" {:count (count sorted-proposals)})})
+              {:label (i18n/trf "Proposals {count}" {:count (max no-of-proposals (count sorted-proposals))})})
             (info-toolbar-item
               {:label (i18n/trf "Participants {count}"
                         {:count (str (max no-of-participants 0))})}))

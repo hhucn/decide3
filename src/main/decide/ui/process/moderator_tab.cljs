@@ -1,6 +1,5 @@
 (ns decide.ui.process.moderator-tab
   (:require
-    [clojure.data :refer [diff]]
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
@@ -21,9 +20,9 @@
     [material-ui.layout :as layout]
     [material-ui.layout.grid :as grid]
     [material-ui.surfaces :as surfaces]
+    ["@material-ui/icons/Clear" :default ClearIcon]
     ["@material-ui/icons/ExpandMore" :default ExpandMoreIcon]
-    ["@material-ui/icons/RemoveCircleOutline" :default RemoveCircleIcon]
-    [taoensso.timbre :as log]))
+    ["@material-ui/icons/RemoveCircleOutline" :default RemoveCircleIcon]))
 
 (defn- accordion [{:keys [title]} body]
   (surfaces/accordion {:defaultExpanded true}
@@ -105,15 +104,14 @@
     m1))
 
 (defsc ProcessEdit [this {::process/keys [slug title description end-time type] :as props}]
-  {:query [::process/slug ::process/title ::process/description ::process/end-time ::process/type :process/features]
+  {:query [::process/slug ::process/title ::process/description ::process/start-time ::process/end-time ::process/type :process/features]
    :ident ::process/slug
    :use-hooks? true}
   (let [[mod-title change-title] (hooks/use-state title)
         [mod-description change-description] (hooks/use-state description)
-        [with-end? set-with-end?] (hooks/use-state (boolean end-time))
-        [mod-end-time set-end-time] (hooks/use-state end-time)
         [mod-type set-type] (hooks/use-state type)
-        [form-state set-form-state] (hooks/use-state props)]
+        [form-state set-form-state] (hooks/use-state props)
+        dirty? (not= form-state props)]
     (accordion {:title (i18n/tr "Edit process")}
       (grid/container
         {:component :form
@@ -121,22 +119,23 @@
          :onSubmit
          (fn [evt]
            (evt/prevent-default! evt)
-           (comp/transact! this [(process.mutations/update-process
-                                   ;; calculate diff ;; NOTE have a look at clojure.data/diff
-                                   (cond->
-                                     (merge (dissoc-equal-vals form-state props) {::process/slug slug})
+           (when dirty?
+             (comp/transact! this [(process.mutations/update-process
+                                     ;; calculate diff ;; NOTE have a look at clojure.data/diff
+                                     (cond->
+                                       (merge (dissoc-equal-vals form-state props) {::process/slug slug})
 
-                                     (not= mod-title title)
-                                     (assoc ::process/title mod-title)
+                                       (not= mod-title title)
+                                       (assoc ::process/title mod-title)
 
-                                     (not= mod-description description)
-                                     (assoc ::process/description mod-description)
+                                       (not= mod-description description)
+                                       (assoc ::process/description mod-description)
 
-                                     (not= mod-type type)
-                                     (assoc ::process/type mod-type)
+                                       (not= mod-type type)
+                                       (assoc ::process/type mod-type)
 
-                                     (not= (when with-end? mod-end-time) end-time)
-                                     (assoc ::process/end-time (when with-end? mod-end-time))))]))}
+                                       #_#_(not= (when with-end? mod-end-time) end-time)
+                                           (assoc ::process/end-time (when with-end? mod-end-time))))])))}
         (grid/item {:xs 12}
           (inputs/textfield
             (merge default-input-props
@@ -165,23 +164,28 @@
                  {:checked (= mod-type ::process/type.public)
                   :onChange #(set-type (if (= mod-type ::process/type.public) ::process/type.private ::process/type.public))})})))
 
-        (grid/item {:xs 12}
-          (form/group {:row true}
-            (form/control-label
-              {:label (i18n/tr "Does the process end?")
-               :control
-               (inputs/switch
-                 {:checked with-end?
-                  :onChange #(set-with-end? (not with-end?))})})))
+        (grid/container {:item true :xs 12 :spacing 2}
+          (grid/item {:xs 12 :sm 6}
+            (time/datetime-picker
+              {:label (i18n/trc "Start of a process" "Start")
+               :value (or (::process/start-time form-state) js/undefined)
+               :inputVariant "filled"
+               :onChange #(set-form-state (assoc form-state ::process/start-time %))
+               :clearable true
+               :fullWidth true
+               :helperText (i18n/tr "Optional")}))
 
-        (grid/item {:xs 12}
-          (time/datetime-picker
-            {:label (i18n/trc "End of a process" "End")
-             :value mod-end-time
-             :disabled (not with-end?)
-             :inputVariant "filled"
-             :onChange set-end-time
-             :fullWidth true}))
+          (grid/item {:xs 12 :sm 6}
+            (time/datetime-picker
+              {:label (i18n/trc "End of a process" "End")
+               :value (or (::process/end-time form-state) js/undefined)
+               :onChange #(set-form-state (assoc form-state ::process/end-time %))
+               :minDate (or (::process/start-time form-state) js/undefined)
+               :inputVariant "filled"
+               :clearable true
+               :fullWidth true})))
+
+
 
         (grid/item {:xs 12}
           (surfaces/accordion {:variant :outlined}
@@ -217,7 +221,11 @@
                                        :process/features (if active? disj conj) key))})})))))))))))
 
         (grid/item {:xs 12}
-          (inputs/button {:color :primary :type "submit"} (i18n/trc "Submit form" "Submit")))))))
+          (inputs/button
+            {:color :primary
+             :type "submit"
+             :disabled (not dirty?)}
+            (i18n/trc "Submit form" "Submit")))))))
 
 (def ui-process-edit (comp/computed-factory ProcessEdit))
 
