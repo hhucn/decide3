@@ -94,9 +94,10 @@
                     (list/list {}
                       (map ui-top-entry top-proposals)))))))
 
-          (when-not process-over?
+          (when (and (not process-over?) (seq (::process/proposals ballot)))
             (grid/item {:xs 12}
               (section-paper {:pb 0}
+                (ballot/header)
                 (ballot/ui-ballot ballot)))))))))
 
 (def ui-process-home (comp/computed-factory ProcessHome))

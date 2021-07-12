@@ -38,16 +38,16 @@
 
 (def entry (comp/computed-factory Entry {:keyfn ::proposal/id}))
 
+(defn header []
+  (dd/typography {:component :h2 :variant "h5"} (i18n/tr "Your approvals")))
+
 (defsc Ballot [_ {::process/keys [proposals]}]
   {:query [::process/slug
            {::process/proposals (comp/get-query Entry)}]
    :ident ::process/slug}
-  (when (seq proposals)
-    (dom/div {}
-      (dd/typography {:component :h2 :variant "h5"} (i18n/tr "Your approvals"))
-      (list/list {:dense true}
-        (->> proposals
-          proposal/rank
-          (map entry))))))
+  (list/list {:dense true}
+    (->> proposals
+      proposal/rank
+      (map entry))))
 
 (def ui-ballot (comp/computed-factory Ballot))
