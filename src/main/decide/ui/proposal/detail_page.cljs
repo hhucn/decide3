@@ -231,12 +231,12 @@
 (defsc ProposalPage
   [this {::proposal/keys [title body]
          :keys [ui/current-process]
-         :>/keys [parent-section children-section opinion-section similar-section argumentation-section]}]
+         :>/keys [parent-section children-section #_opinion-section similar-section argumentation-section]}]
   {:query [::proposal/id
            ::proposal/title ::proposal/body
            {:>/children-section (comp/get-query ChildrenSection)}
            {:>/parent-section (comp/get-query SmallParentSection)}
-           {:>/opinion-section (comp/get-query OpinionSection)}
+           #_{:>/opinion-section (comp/get-query OpinionSection)}
            {:>/similar-section (comp/get-query SimilarSection)}
            {:>/argumentation-section (comp/get-query argumentation.ui/ArgumentList)}
            {[:ui/current-process '_] (comp/get-query Process)}]
@@ -296,6 +296,7 @@
                   (argumentation.ui/ui-argument-list argumentation-section))))
             (grid/item {:xs 12 :lg 4 :component "section"}
               (ui-children-section children-section)
-              (section (i18n/tr "Possible coalitions")
-                (ui-similar-section similar-section {:show-add-dialog show-add-dialog
-                                                     :process-over? process-over?})))))))))
+              (when (seq (:similar similar-section))
+                (section (i18n/tr "Possible coalitions")
+                  (ui-similar-section similar-section {:show-add-dialog show-add-dialog
+                                                       :process-over? process-over?}))))))))))
