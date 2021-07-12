@@ -139,9 +139,7 @@
 
 (defn toggle-button [{:keys [icon] :as props}]
   (inputs/icon-button
-    (merge
-      {:size :small}
-      props)
+    props
     (dom/create-element icon #js {"fontSize" "small"})))
 
 (defn approve-toggle
@@ -242,49 +240,47 @@
       (dd/divider {:variant :middle})
       (surfaces/card-actions {}
         (let [[approved? rejected?] ((juxt pos? neg?) my-opinion)]
-          (layout/box {:ml 1 :clone true}
-            (grid/container
-              {:alignItems :center
-               :spacing 1}
+          (grid/container
+            {:alignItems :center
+             :spacing 1}
 
+            (grid/item {}
+              (if process-over?
+                (disabled-approve-toggle approved?)
+                (approve-toggle
+                  {:approved? approved?
+                   :disabled? (or (not logged-in?) process-over?)
+                   :onClick #(comp/transact! this [(opinion.api/add {::proposal/id id
+                                                                     :opinion (if approved? 0 1)})])})))
+
+
+            (grid/item {}
+              (if (features :process.feature/voting.public)
+                (dd/avatar-group {:max 3}
+                  (for [{::opinion/keys [value user]} opinions
+                        :when (pos? value)]
+                    (user.ui/ui-avatar user)))
+                (dd/typography {} pro-votes)))
+
+            (when (features :process.feature/rejects)
               (grid/item {}
-                (if process-over?
-                  (disabled-approve-toggle approved?)
-                  (approve-toggle
-                    {:approved? approved?
-                     :disabled? (or (not logged-in?) process-over?)
-                     :onClick #(comp/transact! this [(opinion.api/add {::proposal/id id
-                                                                       :opinion (if approved? 0 1)})])})))
+                (reject-toggle
+                  {:toggled? rejected?
+                   :disabled? (or (not logged-in?) process-over?)
+                   :onClick
+                   (fn [_e]
+                     (if (and (features :process.feature/reject-popup) (not rejected?))
+                       (set-reject-open true)               ; only
+                       (comp/transact! this [(opinion.api/add {::proposal/id id
+                                                               :opinion (if rejected? 0 -1)})])))})))
 
+            (layout/box {:ml "auto"})
 
-              (grid/item {}
-                (if (features :process.feature/voting.public)
-                  (dd/avatar-group {:max 3}
-                    (for [{::opinion/keys [value user]} opinions
-                          :when (pos? value)]
-                      (user.ui/ui-avatar user)))
-                  (dd/typography {} pro-votes)))
-
-              (when (features :process.feature/rejects)
-                (grid/item {}
-                  (reject-toggle
-                    {:toggled? rejected?
-                     :disabled? (or (not logged-in?) process-over?)
-                     :onClick
-                     (fn [_e]
-                       (if (and (features :process.feature/reject-popup) (not rejected?))
-                         (set-reject-open true)             ; only
-                         (comp/transact! this [(opinion.api/add {::proposal/id id
-                                                                 :opinion (if rejected? 0 -1)})])))})))
-
-              (layout/box {:ml "auto"})
-
-              (grid/item {}
-                (inputs/button
-                  {:startIcon (dom/create-element Comment)
-                   :size :small
-                   :href proposal-href}
-                  (str no-of-arguments)))))))
+            (grid/item {}
+              (inputs/button
+                {:startIcon (dom/create-element Comment)
+                 :href proposal-href}
+                (str no-of-arguments))))))
 
       (when (features :process.feature/reject-popup)
         (reject-dialog
