@@ -10,4 +10,4 @@ resources/public/workspaces/js
 **/decide.jar
 .DS_Store
 
-_data/
+dev-db/

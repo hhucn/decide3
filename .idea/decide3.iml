@@ -16,8 +16,8 @@
       <excludeFolder url="file://$MODULE_DIR$/.shadow-cljs" />
       <excludeFolder url="file://$MODULE_DIR$/resources/public/js" />
       <excludeFolder url="file://$MODULE_DIR$/resources/public/workspaces/js" />
-      <excludeFolder url="file://$MODULE_DIR$/_data" />
       <excludeFolder url="file://$MODULE_DIR$/classes" />
+      <excludeFolder url="file://$MODULE_DIR$/dev-db" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
