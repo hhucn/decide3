@@ -5,6 +5,7 @@
     [decide.models.user :as user]
     [decide.utils.color :as color-utils]
     [material-ui.data-display :as dd]
+    [material-ui.data-display.list :as list]
     [material-ui.layout :as layout]
     [material-ui.styles :as styles]))
 
@@ -50,7 +51,7 @@
         ;; for use in AvatarGroup
         style (js->clj (comp/get-raw-react-prop this :style) :keywordize-keys true)
         className (comp/get-raw-react-prop this :className)]
-    (dd/tooltip {:title display-name :arrow true}
+    (dd/tooltip {:title (list/list {:dense true} (list/item {:disableGutters true} display-name)) :arrow true}
       (ui-colored-avatar
         (-> avatar-props
           (update :style merge style)

@@ -175,6 +175,20 @@
     #js {:fontSize "small"
          :color (if approved? "primary" "disabled")}))
 
+(defn avatar-group [{:keys [max wrap-overflow]
+                     :or {wrap-overflow identity} :as props} children]
+  (dd/avatar-group (update props :max inc)
+    (let [[to-display overflow] (split-at (dec max) children)]
+      (concat
+        (map user.ui/ui-avatar to-display)
+        (cond
+          (= 1 (count overflow)) (user.ui/ui-avatar overflow)
+          (< 1 (count overflow)) [(dd/tooltip {:title (list/list {:dense true}
+                                                        (for [{::user/keys [display-name]} overflow]
+                                                          (list/item {:disableGutters true} display-name)))
+                                               :arrow true}
+                                    (dd/avatar {} (str "+" (count overflow))))])))))
+
 (defsc ProposalCard [this {::proposal/keys [id title body my-opinion pro-votes parents no-of-arguments opinions]
                            :keys [root/current-session >/subheader]}
                      {::process/keys [slug]
@@ -256,10 +270,7 @@
 
             (grid/item {}
               (if (features :process.feature/voting.public)
-                (dd/avatar-group {:max 3}
-                  (for [{::opinion/keys [value user]} opinions
-                        :when (pos? value)]
-                    (user.ui/ui-avatar user)))
+                (avatar-group {:max 5} (map ::opinion/user (filter #(pos? (::opinion/value %)) opinions)))
                 (dd/typography {} pro-votes)))
 
             (when (features :process.feature/rejects)
