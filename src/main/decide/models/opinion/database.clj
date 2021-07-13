@@ -46,7 +46,7 @@
                     0)]
     (cond
       (= old-value new-value) []                            ; do nothing
-      (zero? new-value) (if id [[:db/retractEntity id]] []) ; retract, if in db
+      (zero? new-value) (if id [[:db.fn/retractEntity id]] []) ; retract, if in db
 
       id [[:db/add id ::opinion/value new-value]]           ; update if in db
 
@@ -69,7 +69,7 @@
              [?proposal ::proposal/opinions ?e]]
         db (:db/id user) (:db/id process))
       (remove #{id})
-      (map #(vector :db/retractEntity %)))))
+      (map #(vector :db.fn/retractEntity %)))))
 
 (defn ->set [db user process proposal value]
   [d.core/db? ::user/entity ::process/entity ::proposal/entity ::opinion/value => vector?]
