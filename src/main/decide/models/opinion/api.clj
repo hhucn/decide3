@@ -7,6 +7,7 @@
     [decide.models.opinion :as opinion]
     [decide.models.opinion.database :as opinion.db]
     [decide.models.process :as process]
+    [decide.models.process.database :as process.db]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]))
 
@@ -23,6 +24,7 @@
         (d/transact conn
           {:tx-data
            (conj
+             (process.db/->enter process user)
              (opinion.db/->set @conn
                user
                process
