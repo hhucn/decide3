@@ -48,12 +48,15 @@
       (let [elapsed (max 0 (- (js/Date.now) start-time))]
         (* 100 (/ elapsed process-duration))))))
 
-(defsc Process [_ {::process/keys [title start-time end-time description] :as process}]
+(defsc Process [_ {::process/keys [title start-time end-time description]
+                   :keys [process/features]
+                   :as process}]
   {:query [::process/slug
            ::process/title
            ::process/description
            ::process/start-time
            ::process/end-time
+           :process/features
            {::process/moderators (comp/get-query Moderator)}]
    :ident ::process/slug
    :initial-state
@@ -83,20 +86,28 @@
                                      (dom/create-element ExpandMore))}
             "Details"))
         (when has-end-time?
-          (grid/item {:xs true}
+          (grid/item {}
             (if (process/over? process)
               (process-ended-alert {:component (time/nice-time-element end-time)})
-              (alert/alert {:severity :info
-                            :aria-hidden true}
+              (alert/alert {:severity :info}
                 (dd/tooltip
                   {:title (str end-time)}
                   (alert/title {} (ends-in-label end-time)))
+
                 (when (and has-start-time? has-end-time?)
                   (layout/box {:sx {:width "200px"}
+                               :aria-hidden true
                                :clone true}
                     (feedback/linear-progress
                       {:variant :determinate
-                       :value (progress start-time end-time)})))))))))))
+                       :value (progress start-time end-time)})))))))
+        #_(when (contains? features :process.feature/single-approve)
+            (grid/item {}
+              (alert/alert {:severity :info :py 0}
+                (alert/title {}
+                  (i18n/tr "Single proposal"))
+
+                (i18n/tr "You can only approve one proposal at a time"))))))))
 
 
 (def ui-process (comp/factory Process))
