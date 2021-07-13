@@ -23,14 +23,14 @@
         tx-report
         (d/transact conn
           {:tx-data
-           (conj
+           (concat
              (process.db/->enter process user)
              (opinion.db/->set @conn
                user
                process
                proposal
                opinion)
-             [:db/add "datomic.tx" :db/txUser [::user/id user-id]])})]
+             [[:db/add "datomic.tx" :db/txUser [::user/id user-id]]])})]
     {::p/env (assoc env :db (:db-after tx-report))}))
 
 (defresolver resolve-personal-opinion [{:keys [db AUTH/user-id]} {::proposal/keys [id]}]
