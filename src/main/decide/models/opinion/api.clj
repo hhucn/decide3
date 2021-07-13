@@ -37,7 +37,7 @@
   (when user-id
     (let [user (d/entity db [::user/id user-id])
           proposal (d/entity db [::proposal/id id])
-          opinion (opinion.db/get-opinion db user proposal)]
+          opinion (opinion.db/get-opinion-eid db user proposal)]
       (if opinion
         (let [{::opinion/keys [value]} (d/pull db [[::opinion/value :default 0]] opinion)]
           {::proposal/my-opinion value})
