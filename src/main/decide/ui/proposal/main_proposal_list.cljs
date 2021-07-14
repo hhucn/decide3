@@ -7,6 +7,7 @@
     [com.fulcrologic.fulcro.data-fetch :as df]
     [com.fulcrologic.fulcro.dom :as dom]
     [com.fulcrologic.fulcro.dom.events :as evt]
+    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.react.error-boundaries :as error-boundaries]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
@@ -31,9 +32,7 @@
     ["@material-ui/icons/Add" :default AddIcon]
     ["@material-ui/icons/Refresh" :default Refresh]
     ["@material-ui/icons/ViewList" :default ViewList]
-    ["@material-ui/icons/ViewModule" :default ViewModule]
-    [taoensso.timbre :as log]
-    [com.wsscode.pathom.core :as p]))
+    ["@material-ui/icons/ViewModule" :default ViewModule]))
 
 
 (defn add-proposal-fab [props]
@@ -147,9 +146,29 @@
           (toggle/button {:value v :key v}
             (dom/create-element icon)))))))
 
+
+(declare MainProposalList)
+
+(defmutation enter-proposal-list [params]
+  (action [{:keys [app state ref]}]
+    (if (get-in @state ref)                                 ; there was 'a' process loaded
+      (do                                                   ;; target ready and refresh
+        (dr/target-ready! app ref)
+        (df/load! app ref MainProposalList {:parallel true :marker ::loading-proposals}))
+      (do                                                   ;; load in two steps
+        (df/load! app ref MainProposalList
+          {:post-mutation `dr/target-ready
+           :without #{::process/proposals :>/favorite-list}
+           :post-mutation-params {:target ref}})
+        (df/load! app ref MainProposalList
+          {:focus [::process/slug ::process/proposals :>/favorite-list]
+           :marker ::loading-proposals
+           :parallel true})))))
+
 ; TODO This component has become way to big.
+; TODO Add empty state.
 (defsc MainProposalList [this {::process/keys [slug proposals end-time no-of-participants no-of-proposals]
-                               :keys [root/current-session >/favorite-list]
+                               :keys [root/current-session >/favorite-list process/features]
                                :as props}
                          {:keys [show-new-proposal-dialog]}]
   {:query [::process/slug
@@ -157,6 +176,7 @@
            ::process/no-of-proposals
            ::process/no-of-participants
            ::process/end-time
+           :process/features
 
            {:>/favorite-list (comp/get-query favorite-list/FavoriteList)}
 
@@ -167,14 +187,7 @@
    :will-enter (fn [app {::process/keys [slug]}]
                  (let [ident (comp/get-ident MainProposalList {::process/slug slug})]
                    (dr/route-deferred ident
-                     (fn []
-                       (if (get-in (app/current-state app) ident)
-                         (do
-                           (df/load! app ident MainProposalList {:parallel true})
-                           (dr/target-ready! app ident))
-                         (df/load! app ident MainProposalList
-                           {:post-mutation `dr/target-ready
-                            :post-mutation-params {:target ident}}))))))
+                     #(comp/transact! app [(enter-proposal-list {})] {:ref ident}))))
    :use-hooks? true}
   (let [logged-in? (get current-session :session/valid?)
         loading-proposals? (df/loading? (get props [df/marker-table ::loading-proposals]))
