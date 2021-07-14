@@ -57,7 +57,7 @@
 
 (defn- get-public-opinions [proposal]
   (let [features (set (get-in proposal [::process/_proposals :process/features] #{}))]
-    (if (or true (contains? features :process.feature/voting.public))
+    (if (contains? features :process.feature/voting.public)
       {::proposal/opinions
        (for [opinion (get proposal ::proposal/opinions)
              :when (not (zero? (::opinion/value opinion)))]
@@ -65,7 +65,7 @@
           ::opinion/user (select-keys (::user/_opinions opinion) [::user/id ::user/display-name])})}
       nil)))
 
-(defresolver resolve-public-opinions [{:keys [db] :as env} {::proposal/keys [id]}]
+(defresolver resolve-public-opinions [{:keys [db]} {::proposal/keys [id]}]
   {::pc/input #{::proposal/id}
    ::pc/output [{::proposal/opinions [::opinion/value {::opinion/user [::user/id]}]}]}
   (let [proposal (d/entity db [::proposal/id id])]

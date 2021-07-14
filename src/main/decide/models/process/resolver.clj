@@ -119,7 +119,7 @@
   {::pc/input #{::process/slug}
    ::pc/output [{::process/winner [::proposal/id]}]}
   (when-let [winner-proposal (process.db/get-winner db process)]
-    {::process/winner winner-proposal}))
+    {::process/winner (select-keys winner-proposal [::proposal/id])}))
 
 (defresolver resolve-personal-approved-proposals [{:keys [db AUTH/user-id]} process]
   {::pc/input #{::process/slug}
