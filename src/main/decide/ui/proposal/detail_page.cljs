@@ -8,6 +8,7 @@
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [decide.models.argumentation.ui :as argumentation.ui]
+    [decide.models.opinion.api :as opinion.api]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
     [decide.ui.proposal.new-proposal :as new-proposal]
@@ -42,19 +43,21 @@
                    :colorPrimary {:backgroundColor (.. theme -palette -error -main)}})))
      LinearProgress)))
 
-(defsc OpinionSection [_ {::proposal/keys [pro-votes con-votes]
-                          :or {pro-votes 0 con-votes 0}}]
-  {:query [::proposal/id ::proposal/pro-votes ::proposal/con-votes]
+(defsc OpinionSection [this {::proposal/keys [id pro-votes my-opinion]
+                             :or {pro-votes 0
+                                  my-opinion 0}}]
+  {:query [::proposal/id
+           ::proposal/pro-votes
+           ::proposal/my-opinion]
    :ident ::proposal/id}
-  (grid/container {:alignItems :center
-                   :justify :space-between
-                   :wrap :nowrap}
-    (grid/item {:xs true :align :center} (str pro-votes))
-    (grid/item {:xs 9}
-      (vote-linear-progress
-        {:variant :determinate
-         :value (percent-of-pro-votes pro-votes con-votes)}))
-    (grid/item {:xs true :align :center} (str con-votes))))
+  (inputs/button
+    {:variant (if (pos? my-opinion) :contained :outlined)
+     :color :primary
+     :onClick #(comp/transact! this [(opinion.api/add {::proposal/id id
+                                                       :opinion (if (pos? my-opinion) 0 +1)})])}
+    (if (pos? my-opinion)
+      (i18n/tr "Approved")
+      (i18n/tr "Approve"))))
 
 (def ui-opinion-section (comp/computed-factory OpinionSection {:keyfn ::proposal/id}))
 ;; endregion
@@ -231,12 +234,12 @@
 (defsc ProposalPage
   [this {::proposal/keys [title body]
          :keys [ui/current-process]
-         :>/keys [parent-section children-section #_opinion-section similar-section argumentation-section]}]
+         :>/keys [parent-section children-section opinion-section similar-section argumentation-section]}]
   {:query [::proposal/id
            ::proposal/title ::proposal/body
            {:>/children-section (comp/get-query ChildrenSection)}
            {:>/parent-section (comp/get-query SmallParentSection)}
-           #_{:>/opinion-section (comp/get-query OpinionSection)}
+           {:>/opinion-section (comp/get-query OpinionSection)}
            {:>/similar-section (comp/get-query SimilarSection)}
            {:>/argumentation-section (comp/get-query argumentation.ui/ArgumentList)}
            {[:ui/current-process '_] (comp/get-query Process)}]
@@ -289,8 +292,8 @@
                       (i18n/trc "Prompt to merge or fork" "Propose a change")))))
 
 
-              #_(grid/item {:xs 6}
-                  (section " Meinungen " (ui-opinion-section opinion-section)))
+              (grid/item {:xs 6}
+                (ui-opinion-section opinion-section))
               (grid/item {:xs 12 :component "section"}
                 (section (i18n/tr "Argumentation")
                   (argumentation.ui/ui-argument-list argumentation-section))))
