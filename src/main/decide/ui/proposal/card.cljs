@@ -28,7 +28,8 @@
     ["@material-ui/icons/ThumbDownAltOutlined" :default ThumbDownOutlined]
     ["@material-ui/icons/ThumbDownAlt" :default ThumbDown]
     ["@material-ui/icons/ThumbUpAltOutlined" :default ThumbUpOutlined]
-    ["@material-ui/icons/ThumbUpAlt" :default ThumbUp]))
+    ["@material-ui/icons/ThumbUpAlt" :default ThumbUp]
+    [taoensso.timbre :as log]))
 
 (defn id-part [proposal-id]
   (dom/data {:className "proposal-id"
@@ -181,13 +182,13 @@
     (let [[to-display overflow] (split-at (dec max) children)]
       (concat
         (map user.ui/ui-avatar to-display)
-        (cond
-          (= 1 (count overflow)) (user.ui/ui-avatar overflow)
-          (< 1 (count overflow)) [(dd/tooltip {:title (list/list {:dense true}
+        [(cond
+           (= 1 (count overflow)) (user.ui/ui-avatar (first overflow))
+           (< 1 (count overflow)) (dd/tooltip {:title (list/list {:dense true}
                                                         (for [{::user/keys [display-name]} overflow]
                                                           (list/item {:disableGutters true} display-name)))
                                                :arrow true}
-                                    (dd/avatar {} (str "+" (count overflow))))])))))
+                                    (dd/avatar {} (str "+" (count overflow)))))]))))
 
 (defsc ProposalCard [this {::proposal/keys [id title body my-opinion pro-votes parents no-of-arguments opinions]
                            :keys [root/current-session >/subheader]}
