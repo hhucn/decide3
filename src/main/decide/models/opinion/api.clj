@@ -9,7 +9,8 @@
     [decide.models.process :as process]
     [decide.models.process.database :as process.db]
     [decide.models.proposal :as proposal]
-    [decide.models.user :as user]))
+    [decide.models.user :as user]
+    [taoensso.timbre :as log]))
 
 
 (defmutation add [{:keys [conn db AUTH/user-id] :as env} {::proposal/keys [id]
@@ -21,16 +22,19 @@
         user (d/entity db [::user/id user-id])
 
         tx-report
-        (d/transact conn
-          {:tx-data
-           (concat
-             (process.db/->enter process user)
-             (opinion.db/->set @conn
-               user
-               process
-               proposal
-               opinion)
-             [[:db/add "datomic.tx" :db/txUser [::user/id user-id]]])})]
+        (log/spy :info
+          (d/transact conn
+            {:tx-data
+             (log/spy :info
+               (vec
+                 (concat
+                   (process.db/->enter process user)
+                   (opinion.db/->set @conn
+                     user
+                     process
+                     proposal
+                     opinion)
+                   [[:db/add "datomic.tx" :db/txUser [::user/id user-id]]])))}))]
     {::p/env (assoc env :db (:db-after tx-report))}))
 
 (defresolver resolve-personal-opinion [{:keys [db AUTH/user-id]} {::proposal/keys [id]}]
