@@ -61,11 +61,7 @@
    {:ui/open? false
     :ui/receive-notifications? false
     :user/email ""}
-   :ident (fn [] [:dialog/id ::AddEmailForNotificationDialog])
-   :componentDidUpdate
-   (fn [this {was-open? :ui/open?}]
-     (when (and (:ui/open? (comp/props this)) (not was-open?))
-       (rc/transact! this [(initialize-notification-dialog {})])))}
+   :ident (fn [] [:dialog/id ::AddEmailForNotificationDialog])}
   (dialog/dialog
     {:open open?
      :onClose #(m/set-value! this :ui/open? false)}
@@ -217,7 +213,8 @@
           (when logged-in?
             (comp/fragment
               (inputs/icon-button {:color :inherit
-                                   :onClick #(comp/transact! this [(open-dialog {:id ::AddEmailForNotificationDialog})])}
+                                   :onClick #(comp/transact! this [(initialize-notification-dialog {})
+                                                                   (open-dialog {:id ::AddEmailForNotificationDialog})])}
                 (dom/create-element Notifications))
               (ui-add-email-for-notification-dialog notification-mail-dialog)))
 
