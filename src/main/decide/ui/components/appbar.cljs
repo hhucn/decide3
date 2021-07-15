@@ -2,6 +2,7 @@
   (:require
     [clojure.string :as str]
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
+    [com.fulcrologic.fulcro.algorithms.form-state :as fs]
     [com.fulcrologic.fulcro.algorithms.normalized-state :as norm-state]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.data-fetch :as df]
@@ -13,6 +14,7 @@
     [decide.models.authorization :as auth]
     [decide.models.user :as user]
     [decide.models.user.api :as user.api]
+    [decide.ui.components.snackbar :as snackbar]
     [decide.ui.login :as login]
     [material-ui.data-display :as dd]
     [material-ui.feedback.dialog :as dialog]
@@ -25,14 +27,15 @@
     ["@material-ui/icons/AccountCircle" :default AccountCircleIcon]
     ["@material-ui/icons/HelpOutline" :default HelpIcon]
     ["@material-ui/icons/Menu" :default Menu]
-    ["@material-ui/icons/Notifications" :default Notifications]
-    [taoensso.timbre :as log]))
+    ["@material-ui/icons/Notifications" :default Notifications]))
 
 (defmutation open-dialog [{:keys [id]}]
   (action [{:keys [state]}]
     (swap! state update-in [:dialog/id id] assoc :ui/open? true)))
 
-(defmutation refresh-notification-dialog [params]
+(declare AddEmailForNotificationDialog)
+
+(defmutation initialize-notification-dialog [params]
   (action [{:keys [app state]}]
     (let [id (norm-state/get-in-graph @state [:root/current-session :user ::user/id])]
       (df/load! app [::user/id id] (rc/nc [::user/id :user/email])
@@ -41,14 +44,19 @@
          (fn [{:keys [state]}]
            (let [email (norm-state/get-in-graph @state [:root/current-session :user :user/email])]
              (when-not (str/blank? email)
-               (swap! state
-                 update-in [:dialog/id ::AddEmailForNotificationDialog]
-                 assoc
-                 :user/email email
-                 :ui/receive-notifications? true))))}))))
+               (norm-state/swap!-> state
+                 (update-in [:dialog/id ::AddEmailForNotificationDialog]
+                   assoc
+                   :user/email email
+                   :ui/receive-notifications? true)
+                 (fs/add-form-config* AddEmailForNotificationDialog [:dialog/id ::AddEmailForNotificationDialog] {:destructive? true})))))}))))
 
-(defsc AddEmailForNotificationDialog [this {:keys [ui/open? ui/receive-notifications? user/email]}]
-  {:query [:ui/open? :ui/receive-notifications? :user/email]
+(defsc AddEmailForNotificationDialog [this {:keys [ui/open? ui/receive-notifications? user/email] :as props}]
+  {:query [:ui/open?
+           :ui/receive-notifications?
+           :user/email
+           fs/form-config-join]
+   :form-fields #{:ui/receive-notifications? :user/email}
    :initial-state
    {:ui/open? false
     :ui/receive-notifications? false
@@ -57,16 +65,24 @@
    :componentDidUpdate
    (fn [this {was-open? :ui/open?}]
      (when (and (:ui/open? (comp/props this)) (not was-open?))
-       (rc/transact! this [(refresh-notification-dialog {})])))}
-
+       (rc/transact! this [(initialize-notification-dialog {})])))}
   (dialog/dialog
     {:open open?
      :onClose #(m/set-value! this :ui/open? false)}
+
     (dom/form
       {:onSubmit
        (fn [e]
          (evt/prevent-default! e)
-         (comp/transact! this [(user.api/update-current {:user/email (if receive-notifications? email "")})]))}
+         (when (fs/dirty? props)
+           (comp/transact! this
+             [(user.api/update-current {:user/email (if receive-notifications? email "")})
+              (m/set-props {:ui/open? false})
+              (snackbar/add
+                {:message "Email saved"
+                 :action {:label (i18n/tr "Undo")
+                          :mutation `user.api/update-current
+                          :mutation-params {:user/email (get-in props [::fs/config ::fs/pristine-state :user/email])}}})])))}
       (dialog/title {} (i18n/tr "Receive notifications"))
       (dialog/content {}
         (dialog/content-text {}
@@ -74,11 +90,7 @@
         (form/control-label
           {:label (i18n/tr "Receive notifications")
            :checked receive-notifications?
-           :onChange #(if (.-checked (.-target %))
-                        (m/set-value! this :ui/receive-notifications? true)
-                        (do
-                          #_(m/set-string!! this :user/email :value "")
-                          (m/set-value! this :ui/receive-notifications? false)))
+           :onChange #(m/set-value! this :ui/receive-notifications? (.-checked (.-target %)))
            :control (inputs/checkbox {})})
         (transitions/collapse {:in receive-notifications?}
           (inputs/textfield
@@ -90,7 +102,10 @@
              :margin :normal
              :onChange #(m/set-string!! this :user/email :event %)})))
       (dialog/actions {}
-        (inputs/button {:color :primary :type :submit} (i18n/tr "Submit"))))))
+        (inputs/button {:color :primary
+                        :type :submit
+                        :disabled (not (fs/dirty? props))}
+          (i18n/tr "Submit"))))))
 
 (def ui-add-email-for-notification-dialog (comp/factory AddEmailForNotificationDialog))
 

@@ -32,14 +32,16 @@
   (if (:current snackbar-container)
     (-> snackbar-container
       (update :next conj snackbar)
-      (assoc-in [:current :open?] false)) ; Remove this line if you want each snackbar to be displayed in full.
+      (assoc-in [:current :open?] false))                   ; Remove this line if you want each snackbar to be displayed in full.
     (assoc snackbar-container :current snackbar)))
 
-(defsc Snackbar [this {:keys [message open?]}]
-  {:query [:message :open?]
-   :initial-state (fn [{:keys [message]}]
-                    {:message message
-                     :open? true})
+(defn create-snackbar [params]
+  ;; TODO Add some validation stuff
+  (assoc params :open? true))
+
+(defsc Snackbar [this {:keys [message open? action]}]
+  {:query [:message :open? :action]
+   :initial-state #(create-snackbar %)
    :use-hooks? true}
   (let [handle-close
         (hooks/use-callback
@@ -54,18 +56,30 @@
        :TransitionProps {:onExited
                          #(comp/transact! this [(next-snackbar {})] {:only-refresh [container-ident]})}
        :message message
-       :action (inputs/icon-button
-                 {:size "small"
-                  :color "inherit"
-                  :onClick handle-close
-                  :aria-label (i18n/trc "[aria]" "Close")}
-                 (dom/create-element Close #js {:fontSize "small"}))})))
+       :action
+       (if action
+         (let [{:keys [label mutation mutation-params]} action]
+           (inputs/button
+             {:size "small"
+              :color "inherit"
+              :onClick (fn [e]
+                         (.blur (.-target e))               ; focus on the button disables autoHide
+                         (comp/transact! this
+                           [(list mutation (or mutation-params {}))
+                            (close-first-snackbar {})]))}
+             label))
+         (inputs/icon-button
+           {:size "small"
+            :color "inherit"
+            :onClick handle-close
+            :aria-label (i18n/trc "[aria]" "Close")}
+           (dom/create-element Close #js {:fontSize "small"})))})))
 
 (def ui-snackbar (comp/computed-factory Snackbar))
 
-(defmutation add [{:keys [message]}]
+(defmutation add [params]
   (action [{:keys [state]}]
-    (swap! state update-in container-ident -add-snackbar (comp/get-initial-state Snackbar {:message message}))))
+    (swap! state update-in container-ident -add-snackbar (create-snackbar params))))
 
 (defn add!
   "Queues a new snackbar to show.
