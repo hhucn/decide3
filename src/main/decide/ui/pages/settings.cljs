@@ -20,6 +20,8 @@
     [material-ui.layout.grid :as grid]
     [material-ui.surfaces :as surfaces]))
 
+(def settings-page-ident [:SCREEN ::settings])
+
 (defn wide-textfield
   "Outlined textfield on full width with normal margins. Takes the same props as `material-ui.inputs/textfield`"
   [props]
@@ -103,78 +105,111 @@
   (ok-action [{:keys [app]}]
     (comp/transact! app [(snackbar/add {:message (i18n/tr "Personal details saved")})])))
 
-(defn valid-display-name [display-name]                     ; TODO move to user ns once it is cljc
-  (< 0 (count display-name) 50))
+(defn valid-display-name? [display-name]                    ; TODO move to user ns once it is cljc
+  (< 2 (count display-name) 50))
 
-(defsc UserInformation [this {:user/keys [display-name nickname email]
-                              :keys [>/avatar]
+(defmutation undo-update [user]
+  (action [{:keys [app state]}]
+    (when (contains? user ::user/id)
+      (comp/transact! app [(user.api/update-user user)])
+      (swap! state fs/entity->pristine* (find user ::user/id)))))
+
+(defn user-info-valid? [form field]
+  (let [v (get form field)]
+    (case field
+      ::user/display-name (valid-display-name? v)           ; not empty
+      true)))
+
+(def user-info-validator (fs/make-validator user-info-valid?))
+
+(defsc UserInformation [this {::user/keys [id display-name]
+                              :keys [>/avatar user/email user/nickname]
                               :as props}]
-  {:query [::user/id
-           :user/display-name
+  {:ident ::user/id
+   :query [::user/id
+           ::user/display-name
            :user/email
            :user/nickname
-           {:>/avatar (comp/get-query user.ui/Avatar)}]
-   :ident ::user/id
-   :use-hooks? true}
-  (let [[pristine-state set-pristine-state] (hooks/use-state props)]
-    (surfaces/card
-      {:component :form
-       :onSubmit
-       (fn [e]
-         (evt/prevent-default! e)
-         (comp/transact! this
-           [(user.api/update-user
-              (-> props
-                (select-keys [::user/id :user/display-name :user/email])
-                (set/rename-keys {:user/display-name ::user/display-name})))
-            (snackbar/add {:message (i18n/tr "Personal details saved")})]
-           {:optimistic? false})
-         (set-pristine-state props))}
-      (surfaces/card-header {:title (i18n/tr "Personal Details")})
-      (surfaces/card-content {}
-        (grid/container {:spacing 1}
-          (grid/item {}
-            (user.ui/ui-avatar avatar {:avatar-props {:style {:width "70px" :height "70px" :fontSize "3rem"}}}))
-          (wide-textfield {:label (i18n/tr "Display name")
-                           :value display-name
-                           :error (not (valid-display-name display-name))
-                           :onChange #(m/set-string!! this :user/display-name :event %)
-                           :onBlur
-                           (fn [_]
-                             (when (and (valid-display-name display-name)
-                                     (not= display-name (:user/display-name pristine-state)))
-                               (comp/transact! this
-                                 [(user.api/update-user (-> props
-                                                          (select-keys [::user/id :user/display-name :user/email])
-                                                          (set/rename-keys {:user/display-name ::user/display-name})))
-                                  (snackbar/add {:message (i18n/tr "Personal details saved")})]
-                                 {:optimistic? true})
-                               (set-pristine-state props)))
-                           :inputProps {:minLength 1}})
-          (wide-textfield {:label (i18n/tr "Nickname")
-                           :value (or nickname "")
-                           :disabled true
-                           :helperText (i18n/trc "Nickname" "Public, unique identifier")
-                           :inputProps {:minLength 4 :maxLength 15}})
-          (wide-textfield
-            {:label (i18n/tr "Email")
-             :value (or email "")
-             :type :email
-             :helperText (i18n/trc "Email field" "This is private. Leave empty if you don't want notification mails.")
-             :onChange #(m/set-string!! this :user/email :event %)})))
-      (surfaces/card-actions {}
-        (save-button)))))
+           {:>/avatar (comp/get-query user.ui/Avatar)}
+           fs/form-config-join]
+   :form-fields #{::user/display-name :user/email}
+   :pre-merge (fn [{:keys [current-normalized data-tree]}]
+                (fs/add-form-config UserInformation (merge current-normalized data-tree) {:destructive? true}))
+   :componentWillUnmount
+   (fn [this]
+     (comp/transact! this [(fs/reset-form! {:form-ident (comp/get-ident this)})]))}
 
-(def ui-basic-user-info (comp/factory UserInformation {:keyfn ::user/id}))
+  (surfaces/card
+    {:component :form
+     :onSubmit
+     (fn [e]
+       (evt/prevent-default! e)
+       (when (fs/dirty? props)
+         (let [dirty-state (->
+                             (fs/dirty-fields props false)
+                             (get (comp/get-ident this)))
+               dirty-keys (keys dirty-state)]
+           (comp/transact! this
+             [(user.api/update-user (assoc dirty-state ::user/id id))
+              (snackbar/add
+                {:message (i18n/tr "Details updated")
+                 :action {:label (i18n/tr "Undo")
+                          :mutation `user.api/update-user
+                          :mutation-params
+                          (let [empty-map (into {} (zipmap (get-in props [::fs/config ::fs/fields]) (repeat "")))
+                                undo-state (merge empty-map (get-in props [::fs/config ::fs/pristine-state]))]
+                            (-> undo-state
+                              (select-keys dirty-keys)
+                              (assoc ::user/id id)))}})]
+             {:optimistic? false}))))}
 
-(def settings-page-ident [:SCREEN ::settings])
+    (surfaces/card-header {:title (i18n/tr "Personal Details")})
+
+    (surfaces/card-content {}
+      (grid/container {:spacing 1}
+        (grid/item {}
+          (user.ui/ui-avatar avatar {:avatar-props {:style {:width "70px" :height "70px" :fontSize "3rem"}}}))
+        (wide-textfield {:label (i18n/tr "Display name")
+                         :value display-name
+                         :error (= :invalid (user-info-validator props ::user/display-name))
+                         :onChange #(m/set-string!! this ::user/display-name :event %)
+                         :onBlur #(comp/transact! this [(fs/mark-complete! {:field ::user/display-name})])
+                         :inputProps {:minLength 1}})
+        (wide-textfield {:label (i18n/tr "Nickname")
+                         :value (or nickname "")
+                         :disabled true
+                         :error (= :invalid (user-info-validator props :user/nickname))
+                         :helperText (i18n/trc "Nickname" "Public, unique identifier")
+                         :inputProps {:minLength 4 :maxLength 15}})
+        (wide-textfield
+          {:label (i18n/tr "Email")
+           :value (or email "")
+           :type :email
+           :error (= :invalid (user-info-validator props :user/email))
+           :helperText (i18n/trc "Email field" "This is private. Leave empty if you don't want notification mails.")
+           :onBlur #(comp/transact! this [(fs/mark-complete! {:field :user/email})])
+           :onChange #(m/set-string!! this :user/email :event %)})))
+
+    (surfaces/card-actions {}
+      (inputs/button
+        {:color :primary
+         :type :submit
+         :disabled (not (fs/dirty? props))}
+        (i18n/tr "Save")))))
+
+(def ui-user-panel (comp/factory UserInformation))
+
+(defmutation init-user-info-panel [{::user/keys [id]}]
+  (action [{:keys [app]}]
+    (df/load! app [::user/id id] UserInformation
+      {:marker ::load-user-information
+       :target (conj settings-page-ident :ui/user-information)})))
+
 
 (defmutation init-settings-page [_]
   (action [{:keys [state app]}]
     (when-let [user-ident (get-in @state [:root/current-session :user])]
-      (df/load! app user-ident UserInformation
-        {:target (conj settings-page-ident :ui/user-information)
-         :marker ::load-user-information}))))
+      (comp/transact! app [(init-user-info-panel {::user/id (second user-ident)})]))))
 
 (defsc SettingsPage [_this {:ui/keys [new-password-form user-information] :as props}]
   {:query [{:ui/new-password-form (comp/get-query NewPasswordForm)}
@@ -198,7 +233,7 @@
            :justifyContent "flex-start"}
           (grid/item {}
             (cond
-              user-information (ui-basic-user-info user-information)
+              user-information (ui-user-panel user-information)
               (df/loading? user-information-marker) (skeleton {:variant "rect" :height "401px"})))
           (grid/item {:xs 12}
             (ui-new-password-form new-password-form)))))))
