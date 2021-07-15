@@ -9,7 +9,8 @@
     [decide.models.opinion :as opinion]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
-    [decide.models.user :as user]))
+    [decide.models.user :as user]
+    [taoensso.timbre :as log]))
 
 (>defn slug-in-use? [db slug]
   [d.core/db? ::process/slug => boolean?]
@@ -129,11 +130,12 @@
 
 (>defn get-number-of-participants [db slug]
   [d.core/db? ::process/slug => nat-int?]
-  (d/q '[:find (count ?e) .
-         :in $ ?process
-         :where
-         [?process ::process/participants ?e]]
-    db [::process/slug slug]))
+  (or (d/q '[:find (count ?e) .
+             :in $ ?process
+             :where
+             [?process ::process/participants ?e]]
+        db [::process/slug slug])
+    0))
 
 (>defn get-winner [db process]
   [d.core/db? (s/keys :req [::process/slug]) => (? ::proposal/proposal)]
