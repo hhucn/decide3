@@ -102,6 +102,8 @@
              :margin :normal
              :onChange #(m/set-string!! this :user/email :event %)})))
       (dialog/actions {}
+        (inputs/button {:onClick #(m/set-value! this :ui/open? false)}
+          (i18n/tr "Cancel"))
         (inputs/button {:color :primary
                         :type :submit
                         :disabled (not (fs/dirty? props))}
