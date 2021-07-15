@@ -2,32 +2,110 @@
   (:require
     [clojure.string :as str]
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
+    [com.fulcrologic.fulcro.algorithms.normalized-state :as norm-state]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.data-fetch :as df]
     [com.fulcrologic.fulcro.dom :as dom]
     [com.fulcrologic.fulcro.dom.events :as evt]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+    [com.fulcrologic.fulcro.raw.components :as rc]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [decide.models.authorization :as auth]
     [decide.models.user :as user]
+    [decide.models.user.api :as user.api]
     [decide.ui.login :as login]
     [material-ui.data-display :as dd]
+    [material-ui.feedback.dialog :as dialog]
     [material-ui.inputs :as inputs]
+    [material-ui.inputs.form :as form]
     [material-ui.layout :as layout]
     [material-ui.navigation :as navigation]
     [material-ui.surfaces :as surfaces]
+    [material-ui.transitions :as transitions]
     ["@material-ui/icons/AccountCircle" :default AccountCircleIcon]
     ["@material-ui/icons/HelpOutline" :default HelpIcon]
-    ["@material-ui/icons/Menu" :default Menu]))
+    ["@material-ui/icons/Menu" :default Menu]
+    ["@material-ui/icons/Notifications" :default Notifications]
+    [taoensso.timbre :as log]))
 
+(defmutation open-dialog [{:keys [id]}]
+  (action [{:keys [state]}]
+    (swap! state update-in [:dialog/id id] assoc :ui/open? true)))
+
+(defmutation refresh-notification-dialog [params]
+  (action [{:keys [app state]}]
+    (let [id (norm-state/get-in-graph @state [:root/current-session :user ::user/id])]
+      (df/load! app [::user/id id] (rc/nc [::user/id :user/email])
+        {:marker ::load-user-email
+         :post-action
+         (fn [{:keys [state]}]
+           (let [email (norm-state/get-in-graph @state [:root/current-session :user :user/email])]
+             (when-not (str/blank? email)
+               (swap! state
+                 update-in [:dialog/id ::AddEmailForNotificationDialog]
+                 assoc
+                 :user/email email
+                 :ui/receive-notifications? true))))}))))
+
+(defsc AddEmailForNotificationDialog [this {:keys [ui/open? ui/receive-notifications? user/email]}]
+  {:query [:ui/open? :ui/receive-notifications? :user/email]
+   :initial-state
+   {:ui/open? false
+    :ui/receive-notifications? false
+    :user/email ""}
+   :ident (fn [] [:dialog/id ::AddEmailForNotificationDialog])
+   :componentDidUpdate
+   (fn [this {was-open? :ui/open?}]
+     (when (and (:ui/open? (comp/props this)) (not was-open?))
+       (rc/transact! this [(refresh-notification-dialog {})])))}
+
+  (dialog/dialog
+    {:open open?
+     :onClose #(m/set-value! this :ui/open? false)}
+    (dom/form
+      {:onSubmit
+       (fn [e]
+         (evt/prevent-default! e)
+         (comp/transact! this [(user.api/update-current {:user/email (if receive-notifications? email "")})]))}
+      (dialog/title {} (i18n/tr "Receive notifications"))
+      (dialog/content {}
+        (dialog/content-text {}
+          (i18n/tr "Get notifications for processes you participate in when something happened. You get at most one email per hour."))
+        (form/control-label
+          {:label (i18n/tr "Receive notifications")
+           :checked receive-notifications?
+           :onChange #(if (.-checked (.-target %))
+                        (m/set-value! this :ui/receive-notifications? true)
+                        (do
+                          #_(m/set-string!! this :user/email :value "")
+                          (m/set-value! this :ui/receive-notifications? false)))
+           :control (inputs/checkbox {})})
+        (transitions/collapse {:in receive-notifications?}
+          (inputs/textfield
+            {:label (i18n/tr "Email")
+             :value email
+             :type :email
+             :variant :outlined
+             :fullWidth true
+             :margin :normal
+             :onChange #(m/set-string!! this :user/email :event %)})))
+      (dialog/actions {}
+        (inputs/button {:color :primary :type :submit} (i18n/tr "Submit"))))))
+
+(def ui-add-email-for-notification-dialog (comp/factory AddEmailForNotificationDialog))
 
 (defsc AppBar
   [this
-   {:keys [ui/account-menu-open? root/current-session]}
+   {:keys [ui/account-menu-open? root/current-session ui/notification-mail-dialog]}
    {:keys [menu-onClick]}]
   {:query [:ui/account-menu-open?
-           {[:root/current-session '_] (comp/get-query auth/Session)}]
+           {[:root/current-session '_] (comp/get-query auth/Session)}
+           {:ui/notification-mail-dialog (comp/get-query AddEmailForNotificationDialog)}]
    :ident (fn [] [:component/id ::AppBar])
-   :initial-state {:ui/account-menu-open? false}
+   :initial-state
+   {:ui/account-menu-open? false
+    :ui/notification-mail-dialog {:ui/open? false}}
+
    :use-hooks? true}
   (let [logged-in? (get current-session :session/valid?)
         display-name (get-in current-session [:user ::user/display-name])
@@ -118,6 +196,13 @@
                   (i18n/tr "Settings"))
                 (navigation/menu-item {:onClick #(comp/transact! this [(user/sign-out nil)])}
                   (i18n/trc "Label of logout button" "Logout")))))
+
+          (when logged-in?
+            (comp/fragment
+              (inputs/icon-button {:color :inherit
+                                   :onClick #(comp/transact! this [(open-dialog {:id ::AddEmailForNotificationDialog})])}
+                (dom/create-element Notifications))
+              (ui-add-email-for-notification-dialog notification-mail-dialog)))
 
           (inputs/icon-button {:color :inherit
                                :component :a

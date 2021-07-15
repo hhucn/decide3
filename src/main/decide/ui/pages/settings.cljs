@@ -122,7 +122,13 @@
        :onSubmit
        (fn [e]
          (evt/prevent-default! e)
-         (comp/transact! this [(save-user-info props)])
+         (comp/transact! this
+           [(user.api/update-user
+              (-> props
+                (select-keys [::user/id :user/display-name :user/email])
+                (set/rename-keys {:user/display-name ::user/display-name})))
+            (snackbar/add {:message (i18n/tr "Personal details saved")})]
+           {:optimistic? false})
          (set-pristine-state props))}
       (surfaces/card-header {:title (i18n/tr "Personal Details")})
       (surfaces/card-content {}
@@ -137,7 +143,12 @@
                            (fn [_]
                              (when (and (valid-display-name display-name)
                                      (not= display-name (:user/display-name pristine-state)))
-                               (comp/transact! this [(save-user-info (select-keys props [::user/id :user/display-name :user/email]))])
+                               (comp/transact! this
+                                 [(user.api/update-user (-> props
+                                                          (select-keys [::user/id :user/display-name :user/email])
+                                                          (set/rename-keys {:user/display-name ::user/display-name})))
+                                  (snackbar/add {:message (i18n/tr "Personal details saved")})]
+                                 {:optimistic? true})
                                (set-pristine-state props)))
                            :inputProps {:minLength 1}})
           (wide-textfield {:label (i18n/tr "Nickname")
