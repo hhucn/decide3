@@ -103,7 +103,7 @@
         (inputs/button {:color :primary
                         :type :submit
                         :disabled (not (fs/dirty? props))}
-          (i18n/tr "Submit"))))))
+          (i18n/tr "Done"))))))
 
 (def ui-add-email-for-notification-dialog (comp/factory AddEmailForNotificationDialog))
 

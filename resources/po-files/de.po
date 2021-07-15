@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: decide3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-07-11 23:43+0200\n"
-"PO-Revision-Date: 2021-07-11 23:48+0200\n"
+"POT-Creation-Date: 2021-07-15 23:24+0200\n"
+"PO-Revision-Date: 2021-07-15 23:28+0200\n"
 "Last-Translator: Björn Ebbinghaus <ebbinghaus@hhu.de>\n"
 "Language-Team: Björn Ebbinghaus\n"
 "Language: de\n"
@@ -20,6 +20,10 @@ msgstr ""
 
 msgid "Password is wrong"
 msgstr "Passwort ist falsch"
+
+msgctxt "[aria]"
+msgid "Close"
+msgstr "schließen"
 
 msgid "Email already in use!"
 msgstr "E-Mail ist bereits vergeben!"
@@ -55,6 +59,28 @@ msgstr "Anmelden"
 msgid "Don't have an account? Sign Up"
 msgstr "Noch keinen Account? Registrieren"
 
+msgid "Undo"
+msgstr "Rückgängig"
+
+msgid "Receive notifications"
+msgstr "Benachrichtigungen erhalten"
+
+msgid ""
+"Get notifications for processes you participate in when something happened. "
+"You get at most one email per hour."
+msgstr ""
+"Erhalte Benachrichtigungen, wenn sich etwas ändert in Prozessen, an denen du "
+"teilnimmst. Du bekommst höchstens eine E-Mail in der Stunde."
+
+msgid "Email"
+msgstr "E-Mail"
+
+msgid "Cancel"
+msgstr "Abbrechen"
+
+msgid "Done"
+msgstr "Fertig"
+
 msgctxt "[aria] navigation menu"
 msgid "navigation menu"
 msgstr "navigations menü"
@@ -78,10 +104,6 @@ msgctxt "Label of logout button"
 msgid "Logout"
 msgstr "Abmelden"
 
-msgctxt "[aria]"
-msgid "Close"
-msgstr "schließen"
-
 msgid "Save"
 msgstr "Speichern"
 
@@ -100,25 +122,24 @@ msgstr "Passwort geändert"
 msgid "Personal details saved"
 msgstr "Persönliche Details wurden gespeichert"
 
+msgid "Details updated"
+msgstr "Details aktualisiert"
+
 msgid "Personal Details"
 msgstr "Persönliche Details"
 
 msgid "Display name"
 msgstr "Anzeigename"
 
-#, fuzzy
 msgctxt "Nickname"
 msgid "Public, unique identifier"
-msgstr "Öffentlicher Name zur eindeutigen Identifikation"
-
-msgid "Email"
-msgstr "E-Mail"
+msgstr "Öffentlicher, eindeutiger Name"
 
 #, fuzzy
 msgctxt "Email field"
 msgid "This is private. Leave empty if you don't want notification mails."
 msgstr ""
-"Diese bleibt geheim. Lasse das Feld leer, wenn du keine Benachrichtigungen "
+"Diese bleibt privat. Lasse das Feld leer, wenn du keine Benachrichtigungen "
 "möchtest."
 
 msgid "today at {time}"
@@ -216,6 +237,15 @@ msgstr "Endete am {endDatetime}!"
 msgid "Ends at {endDatetime}"
 msgstr "Endet am {endDatetime}"
 
+msgid "{days, plural, =1 {# day} other {# days}} left"
+msgstr "Noch {days, plural, =1 {# Tag} other {# Tage}}"
+
+msgid "{hours, plural, =1 {# hour} other {# hours}} left"
+msgstr "Noch {hours, plural, =1 {# Stunde} other {# Stunden}}"
+
+msgid "{minutes, plural, =1 {# minute} other {# minutes}} left"
+msgstr "Noch {minutes, plural, =1 {# Minute} other {# Minuten}}"
+
 msgid "Approvals: {pros}"
 msgstr "Zustimmungen: {pros}"
 
@@ -245,9 +275,6 @@ msgstr "Was für eine Art Argument ist es?"
 
 msgid "Add"
 msgstr "Hinzufügen"
-
-msgid "Cancel"
-msgstr "Abbrechen"
 
 msgid "Login to add argument"
 msgstr "Melde dich an um ein neues Argument hinzuzufügen"
@@ -327,6 +354,12 @@ msgstr "Abgeleitet von {count} anderen Vorschlägen:"
 msgctxt "Abort form"
 msgid "Cancel"
 msgstr "Abbrechen"
+
+msgid "Approved"
+msgstr "Zugestimmt"
+
+msgid "Approve"
+msgstr "Zustimmen"
 
 msgid ""
 "This proposal was derived {count, plural,  =1 {one time} other {# times}}"
@@ -412,12 +445,6 @@ msgctxt "Reject a proposal"
 msgid "Reject"
 msgstr "Ablehnen"
 
-msgid "Approved"
-msgstr "Zugestimmt"
-
-msgid "Approve"
-msgstr "Zustimmen"
-
 msgid "Winner"
 msgstr "Gewinner"
 
@@ -443,6 +470,13 @@ msgstr "Prozess bearbeiten"
 
 msgid "Edit"
 msgstr "Bearbeiten"
+
+msgctxt "Start of a process"
+msgid "Start"
+msgstr "Startzeitpunkt"
+
+msgid "Optional"
+msgstr "Optional"
 
 msgid "Advanced"
 msgstr "Erweitert"
