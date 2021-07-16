@@ -77,13 +77,14 @@
 
        [:link {:href "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" :rel "stylesheet"}]
        [:script (str "var fulcro_network_csrf_token = '" csrf-token "';")]
-       [:script "(function(h,o,t,j,a,r){
-        h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
-        h._hjSettings={hjid:2507531,hjsv:6};
-        a=o.getElementsByTagName('head')[0];
-        r=o.createElement('script');r.async=1;
-        r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
-        a.appendChild(r);})(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');"]
+       (when-not (:dev? config)
+         [:script "(function(h,o,t,j,a,r){
+          h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
+          h._hjSettings={hjid:2507531,hjsv:6};
+          a=o.getElementsByTagName('head')[0];
+          r=o.createElement('script');r.async=1;
+          r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+          a.appendChild(r);})(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');"])
        [:style (garden/css styles/body styles/splashscreen styles/sizing styles/address)]]
       [:body
        [:div#decide initial-html]
