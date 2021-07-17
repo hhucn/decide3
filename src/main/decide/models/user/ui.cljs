@@ -43,15 +43,24 @@
                       :title display-name}
     (or (first-char display-name) \?)))
 
-(defsc Avatar [this {::user/keys [id display-name]}
-               {:keys [avatar-props] :or {avatar-props {}}}]
+(defn- wrap-with-user-tooltip [user & body]
+  (apply
+    dd/tooltip
+    {:arrow true
+     :title (list/list {:dense true}
+              (list/item {:disableGutters true} (::user/display-name user)))}
+    body))
+
+(defsc Avatar [this {::user/keys [id display-name] :as user}
+               {:keys [avatar-props tooltip?] :or {avatar-props {}
+                                                   tooltip? false}}]
   {:query [::user/id ::user/display-name]
    :ident ::user/id}
   (let [color (color-utils/hash-color id)
         ;; for use in AvatarGroup
         style (js->clj (comp/get-raw-react-prop this :style) :keywordize-keys true)
         className (comp/get-raw-react-prop this :className)]
-    (dd/tooltip {:title (list/list {:dense true} (list/item {:disableGutters true} display-name)) :arrow true}
+    (cond->>
       (ui-colored-avatar
         (-> avatar-props
           (update :style merge style)
@@ -60,7 +69,8 @@
             {:alt display-name
              :color color}))
 
-        (or (first-char display-name) \?)))))
+        (or (first-char display-name) \?))
+      tooltip? (wrap-with-user-tooltip user))))
 
 (def ui-avatar (comp/computed-factory Avatar {:keyfn ::user/id}))
 
