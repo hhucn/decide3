@@ -195,7 +195,7 @@
         {:color :primary
          :type :submit
          :disabled (not (fs/dirty? props))}
-        (i18n/tr "Save")))))
+        (i18n/tr "Update")))))
 
 (def ui-user-panel (comp/factory UserInformation))
 
