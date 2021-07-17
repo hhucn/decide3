@@ -11,7 +11,8 @@
     [decide.models.proposal :as proposal]
     [decide.models.proposal.core :as proposal.core]
     [decide.models.proposal.database :as proposal.db]
-    [decide.models.user :as user]))
+    [decide.models.user :as user]
+    [decide.models.user.database :as user.db]))
 
 (defn check-slug-exists [{::pc/keys [mutate] :as mutation}]
   (assoc mutation
@@ -94,25 +95,40 @@
        ::p/env (assoc env :db db-after)})
     (throw (ex-info "User with this email doesn't exist!" {:email email}))))
 
-(defmutation add-participant [{:keys [conn db AUTH/user-id] :as env}
-                              {user-emails :user-emails slug ::process/slug}]
-  {::pc/params [::process/slug ::user/email]
+(defmutation add-participant [{:keys [conn db] :as env}
+                              {user-id ::user/id slug ::process/slug}]
+  {::pc/params [::process/slug ::user/id]
+   ::pc/output [::user/id ::process/slug]
+   ::s/params (s/keys :req [::process/slug])
+   ::pc/transform (comp auth/check-logged-in check-slug-exists needs-moderator)}
+  (when-let [user (user.db/get-entity db user-id)]
+    (let [process (d/entity db [::process/slug slug])
+          {:keys [db-after]}
+          (d/transact conn
+            {:tx-data
+             (concat
+               (process.db/->enter process user)
+               [[:db/add "datomic.tx" :db/txUser [::user/id user-id]]])})]
+      {::user/id (::user/id user)
+       ::process/slug slug
+       ::p/env (assoc env :db db-after)})))
+
+(defmutation remove-participant [{:keys [conn db] :as env}
+                                 {user-id ::user/id slug ::process/slug}]
+  {::pc/params [::process/slug ::user/id]
    ::pc/output [::process/slug]
    ::s/params (s/keys :req [::process/slug])
    ::pc/transform (comp auth/check-logged-in check-slug-exists needs-moderator)}
-  (let [process (d/entity db [::process/slug slug])
-        users
-        (for [user-email user-emails
-              :when (user/email-in-db? db user-email)]
-          (d/entity db [::user/email user-email]))
-
-        {:keys [db-after]}
-        (d/transact conn
-          (conj
-            (mapcat #(process.db/->enter process %) users)
-            [:db/add "datomic.tx" :db/txUser [::user/id user-id]]))]
-    {::process/slug slug
-     ::p/env (assoc env :db db-after)}))
+  (when-let [user (user.db/get-entity db user-id)]
+    (let [process (d/entity db [::process/slug slug])
+          {:keys [db-after]}
+          (d/transact conn
+            {:tx-data
+             (concat
+               (process.db/->remove-participant process user)
+               [[:db/add "datomic.tx" :db/txUser [::user/id user-id]]])})]
+      {::process/slug slug
+       ::p/env (assoc env :db db-after)})))
 
 
 (defmutation add-proposal [{:keys [conn db AUTH/user-id] :as env}
@@ -158,5 +174,6 @@
    add-moderator
 
    add-participant
+   remove-participant
 
    add-proposal])

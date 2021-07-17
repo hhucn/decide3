@@ -79,6 +79,14 @@
   {::pc/output [::process/no-of-participants]}
   {::process/no-of-participants (process.db/get-number-of-participants db slug)})
 
+(defresolver resolve-participants [env {::process/keys [slug]}]
+  {::pc/output [{::process/participants [::user/id ::user/display-name]}]}
+  (let [process (get-process-entity env slug)]
+    {::process/participants
+     (map
+       #(select-keys % [::user/id ::user/display-name])
+       (::process/participants process))}))
+
 (defresolver resolve-proposals [{:keys [db] :as env} {::process/keys [slug]}]
   {::pc/output [{::process/proposals [::proposal/id]}
                 ::process/no-of-proposals]}
@@ -148,6 +156,7 @@
    (pc/alias-resolver2 :process/features :process/features)
    resolve-process-moderators
    resolve-user-moderated-processes
+   resolve-participants
    resolve-no-of-participants
    resolve-winner
 

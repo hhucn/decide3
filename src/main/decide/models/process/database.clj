@@ -81,6 +81,12 @@
 (defn ->enter [process user]
   [[:db/add (:db/id process) ::process/participants (:db/id user)]])
 
+(def ->add-participant ->enter)
+
+(defn ->remove-participant
+  [process user]
+  [[:db/retract (:db/id process) ::process/participants (:db/id user)]])
+
 (defn get-public-processes [db]
   [d.core/db? => (s/coll-of (s/keys :req [::process/slug ::process/type]) :kind set?)]
   (set (d/q '[:find ?slug ?type

@@ -12,6 +12,7 @@
     [decide.models.process :as process]
     [decide.models.process.mutations :as process.mutations]
     [decide.models.user :as user]
+    [decide.ui.process.moderator.participant-list :as participant-list]
     [decide.utils.time :as time]
     [material-ui.data-display :as dd]
     [material-ui.data-display.list :as list]
@@ -243,6 +244,7 @@
 
       ; (df/load! app process-ident ModeratorList {:target (conj ref :moderator-list)})
       ; (df/load! app process-ident ProcessEdit {:target (conj ref :process-edit)})
+      (df/load! app process-ident participant-list/ParticipantList {:target (conj ref :participant-list)})
       ;; combine loads of same entity into one.
       (df/load! app process-ident Process
         {:target (targeting/multiple-targets
@@ -252,25 +254,11 @@
          :post-mutation `dr/target-ready
          :post-mutation-params {:target ref}}))))
 
-(defsc ParticipantList [this props {{::process/keys [participants]} :process}]
-  {:query []
-   :use-hooks? true}
-  (let [[participants set-participants] (hooks/use-state (or participants #{}))]
-    (dom/div {}
-      (surfaces/paper {:variant :outlined}
-        (grid/container {:spacing 1}
-          (for [p participants]
-            (grid/item {:key p}
-              (dd/chip {:label p
-                        :onDelete #(set-participants (disj participants p))}))))))))
-
-
-(def ui-participants-list (comp/factory ParticipantList))
-
-(defsc ProcessModeratorTab [this {:keys [moderator-list process-edit process]}]
+(defsc ProcessModeratorTab [this {:keys [moderator-list process-edit participant-list process] :as props}]
   {:query [{:process (comp/get-query Process)}
            {:process-edit (comp/get-query ProcessEdit)}
-           {:moderator-list (comp/get-query ModeratorList)}]
+           {:moderator-list (comp/get-query ModeratorList)}
+           {:participant-list (comp/get-query participant-list/ParticipantList)}]
    :ident (fn [] [::ProcessModeratorTab (::process/slug process)])
    :route-segment ["moderate"]
    :will-enter
@@ -280,7 +268,14 @@
          #(comp/transact! app [(init-moderator-tab {:slug slug})] {:ref ident}))))}
   (layout/container {}
     (layout/box {:my 2}
-      (ui-process-edit process-edit)
-      #_(accordion {:title (i18n/trc "Label for list of participants" "Participants")}
-          (ui-participants-list {} {:process (log/spy :info process)}))
-      (ui-moderator-list moderator-list))))
+      (grid/container {:spacing 2}
+        (grid/item {:xs 12 :md 8}
+          (ui-process-edit process-edit))
+        (when participant-list
+          (grid/item {:xs 12 :sm 6 :md 4}
+            (surfaces/card {}
+              (surfaces/card-header {:title (i18n/trc "Label for list of participants" "Participants")})
+              (surfaces/card-content {}
+                (participant-list/ui-participant-list participant-list)))))
+        (grid/item {}
+          (ui-moderator-list moderator-list))))))
