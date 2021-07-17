@@ -1,6 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ClojureProjectResolveSettings">
-    <currentScheme>IDE</currentScheme>
+    <item key="com.fulcrologic.rad.attributes/defattr" resolves-as="clojure.core/def" />
+    <item key="decide.models.process-test/with-dev-db" resolves-as="clojure.core/def" />
+    <item key="ghostwheel.core/&gt;defn" resolves-as="clojure.core/defn" />
+    <item key="com.fulcrologic.fulcro.ui-state-machines/defstatemachine" resolves-as="clojure.core/def" />
+    <item key="com.fulcrologic.fulcro.mutations/declare-mutation" resolves-as="clojure.core/def" />
+    <item key="com.fulcrologic.fulcro.algorithms.normalized-state/swap!-&gt;" resolves-as="cljs.core/-&gt;" />
+    <item key="com.fulcrologic.fulcro.routing.dynamic-routing/defrouter" resolves-as="clojure.core/defn" />
+    <item key="nubank.workspaces.core/deftest" resolves-as="clojure.core/def" />
+    <item key="com.fulcrologic.guardrails.core/&gt;defn" resolves-as="clojure.core/defn" />
+    <item key="devcards.core/defcard" resolves-as="clojure.core/def" />
+    <item key="action" resolves-as="cljs.core/fn" />
+    <item key="com.wsscode.pathom.connect/defmutation" resolves-as="clojure.core/defn" />
+    <item key="nubank.workspaces.core/defcard" resolves-as="clojure.core/def" />
+    <item key="com.fulcrologic.fulcro.components/defsc" resolves-as="clojure.core/defn" />
+    <item key="com.fulcrologic.guardrails.core/&gt;defn-" resolves-as="clojure.core/defn-" />
+    <item key="mount.core/defstate" resolves-as="cljs.core/def" />
+    <item key="com.fulcrologic.fulcro.routing.legacy-ui-routers/defsc-router" resolves-as="clojure.core/defn" />
+    <item key="korma.db/defdb" resolves-as="clojure.core/def" />
+    <item key="com.fulcrologic.guardrails.core/&gt;fn" resolves-as="cljs.core/fn" />
+    <item key="com.wsscode.pathom.connect/defresolver" resolves-as="clojure.core/defn" />
+    <item key="com.wsscode.pathom3.connect.operation/defresolver" resolves-as="clojure.core/defn" />
+    <currentScheme>PROJECT</currentScheme>
   </component>
 </project>
