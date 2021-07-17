@@ -39,10 +39,14 @@
   {:task
    (shell "clj -M:dev -m \"shadow.cljs.devtools.cli\" run shadow.cljs.build-report main report.html")}
 
-  outdated
+  outdated:clj
+  {:task (clojure {:continue true} "-Sdeps '{:deps {com.github.liquidz/antq {:mvn/version \"RELEASE\"} org.slf4j/slf4j-nop {:mvn/version \"RELEASE\"}}}' -M -m antq.core")}
+
+  outdated:js
   {:depends [cljs:install]
-   :task (do
-           (clojure {:continue true} "-Sdeps '{:deps {com.github.liquidz/antq {:mvn/version \"RELEASE\"}}}' -m antq.core")
-           (shell "yarn outdated"))}
+   :task (shell "yarn outdated")}
+
+  outdated
+  {:depends [outdated:clj outdated:js]}
 
   deploy (shell "ssh root@ebbinghaus.me 'cd decide ; ./deploy.sh'")}}
