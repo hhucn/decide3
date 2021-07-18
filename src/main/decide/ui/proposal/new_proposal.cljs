@@ -281,8 +281,9 @@
             (stepper/step-button
               {:onClick #(comp/transact! this [(goto-step {:step :parents})])
                :style {:textAlign "start"}
-               :optional (dd/typography {:variant "caption" :color "textSecondary"} (i18n/trc "Input is optional" "Optional"))}
-              (i18n/trc "Parents of a proposal" "Parents"))
+               :optional (dd/typography {:variant "caption" :color "textSecondary"}
+                           (i18n/trc "Input is optional" "Optional"))}
+              (i18n/trc "Parents of a proposal" "Choose proposals"))
             (stepper/step-content {}
               (ui-parent-step parent-step
                 {:next-step next-step
@@ -308,7 +309,7 @@
                                (i18n/tr "Title and details must not be empty")))}
                 (stepper/step-label
                   {:error (and (< 2 step) error?)}
-                  (i18n/trc "Details of a proposal" "Details")))
+                  (i18n/trc "Details of a proposal" "Add details")))
 
               (stepper/step-content {}
                 (dd/typography {:paragraph false}
@@ -351,7 +352,7 @@
           (stepper/step {}
             (stepper/step-button
               {:onClick #(comp/transact! this [(goto-step {:step :final})])}
-              (i18n/tr "Overview"))
+              (i18n/trc "Last step in new proposal dialog" "Check and confirm"))
             (stepper/step-content {}
               (layout/box {:mb 2}
                 (section (str (i18n/trc "Title of a proposal" "Title") ":"))
