@@ -79,27 +79,30 @@
        :variant "outlined"
        :fullWidth true}
       props)
-    (layout/box {:display "flex" :flexDirection "column"}
+    (layout/box {:display "flex" :flexDirection "column" :p 1}
       title
       (dd/typography {:variant "caption" :color "textSecondary"} body))))
 
 (defsc TypeStep [_ _ {:keys [to-step]}]
-  (comp/fragment
-    (dd/typography {:paragraph true}
-      (i18n/tr "Do you want to add a new proposal, fork from an existing or merge proposals?"))
+  {:use-hooks? true}
+  (layout/box {:m (if (breakpoint/<=? "sm") 0 6)}
+    (layout/box {:clone true :sx {:textAlign :center}}
+      (dd/typography {:variant :h5 :paragraph true}
+        #_(i18n/tr "Do you want to add a new proposal, fork from an existing or merge proposals?")
+        (i18n/tr "Add a new proposal or enhance existing proposals?")))
     (grid/container {:spacing 2}
       (grid/item {:sm 6 :xs 12}
         (big-button
           {:onClick #(to-step :details)
            :title (i18n/tr "New")
-           :body (i18n/tr "Create a new proposal that is not related to another one.")
+           :body (i18n/tr "Create a new proposal that is independent.")
            :startIcon (dom/create-element AddBox)}))
 
       (grid/item {:sm 6 :xs 12}
         (big-button
           {:onClick #(to-step :parents)
-           :title (i18n/tr "Fork / Merge")
-           :body (i18n/tr "Create a proposal derived from one or more proposals")
+           :title (i18n/tr "Enhance / Merge")
+           :body (i18n/tr "Create a proposal derived from existing proposals.")
            :startIcon (layout/box {:component MergeType :sx {:transform "rotate(.5turn)"}})})))))
 
 
@@ -259,7 +262,7 @@
             {:completed (pos? step)}
             (stepper/step-button
               {:onClick #(comp/transact! this [(goto-step {:step :type})])}
-              (i18n/trc "Type of proposal" "Type"))
+              (i18n/trc "Start of new proposal stepper" "Start"))
             (stepper/step-content {}
               (ui-type-step {} {:to-step (fn [step] (comp/transact! this [(goto-step {:step step})]))})))
           ;; endregion
