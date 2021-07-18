@@ -69,17 +69,19 @@
     (swap! state update-in ref update :ui/step inc)))
 
 ;; region Type Step
-(defn button-card
+(defn big-button
   "A very large, multiline button."
-  [opts & children]
+  [{:keys [title body] :as props}]
   (inputs/button
     (merge
       {:style {:height "100%"}
        :size "large"
        :variant "outlined"
        :fullWidth true}
-      opts)
-    (apply layout/box {:display "flex" :flexDirection "column"} children)))
+      props)
+    (layout/box {:display "flex" :flexDirection "column"}
+      title
+      (dd/typography {:variant "caption" :color "textSecondary"} body))))
 
 (defsc TypeStep [_ _ {:keys [to-step]}]
   (comp/fragment
@@ -87,21 +89,19 @@
       (i18n/tr "Do you want to add a new proposal, fork from an existing or merge proposals?"))
     (grid/container {:spacing 2}
       (grid/item {:sm 6 :xs 12}
-        (button-card
+        (big-button
           {:onClick #(to-step :details)
-           :startIcon (comp/create-element AddBox nil nil)}
-          (i18n/tr "New")
-          (dd/typography {:variant "caption" :color "textSecondary"}
-            (i18n/tr "Create a new proposal that is not related to another one."))))
+           :title (i18n/tr "New")
+           :body (i18n/tr "Create a new proposal that is not related to another one.")
+           :startIcon (dom/create-element AddBox)}))
 
       (grid/item {:sm 6 :xs 12}
-        (button-card
+        (big-button
           {:onClick #(to-step :parents)
-           :startIcon (layout/box {:clone true :sx {:transform "rotate(.5turn)"}}
-                        (comp/create-element MergeType nil nil))}
-          (i18n/tr "Fork / Merge")
-          (dd/typography {:variant "caption" :color "textSecondary"}
-            (i18n/tr "Create a proposal derived from one or more proposals")))))))
+           :title (i18n/tr "Fork / Merge")
+           :body (i18n/tr "Create a proposal derived from one or more proposals")
+           :startIcon (layout/box {:component MergeType :sx {:transform "rotate(.5turn)"}})})))))
+
 
 (def ui-type-step (comp/computed-factory TypeStep))
 ;; endregion
@@ -232,8 +232,8 @@
     (dialog/dialog
       {:open open?
        :fullWidth true
-       :fullScreen (breakpoint/<=? "xs")
-       :maxWidth "md"
+       :fullScreen (breakpoint/<=? "sm")
+       :maxWidth "lg"
        :onClose close-dialog
        :TransitionProps {:onExit reset-form}
        :PaperProps {:component "form"
