@@ -25,6 +25,7 @@
     [material-ui.layout.grid :as grid]
     [material-ui.navigation.stepper :as stepper]
     ["@material-ui/icons/Add" :default Add]
+    ["@material-ui/icons/Close" :default Close]
     ["@material-ui/icons/FileCopyOutlined" :default FileCopy]
     ["@material-ui/icons/KeyboardReturn" :default KeyboardReturn]
     ["@material-ui/icons/MergeType" :default MergeType]))
@@ -258,12 +259,19 @@
                                       ::proposal/body body
                                       ::proposal/parents (mapv #(select-keys % [::proposal/id]) parents)})])
                                 (close-dialog))}}
-      (dialog/title {} (i18n/trc "Title of new proposal form" "New proposal"))
+      (dialog/title {:disableTypography true :style {:display :flex}}
+        (dd/typography {:component :h2 :variant :h6}
+          (i18n/trc "Title of new proposal form" "New proposal"))
+        (layout/box {:ml :auto :mr -2 :mt -1}
+          (inputs/icon-button {:onClick close-dialog
+                               :aria-label (i18n/trc "[aria]" "Close")}
+            (dom/create-element Close))))
       (dialog/content {}
         (stepper/stepper
           {:activeStep step
            :orientation "vertical"
-           :nonLinear true}
+           :nonLinear true
+           :style {:padding 0}}
 
           ;; region Typ Step
           (stepper/step

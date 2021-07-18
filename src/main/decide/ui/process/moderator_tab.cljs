@@ -23,7 +23,9 @@
     [material-ui.surfaces :as surfaces]
     ["@material-ui/icons/Clear" :default ClearIcon]
     ["@material-ui/icons/ExpandMore" :default ExpandMoreIcon]
-    ["@material-ui/icons/RemoveCircleOutline" :default RemoveCircleIcon]))
+    ["@material-ui/icons/RemoveCircleOutline" :default RemoveCircleIcon]
+    [decide.models.user.ui :as user.ui]
+    [taoensso.timbre :as log]))
 
 (defn- accordion [{:keys [title]} body]
   (surfaces/accordion {:defaultExpanded true}
@@ -32,14 +34,15 @@
     (surfaces/accordion-panel-details {} body)))
 
 (defsc Moderator [_ {::user/keys [id display-name]
-                     :keys [root/current-session]} {:keys [onDelete]}]
+                     :keys [root/current-session >/avatar] :as props} {:keys [onDelete]}]
   {:query [::user/id ::user/display-name
+           {:>/avatar (comp/get-query user.ui/Avatar)}
            {[:root/current-session '_] 1}]}                 ; TODO Replace join with Session.
 
   (let [self? (= id (::user/id current-session))]
     (list/item {}
       (list/item-avatar {}
-        (dd/avatar {} (first display-name)))
+        (user.ui/ui-avatar avatar))
       (list/item-text {:primary display-name})
       (when onDelete
         (list/item-secondary-action {}
