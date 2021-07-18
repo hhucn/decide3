@@ -4,7 +4,7 @@
     #?(:clj  [clojure.spec.alpha :as s]
        :cljs [cljs.spec.alpha :as s])
     [clojure.string :as str]
-    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.raw.components :as rc]
     [com.fulcrologic.guardrails.core :refer [>defn => | <- ?]]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
@@ -154,17 +154,17 @@
     (keep-chars #"[a-z0-9-]")
     (str/replace #"^-|" "")))                               ; remove dash prefix
 
-(defsc Basics [_ _]
-  {:query
-   [::slug
-    ::title
-    ::description
-    ::type
-    ::start-time
-    ::end-time
-    :process/features
-    {::moderators [::user/id]}]
-   :ident ::slug})
+(def Basics
+  (rc/nc [::slug
+          ::title
+          ::description
+          ::type
+          ::start-time
+          ::end-time
+          :process/features
+          {::moderators [::user/id]}]
+    {:componentName ::Basics
+     :ident (fn [_ props] [::slug (::slug props)])}))
 
 (defn single-approve? [{:process/keys [features]}]
   [::entity => boolean?]
