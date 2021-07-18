@@ -52,12 +52,13 @@
       (grid/item {:xs 12}
         (layout/container {:maxWidth :lg :disableGutters true}
           (layout/box {:pb 5}
-            (proposal-card/ui-proposal-card
-              best-proposal
-              {::process/slug slug
-               :process-over? (process/over? {::process/end-time end-time})
-               :features features
-               :card-props {:elevation 12}}))))
+            (when best-proposal
+              (proposal-card/ui-proposal-card
+                best-proposal
+                {::process/slug slug
+                 :process-over? (process/over? {::process/end-time end-time})
+                 :features features
+                 :card-props {:elevation 12}})))))
 
       ;; THOUGHT This could be sensible even with multiple approves. But what would the button do on click?
       (when (contains? features :process.feature/single-approve)
