@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: decide3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-07-17 17:20+0200\n"
-"PO-Revision-Date: 2021-07-17 17:21+0200\n"
+"POT-Creation-Date: 2021-07-18 23:58+0200\n"
+"PO-Revision-Date: 2021-07-19 00:02+0200\n"
 "Last-Translator: Björn Ebbinghaus <ebbinghaus@hhu.de>\n"
 "Language-Team: Björn Ebbinghaus\n"
 "Language: de\n"
@@ -285,25 +285,28 @@ msgstr "Melde dich an um ein neues Argument hinzuzufügen"
 msgid "Add argument"
 msgstr "Argument hinzufügen"
 
-msgid ""
-"Do you want to add a new proposal, fork from an existing or merge proposals?"
+msgid "Add a new proposal, develop or merge existing proposals"
 msgstr ""
-"Möchtest du einen neuen Vorschlag hinzufügen, einen bestehenden erweitern "
-"oder Vorschläge zusammenführen?"
+"Füge einen neuen Vorschlag hinzu, entwickel oder kombiniere existierende "
+"Vorschläge"
 
 msgid "New"
 msgstr "Neu"
 
-msgid "Create a new proposal that is not related to another one."
-msgstr ""
-"Einen neuen Vorschlag erstellen, der nicht mit einem anderen verwandt ist."
+msgid "Create a new proposal"
+msgstr "Erstelle einen neuen Vorschlag"
 
-msgid "Fork / Merge"
-msgstr "Ableiten / Zusammenführen"
+msgid "Develop"
+msgstr "Entwickeln"
 
-msgid "Create a proposal derived from one or more proposals"
-msgstr ""
-"Ein Vorschlag erstellen basierend auf einem oder mehreren anderen Vorschlägen"
+msgid "Develop an existing proposal"
+msgstr "Entwickel einen bestehenden Vorschlag weiter"
+
+msgid "Merge"
+msgstr "Zusammenfügen"
+
+msgid "Merge existing proposals"
+msgstr "Füge bestehende Vorschläge zusammen"
 
 msgid "Von welchen bestehenden Vorschlägen hängt dein neuer Vorschlag ab?"
 msgstr "Von welchen bestehenden Vorschlägen hängt dein neuer Vorschlag ab?"
@@ -315,31 +318,38 @@ msgctxt "Title of new proposal form"
 msgid "New proposal"
 msgstr "Neuer Vorschlag"
 
-msgctxt "Type of proposal"
-msgid "Type"
-msgstr "Typ"
+msgctxt "Start of new proposal stepper"
+msgid "Start"
+msgstr "Start"
 
 msgctxt "Input is optional"
 msgid "Optional"
 msgstr "Optional"
 
 msgctxt "Parents of a proposal"
-msgid "Parents"
-msgstr "Eltern"
+msgid "Choose proposals"
+msgstr "Vorschläge auswählen"
 
 msgid "Title and details must not be empty"
 msgstr "Titel or Details dürfen nicht leer sein"
 
 msgctxt "Details of a proposal"
-msgid "Details"
-msgstr "Details"
+msgid "Add details"
+msgstr "Details hinzufügen"
 
-msgid "Add a recognizable title"
-msgstr "Füge einen erkennbaren Titel hinzu"
+msgid "Chosen proposals"
+msgstr "Ausgewählte Vorschläge"
+
+msgid "My new proposal"
+msgstr "Mein neuer Vorschlag"
 
 msgctxt "Title of a proposal"
 msgid "Title"
 msgstr "Titel"
+
+msgctxt "Details of a proposal"
+msgid "Description"
+msgstr "Beschreibung"
 
 msgid "Copy details from parent"
 msgstr "Kopiere Details von Eltern"
@@ -348,8 +358,13 @@ msgctxt "Go to the next part of the form"
 msgid "Next"
 msgstr "Weiter"
 
-msgid "Overview"
-msgstr "Übersicht"
+msgctxt "Last step in new proposal dialog"
+msgid "Check and confirm"
+msgstr "Überprüfen und bestätigen"
+
+msgctxt "Details of a proposal"
+msgid "Details"
+msgstr "Details"
 
 msgid "Derived from {count} other proposals:"
 msgstr "Abgeleitet von {count} anderen Vorschlägen:"
@@ -614,6 +629,35 @@ msgid ""
 msgstr ""
 "Gelb markierte Bereich werden aktiv bearbeitet und funktionieren eventuell "
 "nicht richtig!"
+
+#~ msgid "Enhance"
+#~ msgstr "Erweitern"
+
+#~ msgid "Create a new proposal that is not related to another one."
+#~ msgstr ""
+#~ "Einen neuen Vorschlag erstellen, der nicht mit einem anderen verwandt ist."
+
+#~ msgid "Fork / Merge"
+#~ msgstr "Ableiten / Zusammenführen"
+
+#~ msgid "Create a proposal derived from one or more proposals"
+#~ msgstr ""
+#~ "Ein Vorschlag erstellen basierend auf einem oder mehreren anderen "
+#~ "Vorschlägen"
+
+#~ msgctxt "Type of proposal"
+#~ msgid "Type"
+#~ msgstr "Typ"
+
+#~ msgctxt "Parents of a proposal"
+#~ msgid "Parents"
+#~ msgstr "Eltern"
+
+#~ msgid "Add a recognizable title"
+#~ msgstr "Füge einen erkennbaren Titel hinzu"
+
+#~ msgid "Overview"
+#~ msgstr "Übersicht"
 
 #~ msgid "New argument"
 #~ msgstr "Neues Argument"

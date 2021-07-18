@@ -90,7 +90,7 @@
   (layout/box {:m (if (breakpoint/<=? "sm") 0 6)}
     (layout/box {:clone true :sx {:textAlign :center}}
       (dd/typography {:variant :h5 :paragraph true}
-        (i18n/tr "Add a new proposal, enhance or merge existing proposals")))
+        (i18n/tr "Add a new proposal, develop or merge existing proposals")))
     ;; TODO Fix Icon sizes / positions
     (grid/container {:spacing 2}
       (grid/item {:sm 4 :xs 12}
@@ -103,8 +103,8 @@
       (grid/item {:sm 4 :xs 12}
         (big-button
           {:onClick #(to-step :parents)
-           :title (i18n/tr "Enhance")
-           :body (i18n/tr "Enhance an existing proposal")
+           :title (i18n/tr "Develop")
+           :body (i18n/tr "Develop an existing proposal")
            :startIcon (layout/box {:component KeyboardReturn :sx {:transform "rotate(.75turn) scaleX(-1)"}})}))
 
       (grid/item {:sm 4 :xs 12}
@@ -320,26 +320,42 @@
                   (i18n/trc "Details of a proposal" "Add details")))
 
               (stepper/step-content {}
-                (dd/typography {:paragraph false}
-                  (i18n/tr "Add a recognizable title"))
+                (when (seq parents)
+                  (layout/box {}
+                    (dd/typography
+                      {:component :h3
+                       :variant :subtitle1
+                       :gutterBottom true}
+                      (i18n/tr "Chosen proposals"))
+                    (grid/container {:spacing 1}
+                      (for [parent parents]
+                        (grid/item {:key (::proposal/id parent)}
+                          (dd/chip {:label (::proposal/title parent)
+                                    :variant :outlined
+                                    :onDelete #(comp/transact! this [(remove-parent {::proposal/ident (find parent ::proposal/id)})])}))))))
+
                 (inputs/textfield
                   {:label (i18n/trc "Title of a proposal" "Title")
-                   :variant "outlined"
+                   :placeholder (i18n/tr "My new proposal")
+                   :variant :filled
                    :fullWidth true
                    :autoComplete "off"
+                   :autoFocus true
                    :value title
                    :onChange change-title
-                   :margin "normal"})
+                   :margin "normal"
+                   :inputProps {:required true}})
 
                 ;; Body
                 (inputs/textfield
-                  {:label (i18n/trc "Details of a proposal" "Details")
-                   :variant "outlined"
+                  {:label (i18n/trc "Details of a proposal" "Description")
+                   :variant :filled
                    :margin "normal"
                    :fullWidth true
                    :autoComplete "off"
                    :multiline true
                    :rows 7
+                   :inputProps {:required true}
                    :value body
                    :onChange change-body})
                 (when (= 1 (count parents))
