@@ -24,9 +24,10 @@
     [material-ui.layout :as layout]
     [material-ui.layout.grid :as grid]
     [material-ui.navigation.stepper :as stepper]
-    ["@material-ui/icons/AddBoxOutlined" :default AddBox]
-    ["@material-ui/icons/MergeType" :default MergeType]
-    ["@material-ui/icons/FileCopyOutlined" :default FileCopy]))
+    ["@material-ui/icons/Add" :default Add]
+    ["@material-ui/icons/FileCopyOutlined" :default FileCopy]
+    ["@material-ui/icons/KeyboardReturn" :default KeyboardReturn]
+    ["@material-ui/icons/MergeType" :default MergeType]))
 
 
 (declare NewProposalFormDialog)
@@ -88,22 +89,29 @@
   (layout/box {:m (if (breakpoint/<=? "sm") 0 6)}
     (layout/box {:clone true :sx {:textAlign :center}}
       (dd/typography {:variant :h5 :paragraph true}
-        #_(i18n/tr "Do you want to add a new proposal, fork from an existing or merge proposals?")
-        (i18n/tr "Add a new proposal or enhance existing proposals?")))
+        (i18n/tr "Add a new proposal, enhance or merge existing proposals")))
+    ;; TODO Fix Icon sizes / positions
     (grid/container {:spacing 2}
-      (grid/item {:sm 6 :xs 12}
+      (grid/item {:sm 4 :xs 12}
         (big-button
           {:onClick #(to-step :details)
            :title (i18n/tr "New")
-           :body (i18n/tr "Create a new proposal that is independent.")
-           :startIcon (dom/create-element AddBox)}))
+           :body (i18n/tr "Create a new proposal")
+           :startIcon (dom/create-element Add)}))
 
-      (grid/item {:sm 6 :xs 12}
+      (grid/item {:sm 4 :xs 12}
         (big-button
           {:onClick #(to-step :parents)
-           :title (i18n/tr "Enhance / Merge")
-           :body (i18n/tr "Create a proposal derived from existing proposals.")
-           :startIcon (layout/box {:component MergeType :sx {:transform "rotate(.5turn)"}})})))))
+           :title (i18n/tr "Enhance")
+           :body (i18n/tr "Enhance an existing proposal")
+           :startIcon (layout/box {:component KeyboardReturn :sx {:transform "rotate(.75turn) scaleX(-1)"}})}))
+
+      (grid/item {:sm 4 :xs 12}
+        (big-button
+          {:onClick #(to-step :parents)
+           :title (i18n/tr "Merge")
+           :body (i18n/tr "Merge existing proposals")
+           :startIcon (dom/create-element MergeType #js {:fontSize "large"})})))))
 
 
 (def ui-type-step (comp/computed-factory TypeStep))
