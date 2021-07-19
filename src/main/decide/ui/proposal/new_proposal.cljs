@@ -21,6 +21,7 @@
     [material-ui.data-display.list :as list]
     [material-ui.feedback.dialog :as dialog]
     [material-ui.inputs :as inputs]
+    [material-ui.inputs.form :as form]
     [material-ui.layout :as layout]
     [material-ui.layout.grid :as grid]
     [material-ui.navigation.stepper :as stepper]
@@ -137,12 +138,12 @@
    :ident ::proposal/id
    :use-hooks true}
   (list/item {}
-    (list/item-icon {}
-      (inputs/checkbox
-        {:edge :start
-         :onClick onClick
-         :checked checked?}))
-    (list/item-text {} (str "#" nice-id " " title))))
+    (form/control-label
+      {:label (str "#" nice-id " " title)
+       :onClick onClick
+       :checked checked?
+       :control (inputs/checkbox {})})))
+
 (def ui-proposal-item (comp/computed-factory ProposalItem {:keyfn ::proposal/id}))
 
 (defsc ProcessProposalList [_ {::process/keys [proposals]} {:keys [selected add-parent remove-parent]}]
