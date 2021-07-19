@@ -160,6 +160,13 @@
       :else
       (ring-handler req))))
 
+(defn get-key-from-string [^String cookie-store-key]
+  {:pre [(= 15 (count cookie-store-key))]}
+  (when-not (= 15 (count cookie-store-key))
+    (throw (ex-info "The Cookie store secret key needs to be 16 bytes long!" {})))
+  (.getBytes cookie-store-key))
+
+
 (defstate middleware
   :start
   (let [defaults-config (:ring.middleware/defaults-config config)
@@ -175,5 +182,5 @@
       ;; E.g. (wrap-defaults (assoc-in defaults-config [:session :store] (my-store)))
       (wrap-resource "public")
       (wrap-defaults (assoc defaults-config :session {:cookie-attrs {:max-age (* 60 60 24 30)}
-                                                      :store (cookie-store {:key (byte-array 16)})})) ;; TODO configure this, when operation gets out of demo phase
+                                                      :store (cookie-store {:key (.getBytes ^String (:cookie-store-secret-key config))})}))
       wrap-gzip)))

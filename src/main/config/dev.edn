@@ -1,5 +1,6 @@
 {:dev? true
  :taoensso.timbre/logging-config {:min-level [[#{"datahike.*"} :info] [#{"*"} :debug]]}
+ :cookie-store-secret-key "abcdefghijklmnop"
  :ring.middleware/defaults-config {:security {:anti-forgery true
                                               :hsts true
                                               :ssl-redirect false
