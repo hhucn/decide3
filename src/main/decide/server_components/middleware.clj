@@ -181,6 +181,5 @@
       ;; code initialized).
       ;; E.g. (wrap-defaults (assoc-in defaults-config [:session :store] (my-store)))
       (wrap-resource "public")
-      (wrap-defaults (assoc defaults-config :session {:cookie-attrs {:max-age (* 60 60 24 30)}
-                                                      :store (cookie-store {:key (.getBytes ^String (:cookie-store-secret-key config))})}))
+      (wrap-defaults (assoc-in defaults-config [:session :store] (cookie-store {:key (.getBytes ^String (:cookie-store-secret-key config))})))
       wrap-gzip)))

@@ -6,7 +6,8 @@
                                               :ssl-redirect false
                                               :frame-options :sameorigin
                                               :xss-protection {:enable? false
-                                                               :mode :block}}}
+                                                               :mode :block}}
+                                   :session {:cookie-attrs {:secure false}}}
  :com.fulcrologic.rad.pathom/config {:sensitive-keys #{:decide.models.user/password}
                                      :trace? true
                                      :log-requests? true

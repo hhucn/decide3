@@ -28,7 +28,10 @@
               :default-charset "utf-8"
               :not-modified-responses true}
   :static {:resources "public"}
-  :session true
+  :session {:cookie-attrs {:max-age 2592000                 ;; 1 Month
+                           :secure true
+                           :http-only true
+                           :same-site :strict}}
   :security {:anti-forgery true
              :hsts true
              :ssl-redirect false
