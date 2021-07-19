@@ -64,46 +64,46 @@
    :ident (fn [] [:dialog/id ::AddEmailForNotificationDialog])}
   (dialog/dialog
     {:open open?
-     :onClose #(m/set-value! this :ui/open? false)}
-
-    (dom/form
-      {:onSubmit
-       (fn [e]
-         (evt/prevent-default! e)
-         (when (fs/dirty? props)
-           (comp/transact! this
-             [(user.api/update-current {:user/email (if receive-notifications? email "")})
-              (m/set-props {:ui/open? false})
-              (snackbar/add
-                {:message "Email saved"
-                 :action {:label (i18n/tr "Undo")
-                          :mutation `user.api/update-current
-                          :mutation-params {:user/email (get-in props [::fs/config ::fs/pristine-state :user/email])}}})])))}
-      (dialog/title {} (i18n/tr "Receive notifications"))
-      (dialog/content {}
-        (dialog/content-text {}
-          (i18n/tr "Get notifications for processes you participate in when something happened. You get at most one email per hour."))
-        (form/control-label
-          {:label (i18n/tr "Receive notifications")
-           :checked receive-notifications?
-           :onChange #(m/set-value! this :ui/receive-notifications? (.-checked (.-target %)))
-           :control (inputs/checkbox {})})
-        (transitions/collapse {:in receive-notifications?}
-          (inputs/textfield
-            {:label (i18n/tr "Email")
-             :value email
-             :type :email
-             :variant :outlined
-             :fullWidth true
-             :margin :normal
-             :onChange #(m/set-string!! this :user/email :event %)})))
-      (dialog/actions {}
-        (inputs/button {:onClick #(m/set-value! this :ui/open? false)}
-          (i18n/tr "Cancel"))
-        (inputs/button {:color :primary
-                        :type :submit
-                        :disabled (not (fs/dirty? props))}
-          (i18n/tr "Done"))))))
+     :onClose #(m/set-value! this :ui/open? false)
+     :PaperProps
+     {:component :form
+      :onSubmit
+      (fn [e]
+        (evt/prevent-default! e)
+        (when (fs/dirty? props)
+          (comp/transact! this
+            [(user.api/update-current {:user/email (if receive-notifications? email "")})
+             (m/set-props {:ui/open? false})
+             (snackbar/add
+               {:message "Email saved"
+                :action {:label (i18n/tr "Undo")
+                         :mutation `user.api/update-current
+                         :mutation-params {:user/email (get-in props [::fs/config ::fs/pristine-state :user/email])}}})])))}}
+    (dialog/title {} (i18n/tr "Receive notifications"))
+    (dialog/content {}
+      (dialog/content-text {}
+        (i18n/tr "Get notifications for processes you participate in when something happened. You get at most one email per hour."))
+      (form/control-label
+        {:label (i18n/tr "Receive notifications")
+         :checked receive-notifications?
+         :onChange #(m/set-value! this :ui/receive-notifications? (.-checked (.-target %)))
+         :control (inputs/checkbox {})})
+      (transitions/collapse {:in receive-notifications?}
+        (inputs/textfield
+          {:label (i18n/tr "Email")
+           :value email
+           :type :email
+           :variant :outlined
+           :fullWidth true
+           :margin :normal
+           :onChange #(m/set-string!! this :user/email :event %)})))
+    (dialog/actions {}
+      (inputs/button {:onClick #(m/set-value! this :ui/open? false)}
+        (i18n/tr "Cancel"))
+      (inputs/button {:color :primary
+                      :type :submit
+                      :disabled (not (fs/dirty? props))}
+        (i18n/tr "Done")))))
 
 (def ui-add-email-for-notification-dialog (comp/factory AddEmailForNotificationDialog))
 
