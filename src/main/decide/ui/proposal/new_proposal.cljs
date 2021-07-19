@@ -25,6 +25,7 @@
     [material-ui.layout :as layout]
     [material-ui.layout.grid :as grid]
     [material-ui.navigation.stepper :as stepper]
+    [decide.ui.components.dialog :as ui.dialog]
     ["@material-ui/icons/Add" :default Add]
     ["@material-ui/icons/Close" :default Close]
     ["@material-ui/icons/FileCopyOutlined" :default FileCopy]
@@ -33,6 +34,12 @@
 
 
 (declare NewProposalFormDialog)
+
+(def steps
+  {:start 0
+   :parents 1
+   :details 2
+   :final 3})
 
 (defmutation reset-form [_]
   (action [{:keys [state ref]}]
@@ -54,18 +61,9 @@
     children))
 ;; endregion
 
-(defn goto-step* [new-proposal-form step]
-  (assoc new-proposal-form
-    :ui/step
-    (case step
-      :type 0
-      :parents 1
-      :details 2
-      :final 3)))
-
 (defmutation goto-step [{:keys [step]}]
   (action [{:keys [ref state]}]
-    (swap! state update-in ref goto-step* step)))
+    (swap! state update-in ref assoc :ui/step (steps step))))
 
 (defmutation next-step [_]
   (action [{:keys [ref state]}]
@@ -196,9 +194,14 @@
       :ui/step (if (empty? parents) 0 1))))
 
 
-(defsc Parent [_ _]
+(defsc Parent [this {::proposal/keys [id title]}]
   {:query [::proposal/id ::proposal/title ::proposal/body ::proposal/nice-id]
-   :ident ::proposal/id})
+   :ident ::proposal/id}
+  (dd/chip {:label title
+            :variant :outlined
+            :onDelete #(comp/transact! this [(remove-parent {::proposal/ident (comp/get-ident this)})])}))
+
+(def ui-parent (comp/factory Parent {:keyfn ::proposal/id}))
 
 (defn new-body [parents]
   (case (count parents)
@@ -213,6 +216,18 @@
   (action [{:keys [state ref component]}]
     (let [{:keys [parents]} (norm/ui->props component)]
       (swap! state update-in ref copy-parents-body* parents))))
+
+(defn form-step [this {:keys [step label StepProps]} & children]
+  (let [{active-step :ui/step} (comp/props this)]
+    (stepper/step
+      (merge
+        {:completed (< (steps step) active-step)
+         :style {:textAlign "start"}}
+        StepProps)
+      (stepper/step-button
+        {:onClick #(comp/transact! this [(goto-step {:step step})])}
+        label)
+      (apply stepper/step-content {} children))))
 
 (defsc NewProposalFormDialog [this {:ui/keys [open? title body step current-process]
                                     :step/keys [parent-step]
@@ -275,30 +290,21 @@
            :style {:padding 0}}
 
           ;; region Typ Step
-          (stepper/step
-            {:completed (pos? step)}
-            (stepper/step-button
-              {:onClick #(comp/transact! this [(goto-step {:step :type})])}
-              (i18n/trc "Start of new proposal stepper" "Start"))
-            (stepper/step-content {}
-              (ui-type-step {} {:to-step (fn [step] (comp/transact! this [(goto-step {:step step})]))})))
+          (form-step this {:step :start
+                           :label (i18n/trc "Start of new proposal stepper" "Start")}
+            (ui-type-step {} {:to-step (fn [step] (comp/transact! this [(goto-step {:step step})]))}))
           ;; endregion
 
           ;; region Parents Step
-          (stepper/step
-            {:completed (< 1 step)}
-            (stepper/step-button
-              {:onClick #(comp/transact! this [(goto-step {:step :parents})])
-               :style {:textAlign "start"}
-               :optional (dd/typography {:variant "caption" :color "textSecondary"}
-                           (i18n/trc "Input is optional" "Optional"))}
-              (i18n/trc "Parents of a proposal" "Choose proposals"))
-            (stepper/step-content {}
-              (ui-parent-step parent-step
-                {:next-step next-step
-                 :add-parent (fn [ident] (comp/transact! this [(add-parent {::proposal/ident ident})]))
-                 :remove-parent (fn [ident] (comp/transact! this [(remove-parent {::proposal/ident ident})]))
-                 :selected parents})))
+          (form-step this {:step :parents
+                           :label (i18n/trc "Parents of a proposal" "Choose proposals")
+                           :StepProps {:optional (dd/typography {:variant "caption" :color "textSecondary"}
+                                                   (i18n/trc "Input is optional" "Optional"))}}
+            (ui-parent-step parent-step
+              {:next-step next-step
+               :add-parent (fn [ident] (comp/transact! this [(add-parent {::proposal/ident ident})]))
+               :remove-parent (fn [ident] (comp/transact! this [(remove-parent {::proposal/ident ident})]))
+               :selected parents}))
           ;; endregion
 
           ;; region Details Step
@@ -307,101 +313,90 @@
                 error? (or
                          (str/blank? title)
                          (str/blank? body))]
-            (stepper/step
-              {:completed
-               (and (< 2 step) (not error?))}
-              (stepper/step-button
-                {:onClick #(comp/transact! this [(goto-step {:step :details})])
-                 :style {:textAlign "start"}                ; fix for text alignment in button
-                 :optional (when (and (< 2 step) error?)
-                             (dd/typography {:variant "caption" :color "error"}
-                               (i18n/tr "Title and details must not be empty")))}
-                (stepper/step-label
-                  {:error (and (< 2 step) error?)}
-                  (i18n/trc "Details of a proposal" "Add details")))
+            (form-step this {:step :details
+                             :label (stepper/step-label
+                                      {:error (and (< 2 step) error?)}
+                                      (i18n/trc "Details of a proposal" "Add details"))
+                             :StepProps {:completed (and (< 2 step) (not error?))
+                                         :optional (when (and (< 2 step) error?)
+                                                     (dd/typography {:variant "caption" :color "error"}
+                                                       (i18n/tr "Title and details must not be empty")))}}
+              (when (seq parents)
+                (layout/box {}
+                  (dd/typography
+                    {:component :h3
+                     :variant :subtitle1
+                     :gutterBottom true}
+                    (i18n/tr "Chosen proposals"))
+                  (grid/container {:spacing 1}
+                    (for [parent parents]
+                      (grid/item {:key (::proposal/id parent)}
+                        (ui-parent parent))))))
 
-              (stepper/step-content {}
-                (when (seq parents)
-                  (layout/box {}
-                    (dd/typography
-                      {:component :h3
-                       :variant :subtitle1
-                       :gutterBottom true}
-                      (i18n/tr "Chosen proposals"))
-                    (grid/container {:spacing 1}
-                      (for [parent parents]
-                        (grid/item {:key (::proposal/id parent)}
-                          (dd/chip {:label (::proposal/title parent)
-                                    :variant :outlined
-                                    :onDelete #(comp/transact! this [(remove-parent {::proposal/ident (find parent ::proposal/id)})])}))))))
+              (inputs/textfield
+                {:label (i18n/trc "Title of a proposal" "Title")
+                 :placeholder (i18n/tr "My new proposal")
+                 :variant :filled
+                 :fullWidth true
+                 :autoComplete "off"
+                 :autoFocus true
+                 :value title
+                 :onChange change-title
+                 :margin "normal"
+                 :inputProps {:required true}})
 
-                (inputs/textfield
-                  {:label (i18n/trc "Title of a proposal" "Title")
-                   :placeholder (i18n/tr "My new proposal")
-                   :variant :filled
-                   :fullWidth true
-                   :autoComplete "off"
-                   :autoFocus true
-                   :value title
-                   :onChange change-title
-                   :margin "normal"
-                   :inputProps {:required true}})
+              ;; Body
+              (inputs/textfield
+                {:label (i18n/trc "Details of a proposal" "Description")
+                 :variant :filled
+                 :margin "normal"
+                 :fullWidth true
+                 :autoComplete "off"
+                 :multiline true
+                 :rows 7
+                 :inputProps {:required true}
+                 :value body
+                 :onChange change-body})
+              (when (= 1 (count parents))
+                (inputs/button {:size :small :variant :outlined
+                                :startIcon (dom/create-element FileCopy)
+                                :onClick #(comp/transact! this [(copy-parents-body nil)])}
+                  (i18n/tr "Copy details from parent")))
+              (dom/br {})
 
-                ;; Body
-                (inputs/textfield
-                  {:label (i18n/trc "Details of a proposal" "Description")
-                   :variant :filled
-                   :margin "normal"
-                   :fullWidth true
-                   :autoComplete "off"
-                   :multiline true
-                   :rows 7
-                   :inputProps {:required true}
-                   :value body
-                   :onChange change-body})
-                (when (= 1 (count parents))
-                  (inputs/button {:size :small :variant :outlined
-                                  :startIcon (dom/create-element FileCopy)
-                                  :onClick #(comp/transact! this [(copy-parents-body nil)])}
-                    (i18n/tr "Copy details from parent")))
-                (dom/br {})
-
-                (inputs/button
-                  {:color "primary"
-                   :variant "contained"
-                   :disabled error?
-                   :onClick #(comp/transact! this [(goto-step {:step :final})])}
-                  (i18n/trc "Go to the next part of the form" "Next")))))
+              (inputs/button
+                {:color "primary"
+                 :variant "contained"
+                 :disabled error?
+                 :onClick #(comp/transact! this [(goto-step {:step :final})])}
+                (i18n/trc "Go to the next part of the form" "Next"))))
           ;; endregion
 
-          (stepper/step {}
-            (stepper/step-button
-              {:onClick #(comp/transact! this [(goto-step {:step :final})])}
-              (i18n/trc "Last step in new proposal dialog" "Check and confirm"))
-            (stepper/step-content {}
-              (layout/box {:mb 2}
-                (section (str (i18n/trc "Title of a proposal" "Title") ":"))
-                (quoted-body title)
+          (form-step this {:step :final
+                           :label (i18n/trc "Last step in new proposal dialog" "Check and confirm")}
+            (layout/box {:mb 2}
+              (section (str (i18n/trc "Title of a proposal" "Title") ":"))
+              (quoted-body title)
 
-                (section (str (i18n/trc "Details of a proposal" "Details") ":"))
-                (quoted-body body)
+              (section (str (i18n/trc "Details of a proposal" "Details") ":"))
+              (quoted-body body)
 
-                (when-not (empty? parents)
-                  (comp/fragment
-                    (section
-                      (i18n/trf
-                        "Derived from {count} other proposals:"
-                        {:count (count parents)}))
-                    (list/list {:dense true :disablePadding true}
-                      (for [{::proposal/keys [nice-id title]} parents]
-                        (list/item {:key nice-id}
-                          (list/item-icon {} (dom/span (str "#" nice-id)))
-                          (list/item-text {} (str title))))))))
+              (when-not (empty? parents)
+                (comp/fragment
+                  (section
+                    (i18n/trf
+                      "Derived from {count} other proposals:"
+                      {:count (count parents)}))
+                  (list/list {:dense true :disablePadding true}
+                    (for [{::proposal/keys [nice-id title]} parents]
+                      (list/item {:key nice-id}
+                        (list/item-icon {} (dom/span (str "#" nice-id)))
+                        (list/item-text {} (str title))))))))
 
-              (inputs/button {:color "primary"
-                              :type "submit"
-                              :variant "contained"}
-                (i18n/trc "Submit form" "Submit"))))))
+            (inputs/button {:color "primary"
+                            :type "submit"
+                            :variant "contained"}
+              (i18n/trc "Submit form" "Submit")))))
 
 
       (dialog/actions {}
