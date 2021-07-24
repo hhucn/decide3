@@ -196,7 +196,7 @@
         [selected-layout set-selected-layout!] (hooks/use-state :favorite)
         sorted-proposals (hooks/use-memo #(proposal/rank-by selected-sort proposals) [selected-sort proposals])
         process-over? (and end-time (time/past? end-time))
-        >=-sm? (breakpoint/>=? "sm")]
+        large-ui? (breakpoint/>=? "sm")]
     (comp/fragment
       (layout/container {:maxWidth :xl}
 
@@ -226,7 +226,7 @@
               {:value selected-layout
                :onChange set-selected-layout!}
               (cond-> {:favorite ViewModule}
-                >=-sm? (assoc :hierarchy ViewList)))
+                large-ui? (assoc :hierarchy ViewList)))
 
             (grid/item {} (sort-selector selected-sort set-selected-sort!))))
 
@@ -234,13 +234,13 @@
         (error-boundaries/error-boundary
           (let [context {::process/slug slug
                          :process-over? process-over?
-                         :card-props {:variant (when >=-sm? :outlined)}}
+                         :card-props {:variant (when large-ui? :outlined)}}
                 list-options (merge
                                {:items (mapv #(comp/computed % context) sorted-proposals)}
                                context)]
             (case selected-layout
               :favorite
-              (grid/container {:spacing (if >=-sm? 2 1)
+              (grid/container {:spacing (if large-ui? 2 1)
                                :alignItems "stretch"
                                :style {:position "relative"}}
                 (if (and (#{"most-approvals"} selected-sort) (not (empty? sorted-proposals)))
