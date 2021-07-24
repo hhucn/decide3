@@ -166,6 +166,7 @@
                  :onChange #(set-temp-nickname (str/replace (evt/target-value %) #"\s" ""))
                  :label (i18n/trc "Temp Nickname for login" "Nickname")
                  :style {:color "inherit"}
+                 :InputLabelProps {:style {:color :inherit}}
                  :InputProps
                  {:style {:color :inherit
                           :border "1px solid rgba(255,255,255,0.77)"}
