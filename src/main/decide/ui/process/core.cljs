@@ -133,18 +133,14 @@
    (fn will-enter-ProcessContext [app {slug ::process/slug}]
      (let [ident (comp/get-ident ProcessContext {::process/slug slug})]
        (if (current-process-already-set? (app/current-state app) [::process/slug slug])
-         (do
-           (log/info 'ProcessContext ": Route immediate!")
-           (dr/route-immediate ident))
+         (dr/route-immediate ident)
          (dr/route-deferred ident
-           (fn []
-             (log/info 'ProcessContext ": Route deferred!")
-             (comp/transact! app [(init-process-context {:slug slug})
-                                  (set-current-process {:ident ident :slug slug})]
-               {:ref ident}))))))
+           #(comp/transact! app [(init-process-context {:slug slug})
+                                 (set-current-process {:ident ident :slug slug})]
+              {:ref ident})))))
    :use-hooks? true}
   (let [{::process/keys [slug]} current-process
-        show-new-proposal-dialog (hooks/use-callback #(comp/transact! this [(new-proposal/show {:slug slug})]))]
+        show-new-proposal-dialog (hooks/use-callback #(comp/transact! this [(new-proposal/show {:slug slug})]) [slug])]
     (comp/fragment
       (header-container
         (process.header/ui-process-header process-header)
