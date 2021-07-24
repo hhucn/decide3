@@ -32,7 +32,8 @@
     ["@material-ui/icons/Add" :default AddIcon]
     ["@material-ui/icons/Refresh" :default Refresh]
     ["@material-ui/icons/ViewList" :default ViewList]
-    ["@material-ui/icons/ViewModule" :default ViewModule]))
+    ["@material-ui/icons/ViewModule" :default ViewModule]
+    [taoensso.timbre :as log]))
 
 
 (defn add-proposal-fab [props]
@@ -194,7 +195,7 @@
         [selected-sort set-selected-sort!] (hooks/use-state "most-approvals")
         [selected-layout set-selected-layout!] (hooks/use-state :favorite)
         sorted-proposals (hooks/use-memo #(proposal/rank-by selected-sort proposals) [selected-sort proposals])
-        process-over? (hooks/use-memo #(boolean (some-> % end-time time/past?)) [end-time])
+        process-over? (and end-time (time/past? end-time))
         >=-sm? (breakpoint/>=? "sm")]
     (comp/fragment
       (layout/container {:maxWidth :xl}
