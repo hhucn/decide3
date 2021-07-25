@@ -33,9 +33,9 @@
 
 (defn ends-in-label [end-time]
   (let [ms-to-end (- end-time (js/Date.now))
-        days-to-end (max 0 (Math/floor (/ ms-to-end (* 1000 60 60 24))))
-        hours-to-end (max 0 (Math/floor (/ ms-to-end (* 1000 60 60))))
-        minutes-to-end (max 0 (Math/floor (/ ms-to-end (* 1000 60))))]
+        days-to-end (max 0 (Math/round (/ ms-to-end (* 1000 60 60 24))))
+        hours-to-end (max 0 (Math/round (/ ms-to-end (* 1000 60 60))))
+        minutes-to-end (max 0 (Math/round (/ ms-to-end (* 1000 60))))]
     (cond
       (pos? days-to-end) (i18n/trf "{days, plural, =1 {# day} other {# days}} left" {:days days-to-end})
       (pos? hours-to-end) (i18n/trf "{hours, plural, =1 {# hour} other {# hours}} left" {:hours hours-to-end})
