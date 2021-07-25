@@ -74,7 +74,8 @@
       (transitions/collapse {:in description-open?}
         (layout/box {:py 2 :clone true}
           (dd/typography {:variant :body1
-                          :style {:whiteSpace :pre-line}}
+                          :style {:whiteSpace :pre-line
+                                  :max-width "800px"}}
             description)))
       (grid/container {:spacing 1 :alignItems :center}
         (grid/item {:xs 12 :sm :auto}
