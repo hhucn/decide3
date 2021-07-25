@@ -93,5 +93,5 @@
     (nav-drawer/ui-navdrawer navdrawer)
     (login/ui-login-modal login-dialog)
 
-    (ui-wip-warning)
+    #_(ui-wip-warning)
     (ui-root-router root-router)))
