@@ -25,7 +25,6 @@
     [material-ui.layout :as layout]
     [material-ui.layout.grid :as grid]
     [material-ui.navigation.stepper :as stepper]
-    [decide.ui.components.dialog :as ui.dialog]
     ["@material-ui/icons/Add" :default Add]
     ["@material-ui/icons/Close" :default Close]
     ["@material-ui/icons/FileCopyOutlined" :default FileCopy]
