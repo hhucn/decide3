@@ -93,12 +93,11 @@
   {:query [::proposal/id
            {:child-relations (comp/get-query Relationship)}]
    :ident ::proposal/id}
-  (when-not (empty? child-relations)
-    (grid/item {:xs 12 :component "section"}
-      (section
-        (i18n/trf "This proposal was derived {count, plural,  =1 {one time} other {# times}}" {:count (count child-relations)})
-        (list/list {:dense false}
-          (map ui-relationship child-relations))))))
+  (grid/item {:xs 12 :component "section"}
+    (section
+      (i18n/trf "This proposal was derived {count, plural,  =1 {one time} other {# times}}" {:count (count child-relations)})
+      (list/list {:dense false}
+        (map ui-relationship child-relations)))))
 
 (def ui-children-section (comp/factory ChildrenSection {:keyfn ::proposal/id}))
 
@@ -256,6 +255,10 @@
              :post-mutation-params {:target ident}}))))}
   (let [{::process/keys [slug] :as process} current-process
         process-over? (process/over? process)
+        has-children? (seq (:child-relations children-section))
+        show-similar-section? (and (process/single-approve? process)
+                                (seq (:similar similar-section)))
+        show-right-side? (or has-children? show-similar-section?)
         show-add-dialog (hooks/use-callback
                           (fn [& idents]
                             (comp/transact! this
@@ -272,7 +275,8 @@
               ;; " Dieser Vorschlag basiert auf " (count parents) " weiteren Vorschlägen "
               (ui-small-parent-section parent-section))
 
-            (grid/container {:item true :xs 12 :lg 8
+            ;; Left side
+            (grid/container {:item true :xs 12 :lg (if show-right-side? 8 12)
                              :alignContent "flex-start"
                              :spacing 1}
 
@@ -297,9 +301,13 @@
               (grid/item {:xs 12 :component "section"}
                 (section (i18n/tr "Argumentation")
                   (argumentation.ui/ui-argument-list argumentation-section))))
-            (grid/item {:xs 12 :lg 4 :component "section"}
-              (ui-children-section children-section)
-              (when (seq (:similar similar-section))
-                (section (i18n/tr "Possible coalitions")
-                  (ui-similar-section similar-section {:show-add-dialog show-add-dialog
-                                                       :process-over? process-over?}))))))))))
+
+            ;; Right side
+            (when-not show-right-side?
+              (grid/item {:xs 12 :lg 4 :component "section"}
+                (when has-children?
+                  (ui-children-section children-section))
+                (when show-similar-section?
+                  (section (i18n/tr "Possible coalitions")
+                    (ui-similar-section similar-section {:show-add-dialog show-add-dialog
+                                                         :process-over? process-over?})))))))))))
