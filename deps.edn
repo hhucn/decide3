@@ -25,7 +25,7 @@
 
         buddy/buddy {:mvn/version "2.0.0"}
 
-        ring/ring-core {:mvn/version "1.9.3"}
+        ring/ring-core {:mvn/version "1.9.4"}
         ring/ring-defaults {:mvn/version "0.3.3"}
 
         com.draines/postal {:mvn/version "2.0.4"}
@@ -41,15 +41,15 @@
            ;; See https://github.com/clojure-emacs/cider-nrepl/blob/master/deps.edn for Emacs support
            :dev {:extra-paths ["src/test" "src/dev" "src/workspaces"]
                  :jvm-opts ["-XX:-OmitStackTraceInFastThrow"]
-                 :extra-deps {org.clojure/clojurescript {:mvn/version "1.10.866"}
-                              thheller/shadow-cljs {:mvn/version "2.15.1"}
+                 :extra-deps {org.clojure/clojurescript {:mvn/version "1.10.879"}
+                              thheller/shadow-cljs {:mvn/version "2.15.2"}
                               expound/expound {:mvn/version "0.8.9"}
                               fulcrologic/fulcro-spec {:mvn/version "3.1.12"}
                               binaryage/devtools {:mvn/version "1.0.3"}
                               com.github.awkay/workspaces {:mvn/version "1.0.3"}
                               org.clojure/tools.namespace {:mvn/version "1.1.0"}}}
 
-           :uberjar {:replace-deps {com.github.seancorfield/depstar {:mvn/version "2.1.253"}}
+           :uberjar {:replace-deps {com.github.seancorfield/depstar {:mvn/version "2.1.267"}}
                      :exec-fn hf.depstar/uberjar
                      :exec-args {:jar "decide.jar"
                                  :aot true
