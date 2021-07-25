@@ -6,6 +6,7 @@
     [datahike.api :as d]
     [decide.models.proposal :as proposal]
     [decide.models.proposal.database :as proposal.db]
+    [decide.models.process :as process]
     [decide.models.user :as user]))
 
 (defresolver resolve-proposal [{:keys [db]} input]
@@ -78,19 +79,23 @@
                            {:other-proposal [::proposal/id]}
                            :other-uniques
                            :sum-uniques]}]}
-  (let [own-approvers (proposal.db/get-pro-voting-users db [::proposal/id id])]
+  (let [proposal (proposal.db/get-entity db id)
+        process (get proposal ::process/_proposals)
+        own-approvers (proposal.db/get-pro-voting-users db [::proposal/id id])]
     {:similar
-     (for [other-proposal-id (proposal.db/get-proposals-with-shared-opinion db [::proposal/id id])
-           :let [other-approvers (proposal.db/get-pro-voting-users db [::proposal/id other-proposal-id])
-                 own-uniques (count (set/difference own-approvers other-approvers))
-                 common-uniques (count (set/intersection own-approvers other-approvers))
-                 other-uniques (count (set/difference other-approvers own-approvers))]]
-       {:own-proposal {::proposal/id id}
-        :own-uniques own-uniques
-        :common-uniques common-uniques
-        :other-uniques (count (set/difference other-approvers own-approvers))
-        :other-proposal {::proposal/id other-proposal-id}
-        :sum-uniques (+ own-uniques common-uniques other-uniques)})}))
+     (if (process/single-approve? process)
+       []
+       (for [other-proposal-id (proposal.db/get-proposals-with-shared-opinion db [::proposal/id id])
+             :let [other-approvers (proposal.db/get-pro-voting-users db [::proposal/id other-proposal-id])
+                   own-uniques (count (set/difference own-approvers other-approvers))
+                   common-uniques (count (set/intersection own-approvers other-approvers))
+                   other-uniques (count (set/difference other-approvers own-approvers))]]
+         {:own-proposal {::proposal/id id}
+          :own-uniques own-uniques
+          :common-uniques common-uniques
+          :other-uniques (count (set/difference other-approvers own-approvers))
+          :other-proposal {::proposal/id other-proposal-id}
+          :sum-uniques (+ own-uniques common-uniques other-uniques)}))}))
 
 (def full-api [resolve-proposal
                resolve-generation
