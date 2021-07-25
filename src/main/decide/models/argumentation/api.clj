@@ -15,13 +15,16 @@
                                     :statement/content]}
                 {:argument/conclusion [:statement/id
                                        :statement/content]}
-                {:author [::user/id]}]}
-  (d/pull db [:argument/id
-              :argument/type
-              {:argument/premise [:statement/id :statement/content]}
-              {:argument/conclusion [:statement/id :statement/content]}
-              {:author [::user/id]}]
-    [:argument/id id]))
+                {:author [::user/id]}
+                {:argument/author [::user/id]}]}
+  (let [argument (d/pull db [:argument/id
+                             :argument/type
+                             {:argument/premise [:statement/id :statement/content]}
+                             {:argument/conclusion [:statement/id :statement/content]}
+                             {:author [::user/id]}]
+                   [:argument/id id])
+        user (:author argument)]
+    (assoc argument :argument/author user)))
 
 (defresolver resolve-skip-statement [{:keys [db]} {:argument/keys [id]}]
   {::pc/output [{:argument/premise->arguments [:argument/id]}]}
