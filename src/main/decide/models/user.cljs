@@ -2,16 +2,14 @@
   (:require
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.application :as app]
-    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+    [com.fulcrologic.fulcro.raw.components :as rc]
     [goog.net.cookies]))
 
 (def sign-in `sign-in)
 (def sign-up `sign-up)
 
-(defsc User [_ _]
-  {:query [::id ::display-name]
-   :ident ::id})
+(def User (rc/nc [::id ::display-name] {:componentName ::User}))
 
 (defmutation sign-out [_]
   (action [{:keys [app state]}]
