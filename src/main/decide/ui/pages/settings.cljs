@@ -171,12 +171,14 @@
           (user.ui/ui-avatar avatar {:avatar-props {:style {:width "70px" :height "70px" :fontSize "3rem"}}}))
         (wide-textfield {:label (i18n/tr "Display name")
                          :value display-name
+                         :name :name
                          :error (= :invalid (user-info-validator props ::user/display-name))
                          :onChange #(m/set-string!! this ::user/display-name :event %)
                          :onBlur #(comp/transact! this [(fs/mark-complete! {:field ::user/display-name})])
                          :inputProps {:minLength 1}})
         (wide-textfield {:label (i18n/tr "Nickname")
                          :value (or nickname "")
+                         :name :username
                          :disabled true
                          :error (= :invalid (user-info-validator props :user/nickname))
                          :helperText (i18n/trc "Nickname" "Public, unique identifier")

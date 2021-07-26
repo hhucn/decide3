@@ -106,6 +106,7 @@
         (grid/item {:xs 12}
           (wide-textfield {:label (i18n/tr "Nickname")
                            :value email
+                           :name :username
                            :error (boolean email-error)
                            :helperText email-error
                            :autoFocus true
@@ -175,6 +176,7 @@
                                                            ::user/password password})]))}
         (grid/item {:xs 12}
           (wide-textfield {:label (i18n/tr "Nickname")
+                           :name :username
                            :error (boolean email-error)
                            :helperText email-error
                            :inputProps {:aria-label (i18n/tr "Nickname")

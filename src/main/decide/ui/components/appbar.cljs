@@ -160,6 +160,7 @@
                            (comp/transact! this [(login/sign-in #:decide.models.user{:email temp-nickname :password temp-nickname})]))}
               (inputs/textfield
                 {:variant :filled
+                 :name :username
                  :size :small
                  :required true
                  :value temp-nickname
