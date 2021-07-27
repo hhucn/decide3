@@ -122,7 +122,7 @@
            (comp/transact! this [(process.api/add-participant {::user/id (::user/id user)
                                                                ::process/slug slug})]))}))
     (grid/item {:xs 12}
-      (list/list {:style {:maxHeight "900px" :overflowY "auto"}}
+      (list/list {:style {:maxHeight "500px" :overflowY "auto"}}
         (mapv
           #(ui-participant %
              {:onRemove
