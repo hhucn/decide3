@@ -5,6 +5,7 @@
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.data-fetch :as df]
     [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [decide.models.argumentation.ui :as argumentation.ui]
@@ -230,6 +231,20 @@
   {:query [::process/slug ::process/end-time]
    :ident ::process/slug})
 
+(declare ProposalPage)
+
+(defmutation init-proposal-page [_]
+  (action [{:keys [app ref]}]
+    (df/load! app ref ProposalPage
+      {:without #{::proposal/positions}
+       :post-mutation `dr/target-ready
+       :post-mutation-params {:target ref}})
+    (df/load! app ref ProposalPage
+      {:focus [:>/argumentation-section]
+       :without #{:argument/premise->arguments}
+       :marker [:load-argument-section ref]})))
+
+
 (defsc ProposalPage
   [this {::proposal/keys [title body]
          :keys [ui/current-process]
@@ -250,9 +265,8 @@
      [app {::proposal/keys [id]}]
      (let [ident (comp/get-ident ProposalPage {::proposal/id (uuid id)})]
        (dr/route-deferred ident
-         #(df/load! app ident ProposalPage
-            {:post-mutation `dr/target-ready
-             :post-mutation-params {:target ident}}))))}
+         #(comp/transact! app [(init-proposal-page {})]
+            {:ref ident :only-refresh [ident]}))))}
   (let [{::process/keys [slug] :as process} current-process
         process-over? (process/over? process)
         has-children? (seq (:child-relations children-section))

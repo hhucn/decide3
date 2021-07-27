@@ -15,6 +15,7 @@
     [material-ui.data-display :as dd]
     [material-ui.data-display.list :as list]
     [material-ui.inputs :as inputs]
+    [material-ui.lab :refer [skeleton]]
     [material-ui.lab.toggle-button :as toggle]
     [material-ui.layout :as layout]
     [material-ui.layout.grid :as grid]
@@ -192,19 +193,23 @@
 
 (def ui-argument (comp/computed-factory Argument {:keyfn :argument/id}))
 
-(defsc ArgumentList [this {::proposal/keys [id positions]}]
+(defsc ArgumentList [this {::proposal/keys [id positions] :as props}]
   {:query [::proposal/id
-           {::proposal/positions (comp/get-query Argument)}]
+           {::proposal/positions (comp/get-query Argument)}
+           [df/marker-table '_]]
    :ident ::proposal/id
    :use-hooks? true}
-  (let [type-feature? true
+  (let [loading? (df/loading? (get-in props [df/marker-table [:load-argument-section (comp/get-ident this)]]))
+        empty-and-loading? (and (empty? positions) loading?)
+        type-feature? true
         [new-argument-open? set-new-argument-open!] (hooks/use-state false)]
     (grid/container
       {:spacing 1}
       (grid/item {:xs 12}
         (inputs/button
           {:onClick #(set-new-argument-open! (not new-argument-open?))
-           :disabled (not (comp/shared this :logged-in?))
+           :disabled (or (not (comp/shared this :logged-in?))
+                       empty-and-loading?)
            :startIcon (dom/create-element AddComment)}
           (i18n/tr "Add argument"))
         (transitions/collapse {:in new-argument-open?}
@@ -221,12 +226,17 @@
                        (-> {:argument/type (when-not (= :neutral type) type)}
                          argumentation/make-argument
                          (assoc :argument/premise statement))})])))})))
-      (map
-        (fn [position]
-          (grid/item {:key (:argument/id position)
-                      :xs 12}
-            (ui-argument position {:type-feature? type-feature?})))
-        positions))))
+      (if empty-and-loading?
+        (comp/fragment
+          (grid/item {:xs 12} (skeleton {:variant :rect :height "160px"}))
+          (grid/item {:xs 12} (skeleton {:variant :rect :height "160px"}))
+          (grid/item {:xs 12} (skeleton {:variant :rect :height "160px"})))
+        (mapv
+          (fn [position]
+            (grid/item {:key (:argument/id position)
+                        :xs 12}
+              (ui-argument position {:type-feature? type-feature?})))
+          positions)))))
 
 
 (def ui-argument-list (comp/factory ArgumentList {:keyfn ::proposal/id}))
