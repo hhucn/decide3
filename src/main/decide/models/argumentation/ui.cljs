@@ -134,20 +134,22 @@
                          (set-show-premises (not show-premises?)))
                        [this show-premises?])
         {:statement/keys [author content]} premise]
-    (layout/box {:clone true :borderRadius 0 :mr "-1px" :mb "-1px"}
+    (layout/box {:clone true :mr "-1px" :mb "-1px"}
       (surfaces/card {:variant :outlined
                       :elevation 0
+                      :square true
                       :component :article}
+
         (surfaces/card-header
-          {:subheader (user.ui/chip (set/rename-keys author {::user/display-name :user/display-name
-                                                             ::user/id :user/id}))
+          {:avatar (user.ui/chip (set/rename-keys author {::user/display-name :user/display-name
+                                                          ::user/id :user/id}))
            :action (inputs/icon-button {:size :small :onClick toggle-list!}
                      (if show-premises?
                        (dom/create-element ExpandLess)
                        (dom/create-element ExpandMore)))})
 
-        (layout/box {:clone true :ml 2}
-          (surfaces/card-content {}
+        (layout/box {:ml 3 :px 2 :py 0.5} ; TODO Scale this with viewport size?
+          (dd/typography {:variant :body2, :color :textPrimary}
             (type-indicator type)
             content))
 
