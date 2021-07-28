@@ -2,7 +2,6 @@
   (:require
     [clojure.string :as str]
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
-    [com.fulcrologic.fulcro.application :as app]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.data-fetch :as df]
     [com.fulcrologic.fulcro.dom :as dom]
@@ -15,6 +14,7 @@
     [decide.models.proposal :as proposal]
     [decide.ui.proposal.card :as proposal-card]
     [decide.ui.proposal.favorite-list :as favorite-list]
+    [decide.ui.proposal.lists.hierarchy :as hierarchy-list]
     [decide.ui.proposal.plain-list :as plain-list]
     [decide.utils.breakpoint :as breakpoint]
     [decide.utils.time :as time]
@@ -32,8 +32,7 @@
     ["@material-ui/icons/Add" :default AddIcon]
     ["@material-ui/icons/Refresh" :default Refresh]
     ["@material-ui/icons/ViewList" :default ViewList]
-    ["@material-ui/icons/ViewModule" :default ViewModule]
-    [taoensso.timbre :as log]))
+    ["@material-ui/icons/ViewModule" :default ViewModule]))
 
 
 (defn add-proposal-fab [props]
@@ -53,12 +52,6 @@
         (when extended?
           (layout/box {:ml 1}
             (i18n/tr "New proposal")))))))
-
-(defn empty-proposal-list-message []
-  (layout/box {:p 2 :mx "auto"}
-    (dd/typography {:align "center"
-                    :color "textSecondary"}
-      (i18n/tr "So far there are no arguments"))))
 
 (defn sort-selector [selected set-selected!]
   (form/control {:size :small}
@@ -92,26 +85,6 @@
         (navigation/menu-item {:key value :value value}
           (inputs/checkbox {:checked (contains? selected value)})
           (list/item-text {:primary label}))))))
-
-(defn hierarchy-list
-  [{:keys [items card-props]}]
-  (grid/container {:spacing 5}
-    (vec
-      (for [{id ::proposal/id :as proposal} items
-            :let [computed (comp/get-computed proposal)]]
-        (grid/container {:xs 12 :key id :style {:flexGrow 1} :item true :spacing 1}
-          (layout/box {:clone true}
-            (grid/item {:xs 12 :lg 4}
-              (proposal-card/ui-proposal-card proposal (assoc computed :elevation 10))))
-
-          (let [children (::proposal/children proposal)]
-            (grid/item {:xs 12 :lg 8}
-              (dd/typography {:variant :overline} (i18n/tr "Children"))
-              (grid/container {:item true :spacing 1 :direction :row}
-                (vec
-                  (for [proposal children]
-                    (grid/item {:xs 4 :key (::proposal/id proposal)}
-                      (proposal-card/ui-proposal-card proposal computed))))))))))))
 
 (defn new-proposal-card [{:keys [disabled? onClick]}]
   (inputs/button {:style {:height "100%"
@@ -162,14 +135,13 @@
            :without #{::process/proposals :>/favorite-list}
            :post-mutation-params {:target ref}})
         (df/load! app ref MainProposalList
-          {:focus [::process/slug ::process/proposals :>/favorite-list]
-           :marker ::loading-proposals
-           :parallel true})))))
+          {:focus [::process/slug ::process/proposals :>/favorite-list :>/hierarchy-list]
+           :marker ::loading-proposals})))))
 
 ; TODO This component has become way to big.
 ; TODO Add empty state.
 (defsc MainProposalList [this {::process/keys [slug proposals end-time no-of-participants no-of-proposals]
-                               :keys [root/current-session >/favorite-list process/features]
+                               :keys [root/current-session >/favorite-list >/hierarchy-list process/features]
                                :as props}
                          {:keys [show-new-proposal-dialog]}]
   {:query [::process/slug
@@ -180,6 +152,7 @@
            :process/features
 
            {:>/favorite-list (comp/get-query favorite-list/FavoriteList)}
+           {:>/hierarchy-list (comp/get-query hierarchy-list/HierarchyList)}
 
            [:root/current-session '_]
            [df/marker-table ::loading-proposals]]
@@ -254,7 +227,7 @@
                                         :onClick show-new-proposal-dialog}))))
 
               :hierarchy
-              (hierarchy-list list-options)))))
+              (hierarchy-list/ui-hierarchy-list hierarchy-list)))))
 
       ; fab
       (when-not process-over?
