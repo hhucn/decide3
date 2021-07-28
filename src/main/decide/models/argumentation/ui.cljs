@@ -143,7 +143,10 @@
         (surfaces/card-header
           {:avatar (user.ui/chip (set/rename-keys author {::user/display-name :user/display-name
                                                           ::user/id :user/id}))
-           :action (inputs/icon-button {:size :small :onClick toggle-list!}
+           :action (inputs/icon-button
+                     {:size :small
+                      :onClick toggle-list!
+                      :disabled (zero? no-of-arguments)}
                      (if show-premises?
                        (dom/create-element ExpandLess)
                        (dom/create-element ExpandMore)))})
