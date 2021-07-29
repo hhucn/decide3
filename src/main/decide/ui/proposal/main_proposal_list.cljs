@@ -227,7 +227,8 @@
                                         :onClick show-new-proposal-dialog}))))
 
               :hierarchy
-              (hierarchy-list/ui-hierarchy-list hierarchy-list)))))
+              (hierarchy-list/ui-hierarchy-list hierarchy-list {:process-over? process-over?
+                                                                :sort-order (keyword selected-sort)})))))
 
       ; fab
       (when-not process-over?
