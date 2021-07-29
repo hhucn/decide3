@@ -2,10 +2,12 @@
   (:require
     [clojure.set :as set]
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
+    [com.fulcrologic.fulcro.algorithms.merge :as mrg]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.data-fetch :as df]
     [com.fulcrologic.fulcro.dom :as dom]
     [com.fulcrologic.fulcro.dom.events :as evt]
+    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [decide.models.argumentation :as argumentation]
     [decide.models.argumentation.api :as argumentation.api]
@@ -27,8 +29,7 @@
     ["@material-ui/icons/Close" :default Close]
     ["@material-ui/icons/AddCircleOutline" :default AddCircleOutline]
     ["@material-ui/icons/Comment" :default Comment]
-    ["@material-ui/icons/AddComment" :default AddComment]
-    [taoensso.timbre :as log]))
+    ["@material-ui/icons/AddComment" :default AddComment]))
 
 (defsc StatementAuthor [_ {::user/keys [display-name]}]
   {:query [::user/id ::user/display-name]
@@ -103,6 +104,70 @@
                         :startIcon (dom/create-element Send)}
           (i18n/tr "Add"))
         (inputs/button {:onClick close!} (i18n/tr "Cancel"))))))
+
+(defsc NewArgumentFormCard [this {:keys [new-argument attitude]} {:keys [onSave onClose use-type?]}]
+  {:query [:belongs-to :new-argument :attitude]
+   :ident [::NewArgumentForm :belongs-to]
+   :initial-state
+   {:belongs-to :param/belongs-to
+    :new-argument ""
+    :attitude :neutral}}
+  (surfaces/card
+    {:component :form
+     :onSubmit
+     (fn [e]
+       (evt/prevent-default! e)
+       (onSave new-argument attitude)
+       (onClose)
+       (comp/transact! this [(m/set-props {:new-argument "", :attitude :neutral})] {:compressible? true}))}
+
+    (surfaces/card-content {}
+      (grid/container
+        {:spacing 1}
+
+        (grid/item {:xs 12}
+          (inputs/textfield
+            {:type :text
+             :label (i18n/tr "Argument")
+             :fullWidth true
+             :color :secondary
+             :multiline true
+             :autoFocus true
+             :variant :filled
+             :value new-argument
+             :onKeyDown #(when (evt/escape? %) (onClose))
+             :onChange #(m/set-string!! this :new-argument :event %)
+             :inputProps {:required true}}))
+
+        (when use-type?
+          (grid/item {:xs 12 :sm :auto}
+            (dd/typography {:component :legend
+                            :variant :caption
+                            :color :textSecondary}
+              (i18n/tr "What is the attitude of this argument?"))
+            (toggle/button-group
+              {:size :small
+               :exclusive true
+               :value (name attitude)
+               :onChange #(some->> %2 keyword (m/set-value!! this :attitude))}
+              (for [type [:pro :neutral :contra]]
+                (toggle/button {:key type :value type} (type-label type))))))))
+    (surfaces/card-actions {}
+      (inputs/button {:type :submit,
+                      :variant :contained
+                      :color :secondary,
+                      :startIcon (dom/create-element Send)}
+        (i18n/tr "Add"))
+      (inputs/button {:onClick onClose} (i18n/tr "Cancel")))))
+
+(def ui-new-argument-form-card (comp/computed-factory NewArgumentFormCard {:keyfn :form/id}))
+
+(defmutation init-new-argument-form [{:keys [belongs-to]}]
+  (action [{:keys [state ref]}]
+    (swap! state mrg/merge-component
+      NewArgumentFormCard
+      (comp/get-initial-state NewArgumentFormCard {:belongs-to belongs-to})
+      :replace (conj ref :ui/new-argument-form))))
 
 (declare ui-argument)
 
@@ -198,9 +263,19 @@
 
 (def ui-argument (comp/computed-factory Argument {:keyfn :argument/id}))
 
-(defsc ArgumentList [this {::proposal/keys [id positions] :as props}]
+(def ui-argument-list-placeholder
+  (comp/fragment
+    (grid/item {:xs 12} (skeleton {:variant :rect :height "160px"}))
+    (grid/item {:xs 12} (skeleton {:variant :rect :height "160px"}))
+    (grid/item {:xs 12} (skeleton {:variant :rect :height "160px"}))))
+
+
+(defsc ArgumentList [this {::proposal/keys [id positions]
+                           :keys [ui/new-argument-form]
+                           :as props}]
   {:query [::proposal/id
            {::proposal/positions (comp/get-query Argument)}
+           {:ui/new-argument-form (comp/get-query NewArgumentFormCard)}
            [df/marker-table '_]]
    :ident ::proposal/id
    :use-hooks? true}
@@ -212,30 +287,31 @@
       {:spacing 1}
       (grid/item {:xs 12}
         (inputs/button
-          {:onClick #(set-new-argument-open! (not new-argument-open?))
+          {:onClick (fn []
+                      (when (not new-argument-open?)        ; about to open?
+                        (comp/transact! this [(init-new-argument-form {:belongs-to [::proposal/id id]})]))
+                      (set-new-argument-open! (not new-argument-open?)))
            :disabled (or (not (comp/shared this :logged-in?))
                        empty-and-loading?)
            :startIcon (dom/create-element AddComment)}
           (i18n/tr "Add argument"))
-        (transitions/collapse {:in new-argument-open?}
-          (new-argument-ui
-            {:use-type? type-feature?
-             :close! #(set-new-argument-open! false)
-             :save!
-             (fn [text type]
-               (let [statement (argumentation/make-statement {:statement/content text})]
-                 (comp/transact! this
-                   [(argumentation.api/add-argument-to-proposal
-                      {:proposal {::proposal/id id}
-                       :argument
-                       (-> {:argument/type (when-not (= :neutral type) type)}
-                         argumentation/make-argument
-                         (assoc :argument/premise statement))})])))})))
+        (transitions/collapse {:in (and new-argument-open? new-argument-form)}
+          (when new-argument-form
+            (ui-new-argument-form-card new-argument-form
+              {:use-type? type-feature?
+               :onClose #(set-new-argument-open! false)
+               :onSave
+               (fn [text type]
+                 (let [statement (argumentation/make-statement {:statement/content text})]
+                   (comp/transact! this
+                     [(argumentation.api/add-argument-to-proposal
+                        {:proposal {::proposal/id id}
+                         :argument
+                         (-> {:argument/type (when-not (= :neutral type) type)}
+                           argumentation/make-argument
+                           (assoc :argument/premise statement))})])))}))))
       (if empty-and-loading?
-        (comp/fragment
-          (grid/item {:xs 12} (skeleton {:variant :rect :height "160px"}))
-          (grid/item {:xs 12} (skeleton {:variant :rect :height "160px"}))
-          (grid/item {:xs 12} (skeleton {:variant :rect :height "160px"})))
+        ui-argument-list-placeholder
         (mapv
           (fn [position]
             (grid/item {:key (:argument/id position)
