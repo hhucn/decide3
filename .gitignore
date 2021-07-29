@@ -208,5 +208,5 @@ js/
 .shadow-cljs/
 *.css
 report.html
-
+.lsp/
 dev-db/

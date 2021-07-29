@@ -15,8 +15,6 @@
            ghostwheel.core/>defn                                      clojure.core/defn
            ghostwheel.core/>defn-                                     clojure.core/defn-
            nubank.workspaces.core/defcard                             clojure.core/def
-           com.wsscode.pathom.connect/defresolver                     clojure.core/defn
-           com.wsscode.pathom.connect/defmutation                     clojure.core/defn
            com.fulcrologic.fulcro.ui-state-machines/defstatemachine   clojure.core/def
            com.fulcrologic.fulcro.algorithms.normalized-state/swap!-> clojure.core/->}
  :linters {:misplaced-docstring {:level :error}
