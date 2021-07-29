@@ -54,57 +54,6 @@
     :contra (i18n/trc "Argument type" "Contra")
     (i18n/trc "Argument type" "Neutral")))
 
-(defn new-argument-ui [{:keys [save! close! use-type?] :or {use-type? false}}]
-  (let [[new-argument set-new-argument] (hooks/use-state "")
-        [attitude set-attitude] (hooks/use-state :neutral)]
-    (surfaces/card
-      {:component :form
-       :onSubmit
-       (fn [e]
-         (evt/prevent-default! e)
-         (save! new-argument attitude)
-         (close!)
-         (set-new-argument ""))}
-
-      (surfaces/card-content {}
-        (grid/container
-          {:spacing 1}
-
-          (grid/item {:xs 12}
-            (inputs/textfield
-              {:type :text
-               :label (i18n/tr "Argument")
-               :fullWidth true
-               :color :secondary
-               :multiline true
-               :autoFocus true
-               :variant :filled
-               :value new-argument
-               :onKeyDown #(when (evt/escape? %) (close!))
-               :onChange #(set-new-argument (evt/target-value %))
-               :inputProps {:required true}}))
-
-          (when use-type?
-            (grid/item {:xs 12 :sm :auto}
-              (dd/typography {:component :legend
-                              :variant :caption
-                              :color :textSecondary}
-                (i18n/tr "What is the attitude of this argument?"))
-              (toggle/button-group
-                {:size :small
-                 :exclusive true
-                 :value (name attitude)
-                 :onChange #(some->> %2 keyword set-attitude)}
-                (for [type [:pro :neutral :contra]]
-                  (toggle/button {:key type :value type} (type-label type))))))))
-      (surfaces/card-actions {}
-        (inputs/button {:type :submit,
-                        :variant :contained
-                        :color :secondary,
-                        :startIcon (dom/create-element Send)}
-          (i18n/tr "Add"))
-        (inputs/button {:onClick close!} (i18n/tr "Cancel"))))))
-
 (defsc NewArgumentFormCard [this {:keys [new-argument attitude]} {:keys [onSave onClose use-type?]}]
   {:query [:belongs-to :new-argument :attitude]
    :ident [::NewArgumentForm :belongs-to]
@@ -119,7 +68,7 @@
        (evt/prevent-default! e)
        (onSave new-argument attitude)
        (onClose)
-       (comp/transact! this [(m/set-props {:new-argument "", :attitude :neutral})] {:compressible? true}))}
+       (comp/transact!! this [(m/set-props {:new-argument "", :attitude :neutral})] {:compressible? true}))}
 
     (surfaces/card-content {}
       (grid/container
@@ -182,13 +131,15 @@
                          :default)}))))
 
 
-(defsc Argument [this {:argument/keys [type premise premise->arguments no-of-arguments]}
+(defsc Argument [this {:argument/keys [id type premise premise->arguments no-of-arguments]
+                       :keys [ui/new-argument-form]}
                  {:keys [type-feature?]}]
   {:query [:argument/id
            :argument/type
            {:argument/premise (comp/get-query Statement)}
            {:argument/premise->arguments '...}
-           :argument/no-of-arguments]
+           :argument/no-of-arguments
+           {:ui/new-argument-form (comp/get-query NewArgumentFormCard)}]
    :ident :argument/id
    :use-hooks? true}
   (let [[show-premises? set-show-premises] (hooks/use-state false)
@@ -217,7 +168,7 @@
                        (dom/create-element ExpandMore)))})
 
         (layout/box {:ml 3 :px 2 :py 0.5} ; TODO Scale this with viewport size?
-          (dd/typography {:variant :body2, :color :textPrimary}
+          (dd/typography {:variant :body2, :color :textPrimary, :component :span}
             (type-indicator type)
             content))
 
@@ -232,25 +183,29 @@
              :arrow true}
             (dom/span {}
               (inputs/button
-                {:onClick #(set-new-argument-open (not new-argument-open?))
+                {:onClick (fn []
+                            (when (not new-argument-open?)  ; about to open?
+                              (comp/transact! this [(init-new-argument-form {:belongs-to [:argument/id id]})]))
+                            (set-new-argument-open (not new-argument-open?)))
                  :size :small
                  :disabled (not (comp/shared this :logged-in?))
                  :startIcon (dom/create-element AddComment)}
                 (i18n/tr "Add argument")))))
-        (transitions/collapse {:in new-argument-open?}
-          (surfaces/card-content {}
-            (new-argument-ui
-              {:use-type? type-feature?
-               :close! #(set-new-argument-open false)
-               :save! (fn [statement-str type]
-                        (let [new-statement (argumentation/make-statement {:statement/content statement-str})]
-                          (comp/transact! this
-                            [(argumentation.api/add-argument-to-statement
-                               {:conclusion premise
-                                :argument
-                                (-> {:argument/type (when-not (= :neutral type) type)}
-                                  argumentation/make-argument
-                                  (assoc :argument/premise new-statement))})])))})))
+        (transitions/collapse {:in (and new-argument-open? new-argument-form)}
+          (when new-argument-form
+            (surfaces/card-content {}
+              (ui-new-argument-form-card new-argument-form
+                {:use-type? type-feature?
+                 :onClose #(set-new-argument-open false)
+                 :onSave (fn [statement-str type]
+                           (let [new-statement (argumentation/make-statement {:statement/content statement-str})]
+                             (comp/transact! this
+                               [(argumentation.api/add-argument-to-statement
+                                  {:conclusion premise
+                                   :argument
+                                   (-> {:argument/type (when-not (= :neutral type) type)}
+                                     argumentation/make-argument
+                                     (assoc :argument/premise new-statement))})])))}))))
         (when (seq premise->arguments)
           (transitions/collapse {:in show-premises?}
             (layout/box {:ml 1}
