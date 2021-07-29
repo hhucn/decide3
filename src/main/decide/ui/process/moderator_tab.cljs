@@ -111,10 +111,7 @@
   {:query [::process/slug ::process/title ::process/description ::process/start-time ::process/end-time ::process/type :process/features]
    :ident ::process/slug
    :use-hooks? true}
-  (let [[mod-title change-title] (hooks/use-state title)
-        [mod-description change-description] (hooks/use-state description)
-        [mod-type set-type] (hooks/use-state type)
-        [form-state set-form-state] (hooks/use-state props)
+  (let [[form-state set-form-state] (hooks/use-state props)
         dirty? (not= form-state props)]
     (accordion {:title (i18n/tr "Edit process")}
       (grid/container
@@ -126,47 +123,35 @@
            (when dirty?
              (comp/transact! this [(process.mutations/update-process
                                      ;; calculate diff ;; NOTE have a look at clojure.data/diff
-                                     (cond->
-                                       (merge (dissoc-equal-vals form-state props) {::process/slug slug})
+                                     (merge (dissoc-equal-vals form-state props) {::process/slug slug}))])))}
 
-                                       (not= mod-title title)
-                                       (assoc ::process/title mod-title)
-
-                                       (not= mod-description description)
-                                       (assoc ::process/description mod-description)
-
-                                       (not= mod-type type)
-                                       (assoc ::process/type mod-type)
-
-                                       #_#_(not= (when with-end? mod-end-time) end-time)
-                                           (assoc ::process/end-time (when with-end? mod-end-time))))])))}
         (grid/item {:xs 12}
           (inputs/textfield
             (merge default-input-props
               {:label (i18n/trc "Title of a process" "Title")
-               :value mod-title
-               :helperText (when (not= title mod-title) (i18n/tr "Edit"))
-               :onChange #(change-title (evt/target-value %))
+               :value (::process/title form-state)
+               :helperText (when (not= title (::process/title form-state)) (i18n/tr "Edited"))
+               :onChange #(set-form-state (assoc form-state ::process/title (evt/target-value %)))
                :inputProps {:maxLength 140}})))
 
         (grid/item {:xs 12}
           (inputs/textfield
             (merge default-input-props
               {:label (i18n/trc "Description of a process" "Description")
-               :helperText (when (not= description mod-description) (i18n/tr "Edit"))
+               :helperText (when (not= description (::process/description form-state)) (i18n/tr "Edited"))
                :multiline true
                :rows 7
-               :value mod-description
-               :onChange #(change-description (evt/target-value %))})))
+               :value (::process/description form-state)
+               :onChange #(set-form-state (assoc form-state ::process/description (evt/target-value %)))})))
 
         (grid/item {:xs 12}
           (form/group {:row true}
-            (form/control-label
-              {:label (i18n/tr "Is the process public?")
-               :control
-               (inputs/switch
-                 {:checked (= mod-type ::process/type.public)
-                  :onChange #(set-type (if (= mod-type ::process/type.public) ::process/type.private ::process/type.public))})})))
+            (let [current-type (::process/type form-state)]
+              (form/control-label
+                {:label (i18n/tr "Is the process public?")
+                 :checked (= current-type ::process/type.public)
+                 :onChange #(set-form-state (assoc form-state ::process/type (if (= current-type ::process/type.public) ::process/type.private ::process/type.public)))
+                 :control (inputs/checkbox {})}))))
 
         (grid/container {:item true :xs 12 :spacing 2}
           (grid/item {:xs 12 :sm 6}
