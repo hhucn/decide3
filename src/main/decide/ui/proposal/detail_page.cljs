@@ -19,9 +19,7 @@
     [material-ui.inputs :as inputs]
     [material-ui.layout :as layout]
     [material-ui.layout.grid :as grid]
-    [material-ui.surfaces :as surfaces]
-    ["@material-ui/core/LinearProgress" :default LinearProgress]
-    ["@material-ui/core/styles" :refer [withStyles useTheme]]))
+    [material-ui.surfaces :as surfaces]))
 
 (declare ProposalPage)
 
@@ -31,19 +29,6 @@
     children))
 
 ;; region Opinion section
-(defn percent-of-pro-votes [pro-votes con-votes]
-  (if (zero? pro-votes)
-    0
-    (* 100 (/ pro-votes (+ pro-votes con-votes)))))
-
-(def vote-linear-progress
-  (interop/react-factory
-    ((withStyles
-       (fn [theme]
-         (clj->js {:barColorPrimary {:backgroundColor (.. theme -palette -success -main)}
-                   :colorPrimary {:backgroundColor (.. theme -palette -error -main)}})))
-     LinearProgress)))
-
 (defsc OpinionSection [this {::proposal/keys [id pro-votes my-opinion]
                              :or {pro-votes 0
                                   my-opinion 0}}]
