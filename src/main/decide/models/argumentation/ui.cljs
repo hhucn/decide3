@@ -270,15 +270,19 @@
     (grid/container
       {:spacing 1}
       (grid/item {:xs 12}
-        (inputs/button
-          {:onClick (fn []
-                      (when (not new-argument-open?)        ; about to open?
-                        (comp/transact! this [(init-new-argument-form {:belongs-to [::proposal/id id]})]))
-                      (set-new-argument-open! (not new-argument-open?)))
-           :disabled (or (not (comp/shared this :logged-in?))
-                       empty-and-loading?)
-           :startIcon (dom/create-element AddComment)}
-          (i18n/tr "Add argument"))
+        (surfaces/toolbar {:variant :dense, :disableGutters true, :style {:justifyContent :space-between}}
+          (dom/div {}
+            (inputs/button
+              {:variant :outlined
+               :onClick (fn []
+                          (when (not new-argument-open?)    ; about to open?
+                            (comp/transact! this [(init-new-argument-form {:belongs-to [::proposal/id id]})]))
+                          (set-new-argument-open! (not new-argument-open?)))
+               :disabled (or (not (comp/shared this :logged-in?))
+                           empty-and-loading?)
+               :startIcon (dom/create-element AddComment)}
+              (i18n/tr "Add argument")))
+          (dom/div {}))
         (transitions/collapse {:in (and new-argument-open? new-argument-form)}
           (when new-argument-form
             (ui-new-argument-form-card new-argument-form
