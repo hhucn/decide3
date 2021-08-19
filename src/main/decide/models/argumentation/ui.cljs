@@ -59,8 +59,9 @@
            :statement/content
            {:statement/author (comp/get-query user/User)}]
    :ident :statement/id}
-  (list/item-text {:primary content
-                   :secondary (when author (ui-statement-author author))}))
+  content
+  #_(list/item-text {:primary content
+                     :secondary (when author (ui-statement-author author))}))
 
 (def ui-statement (comp/factory Statement {:keyfn :statement/id}))
 
@@ -147,13 +148,20 @@
 
 (defn argument-header [{:keys [author onClick show-premises?]}]
   (surfaces/card-header
-    {:avatar (user.ui/chip (set/rename-keys author {::user/display-name :user/display-name
-                                                    ::user/id :user/id}))
+    {:avatar (layout/box {:clone true :color "text.secondary"}
+               (user.ui/chip (set/rename-keys author {::user/display-name :user/display-name
+                                                      ::user/id :user/id})))
      :action (inputs/icon-button
                {:size :small
                 :onClick onClick
                 :disabled (nil? onClick)}
                (dom/create-element (if show-premises? ExpandLess ExpandMore)))}))
+
+(defn argument-content [{:argument/keys [type premise]}]
+  (layout/box {:ml 3 :px 2 :py 0.5}                         ; TODO Scale this with viewport size?
+    (dd/typography {:variant :body2, :color :textPrimary, :component :span}
+      (type-indicator type)
+      (ui-statement premise))))
 
 (declare ui-argument)
 
@@ -184,70 +192,64 @@
                               :abort-id [::argument-premises id]})))
                        (set-show-premises (not show-premises?)))
 
-        {:statement/keys [author content]} premise]
-    (layout/box {:clone true :mr "-1px" :mb "-1px"}
-      (surfaces/card {:variant :outlined
-                      :elevation 0
-                      :square true
-                      :component :article}
+        {:statement/keys [author]} premise]
+    (surfaces/card {:variant :outlined
+                    :component :article}
 
-        (argument-header {:argument props
-                          :author author
-                          :show-premises? show-premises?
-                          :onClick (when (pos? no-of-arguments) toggle-list!)})
+      (argument-header {:argument props
+                        :author author
+                        :show-premises? show-premises?
+                        :onClick (when (pos? no-of-arguments) toggle-list!)})
 
-        (layout/box {:ml 3 :px 2 :py 0.5}                   ; TODO Scale this with viewport size?
-          (dd/typography {:variant :body2, :color :textPrimary, :component :span}
-            (type-indicator type)
-            content))
+      (argument-content props)
 
-        (surfaces/card-actions {}
-          (inputs/button
-            {:size :small
-             :startIcon (dom/create-element Comment)
-             :onClick toggle-list!}
-            (str no-of-arguments))
-          (dd/tooltip
-            {:title (if (comp/shared this :logged-in?) "" (i18n/tr "Login to add argument"))
-             :arrow true}
-            (dom/span {}
-              (inputs/button
-                {:onClick (fn []
-                            (when (not new-argument-open?)  ; about to open?
-                              (comp/transact! this [(init-new-argument-form {:belongs-to [:argument/id id]})]))
-                            (set-new-argument-open (not new-argument-open?)))
-                 :size :small
-                 :disabled (not (comp/shared this :logged-in?))
-                 :startIcon (dom/create-element AddComment)}
-                (i18n/tr "Add argument")))))
+      (surfaces/card-actions {}
+        (inputs/button
+          {:size :small
+           :startIcon (dom/create-element Comment)
+           :onClick toggle-list!}
+          (str no-of-arguments))
+        (dd/tooltip
+          {:title (if (comp/shared this :logged-in?) "" (i18n/tr "Login to add argument"))
+           :arrow true}
+          (dom/span {}
+            (inputs/button
+              {:onClick (fn []
+                          (when (not new-argument-open?)    ; about to open?
+                            (comp/transact! this [(init-new-argument-form {:belongs-to [:argument/id id]})]))
+                          (set-new-argument-open (not new-argument-open?)))
+               :size :small
+               :disabled (not (comp/shared this :logged-in?))
+               :startIcon (dom/create-element AddComment)}
+              (i18n/tr "Add argument")))))
 
-        (transitions/collapse {:in (and new-argument-open? new-argument-form)}
-          (when new-argument-form
-            (surfaces/card-content {}
-              (ui-new-argument-form-card new-argument-form
-                {:use-type? type-feature?
-                 :onClose #(set-new-argument-open false)
-                 :onSave (fn [statement-str type]
-                           (let [new-statement (argumentation/make-statement {:statement/content statement-str})]
-                             (comp/transact! this
-                               [(argumentation.api/add-argument-to-statement
-                                  {:conclusion premise
-                                   :argument
-                                   (-> {:argument/type (when-not (= :neutral type) type)}
-                                     argumentation/make-argument
-                                     (assoc :argument/premise new-statement))})])))}))))
+      (transitions/collapse {:in (and new-argument-open? new-argument-form)}
+        (when new-argument-form
+          (surfaces/card-content {}
+            (ui-new-argument-form-card new-argument-form
+              {:use-type? type-feature?
+               :onClose #(set-new-argument-open false)
+               :onSave (fn [statement-str type]
+                         (let [new-statement (argumentation/make-statement {:statement/content statement-str})]
+                           (comp/transact! this
+                             [(argumentation.api/add-argument-to-statement
+                                {:conclusion premise
+                                 :argument
+                                 (-> {:argument/type (when-not (= :neutral type) type)}
+                                   argumentation/make-argument
+                                   (assoc :argument/premise new-statement))})])))}))))
 
-        (transitions/collapse {:in show-premises?
-                               :mountOnEnter true}
-          (layout/box {:ml 1}
-            (grid/container {:spacing 1 :direction :column}
-              (if (and loading? (empty? premise->arguments))
-                (ui-argument-list-placeholder {:n (min no-of-arguments 3)})
-                (mapv
-                  (fn [argument]
-                    (grid/item {:key (:argument/id argument)}
-                      (ui-argument argument {:type-feature? type-feature?})))
-                  premise->arguments)))))))))
+      (transitions/collapse {:in show-premises?
+                             :mountOnEnter true}
+        (layout/box {:ml 1}
+          (grid/container {:spacing 1 :direction :column}
+            (if (and loading? (empty? premise->arguments))
+              (ui-argument-list-placeholder {:n (min no-of-arguments 3)})
+              (mapv
+                (fn [argument]
+                  (grid/item {:key (:argument/id argument)}
+                    (ui-argument argument {:type-feature? type-feature?})))
+                premise->arguments))))))))
 
 (def ui-argument (comp/computed-factory Argument {:keyfn :argument/id}))
 
