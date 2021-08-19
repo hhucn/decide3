@@ -29,7 +29,7 @@
 
 (defn- accordion [{:keys [title]} body]
   (surfaces/accordion {:defaultExpanded true}
-    (surfaces/accordion-panel-summary {:expandIcon (layout/box {:component ExpandMoreIcon})}
+    (surfaces/accordion-panel-summary {:expandIcon (dom/create-element ExpandMoreIcon)}
       (dd/typography {:variant "body1"} title))
     (surfaces/accordion-panel-details {} body)))
 

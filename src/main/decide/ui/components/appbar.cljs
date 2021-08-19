@@ -137,7 +137,7 @@
              :color :inherit
              :aria-label (i18n/trc "[aria] navigation menu" "navigation menu")
              :onClick menu-onClick}
-            (layout/box {:component Menu})))
+            (dom/create-element Menu)))
         (dd/typography
           {:component :span
            :variant :h5
@@ -190,7 +190,7 @@
                  :aria-haspopup true
                  :onClick #(m/set-value! this :ui/account-menu-open? true)
                  :color "inherit"}
-                (layout/box {:component AccountCircleIcon}))
+                (dom/create-element AccountCircleIcon))
 
               (layout/box {:p 1}
                 (dd/typography {:color :inherit} display-name))
@@ -199,7 +199,6 @@
                 {:keepMounted true
                  :id "menuId"
                  :anchorEl (.-current menu-ref)
-                 :getContentAnchorEl nil
                  :anchorOrigin {:vertical "bottom"
                                 :horizontal "left"}
                  :transformOrigin {:vertical "top"
