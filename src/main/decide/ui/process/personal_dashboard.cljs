@@ -22,8 +22,8 @@
     [com.fulcrologic.fulcro.dom :as dom]
     [material-ui.data-display :as dd]))
 
-(defsc ProposalListItem [this {::proposal/keys [id nice-id title pro-votes my-opinion]} {:keys [compact?] :or {compact? false}}]
-  {:query [::proposal/id ::proposal/title ::proposal/nice-id ::proposal/created ::proposal/pro-votes ::proposal/my-opinion]
+(defsc ProposalListItem [this {::proposal/keys [id nice-id title pro-votes my-opinion-value]} {:keys [compact?] :or {compact? false}}]
+  {:query [::proposal/id ::proposal/title ::proposal/nice-id ::proposal/created ::proposal/pro-votes ::proposal/my-opinion-value]
    :ident ::proposal/id}
   (list/item {:href (str "proposal/" id)
               :component :a
@@ -33,7 +33,7 @@
       {:primary title
        :secondary (when-not compact? (i18n/trf "Approvals {pros}" {:pros pro-votes}))})
     (list/item-secondary-action {}
-      (let [approved? (pos? my-opinion)]
+      (let [approved? (pos? my-opinion-value)]
         (inputs/icon-button
           {:aria-label
            (if approved?

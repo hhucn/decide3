@@ -16,19 +16,19 @@
            (= (::user/id user) (-> opinion ::opinion/user second)))
          %))))
 
-(defn set* [{::proposal/keys [my-opinion pro-votes] :as proposal} new-opinion]
+(defn set* [{::proposal/keys [my-opinion-value pro-votes] :as proposal} new-opinion]
   (-> proposal
     (assoc
-      ::proposal/my-opinion new-opinion
-      ::proposal/pro-votes (+ pro-votes (- new-opinion my-opinion)))
+      ::proposal/my-opinion-value new-opinion
+      ::proposal/pro-votes (+ pro-votes (- new-opinion my-opinion-value)))
     #_(update ::proposal/opinions add-opinion {::opinion/value new-opinion
                                                ::opinion/user [::user/id user-id]})))
 
 (defn set-opinion [proposal opinion]
-  (let [old-value (::proposal/my-opinion proposal)
+  (let [old-value (::proposal/my-opinion-value proposal)
         new-value (::opinion/value opinion)]
     (-> proposal
-      (assoc ::proposal/my-opinion (::opinion/value opinion))
+      (assoc ::proposal/my-opinion-value (::opinion/value opinion))
       (update ::proposal/pro-votes #(-> % (- (max 0 old-value)) (+ (max 0 new-value))))
       (update ::proposal/con-votes #(-> % (- (min 0 old-value)) (+ (min 0 new-value))))
 
@@ -36,7 +36,7 @@
       (remove-opinion-of-user (::opinion/user opinion))
       (update ::proposal/opinions conj (update opinion ::opinion/user #(find % ::user/id))))))  ; manual ident.. :-/
 
-(defn- neutralize-proposal [{::proposal/keys [my-opinion] :as proposal} user-id]
+(defn- neutralize-proposal [{::proposal/keys [my-opinion-value] :as proposal} user-id]
   (set-opinion proposal {::opinion/value 0
                          ::opinion/user {::user/id user-id}}))
 
@@ -48,7 +48,7 @@
       state proposal-idents)))
 
 {::proposal/id {42 {::proposal/id 42
-                    ::proposal/my-opinion 1
+                    ::proposal/my-opinion-value 1
                     ::proposal/pro-votes 5
                     ::proposal/opinions [{::opinion/value 1
                                           ::opinion/user [::user/id 1337]}]}}}
@@ -71,7 +71,7 @@
       (m/returning
         (raw.comp/nc
           [::proposal/id
-           ::proposal/my-opinion
+           ::proposal/my-opinion-value
            ::proposal/pro-votes
            {::proposal/opinions
             [::opinion/value

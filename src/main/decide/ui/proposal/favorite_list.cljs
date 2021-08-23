@@ -32,7 +32,7 @@
     (i18n/tr "Your favourite proposal is not winning right now. Can you propose a coalition?")))
 
 (defn- show-merge-alert? [proposals]
-  (let [my-proposal (->> proposals (filter #(-> % ::proposal/my-opinion pos?)) first)]
+  (let [my-proposal (->> proposals (filter #(-> % ::proposal/my-opinion-value pos?)) first)]
     (and my-proposal (not= (first proposals) my-proposal))))
 
 (defsc FavoriteList [this {::process/keys [slug proposals end-time]

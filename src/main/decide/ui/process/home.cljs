@@ -16,12 +16,12 @@
     [material-ui.layout.grid :as grid]
     [material-ui.surfaces :as surfaces]))
 
-(defsc TopEntry [this {::proposal/keys [id title pro-votes my-opinion]
+(defsc TopEntry [this {::proposal/keys [id title pro-votes my-opinion-value]
                        :keys [root/current-session]}]
-  {:query [::proposal/id ::proposal/title ::proposal/pro-votes ::proposal/my-opinion
+  {:query [::proposal/id ::proposal/title ::proposal/pro-votes ::proposal/my-opinion-value
            [:root/current-session '_]]
    :ident ::proposal/id}
-  (let [approved? (pos? my-opinion)]
+  (let [approved? (pos? my-opinion-value)]
     (list/item
       {:button true
        :component :a
@@ -30,7 +30,7 @@
                        :secondary (i18n/trf "Approvals: {pros}" {:pros pro-votes})} title)
       (when (get current-session :session/valid?)
         (list/item-secondary-action {}
-          (if (pos? my-opinion)
+          (if (pos? my-opinion-value)
             (layout/box {:color "success.main"} (dd/typography {:color :inherit} (i18n/tr "Approved")))
             (inputs/button
               {:color :primary

@@ -170,3 +170,7 @@
   [::entity => boolean?]
   (contains? (set features) :process.feature/single-approve))
 
+(defn public-voting? [process]
+  (contains? (set (:process/features process)) :process.feature/voting.public))
+
+

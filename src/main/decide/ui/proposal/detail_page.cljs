@@ -29,19 +29,19 @@
     children))
 
 ;; region Opinion section
-(defsc OpinionSection [this {::proposal/keys [id pro-votes my-opinion]
+(defsc OpinionSection [this {::proposal/keys [id pro-votes my-opinion-value]
                              :or {pro-votes 0
-                                  my-opinion 0}}]
+                                  my-opinion-value 0}}]
   {:query [::proposal/id
            ::proposal/pro-votes
-           ::proposal/my-opinion]
+           ::proposal/my-opinion-value]
    :ident ::proposal/id}
   (inputs/button
-    {:variant (if (pos? my-opinion) :contained :outlined)
+    {:variant (if (pos? my-opinion-value) :contained :outlined)
      :color :primary
      :onClick #(comp/transact! this [(opinion.api/add {::proposal/id id
-                                                       :opinion (if (pos? my-opinion) 0 +1)})])}
-    (if (pos? my-opinion)
+                                                       :opinion (if (pos? my-opinion-value) 0 +1)})])}
+    (if (pos? my-opinion-value)
       (i18n/tr "Approved")
       (i18n/tr "Approve"))))
 

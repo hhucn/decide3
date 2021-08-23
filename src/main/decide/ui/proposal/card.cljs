@@ -194,7 +194,7 @@
                           :arrow true}
                (dd/avatar {} (str "+" (count overflow)))))])))))
 
-(defsc ProposalCard [this {::proposal/keys [id title body my-opinion pro-votes parents no-of-arguments opinions]
+(defsc ProposalCard [this {::proposal/keys [id title body my-opinion-value pro-votes parents no-of-arguments opinions]
                            :keys [root/current-session >/subheader]}
                      {::process/keys [slug]
                       :keys [process-over?
@@ -206,7 +206,7 @@
   {:query (fn []
             [::proposal/id
              ::proposal/title ::proposal/body
-             ::proposal/my-opinion
+             ::proposal/my-opinion-value
              ::proposal/no-of-arguments
              ::proposal/pro-votes
              {::proposal/opinions [::opinion/value
@@ -258,7 +258,7 @@
 
       (dd/divider {:variant :middle})
       (surfaces/card-actions {}
-        (let [[approved? rejected?] ((juxt pos? neg?) my-opinion)]
+        (let [[approved? rejected?] ((juxt pos? neg?) my-opinion-value)]
           (grid/container
             {:alignItems :center
              :spacing 1}

@@ -11,13 +11,13 @@
     [material-ui.data-display.list :as list]
     [material-ui.inputs :as inputs]))
 
-(defsc Entry [this {::proposal/keys [id title pro-votes my-opinion]}]
+(defsc Entry [this {::proposal/keys [id title pro-votes my-opinion-value]}]
   {:query [::proposal/id
            ::proposal/title
            ::proposal/pro-votes
-           ::proposal/my-opinion]
+           ::proposal/my-opinion-value]
    :ident ::proposal/id}
-  (let [approved? (pos? my-opinion)]
+  (let [approved? (pos? my-opinion-value)]
     (list/item
       {:button true
        :component :a

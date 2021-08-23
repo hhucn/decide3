@@ -9,8 +9,7 @@
     [decide.models.process :as process]
     [decide.models.process.database :as process.db]
     [decide.models.proposal :as proposal]
-    [decide.models.user :as user]
-    [taoensso.timbre :as log]))
+    [decide.models.user :as user]))
 
 
 (defmutation add [{:keys [conn db AUTH/user-id] :as env} {::proposal/keys [id]
@@ -35,17 +34,17 @@
                [[:db/add "datomic.tx" :db/txUser [::user/id user-id]]]))})]
     {::p/env (assoc env :db (:db-after tx-report))}))
 
-(defresolver resolve-personal-opinion [{:keys [db AUTH/user-id]} {::proposal/keys [id]}]
+(defresolver resolve-personal-opinion-value [{:keys [db AUTH/user-id]} {::proposal/keys [id]}]
   {::pc/input #{::proposal/id}
-   ::pc/output [::proposal/my-opinion]}
+   ::pc/output [::proposal/my-opinion-value]}
   (when user-id
     (let [user (d/entity db [::user/id user-id])
           proposal (d/entity db [::proposal/id id])
           opinion (opinion.db/get-opinion-eid db user proposal)]
       (if opinion
         (let [{::opinion/keys [value]} (d/pull db [[::opinion/value :default 0]] opinion)]
-          {::proposal/my-opinion value})
-        {::proposal/my-opinion 0}))))
+          {::proposal/my-opinion-value value})
+        {::proposal/my-opinion-value 0}))))
 
 
 (defresolver resolve-proposal-opinions [{:keys [db]} {::proposal/keys [id]}]
@@ -56,14 +55,13 @@
      ::proposal/con-votes (get opinions -1 0)}))
 
 (defn- get-public-opinions [proposal]
-  (let [features (set (get-in proposal [::process/_proposals :process/features] #{}))]
-    (if (contains? features :process.feature/voting.public)
+  (let [process (::process/_proposals proposal)]
+    (when (process/public-voting? process)
       {::proposal/opinions
        (for [opinion (get proposal ::proposal/opinions)
              :when (not (zero? (::opinion/value opinion)))]
          {::opinion/value (::opinion/value opinion)
-          ::opinion/user (select-keys (::user/_opinions opinion) [::user/id ::user/display-name])})}
-      nil)))
+          ::opinion/user (select-keys (::user/_opinions opinion) [::user/id ::user/display-name])})})))
 
 (defresolver resolve-public-opinions [{:keys [db]} {::proposal/keys [id]}]
   {::pc/input #{::proposal/id}
@@ -72,7 +70,7 @@
     (get-public-opinions proposal)))
 
 (def resolvers
-  [resolve-personal-opinion
+  [resolve-personal-opinion-value
    resolve-proposal-opinions
    resolve-public-opinions
 
