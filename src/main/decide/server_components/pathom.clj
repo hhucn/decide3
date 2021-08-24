@@ -89,10 +89,8 @@
                         (p/env-plugin {::p/process-error process-error})
                         (when log-requests? (p/pre-process-parser-plugin rad-pathom/log-request!))
                         ;; TODO: Do we need this, and if so, we need to pass the attribute map
-                        ;(p/post-process-parser-plugin add-empty-vectors)
 
-                        (p/post-process-parser-plugin p/elide-not-found)
-                        (p/post-process-parser-plugin rad-pathom/elide-reader-errors)
+                        p/elide-special-outputs-plugin
                         (when log-responses? (rad-pathom/post-process-parser-plugin-with-env rad-pathom/log-response!))
                         rad-pathom/query-params-to-env-plugin
                         p/error-handler-plugin
