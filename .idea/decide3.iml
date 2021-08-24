@@ -3,7 +3,7 @@
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
     <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$/resources" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/resources" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/dev" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/main" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/workspaces" isTestSource="false" />
@@ -74,7 +74,7 @@
     <orderEntry type="library" name="Deps: com.cognitect/transit-cljs:0.8.269" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/google-closure-library:0.0-20201211-3e6c510d" level="project" />
     <orderEntry type="library" name="Deps: io.aviso/pretty:0.1.37" level="project" />
-    <orderEntry type="library" name="Deps: thheller/shadow-cljs:2.15.3" level="project" />
+    <orderEntry type="library" name="Deps: thheller/shadow-cljs:2.15.5" level="project" />
     <orderEntry type="library" name="Deps: org.graalvm.sdk/graal-sdk:21.1.0" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/clojurescript:1.10.879" level="project" />
     <orderEntry type="library" name="Deps: fress:0.3.1" level="project" />
@@ -97,6 +97,7 @@
     <orderEntry type="library" name="Deps: buddy/buddy-hashers:1.3.0" level="project" />
     <orderEntry type="library" name="Deps: com.lambdaworks/scrypt:1.4.0" level="project" />
     <orderEntry type="library" name="Deps: com.cognitect/transit-js:0.8.874" level="project" />
+    <orderEntry type="library" name="Deps: io.methvin/directory-watcher:0.15.0" level="project" />
     <orderEntry type="library" name="Deps: io.replikativ/zufall:0.1.0" level="project" />
     <orderEntry type="library" name="Deps: clojurewerkz/scrypt:1.2.0" level="project" />
     <orderEntry type="library" name="Deps: com.taoensso/truss:1.6.0" level="project" />
@@ -137,6 +138,7 @@
     <orderEntry type="library" name="Deps: org.wildfly.client/wildfly-client-config:1.0.1.Final" level="project" />
     <orderEntry type="library" name="Deps: cljs.java-time:0.1.13" level="project" />
     <orderEntry type="library" name="Deps: persistent-sorted-set:0.1.2" level="project" />
+    <orderEntry type="library" name="Deps: net.java.dev.jna/jna:5.7.0" level="project" />
     <orderEntry type="library" name="Deps: junit:4.13.1" level="project" />
     <orderEntry type="library" name="Deps: cheshire:5.8.0" level="project" />
     <orderEntry type="library" name="Deps: tigris:0.1.1" level="project" />
@@ -153,7 +155,7 @@
     <orderEntry type="library" name="Deps: buddy/buddy-auth:2.1.0" level="project" />
     <orderEntry type="library" name="Deps: cljsjs/js-joda-timezone:2.0.1-0" level="project" />
     <orderEntry type="library" name="Deps: com.fulcrologic/fulcro-garden-css:3.0.9" level="project" />
-    <orderEntry type="library" name="Deps: org.slf4j/slf4j-api:1.7.25" level="project" />
+    <orderEntry type="library" name="Deps: org.slf4j/slf4j-api:1.7.30" level="project" />
     <orderEntry type="library" name="Deps: org.jboss.xnio/xnio-api:3.8.0.Final" level="project" />
     <orderEntry type="library" name="Deps: buddy/buddy-sign:2.2.0" level="project" />
     <orderEntry type="library" name="Deps: com.google.javascript/closure-compiler-unshaded:v20210505" level="project" />
