@@ -24,12 +24,10 @@
     [material-ui.layout.grid :as grid]
     [material-ui.surfaces :as surfaces]
     ["@material-ui/icons/Comment" :default Comment]
-    ["@material-ui/icons/MoreVert" :default MoreVert]
     ["@material-ui/icons/ThumbDownAltOutlined" :default ThumbDownOutlined]
     ["@material-ui/icons/ThumbDownAlt" :default ThumbDown]
     ["@material-ui/icons/ThumbUpAltOutlined" :default ThumbUpOutlined]
-    ["@material-ui/icons/ThumbUpAlt" :default ThumbUp]
-    [taoensso.timbre :as log]))
+    ["@material-ui/icons/ThumbUpAlt" :default ThumbUp]))
 
 (defn id-part [proposal-id]
   (dom/data {:className "proposal-id"
@@ -47,10 +45,6 @@
   (i18n/trf "by {author}" {:author (dom/address {:key id} (str display-name))}))
 
 (def ui-author (comp/factory Author {:keyfn ::user/id}))
-
-(defsc Parent [_ _]
-  {:query [::proposal/id]
-   :ident ::proposal/id})
 
 (defsc Subheader [_ {::proposal/keys [nice-id created no-of-parents original-author generation]}
                   {:keys [author? created? gen? type?]
@@ -194,36 +188,88 @@
                           :arrow true}
                (dd/avatar {} (str "+" (count overflow)))))])))))
 
-(defsc ProposalCard [this {::proposal/keys [id title body my-opinion-value pro-votes parents no-of-arguments opinions]
-                           :keys [root/current-session >/subheader]}
+(defsc VotingArea [this {::proposal/keys [id pro-votes my-opinion opinions]}
+                   {:keys [process]}]
+  {:query [::proposal/id
+           ::proposal/pro-votes
+           ::proposal/my-opinion-value
+           {::proposal/my-opinion [::opinion/value :opinion/rank]}
+           {::proposal/opinions [::opinion/value
+                                 {::opinion/user (comp/get-query user.ui/Avatar)}]}]
+   :ident ::proposal/id
+   :use-hooks? true}
+  (let [logged-in? (comp/shared this :logged-in?)
+        disabled? (or (not logged-in?) (not (process/running? process)))
+        [reject-open? set-reject-dialog-open] (hooks/use-state false)
+        [approved? rejected?] ((juxt pos? neg?) (::opinion/value my-opinion))]
+    (grid/container {:alignItems :center}
+      (grid/item {}
+        (if (process/running? process)
+          (approve-toggle
+            {:approved? approved?
+             :disabled? disabled?
+             :onClick #(comp/transact! this [(opinion.api/add {::proposal/id id
+                                                               :opinion (if approved? 0 1)})])})
+          (disabled-approve-toggle approved?)))
+
+      (when (process/allows-rejects? process)
+        (comp/fragment
+          (when (process/show-reject-dialog? process)
+            (reject-dialog
+              this
+              {:open? reject-open?
+               :id id
+               :slug (::process/slug process)
+               :parents parents
+               :onClose #(set-reject-dialog-open false)}))
+
+          (grid/item {}
+            (reject-toggle
+              {:toggled? rejected?
+               :disabled? disabled?
+               :onClick
+               (fn [_e]
+                 (if (and (process/show-reject-dialog? process) (not rejected?))
+                   (set-reject-dialog-open true)            ; only
+                   (comp/transact! this [(opinion.api/add {::proposal/id id
+                                                           :opinion (if rejected? 0 -1)})])))}))))
+
+
+      (grid/item {}
+        (if (process/public-voting? process)
+          (->> opinions
+            (filter #(pos? (::opinion/value %)))
+            (map ::opinion/user)
+            (user.ui/avatar-group {:max 5}))
+          (dd/typography {:variant :button} pro-votes))))))
+
+(def ui-voting-area (comp/computed-factory VotingArea {:keyfn ::proposal/id}))
+
+(defsc Process [_ _]
+  {:query [::process/slug :process/features ::process/start-time ::process/end-time]
+   :ident ::process/slug})
+
+(defsc ProposalCard [this {::proposal/keys [id title body no-of-arguments]
+                           :keys [>/subheader >/voting-area ui/current-process]}
                      {::process/keys [slug]
-                      :keys [process-over?
-                             card-props
-                             max-height
-                             features]
-                      :or {max-height "6rem"
-                           features #{}}}]
-  {:query (fn []
-            [::proposal/id
-             ::proposal/title ::proposal/body
-             ::proposal/my-opinion-value
-             ::proposal/no-of-arguments
-             ::proposal/pro-votes
-             {::proposal/opinions [::opinion/value
-                                   {::opinion/user (comp/get-query user.ui/Avatar)}]}
-             ::proposal/created
-             {::proposal/parents (comp/get-query Parent)}
-             [:root/current-session '_]
-             {:>/subheader (comp/get-query Subheader)}])
+                      :keys [card-props
+                             max-height]
+                      :or {max-height "6rem"}}]
+  {:query [::proposal/id
+           ::proposal/title ::proposal/body
+           ::proposal/no-of-arguments
+           ::proposal/created
+           ::proposal/pro-votes
+           {:>/subheader (comp/get-query Subheader)}
+           {:>/voting-area (comp/get-query VotingArea)}
+           {[:ui/current-process '_] (comp/get-query Process)}]
    :ident ::proposal/id
    :initial-state (fn [{::keys [id title body]}]
                     {::proposal/id id
                      ::proposal/title title
                      ::proposal/body body})
    :use-hooks? true}
-  (let [logged-in? (get current-session :session/valid?)
-        [reject-open? set-reject-open] (hooks/use-state false)
-        proposal-href (hooks/use-memo
+  (let [proposal-href (hooks/use-memo
                         #(routing/path->absolute-url
                            (dr/into-path ["decision" slug] detail-page/ProposalPage (str id)))
                         [slug id])]
@@ -241,9 +287,7 @@
         (surfaces/card-header
           {:title title
            :titleTypographyProps {:component "h3"}
-           :subheader (ui-subheader subheader {:type? true :gen? true :created? true :author? false})
-           :action (inputs/icon-button {:disabled true :size :small}
-                     (comp/create-element MoreVert nil nil))})
+           :subheader (ui-subheader subheader {:type? true :gen? true :created? true :author? false})})
 
         (layout/box {:maxHeight max-height
                      :overflow "hidden"
@@ -258,53 +302,18 @@
 
       (dd/divider {:variant :middle})
       (surfaces/card-actions {}
-        (let [[approved? rejected?] ((juxt pos? neg?) my-opinion-value)]
-          (grid/container
-            {:alignItems :center
-             :spacing 1}
+        (grid/container
+          {:alignItems :center
+           :justifyContent :space-between
+           :direction :row
+           :spacing 1}
+          (grid/item {:xs :auto}
+            (ui-voting-area voting-area {:process current-process}))
 
-            (grid/item {}
-              (if process-over?
-                (disabled-approve-toggle approved?)
-                (approve-toggle
-                  {:approved? approved?
-                   :disabled? (or (not logged-in?) process-over?)
-                   :onClick #(comp/transact! this [(opinion.api/add {::proposal/id id
-                                                                     :opinion (if approved? 0 1)})])})))
-
-
-            (grid/item {}
-              (if (features :process.feature/voting.public)
-                (avatar-group {:max 5} (map ::opinion/user (filter #(pos? (::opinion/value %)) opinions)))
-                (dd/typography {} pro-votes)))
-
-            (when (features :process.feature/rejects)
-              (grid/item {}
-                (reject-toggle
-                  {:toggled? rejected?
-                   :disabled? (or (not logged-in?) process-over?)
-                   :onClick
-                   (fn [_e]
-                     (if (and (features :process.feature/reject-popup) (not rejected?))
-                       (set-reject-open true)               ; only
-                       (comp/transact! this [(opinion.api/add {::proposal/id id
-                                                               :opinion (if rejected? 0 -1)})])))})))
-
-            (layout/box {:ml "auto"})
-
-            (grid/item {}
-              (inputs/button
-                {:startIcon (dom/create-element Comment)
-                 :href proposal-href}
-                (str no-of-arguments))))))
-
-      (when (features :process.feature/reject-popup)
-        (reject-dialog
-          this
-          {:open? reject-open?
-           :id id
-           :slug slug
-           :parents parents
-           :onClose #(set-reject-open false)})))))
+          (grid/item {}
+            (inputs/button
+              {:startIcon (dom/create-element Comment)
+               :href proposal-href}
+              (str no-of-arguments))))))))
 
 (def ui-proposal-card (comp/computed-factory ProposalCard {:keyfn ::proposal/id}))
