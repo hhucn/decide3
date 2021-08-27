@@ -9,7 +9,7 @@
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]))
 
-(def approves-rule
+(def rules
   '[[(approves? ?user ?proposal)
      [?user ::user/opinions ?opinion]
      [?proposal ::proposal/opinions ?opinion]

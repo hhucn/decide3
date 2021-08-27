@@ -140,7 +140,7 @@
             [?process ::process/proposals ?proposal]
             (approves? ?user ?proposal)]
        db
-       opinion.db/approves-rule
+       opinion.db/rules
        (find process ::process/slug)
        [::user/id user-id])}))
 
