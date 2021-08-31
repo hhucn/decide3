@@ -1,23 +1,18 @@
 (ns decide.models.proposal
   (:require
-    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.raw.components :as rc]
     [decide.models.user :as user]))
 
-(defsc Author [_ _]
-  {:query [::user/id ::user/display-name]
-   :ident ::user/id})
-
-(defsc Proposal [_this _props]
-  {:query (fn []
-            [::id
-             ::title
-             ::body
-             ::pro-votes ::con-votes
-             ::created
-             ::my-opinion
-             {::parents '...}                               ; this is a recursion
-             {::original-author (comp/get-query Author)}])
-   :ident ::id})
+(def Proposal
+  (rc/nc [::id
+          ::title
+          ::body
+          ::pro-votes ::con-votes
+          ::created
+          ::my-opinion-value
+          {::parents '...}                                  ; this is a recursion
+          {::original-author [::user/id ::user/display-name]}]
+    {:componentName ::Proposal}))
 
 (def approval-order (juxt ::pro-votes ::created))
 
@@ -51,4 +46,4 @@
 (def add-argument `add-argument)
 
 (defn my-approved [proposals]
-  (filter #(-> % ::my-opinion pos?) proposals))
+  (filter #(-> % ::my-opinion-value pos?) proposals))
