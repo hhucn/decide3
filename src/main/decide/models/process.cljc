@@ -101,6 +101,14 @@
     (time/past? end-time)
     false))
 
+(defn started? [{::keys [start-time]}]
+  (if start-time
+    (time/past? start-time)
+    true))
+
+(defn running? [process]
+  (and (started? process) (not (over? process))))
+
 (>defn get-most-approved-proposals
   "From a collection of `proposals`, return a subset of `proposals` that have the most approval"
   [proposals]
