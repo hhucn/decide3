@@ -163,7 +163,8 @@
 (defn get-key-from-string [^String cookie-store-key]
   {:pre [(= 15 (count cookie-store-key))]}
   (when-not (= 15 (count cookie-store-key))
-    (throw (ex-info "The Cookie store secret key needs to be 16 bytes long!" {})))
+    (throw (ex-info "The Cookie store secret key needs to be 16 bytes long!" {}))
+    (System/exit -1))
   (.getBytes cookie-store-key))
 
 
@@ -181,5 +182,6 @@
       ;; code initialized).
       ;; E.g. (wrap-defaults (assoc-in defaults-config [:session :store] (my-store)))
       (wrap-resource "public")
-      (wrap-defaults (assoc-in defaults-config [:session :store] (cookie-store {:key (.getBytes ^String (:cookie-store-secret-key config))})))
+      (wrap-defaults (assoc-in defaults-config [:session :store]
+                       (cookie-store {:key (.getBytes ^String (:cookie-store-secret-key config))})))
       wrap-gzip)))
