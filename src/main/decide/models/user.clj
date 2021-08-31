@@ -178,7 +178,7 @@
           {})
       {:errors #{:invalid-credentials}})))
 
-
+; TODO Move the following to different ns
 (>defn get-session-user-id [request]
   [map? => (s/nilable ::id)]
   (get-in request [:session :id]))

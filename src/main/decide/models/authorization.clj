@@ -3,7 +3,8 @@
     [clojure.spec.alpha :as s]
     [com.fulcrologic.fulcro.components :as comp]
     [com.wsscode.pathom.connect :as pc :refer [defmutation defresolver]]
-    [decide.models.user :as user]))
+    [decide.models.user :as user]
+    [decide.models.user.database :as user.db]))
 
 (s/def ::session (s/nilable ::user/id))
 
@@ -15,6 +16,7 @@
 
 (defn- add-user-id-to-env [env user-id]
   (assoc env
+    :AUTH/user (user.db/get-entity (:db env) [::user/id user-id])
     :AUTH/user-id user-id
     :session (when user-id
                {:user {:session/valid? true
