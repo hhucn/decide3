@@ -134,7 +134,7 @@
 
 (defn toggle-button [{:keys [icon] :as props}]
   (inputs/icon-button
-    props
+    (dissoc props :icon)
     (dom/create-element icon #js {"fontSize" "small"})))
 
 (defn approve-toggle
