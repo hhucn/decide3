@@ -166,11 +166,19 @@
     {:componentName ::Basics
      :ident (fn [_ props] [::slug (::slug props)])}))
 
-(defn single-approve? [{:process/keys [features]}]
-  [::entity => boolean?]
-  (contains? (set features) :process.feature/single-approve))
+(defn feature-enabled? [process feature]
+  (contains? (set (:process/features process)) feature))
+
+(defn single-approve? [process]
+  (feature-enabled? process :process.feature/single-approve))
 
 (defn public-voting? [process]
-  (contains? (set (:process/features process)) :process.feature/voting.public))
+  (feature-enabled? process :process.feature/voting.public))
 
+(defn allows-rejects? [process]
+  (feature-enabled? process :process.feature/rejects))
 
+(defn show-reject-dialog? [process]
+  (and
+    (feature-enabled? process :process.feature/rejects)
+    (feature-enabled? process :process.feature/reject-popup)))
