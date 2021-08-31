@@ -9,7 +9,9 @@
     [decide.models.process :as process]
     [decide.models.process.database :as process.db]
     [decide.models.proposal :as proposal]
-    [decide.models.user :as user]))
+    [decide.models.user :as user]
+    [taoensso.timbre :as log]
+    [decide.models.user.database :as user.db]))
 
 
 (defmutation add [{:keys [conn db AUTH/user-id] :as env} {::proposal/keys [id]
@@ -38,13 +40,10 @@
   {::pc/input #{::proposal/id}
    ::pc/output [::proposal/my-opinion-value]}
   (when user-id
-    (let [user (d/entity db [::user/id user-id])
-          proposal (d/entity db [::proposal/id id])
-          opinion (opinion.db/get-opinion-eid db user proposal)]
-      (if opinion
-        (let [{::opinion/keys [value]} (d/pull db [[::opinion/value :default 0]] opinion)]
-          {::proposal/my-opinion-value value})
-        {::proposal/my-opinion-value 0}))))
+    (let [user (user.db/get-entity db user-id)
+          proposal (d/entity db [::proposal/id id])]
+      (when (and user proposal)
+        {::proposal/my-opinion-value (get (opinion.db/get-opinion db user proposal) ::opinion/value 0)}))))
 
 
 (defresolver resolve-proposal-opinions [{:keys [db]} {::proposal/keys [id]}]
