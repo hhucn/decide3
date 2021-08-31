@@ -241,7 +241,9 @@
             (filter #(pos? (::opinion/value %)))
             (map ::opinion/user)
             (user.ui/avatar-group {:max 5}))
-          (dd/typography {:variant :button} pro-votes))))))
+          (dd/typography {:variant :body1
+                          :aria-label (i18n/trc "[ARIA]" "pro votes")}
+            pro-votes))))))
 
 (def ui-voting-area (comp/computed-factory VotingArea {:keyfn ::proposal/id}))
 
