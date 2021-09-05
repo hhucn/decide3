@@ -10,13 +10,13 @@
     [decide.models.process.database :as process.db]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
-    [taoensso.timbre :as log]
     [decide.models.user.database :as user.db]))
 
 
 (defmutation add [{:keys [conn db AUTH/user-id] :as env} {::proposal/keys [id]
                                                           :keys [opinion]}]
   {::pc/params [::proposal/id :opinion]
+   ::pc/output [::proposal/id ::process/slug]
    ::pc/transform auth/check-logged-in}
   (let [proposal (d/entity db [::proposal/id id])
         process (::process/_proposals proposal)
@@ -34,7 +34,9 @@
                  proposal
                  opinion)
                [[:db/add "datomic.tx" :db/txUser [::user/id user-id]]]))})]
-    {::p/env (assoc env :db (:db-after tx-report))}))
+    {::proposal/id id
+     ::process/slug (::process/slug process)
+     ::p/env (assoc env :db (:db-after tx-report))}))
 
 (defresolver resolve-personal-opinion-value [{:keys [db AUTH/user-id]} {::proposal/keys [id]}]
   {::pc/input #{::proposal/id}
