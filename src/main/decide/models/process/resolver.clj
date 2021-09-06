@@ -120,8 +120,10 @@
        db [::process/slug slug] nice-id)}))
 
 (defresolver resolve-proposal-process [{:keys [db]} {::proposal/keys [id]}]
-  {::pc/output [::process/slug]}
-  (::process/_proposals (d/pull db [{::process/_proposals [::process/slug]}] [::proposal/id id])))
+  {::pc/output [::process/slug
+                {::proposal/process [::process/slug]}]}
+  (let [process (::process/_proposals (d/pull db [{::process/_proposals [::process/slug]}] [::proposal/id id]))]
+    (assoc process ::proposal/process process)))
 
 (defresolver resolve-winner [{:keys [db]} process]
   {::pc/input #{::process/slug}
@@ -161,6 +163,7 @@
    resolve-winner
 
    resolve-proposals
+   resolve-proposal-process
    resolve-no-of-proposals
 
    resolve-personal-approved-proposals
