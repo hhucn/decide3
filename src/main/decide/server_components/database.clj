@@ -129,6 +129,12 @@
       (assoc config :initial-tx schema))
     (d/connect config))
 
+(defn transact-as
+  [conn user-or-id arg-map]
+  (let [user-id (if (uuid? user-or-id) user-or-id (:decide.models.user/id user-or-id))]
+    (d/transact conn
+      (update arg-map :tx-data conj [:db/add "datomic.tx" :db/txUser [::user/id user-id]]))))
+
 (>defn transact-schema! [conn]
   [d.core/conn? => map?]
   (d/transact conn schema))
@@ -142,11 +148,11 @@
       (d/create-database db-config))))
 
 
-(defn test-database [inital-db]
+(defn test-database [initial-db]
   (d/create-database)
   (let [conn (d/connect)]
     (transact-schema! conn)
-    (d/transact conn inital-db)
+    (d/transact conn initial-db)
     conn))
 
 (defstate conn
