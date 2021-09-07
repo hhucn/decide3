@@ -76,7 +76,7 @@
         (dd/tooltip
           {:title (i18n/trf "This proposal has a chain of {count} proposals, that lead up to this proposal" {:count generation})}
           (dom/span {} (i18n/trf "Gen. {generation}" {:generation generation})))))
-    (when type?
+    (when (and type? no-of-parents)
       (case no-of-parents
         0 nil
         1
