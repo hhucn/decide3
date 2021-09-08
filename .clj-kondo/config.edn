@@ -1,28 +1,14 @@
 {:config-paths ["com.wsscode/pathom" "com.wsscode/async" "com.fulcrologic/fulcro"]
- :lint-as {slingshot.slingshot/try+                                   clojure.core/try
-           compojure.core/defroutes                                   clojure.core/def
-           clojure.test.check.clojure-test/defspec                    clojure.core/def
+ :lint-as {clojure.test.check.clojure-test/defspec                    clojure.core/def
            clojure.test.check.properties/for-all                      clojure.core/let
-           clojure.java.jdbc/with-db-transaction                      clojure.core/let
-           com.fulcrologic.fulcro.components/defsc                    clojure.core/defn
-           com.fulcrologic.fulcro.mutations/defmutation               clojure.core/defn
-           com.fulcrologic.rad.form/defsc-form                        clojure.core/defn
-           com.fulcrologic.rad.report/defsc-report                    clojure.core/defn
            com.fulcrologic.fulcro.routing.dynamic-routing/defrouter   clojure.core/defn
-           com.fulcrologic.rad.authorization/defauthenticator         clojure.core/defn
            mount.core/defstate                                        clojure.core/def
-           com.fulcrologic.guardrails.core/>defn                      clojure.core/defn
-           com.fulcrologic.guardrails.core/>defn-                     clojure.core/defn-
-           ghostwheel.core/>defn                                      clojure.core/defn
-           ghostwheel.core/>defn-                                     clojure.core/defn-
            nubank.workspaces.core/defcard                             clojure.core/def
-           com.fulcrologic.fulcro.ui-state-machines/defstatemachine   clojure.core/def
            com.fulcrologic.fulcro.algorithms.normalized-state/swap!-> clojure.core/->}
  :linters {:misplaced-docstring {:level :error}
            :not-empty?          {:level :off}
            :unresolved-symbol   {:exclude
-                                 [(com.fulcrologic.fulcro.mutations/defmutation)
-                                  (fulcro-spec.core/provided!)]}
+                                 [(fulcro-spec.core/provided!)]}
            :unused-binding      {:level :off}
            :unused-referred-var {:level :off}
            :single-key-in       {:level :warning}
