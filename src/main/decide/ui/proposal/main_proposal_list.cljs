@@ -195,11 +195,12 @@
           ;; right side
           (grid/container
             {:spacing 2, :alignItems :center, :justifyContent :flex-end}
-            (layout-selector
-              {:value selected-layout
-               :onChange set-selected-layout!}
-              (cond-> {:favorite ViewModule}
-                large-ui? (assoc :hierarchy ViewList)))
+            (grid/item {}
+              (layout-selector
+                {:value selected-layout
+                 :onChange set-selected-layout!}
+                (cond-> {:favorite ViewModule}
+                  large-ui? (assoc :hierarchy ViewList))))
 
             (grid/item {} (sort-selector selected-sort set-selected-sort!))))
 
