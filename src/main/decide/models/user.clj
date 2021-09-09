@@ -48,6 +48,11 @@
    {:db/ident :db/txUser
     :db/doc "Ref tu user who authored the transaction. Useful for audits."
     :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/one}
+
+   {:db/ident :user/language
+    :db/doc "The preferred language for the user. ISO 639"
+    :db/valueType :db.type/keyword
     :db/cardinality :db.cardinality/one}])
 
 (s/def ::id uuid?)
@@ -58,6 +63,8 @@
 (s/def ::encrypted-password string?)
 (s/def ::password (s/or :encrypted ::encrypted-password :raw string?))
 (s/def ::display-name (s/and string? #(< 0 (count %) 50)))
+(s/def :iso/ISO-639-3 #(>= 3 (count (name %))))
+(s/def :user/language (s/and simple-keyword? :iso/ISO-639-3))
 
 (s/def ::entity (s/and associative? #(contains? % :db/id)))
 

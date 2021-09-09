@@ -7,8 +7,9 @@
     [datahike.api :as d]
     [datahike.core :as d.core]
     [decide.models.user :as user]
-    [taoensso.timbre :as log]
-    [clojure.string :as str]))
+    [decide.models.user.database :as user.db]
+    [decide.server-components.database :as db]
+    [taoensso.timbre :as log]))
 
 (>defn search-for-user [db search-term]
   [d.core/db? string? => (s/coll-of (s/keys :req [::user/id]) :distinct true)]
@@ -64,23 +65,22 @@
       (log/warn (format "%s tried to resolve :user/mail for %s" (str user-id) (str id)))
       nil)))
 
-(defmutation update-user [{:keys [conn AUTH/user-id] :as env} {::user/keys [id display-name]
-                                                               :user/keys [email]
-                                                               :as user}]
-  {::pc/params [::user/id ::user/display-name :user/email]
+(defresolver resolve-language [{:keys [AUTH/user]} {::user/keys [id]}]
+  {::pc/output [:user/language]}
+  (when (= (::user/id user) id)
+    (select-keys user [:user/language])))
+
+(defmutation update-user [{:keys [conn AUTH/user-id] :as env} {::user/keys [id] :as updated-user}]
+  {::pc/params [::user/id ::user/display-name :user/email :user/language]
    ::pc/output [:user/id]}
-  (let [valid-spec (s/keys :req [::user/id] :opt [:user/email ::user/display-name])
-        user (select-keys user [::user/id ::user/display-name :user/email])]
-    (when (= user-id id)
+  (when (= user-id id)
+    (let [valid-spec (s/keys :req [::user/id] :opt [:user/email ::user/display-name :user/language])
+          user (select-keys updated-user [::user/id ::user/display-name :user/email :user/language])]
       (if (s/valid? valid-spec user)
         (let [{:keys [db-after]}
-              (d/transact conn
+              (db/transact-as conn user-id
                 {:tx-data
-                 [(-> user
-                    (dissoc ::user/id)
-                    (assoc :db/id [::user/id id]))
-                  (when (str/blank? email)
-                    [:db/retract [::user/id id] :user/email])]})]
+                 (user.db/->update user)})]
           {::p/env (assoc env :db db-after)
            :user/id id})
         (throw (ex-info "Malformed user data" (select-keys (s/explain-data valid-spec user) [::s/problems])))))))
@@ -90,6 +90,7 @@
   [autocomplete-user
    resolve-public-infos
    resolve-private-infos
+   resolve-language
 
    resolve-nickname-to-id
 
