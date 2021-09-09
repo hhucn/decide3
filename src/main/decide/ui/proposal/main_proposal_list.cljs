@@ -36,22 +36,20 @@
 
 
 (defn add-proposal-fab [props]
-  (let [extended? (breakpoint/>=? "sm")]
-    (layout/box
-      {:position "fixed"
-       :bottom "16px"
-       :right "16px"}
-      (inputs/fab
-        (merge
-          {:aria-label (i18n/tr "New proposal")
-           :title (i18n/tr "New proposal")
-           :color "secondary"
-           :variant (if extended? "extended" "circular")}
-          props)
-        (dom/create-element AddIcon)
-        (when extended?
-          (layout/box {:ml 1}
-            (i18n/tr "New proposal")))))))
+  (layout/box
+    {:position :fixed
+     :bottom "16px"
+     :right "16px"}
+    (inputs/fab
+      (merge
+        {:aria-label (i18n/tr "New proposal")
+         :title (i18n/tr "New proposal")
+         :color :secondary
+         :variant :extended}
+        props)
+      (dom/create-element AddIcon)
+      (layout/box {:ml 1}
+        (i18n/tr "New proposal")))))
 
 (defn sort-selector [selected set-selected!]
   (form/control {:size :small}
