@@ -1,5 +1,6 @@
 (ns decide.server-components.database
   (:require
+    [clojure.string :as str]
     [datahike.api :as d]
     [decide.models.opinion :as opinion]
     [decide.models.process :as process]
@@ -123,17 +124,25 @@
                {:db/id (str proposal "+" user)
                 ::opinion/value 1}])))))))
 
-#_(defn test-database [config]
-    (d/delete-database config)
-    (d/create-database
-      (assoc config :initial-tx schema))
-    (d/connect config))
-
 (defn transact-as
   [conn user-or-id arg-map]
   (let [user-id (if (uuid? user-or-id) user-or-id (:decide.models.user/id user-or-id))]
     (d/transact conn
       (update arg-map :tx-data conj [:db/add "datomic.tx" :db/txUser [::user/id user-id]]))))
+
+(defn- empty-or-nil-field? [[_ v]]
+  (or
+    (nil? v)
+    (and (string? v) (str/blank? v))))
+
+(defn- retract-statement [eid-or-ident v]
+  [:db/retract eid-or-ident v])
+
+(defn retract-empty?-tx [eid-or-ident m]
+  (->> m
+    (filter empty-or-nil-field?)
+    keys
+    (mapv #(retract-statement eid-or-ident %))))
 
 (>defn transact-schema! [conn]
   [d.core/conn? => map?]
