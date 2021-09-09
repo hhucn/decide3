@@ -48,7 +48,7 @@
            :color "secondary"
            :variant (if extended? "extended" "circular")}
           props)
-        (comp/create-element AddIcon nil nil)
+        (dom/create-element AddIcon)
         (when extended?
           (layout/box {:ml 1}
             (i18n/tr "New proposal")))))))
