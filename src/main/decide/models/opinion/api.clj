@@ -10,20 +10,19 @@
     [decide.models.process.database :as process.db]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
-    [decide.models.user.database :as user.db]))
+    [decide.server-components.database :as db]))
 
 
-(defmutation add [{:keys [conn db AUTH/user-id] :as env} {::proposal/keys [id]
-                                                          :keys [opinion]}]
+(defmutation add [{:keys [conn db AUTH/user] :as env} {::proposal/keys [id]
+                                                       :keys [opinion]}]
   {::pc/params [::proposal/id :opinion]
    ::pc/output [::proposal/id ::process/slug]
    ::pc/transform auth/check-logged-in}
   (let [proposal (d/entity db [::proposal/id id])
         process (::process/_proposals proposal)
-        user (d/entity db [::user/id user-id])
 
         tx-report
-        (d/transact conn
+        (db/transact-as user conn
           {:tx-data
            (vec
              (concat
@@ -32,8 +31,7 @@
                  user
                  process
                  proposal
-                 opinion)
-               [[:db/add "datomic.tx" :db/txUser [::user/id user-id]]]))})]
+                 opinion)))})]
     {::proposal/id id
      ::process/slug (::process/slug process)
      ::p/env (assoc env :db (:db-after tx-report))}))

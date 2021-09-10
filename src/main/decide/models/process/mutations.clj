@@ -12,7 +12,8 @@
     [decide.models.proposal.core :as proposal.core]
     [decide.models.proposal.database :as proposal.db]
     [decide.models.user :as user]
-    [decide.models.user.database :as user.db]))
+    [decide.models.user.database :as user.db]
+    [decide.server-components.database :as db]))
 
 (defn check-slug-exists [{::pc/keys [mutate] :as mutation}]
   (assoc mutation
@@ -42,7 +43,7 @@
           (throw (ex-info "The process is already over" {::process/slug slug})))))))
 
 
-(defmutation add-process [{:keys [conn db AUTH/user-id] :as env}
+(defmutation add-process [{:keys [conn db AUTH/user] :as env}
                           {::process/keys [slug] :keys [participant-emails] :as process}]
   {::pc/params [::process/title ::process/slug ::process/description ::process/end-time ::process/type :process/features
                 :participant-emails]
@@ -51,21 +52,19 @@
                 :req [::process/slug ::process/title ::process/description]
                 :opt [::process/end-time ::process/type])
    ::pc/transform auth/check-logged-in}
-  (let [user {::user/id user-id}
-        existing-emails (filter #(user/email-in-db? db %) participant-emails)
+  (let [existing-emails (filter #(user/email-in-db? db %) participant-emails)
         {:keys [db-after]}
-        (d/transact conn
+        (db/transact-as user conn
           {:tx-data
-           (conj (process.db/->add db
-                   (-> process
-                     (update ::process/moderators conj user)  ; remove that here? let the user come through parameters?
-                     (update ::process/participants concat (map #(vector ::user/email %) existing-emails))))
-             [:db/add "datomic.tx" :db/txUser [::user/id user-id]])})]
+           (process.db/->add db
+             (-> process
+               (update ::process/moderators conj user)  ; remove that here? let the user come through parameters?
+               (update ::process/participants concat (map #(vector ::user/email %) existing-emails))))})]
     {::process/slug slug
      ::p/env (assoc env :db db-after)}))
 
 ;; TODO Fix this up... Proper validation and everything.
-(defmutation update-process [{:keys [conn db AUTH/user-id] :as env} {::process/keys [slug] :as process}]
+(defmutation update-process [{:keys [conn db AUTH/user] :as env} {::process/keys [slug] :as process}]
   {::pc/params [::process/slug ::process/title ::process/description ::process/start-time ::process/end-time ::process/type]
    ::pc/output [::process/slug]
    ::s/params
@@ -73,10 +72,7 @@
      :req [::process/slug]
      :opt [::process/title ::process/description ::process/start-time ::process/end-time ::process/type])
    ::pc/transform (comp auth/check-logged-in check-slug-exists needs-moderator)}
-  (let [{:keys [db-after]}
-        (d/transact conn
-          {:tx-data
-           (-> (process.db/->update db process) (conj [:db/add "datomic.tx" :db/txUser [::user/id user-id]]))})]
+  (let [{:keys [db-after]} (db/transact-as user conn {:tx-data (process.db/->update db process)})]
     {::process/slug slug
      ::p/env (assoc env :db db-after)}))
 

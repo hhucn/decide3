@@ -6,13 +6,13 @@
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]))
 
-(defresolver resolve-personal-proposal-recommendations [{:keys [db AUTH/user-id]} process]
+(defresolver resolve-personal-proposal-recommendations [{:keys [db AUTH/user]} process]
   {::pc/input #{::process/slug}
    ::pc/output [{:MY/proposal-recommendations [::proposal/id]}]}
-  (when user-id
+  (when user
     {:MY/proposal-recommendations
      (core/recommended-proposals db
-       {:user {::user/id user-id}
+       {:user (select-keys user [::user/id])
         :process process})}))
 
 (def all-resolvers

@@ -172,18 +172,15 @@
   {::pc/output [:session/valid?]}
   (wrap-session env {:session/valid? false ::id nil}))
 
-(defmutation change-password [{:keys [db conn AUTH/user-id]} {:keys [old-password new-password]}]
+(defmutation change-password [{:keys [conn AUTH/user-id AUTH/user]} {:keys [old-password new-password]}]
   {::pc/params [:old-password :new-password]
    ::pc/output [:errors]}
-  (let [pw-valid? (-> db
-                    (d/pull [::password] [::id user-id])
-                    (password-valid? old-password))]
-    (if pw-valid?
-      (do (d/transact! conn [{:db/id [::id user-id]
-                              ::password new-password}
-                             [:db/add "datomic.tx" :db/txUser [::id user-id]]])
-          {})
-      {:errors #{:invalid-credentials}})))
+  (if (password-valid? (::password user) old-password)
+    (do (d/transact! conn [{:db/id [::id user-id]
+                            ::password new-password}
+                           [:db/add "datomic.tx" :db/txUser [::id user-id]]])
+        {})
+    {:errors #{:invalid-credentials}}))
 
 (defresolver current-session-resolver [{:keys [AUTH/user] :as env} _]
   {::pc/output [{::current-session

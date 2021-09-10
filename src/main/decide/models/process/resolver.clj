@@ -131,10 +131,10 @@
   (when-let [winner-proposal (process.db/get-winner db process)]
     {::process/winner (select-keys winner-proposal [::proposal/id])}))
 
-(defresolver resolve-personal-approved-proposals [{:keys [db AUTH/user-id]} process]
+(defresolver resolve-personal-approved-proposals [{:keys [db AUTH/user]} process]
   {::pc/input #{::process/slug}
    ::pc/output [{:MY/personal-proposals [::proposal/id]}]}
-  (when user-id
+  (when user
     {:MY/personal-proposals
      (d/q '[:find [(pull ?proposal [::proposal/id]) ...]
             :in $ % ?process ?user
@@ -144,7 +144,7 @@
        db
        opinion.db/rules
        (find process ::process/slug)
-       [::user/id user-id])}))
+       (:db/id user))}))
 
 (def all-resolvers
   [process.mutations/all-mutations
