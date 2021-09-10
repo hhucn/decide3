@@ -14,9 +14,9 @@
     [material-ui.inputs.input :as input]))
 
 (defmutation change-language [{:keys [locale]}]
-  (action [{:keys [comp state]}]
+  (action [{:keys [component state]}]
     (when-let [user-id (::user/id (auth/current-user @state))]
-      (comp/transact! comp
+      (comp/transact! component
         [(user.api/update-user {::user/id user-id
                                 :user/language locale})]))))
 
