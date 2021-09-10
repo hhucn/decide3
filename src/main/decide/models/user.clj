@@ -185,28 +185,19 @@
           {})
       {:errors #{:invalid-credentials}})))
 
-; TODO Move the following to different ns
-(>defn get-session-user-id [request]
-  [map? => (s/nilable ::id)]
-  (get-in request [:session :id]))
-
-(defn get-current-session [db request]
-  (let [id (get-session-user-id request)]
-    (if (and id (exists? db id))
-      {:session/valid? true
-       :user {::id id}
-       ::id id}
-      {:session/valid? false
-       ::id nil})))
-
-(defresolver current-session-resolver [{:keys [db ring/request] :as env} _]
+(defresolver current-session-resolver [{:keys [AUTH/user] :as env} _]
   {::pc/output [{::current-session
                  [:session/valid?
-                  {:user [::id]}
+                  {:user [::id ::display-name]}
                   ::id]}]}
   {::current-session
    (wrap-session env
-     (get-current-session db request))})
+     (if user
+       {:session/valid? true
+        :user (select-keys user [::id ::display-name])
+        ::id (::id user)}
+       {:session/valid? false
+        ::id nil}))})
 
 
 (def resolvers [sign-up sign-in sign-out change-password current-session-resolver])
