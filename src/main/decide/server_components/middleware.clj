@@ -1,6 +1,5 @@
 (ns decide.server-components.middleware
   (:require
-    [clojure.string :as str]
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.algorithms.denormalize :as dn]
     [com.fulcrologic.fulcro.algorithms.server-render :as ssr]
@@ -10,6 +9,7 @@
                                                           wrap-transit-params
                                                           wrap-transit-response]]
     [decide.models.authorization :as auth]
+    [decide.server-components.database :refer [conn]]
     [decide.server-components.config :refer [config]]
     [decide.server-components.pathom :refer [parser]]
     [decide.ui.pages.splash :as splash]
@@ -98,14 +98,22 @@
   {:query [{::i18n/current-locale (comp/get-query i18n/Locale)}
            {:root/current-session (comp/get-query auth/Session)}]})
 
+(defn- lang [request]
+  (or
+    (log/spy :debug (:user/language (auth/get-session-user @conn request)))
+    (-> request
+      (get-in [:headers "accept-language"] "en")
+      utils.header/preferred-language
+      keyword)))
+
+(def load-locale (memoize (partial i18n/load-locale "po-files")))
+
 (defn index-with-credentials [csrf-token script-manifest request]
-  (let [lang (-> request (get-in [:headers "accept-language"] "en") utils.header/preferred-language keyword)
-        locale (or (i18n/load-locale "po-files" lang) {::i18n/locale :en})
+  (let [locale (or (load-locale (log/spy :debug (lang request))) {::i18n/locale :en})
         initial-state
         (->
           (comp/get-initial-state Root)
-          (assoc
-            ::i18n/current-locale locale)
+          (assoc ::i18n/current-locale locale)
           (ssr/build-initial-state Root))]
     (index csrf-token script-manifest initial-state splash/splash)))
 
