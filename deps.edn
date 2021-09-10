@@ -7,7 +7,7 @@
         com.taoensso/timbre {:mvn/version "5.1.2"}
         com.taoensso/tufte {:mvn/version "2.2.0"}
         com.wsscode/pathom {:mvn/version "2.4.0"}
-        com.fulcrologic/fulcro {:mvn/version "3.5.5-SNAPSHOT"}
+        com.fulcrologic/fulcro {:mvn/version "3.5.5"}
         com.fulcrologic/fulcro-garden-css {:mvn/version "3.0.9"}
         com.fulcrologic/fulcro-i18n {:mvn/version "0.0.5-alpha"}
         com.fulcrologic/fulcro-rad {:mvn/version "1.0.16"}
@@ -36,7 +36,8 @@
  :aliases {:clj-tests {:extra-paths ["src/test"]
                        :main-opts ["-m" "kaocha.runner"]
                        :extra-deps {lambdaisland/kaocha {:mvn/version "1.0.887"}
-                                    lambdaisland/kaocha-junit-xml {:mvn/version "0.0.76"}}}
+                                    lambdaisland/kaocha-junit-xml {:mvn/version "0.0.76"}
+                                    orchestra/orchestra {:mvn/version "2021.01.01-1"}}}
 
            ;; See https://github.com/clojure-emacs/cider-nrepl/blob/master/deps.edn for Emacs support
            :dev {:extra-paths ["src/test" "src/dev" "src/workspaces"]
