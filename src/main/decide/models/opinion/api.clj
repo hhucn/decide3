@@ -38,14 +38,12 @@
      ::process/slug (::process/slug process)
      ::p/env (assoc env :db (:db-after tx-report))}))
 
-(defresolver resolve-personal-opinion-value [{:keys [db AUTH/user-id]} {::proposal/keys [id]}]
+(defresolver resolve-personal-opinion-value [{:keys [db AUTH/user]} {::proposal/keys [id]}]
   {::pc/input #{::proposal/id}
    ::pc/output [::proposal/my-opinion-value]}
-  (when user-id
-    (let [user (user.db/get-entity db user-id)
-          proposal (d/entity db [::proposal/id id])]
-      (when (and user proposal)
-        {::proposal/my-opinion-value (get (opinion.db/get-opinion db user proposal) ::opinion/value 0)}))))
+  (when user
+    (when-let [proposal (d/entity db [::proposal/id id])]
+      {::proposal/my-opinion-value (get (opinion.db/get-opinion db user proposal) ::opinion/value 0)})))
 
 
 (defresolver resolve-proposal-opinions [{:keys [db]} {::proposal/keys [id]}]

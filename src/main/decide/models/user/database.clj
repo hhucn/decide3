@@ -7,8 +7,6 @@
 (defn entity [db user-id]
   (d/entity db [::user/id user-id]))
 
-(def ^:deprecated get-entity entity)
-
 (defn ->update [user]
   (let [user-id (::user/id user)]
     (cons

@@ -101,7 +101,7 @@
    ::pc/output [::user/id ::process/slug]
    ::s/params (s/keys :req [::process/slug])
    ::pc/transform (comp auth/check-logged-in check-slug-exists needs-moderator)}
-  (when-let [user (user.db/get-entity db user-id)]
+  (when-let [user (user.db/entity db user-id)]
     (let [process (d/entity db [::process/slug slug])
           {:keys [db-after]}
           (d/transact conn
@@ -119,7 +119,7 @@
    ::pc/output [::process/slug]
    ::s/params (s/keys :req [::process/slug])
    ::pc/transform (comp auth/check-logged-in check-slug-exists needs-moderator)}
-  (when-let [user (user.db/get-entity db user-id)]
+  (when-let [user (user.db/entity db user-id)]
     (let [process (d/entity db [::process/slug slug])
           {:keys [db-after]}
           (d/transact conn
