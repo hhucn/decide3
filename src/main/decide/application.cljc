@@ -21,7 +21,8 @@
      #?@(:cljs
          [:shared {::i18n/message-formatter message-formatter}])
 
-     :shared-fn (fn [db]
-                  (-> db
-                    (select-keys [::i18n/current-locale])
-                    (assoc :logged-in? (get-in db [:root/current-session :session/valid?] false))))}))
+     :shared-fn
+     (fn shared-fn [db]
+       (merge
+         (::i18n/current-locale db)
+         {:logged-in? (get-in db [:root/current-session :session/valid?] false)}))}))
