@@ -100,7 +100,7 @@
 
 (defn- lang [request]
   (or
-    (log/spy :debug (:user/language (auth/get-session-user @conn request)))
+    (:user/language (auth/get-session-user @conn request))
     (-> request
       (get-in [:headers "accept-language"] "en")
       utils.header/preferred-language
@@ -109,7 +109,7 @@
 (def load-locale (memoize (partial i18n/load-locale "po-files")))
 
 (defn index-with-credentials [csrf-token script-manifest request]
-  (let [locale (or (load-locale (log/spy :debug (lang request))) {::i18n/locale :en})
+  (let [locale (or (load-locale (lang request)) {::i18n/locale :en})
         initial-state
         (->
           (comp/get-initial-state Root)
