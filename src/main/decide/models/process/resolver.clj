@@ -51,29 +51,9 @@
    ::pc/output [{::process/moderators [::user/id]}]}
   (d/pull db [{::process/moderators [::user/id]}] [::process/slug slug]))
 
-(defresolver resolve-user-moderated-processes [{:keys [db]} {::user/keys [id]}]
-  {::pc/output [{::user/moderated-processes [::process/slug]}]}
-  (if (user/exists? db id)
-    (d/pull db [{::process/_moderators :as ::user/moderated-processes [::process/slug]}] [::user/id id])
-    (throw (ex-info "User does not exist" {::user/id id}))))
-
 (defresolver resolve-I-moderator? [{:keys [db AUTH/user-id]} {::process/keys [slug]}]
   {::pc/output [:I/moderator?]}
   {:I/moderator? (process/moderator? (d/pull db [{::process/moderators [::user/id]}] [::process/slug slug]) user-id)})
-
-(defresolver resolve-authors [{:keys [db]} {::process/keys [proposals]}]
-  {::pc/output [{::process/authors [::user/id]}
-                ::process/no-of-authors]}
-  (let [authors (vec
-                  (set
-                    (for [{::proposal/keys [id original-author]} proposals]
-                      (if-let [user-id (::user/id original-author)]
-                        {::user/id user-id}
-                        (-> db
-                          (d/pull [{::proposal/original-author [::user/id]}] [::proposal/id id])
-                          ::proposal/original-author)))))]
-    {::process/authors authors
-     ::process/no-of-authors (count authors)}))
 
 (defresolver resolve-no-of-participants [{:keys [db]} {::process/keys [slug]}]
   {::pc/output [::process/no-of-participants]}
@@ -157,7 +137,6 @@
    resolve-process
    (pc/alias-resolver2 :process/features :process/features)
    resolve-process-moderators
-   resolve-user-moderated-processes
    resolve-participants
    resolve-no-of-participants
    resolve-winner
@@ -167,8 +146,6 @@
    resolve-no-of-proposals
 
    resolve-personal-approved-proposals
-
-   resolve-authors
 
    resolve-I-moderator?
 
