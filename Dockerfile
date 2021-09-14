@@ -1,7 +1,11 @@
-FROM circleci/clojure:openjdk-16-tools-deps-buster-node AS clj-build
+FROM clojure:openjdk-17-tools-deps-buster AS clj-build
 
 USER root
-RUN curl -o- -L https://yarnpkg.com/install.sh | bash
+RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
+    echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
+    apt-get update && \
+    apt-get -y dist-upgrade && \
+    apt-get -y install yarn
 
 WORKDIR /code
 ENV REPO="/code/.m2/repository"
@@ -17,7 +21,7 @@ RUN echo "Compile CLJS..." && \
     echo "Compiling CLJ..." && \
     clj -Sdeps "{:mvn/local-repo \"$REPO\"}" -X:uberjar
 
-FROM adoptopenjdk:16-jre
+FROM openjdk:17-slim
 COPY src/main/config/prod.edn /config/production.edn
 EXPOSE 8080
 ENTRYPOINT ["java", "-Dconfig=/config/production.edn", "-Dfulcro.logging=info", "-jar", "decide.jar", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=85", "-XX:+UnlockExperimentalVMOptions", "-XX:+UseZGC"]
