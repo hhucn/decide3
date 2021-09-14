@@ -22,7 +22,7 @@
         process (::process/_proposals proposal)
 
         tx-report
-        (db/transact-as user conn
+        (db/transact-as conn user
           {:tx-data
            (vec
              (concat

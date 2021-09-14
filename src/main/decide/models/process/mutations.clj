@@ -54,7 +54,7 @@
    ::pc/transform auth/check-logged-in}
   (let [existing-emails (filter #(user/email-in-db? db %) participant-emails)
         {:keys [db-after]}
-        (db/transact-as user conn
+        (db/transact-as conn user
           {:tx-data
            (process.db/->add db
              (-> process
@@ -72,7 +72,7 @@
      :req [::process/slug]
      :opt [::process/title ::process/description ::process/start-time ::process/end-time ::process/type])
    ::pc/transform (comp auth/check-logged-in check-slug-exists needs-moderator)}
-  (let [{:keys [db-after]} (db/transact-as user conn {:tx-data (process.db/->update db process)})]
+  (let [{:keys [db-after]} (db/transact-as conn user {:tx-data (process.db/->update db process)})]
     {::process/slug slug
      ::p/env (assoc env :db db-after)}))
 

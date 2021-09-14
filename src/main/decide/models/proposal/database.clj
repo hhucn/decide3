@@ -47,7 +47,7 @@
       [(generation ?proposal ?gen)
        [?proposal ::proposal/parents ?parent]
        (generation ?parent ?pgen)
-       [(max ?pgen) ?max-pgen]
+       [(max ?pgen) ?max-pgen] ; does this really work???
        [(inc ?max-pgen) ?gen]]]
 
 
