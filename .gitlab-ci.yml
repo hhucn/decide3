@@ -10,13 +10,6 @@ cache: &global_cache
     - .m2
     - .yarn
 
-stages:
-  - build
-  - test
-  - build-images
-  - analysis
-  - deploy
-
 include:
   - template: Security/Dependency-Scanning.gitlab-ci.yml
   - template: Security/License-Scanning.gitlab-ci.yml
