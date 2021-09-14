@@ -25,7 +25,6 @@ include:
 
 cljs-test:
   image: circleci/clojure:openjdk-14-tools-deps-buster-node-browsers
-  stage: test
   before_script:
     - curl -o- -L https://yarnpkg.com/install.sh | bash
     - export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
@@ -39,7 +38,6 @@ cljs-test:
       junit: target/TESTS.xml
 
 clj-test:
-  stage: test
   cache:
     key: ${CI_JOB_NAME}
     paths:
@@ -56,7 +54,6 @@ clj-test:
       junit: junit.xml
 
 build_latest_images:
-  stage: build-images
   needs: [ "clj-test", "cljs-test" ]
   image: docker
   before_script:
