@@ -3,6 +3,7 @@ node_modules/
 .shadow-cljs/
 .cpcache/
 .idea/
+.lsp/
 target/
 resources/public/js
 resources/public/workspaces/js
