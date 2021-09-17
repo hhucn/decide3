@@ -1,16 +1,19 @@
 (ns decide.ui.theming.themes
   (:require
-    [mui.styles :refer [create-mui-theme]]
-    ["@mui/utils" :refer [deepmerge]]
     ["@mui/material/styles" :refer [responsiveFontSizes createTheme]]
-    [decide.ui.theming.styles :as styles]
-    [taoensso.timbre :as log]))
+    ["@mui/utils" :refer [deepmerge]]
+    [decide.ui.theming.styles :as styles]))
 
 (def shared
-  {:overrides
-   {:MuiCardHeader
-    {:root
-     {:padding-bottom "4px"}}}})
+  {:components
+   {:MuiTooltip
+    {:defaultProps
+     {:arrow true}}
+    :MuiCard
+    {:styleOverrides
+     {:root
+      {:borderRadius 12
+       :border "1px solid rgba(0, 0, 0, 0.12)"}}}}})
 
 (def light-theme
   {:palette
