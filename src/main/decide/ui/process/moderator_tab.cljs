@@ -14,24 +14,27 @@
     [decide.models.user :as user]
     [decide.ui.process.moderator.participant-list :as participant-list]
     [decide.utils.time :as time]
-    [material-ui.data-display :as dd]
-    [material-ui.data-display.list :as list]
-    [material-ui.inputs :as inputs]
-    [material-ui.inputs.form :as form]
-    [material-ui.layout :as layout]
-    [material-ui.layout.grid :as grid]
-    [material-ui.surfaces :as surfaces]
-    ["@material-ui/icons/Clear" :default ClearIcon]
-    ["@material-ui/icons/ExpandMore" :default ExpandMoreIcon]
-    ["@material-ui/icons/RemoveCircleOutline" :default RemoveCircleIcon]
+    [mui.data-display :as dd]
+    [mui.data-display.list :as list]
+    [mui.inputs :as inputs]
+    [mui.inputs.form :as form]
+    [mui.layout :as layout]
+    [mui.layout.grid :as grid]
+    [mui.surfaces :as surfaces]
+    [mui.surfaces.card :as card]
+    [mui.surfaces.accordion :as accordion]
+    ["@mui/icons-material/Clear" :default ClearIcon]
+    ["@mui/icons-material/ExpandMore" :default ExpandMoreIcon]
+    ["@mui/icons-material/RemoveCircleOutline" :default RemoveCircleIcon]
     [decide.models.user.ui :as user.ui]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [mui.lab :as lab]))
 
 (defn- accordion [{:keys [title]} body]
-  (surfaces/accordion {:defaultExpanded true}
-    (surfaces/accordion-panel-summary {:expandIcon (dom/create-element ExpandMoreIcon)}
+  (accordion/accordion {:defaultExpanded true}
+    (accordion/summary {:expandIcon (dom/create-element ExpandMoreIcon)}
       (dd/typography {:variant "body1"} title))
-    (surfaces/accordion-panel-details {} body)))
+    (accordion/details {} body)))
 
 (defsc Moderator [_ {::user/keys [id display-name]
                      :keys [root/current-session >/avatar] :as props} {:keys [onDelete]}]
@@ -92,7 +95,6 @@
 
 (def default-input-props
   {:fullWidth true
-   :variant "filled"
    :autoComplete "off"
    :margin "normal"})
 
@@ -155,32 +157,32 @@
 
         (grid/container {:item true :xs 12 :spacing 2}
           (grid/item {:xs 12 :sm 6}
-            (time/datetime-picker
-              {:label (i18n/trc "Start of a process" "Start")
+            (lab/date-time-picker
+              {:renderInput #(inputs/textfield (merge (js->clj %)
+                                                 default-input-props
+                                                 {:helperText (i18n/tr "Optional")}))
                :value (or (::process/start-time form-state) js/undefined)
-               :inputVariant "filled"
+               :maxDate (or (::process/end-time form-state) js/undefined)
                :onChange #(set-form-state (assoc form-state ::process/start-time %))
                :clearable true
-               :fullWidth true
-               :helperText (i18n/tr "Optional")}))
+               :label (i18n/trc "Start of a process" "Start")}))
 
           (grid/item {:xs 12 :sm 6}
-            (time/datetime-picker
-              {:label (i18n/trc "End of a process" "End")
+            (lab/date-time-picker
+              {:renderInput #(inputs/textfield (merge (js->clj %)
+                                                 default-input-props
+                                                 {:helperText (i18n/tr "Optional")}))
                :value (or (::process/end-time form-state) js/undefined)
+               :maxDate (or (::process/start-time form-state) js/undefined)
                :onChange #(set-form-state (assoc form-state ::process/end-time %))
-               :minDate (or (::process/start-time form-state) js/undefined)
-               :inputVariant "filled"
                :clearable true
-               :fullWidth true})))
-
-
+               :label (i18n/trc "End of a process" "End")})))
 
         (grid/item {:xs 12}
-          (surfaces/accordion {:variant :outlined}
-            (surfaces/accordion-panel-summary {:expandIcon (dom/create-element ExpandMoreIcon)}
+          (accordion/accordion {:variant :outlined}
+            (accordion/summary {:expandIcon (dom/create-element ExpandMoreIcon)}
               (i18n/tr "Advanced"))
-            (surfaces/accordion-panel-details {}
+            (accordion/details {}
               (grid/container {}
                 (grid/item {:xs 12}
                   (form/group {:row true}
@@ -261,9 +263,9 @@
           (ui-process-edit process-edit))
         (when participant-list
           (grid/item {:xs 12 :sm 6 :md 4}
-            (surfaces/card {}
-              (surfaces/card-header {:title (i18n/trc "Label for list of participants" "Participants")})
-              (surfaces/card-content {}
+            (card/card {}
+              (card/header {:title (i18n/trc "Label for list of participants" "Participants")})
+              (card/content {}
                 (participant-list/ui-participant-list participant-list)))))
         (grid/item {}
           (ui-moderator-list moderator-list))))))

@@ -2,8 +2,8 @@
   (:require
     [com.fulcrologic.guardrails.core :refer [>defn =>]]
     [cljs.spec.alpha :as s]
-    ["@material-ui/core/styles" :refer [useTheme]]
-    [material-ui.utils :as utils]))
+    ["@mui/material/styles" :refer [useTheme]]
+    [mui.utils :as utils]))
 
 (s/def ::breakpoint #{"xs" "sm" "md" "lg" "xl"})
 

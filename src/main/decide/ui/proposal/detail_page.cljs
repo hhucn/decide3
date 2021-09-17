@@ -14,12 +14,13 @@
     [decide.models.proposal :as proposal]
     [decide.ui.proposal.new-proposal :as new-proposal]
     [decide.utils.breakpoint :as breakpoint]
-    [material-ui.data-display :as dd]
-    [material-ui.data-display.list :as list]
-    [material-ui.inputs :as inputs]
-    [material-ui.layout :as layout]
-    [material-ui.layout.grid :as grid]
-    [material-ui.surfaces :as surfaces]))
+    [mui.data-display :as dd]
+    [mui.data-display.list :as list]
+    [mui.inputs :as inputs]
+    [mui.layout :as layout]
+    [mui.layout.grid :as grid]
+    [mui.surfaces :as surfaces]
+    [mui.surfaces.card :as card]))
 
 (declare ProposalPage)
 
@@ -96,9 +97,8 @@
      :label (str title)
      :variant :outlined
      :avatar
-     (layout/box {:clone true :bgcolor "transparent"}
-       (dd/avatar {}
-         (str "#" nice-id)))}))
+     (dd/avatar {:sx {:bgcolor "transparent"}}
+       (str "#" nice-id))}))
 
 (def ui-small-relationship (comp/computed-factory SmallRelationship {:keyfn (comp ::proposal/id :proposal)}))
 
@@ -165,10 +165,10 @@
            :other-uniques]}
   (let [others-total (+ common-uniques other-uniques)
         own-total (+ own-uniques common-uniques)]
-    (surfaces/card {:variant :outlined :style {:flexGrow 1}}
-      (surfaces/card-action-area {:href (str (::proposal/id other-proposal))}
-        (surfaces/card-header {:title (ui-similar-proposal other-proposal)})
-        (surfaces/card-content {}
+    (card/card {:variant :outlined :style {:flexGrow 1}}
+      (card/action-area {:href (str (::proposal/id other-proposal))}
+        (card/header {:title (ui-similar-proposal other-proposal)})
+        (card/content {}
           (grid/container {:spacing 1}
 
             (grid/item {:xs true}
@@ -178,12 +178,11 @@
 
             (grid/item {:xs true}
               (dd/typography {:variant :caption :component :label} (i18n/tr "Potential approves")
-                (layout/box {:clone true :color "success.main"}
-                  (dd/typography {}
-                    (i18n/trf "{ratioOfVoters, number, ::+! percent} more approves" {:ratioOfVoters (dec (/ sum-uniques own-total))}))))))))
+                (dd/typography {:sx {:color "success.main"}}
+                  (i18n/trf "{ratioOfVoters, number, ::+! percent} more approves" {:ratioOfVoters (dec (/ sum-uniques own-total))})))))))
 
       (when-not process-over?
-        (surfaces/card-actions {}
+        (card/actions {}
           (inputs/button
             {:color :secondary
              :onClick #(show-add-dialog (comp/get-ident SimilarProposal other-proposal))}
@@ -266,47 +265,46 @@
                                   :parents (apply vector (comp/get-ident this) idents)})]))
                           [slug])]
     (layout/container {:maxWidth :xl :disableGutters (breakpoint/<=? "sm")}
-      (layout/box {:mt 2 :p 2 :clone true}
-        (surfaces/paper {}
-          (grid/container {:spacing 2 :component "main"}
+      (surfaces/paper {:sx {:mt 2 :p 2}}
+        (grid/container {:spacing 2 :component "main"}
+          (grid/item {:xs 12}
+            (dd/typography {:variant "h3" :component "h1"} title)
+            ;; " Dieser Vorschlag basiert auf " (count parents) " weiteren Vorschlägen "
+            (ui-small-parent-section parent-section))
+
+          ;; Left side
+          (grid/container {:item true :xs 12 :lg (if show-right-side? 8 12)
+                           :alignContent "flex-start"
+                           :spacing 1}
+
+            (grid/item {:xs 12 :component "section"}
+              (dd/typography {:variant "body1" :style {:whiteSpace "pre-line"}} body))
+
             (grid/item {:xs 12}
-              (dd/typography {:variant "h3" :component "h1"} title)
-              ;; " Dieser Vorschlag basiert auf " (count parents) " weiteren Vorschlägen "
-              (ui-small-parent-section parent-section))
-
-            ;; Left side
-            (grid/container {:item true :xs 12 :lg (if show-right-side? 8 12)
-                             :alignContent "flex-start"
-                             :spacing 1}
-
-              (grid/item {:xs 12 :component "section"}
-                (dd/typography {:variant "body1" :style {:whiteSpace "pre-line"}} body))
-
-              (grid/item {:xs 12}
-                (surfaces/toolbar
-                  {:variant :dense
-                   :disableGutters true}
-                  (when-not process-over?
-                    (inputs/button
-                      {:color :primary
-                       :variant :contained
-                       :size :small
-                       :onClick #(comp/transact! this [(new-proposal/show {:parents [(comp/get-ident this)]})])}
-                      (i18n/trc "Prompt to merge or fork" "Propose a change")))))
+              (surfaces/toolbar
+                {:variant :dense
+                 :disableGutters true}
+                (when-not process-over?
+                  (inputs/button
+                    {:color :primary
+                     :variant :contained
+                     :size :small
+                     :onClick #(comp/transact! this [(new-proposal/show {:parents [(comp/get-ident this)]})])}
+                    (i18n/trc "Prompt to merge or fork" "Propose a change")))))
 
 
-              (grid/item {:xs 6}
-                (ui-opinion-section opinion-section))
-              (grid/item {:xs 12 :component "section"}
-                (section (i18n/tr "Argumentation")
-                  (argumentation.ui/ui-argument-list argumentation-section))))
+            (grid/item {:xs 6}
+              (ui-opinion-section opinion-section))
+            (grid/item {:xs 12 :component "section"}
+              (section (i18n/tr "Argumentation")
+                (argumentation.ui/ui-argument-list argumentation-section))))
 
-            ;; Right side
-            (when-not show-right-side?
-              (grid/item {:xs 12 :lg 4 :component "section"}
-                (when has-children?
-                  (ui-children-section children-section))
-                (when show-similar-section?
-                  (section (i18n/tr "Possible coalitions")
-                    (ui-similar-section similar-section {:show-add-dialog show-add-dialog
-                                                         :process-over? process-over?})))))))))))
+          ;; Right side
+          (when-not show-right-side?
+            (grid/item {:xs 12 :lg 4 :component "section"}
+              (when has-children?
+                (ui-children-section children-section))
+              (when show-similar-section?
+                (section (i18n/tr "Possible coalitions")
+                  (ui-similar-section similar-section {:show-add-dialog show-add-dialog
+                                                       :process-over? process-over?}))))))))))

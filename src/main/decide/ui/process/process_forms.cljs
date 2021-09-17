@@ -9,16 +9,17 @@
     [decide.models.process :as process]
     [decide.models.user :as user]
     [decide.utils.time :as time]
-    [material-ui.data-display :as dd]
-    [material-ui.inputs :as inputs]
-    [material-ui.inputs.form :as form]
-    [material-ui.inputs.input :as input]
-    [material-ui.layout :as layout]
-    [material-ui.layout.grid :as grid]
+    [mui.data-display :as dd]
+    [mui.inputs :as inputs]
+    [mui.inputs.form :as form]
+    [mui.inputs.input :as input]
+    [mui.layout :as layout]
+    [mui.layout.grid :as grid]
     [taoensso.timbre :as log]
-    [material-ui.transitions :as transitions]
-    [material-ui.data-display.list :as list]
-    [material-ui.surfaces :as surfaces]))
+    [mui.transitions :as transitions]
+    [mui.data-display.list :as list]
+    [mui.surfaces :as surfaces]
+    [mui.lab :as lab]))
 
 
 (def default-input-props
@@ -108,15 +109,12 @@
              :control (inputs/switch {})}))
 
         (transitions/collapse {:in with-end?}
-          (time/datetime-picker
-            (merge default-input-props
-              {:label (i18n/trc "When does a process end?" "When?")
-               :value end-time
-               :required with-end?
-               :disabled (not with-end?)
-               :inputVariant "filled"
-               :onChange set-end-time
-               :fullWidth true}))))
+          (lab/date-time-picker
+            {:renderInput #(inputs/textfield (merge (js->clj %) default-input-props {}))
+             :value end-time
+             :disabled (not with-end?)
+             :onChange set-end-time
+             :label (i18n/trc "When does a process end?" "When?")})))
 
       (dom/div {}
         (form/group {:row true}

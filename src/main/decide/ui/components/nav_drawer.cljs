@@ -12,17 +12,17 @@
     [decide.ui.pages.settings :as settings]
     [decide.ui.process.list :as process.list]
     [decide.ui.translations.selector :as i18n.switcher]
-    [material-ui.data-display :as dd]
-    [material-ui.data-display.list :as list]
-    [material-ui.inputs :as inputs]
-    [material-ui.layout :as layout]
-    [material-ui.navigation :as nav]
-    [material-ui.surfaces :as surfaces]
-    ["@material-ui/icons/AccountCircle" :default AccountCircle]
-    ["@material-ui/icons/ChevronLeft" :default ChevronLeftIcon]
-    ["@material-ui/icons/Settings" :default SettingsIcon]
-    ["@material-ui/icons/DeviceHub" :default DeviceHubIcon]
-    ["@material-ui/icons/Translate" :default TranslateIcon]
+    [mui.data-display :as dd]
+    [mui.data-display.list :as list]
+    [mui.inputs :as inputs]
+    [mui.layout :as layout]
+    [mui.navigation :as nav]
+    [mui.surfaces :as surfaces]
+    ["@mui/icons-material/AccountCircle" :default AccountCircle]
+    ["@mui/icons-material/ChevronLeft" :default ChevronLeftIcon]
+    ["@mui/icons-material/Settings" :default SettingsIcon]
+    ["@mui/icons-material/DeviceHub" :default DeviceHubIcon]
+    ["@mui/icons-material/Translate" :default TranslateIcon]
     [taoensso.timbre :as log]))
 
 (def ident [:component/id ::NavDrawer])
@@ -55,16 +55,15 @@
          :flexDirection :column
          :width "250px"
          :height "100vh"}
-        (layout/box {:clone true
-                     :display :flex}
-          (surfaces/toolbar {:width "100%"}
+        (surfaces/toolbar {:width "100%"
+                           :sx {:display :flex}}
 
-            (dd/typography {:variant :h5
-                            :color "inherit"} "decide")
-            (inputs/icon-button
-              {:edge :end :onClick toggle-navdrawer!
-               :style {:marginLeft :auto}}
-              (dom/create-element ChevronLeftIcon))))
+          (dd/typography {:variant :h5
+                          :color "inherit"} "decide")
+          (inputs/icon-button
+            {:edge :end :onClick toggle-navdrawer!
+             :style {:marginLeft :auto}}
+            (dom/create-element ChevronLeftIcon)))
 
         (layout/box {:flexBasis "100%"
                      :my 1}

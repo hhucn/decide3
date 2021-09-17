@@ -17,19 +17,19 @@
     [decide.models.process.mutations :as process.mutations]
     [decide.models.proposal :as proposal]
     [decide.utils.breakpoint :as breakpoint]
-    [material-ui.data-display :as dd]
-    [material-ui.data-display.list :as list]
-    [material-ui.feedback.dialog :as dialog]
-    [material-ui.inputs :as inputs]
-    [material-ui.inputs.form :as form]
-    [material-ui.layout :as layout]
-    [material-ui.layout.grid :as grid]
-    [material-ui.navigation.stepper :as stepper]
-    ["@material-ui/icons/Add" :default Add]
-    ["@material-ui/icons/Close" :default Close]
-    ["@material-ui/icons/FileCopyOutlined" :default FileCopy]
-    ["@material-ui/icons/KeyboardReturn" :default KeyboardReturn]
-    ["@material-ui/icons/MergeType" :default MergeType]))
+    [mui.data-display :as dd]
+    [mui.data-display.list :as list]
+    [mui.feedback.dialog :as dialog]
+    [mui.inputs :as inputs]
+    [mui.inputs.form :as form]
+    [mui.layout :as layout]
+    [mui.layout.grid :as grid]
+    [mui.navigation.stepper :as stepper]
+    ["@mui/icons-material/Add" :default Add]
+    ["@mui/icons-material/Close" :default Close]
+    ["@mui/icons-material/FileCopyOutlined" :default FileCopy]
+    ["@mui/icons-material/KeyboardReturn" :default KeyboardReturn]
+    ["@mui/icons-material/MergeType" :default MergeType]))
 
 
 (declare NewProposalFormDialog)
@@ -86,9 +86,8 @@
 (defsc TypeStep [_ _ {:keys [to-step]}]
   {:use-hooks? true}
   (layout/box {:m (if (breakpoint/<=? "sm") 0 6)}
-    (layout/box {:clone true :sx {:textAlign :center}}
-      (dd/typography {:variant :h5 :paragraph true}
-        (i18n/tr "Add a new proposal, develop or merge existing proposals")))
+    (dd/typography {:variant :h5 :paragraph true, :sx {:textAlign :center}}
+      (i18n/tr "Add a new proposal, develop or merge existing proposals"))
     ;; TODO Fix Icon sizes / positions
     (grid/container {:spacing 2}
       (grid/item {:sm 4 :xs 12}
@@ -274,8 +273,8 @@
                                       ::proposal/body body
                                       ::proposal/parents (mapv #(select-keys % [::proposal/id]) parents)})])
                                 (close-dialog))}}
-      (dialog/title {:disableTypography true :style {:display :flex}}
-        (dd/typography {:component :h2 :variant :h6}
+      (dialog/title {:style {:display :flex}}
+        (dd/typography {:component :span :variant :h6}
           (i18n/trc "Title of new proposal form" "New proposal"))
         (layout/box {:ml :auto :mr -2 :mt -1}
           (inputs/icon-button {:onClick close-dialog

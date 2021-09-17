@@ -16,18 +16,19 @@
     [decide.ui.proposal.detail-page :as detail-page]
     [decide.ui.proposal.new-proposal :as new-proposal]
     [decide.utils.time :as time]
-    [material-ui.data-display :as dd]
-    [material-ui.data-display.list :as list]
-    [material-ui.feedback.dialog :as dialog]
-    [material-ui.inputs :as inputs]
-    [material-ui.layout :as layout]
-    [material-ui.layout.grid :as grid]
-    [material-ui.surfaces :as surfaces]
-    ["@material-ui/icons/Comment" :default Comment]
-    ["@material-ui/icons/ThumbDownAltOutlined" :default ThumbDownOutlined]
-    ["@material-ui/icons/ThumbDownAlt" :default ThumbDown]
-    ["@material-ui/icons/ThumbUpAltOutlined" :default ThumbUpOutlined]
-    ["@material-ui/icons/ThumbUpAlt" :default ThumbUp]))
+    [mui.data-display :as dd]
+    [mui.data-display.list :as list]
+    [mui.feedback.dialog :as dialog]
+    [mui.inputs :as inputs]
+    [mui.layout :as layout]
+    [mui.layout.grid :as grid]
+    [mui.surfaces :as surfaces]
+    ["@mui/icons-material/Comment" :default Comment]
+    ["@mui/icons-material/ThumbDownAltOutlined" :default ThumbDownOutlined]
+    ["@mui/icons-material/ThumbDownAlt" :default ThumbDown]
+    ["@mui/icons-material/ThumbUpAltOutlined" :default ThumbUpOutlined]
+    ["@mui/icons-material/ThumbUpAlt" :default ThumbUp]
+    [mui.surfaces.card :as card]))
 
 (defn id-part [proposal-id]
   (dom/data {:className "proposal-id"
@@ -275,7 +276,7 @@
                         #(routing/path->absolute-url
                            (dr/into-path ["decision" slug] detail-page/ProposalPage (str id)))
                         [slug id])]
-    (surfaces/card
+    (card/card
       (merge
         {:raised false
          :component :article
@@ -284,26 +285,24 @@
                  :flexDirection "column"}}
         card-props)
 
-      (surfaces/card-action-area {:href proposal-href
-                                  :style {:flexGrow 1}}
-        (surfaces/card-header
+      (card/action-area {:href proposal-href
+                         :style {:flexGrow 1}}
+        (card/header
           {:title title
            :titleTypographyProps {:component "h3"}
            :subheader (ui-subheader subheader {:type? true :gen? true :created? true :author? false})})
-
-        (layout/box {:maxHeight max-height
-                     :overflow "hidden"
-                     :clone true}
-          (surfaces/card-content {}
-            (dd/typography
-              {:component "p"
-               :variant "body2"
-               :color "textSecondary"
-               :style {:whiteSpace "pre-line"}}
-              body))))
+        
+        (card/content {:sx {:maxHeight max-height
+                            :overflow "hidden"}}
+          (dd/typography
+            {:component "p"
+             :variant "body2"
+             :color "textSecondary"
+             :style {:whiteSpace "pre-line"}}
+            body)))
 
       (dd/divider {:variant :middle})
-      (surfaces/card-actions {}
+      (card/actions {}
         (grid/container
           {:alignItems :center
            :justifyContent :space-between

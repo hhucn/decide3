@@ -8,10 +8,10 @@
     [decide.models.authorization :as auth]
     [decide.models.user :as user]
 
-    [material-ui.data-display :as dd]
-    [material-ui.feedback.dialog :as dialog]
-    [material-ui.inputs :as inputs]
-    [material-ui.layout.grid :as grid]
+    [mui.data-display :as dd]
+    [mui.feedback.dialog :as dialog]
+    [mui.inputs :as inputs]
+    [mui.layout.grid :as grid]
     [com.fulcrologic.fulcro.application :as app]))
 
 (defn reset-password-field! [component]
@@ -137,7 +137,7 @@
             (i18n/trc "Label of submit form" "Sign up")))
         (grid/container
           {:item true
-           :justify :flex-end}
+           :justifyContent :flex-end}
           (grid/item {}
             (inputs/button
               {:color "inherit"
@@ -207,7 +207,7 @@
             (i18n/trc "Label of submit form" "Sign in")))
         (grid/container
           {:item true
-           :justify :space-between}
+           :justifyContent :space-between}
           (grid/item {:xs true}
             #_(navigation/link {:variant :body2} "Forgot password?"))
           (grid/item {}

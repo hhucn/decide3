@@ -18,21 +18,21 @@
     [decide.ui.proposal.plain-list :as plain-list]
     [decide.utils.breakpoint :as breakpoint]
     [decide.utils.time :as time]
-    [material-ui.data-display :as dd]
-    [material-ui.data-display.list :as list]
-    [material-ui.feedback :as feedback]
-    [material-ui.inputs :as inputs]
-    [material-ui.inputs.form :as form]
-    [material-ui.inputs.input :as input]
-    [material-ui.lab.toggle-button :as toggle]
-    [material-ui.layout :as layout]
-    [material-ui.layout.grid :as grid]
-    [material-ui.navigation :as navigation]
-    [material-ui.surfaces :as surfaces]
-    ["@material-ui/icons/Add" :default AddIcon]
-    ["@material-ui/icons/Refresh" :default Refresh]
-    ["@material-ui/icons/ViewList" :default ViewList]
-    ["@material-ui/icons/ViewModule" :default ViewModule]))
+    [mui.data-display :as dd]
+    [mui.data-display.list :as list]
+    [mui.feedback :as feedback]
+    [mui.inputs :as inputs]
+    [mui.inputs.form :as form]
+    [mui.inputs.input :as input]
+    [mui.inputs.toggle-button :as toggle]
+    [mui.layout :as layout]
+    [mui.layout.grid :as grid]
+    [mui.navigation :as navigation]
+    [mui.surfaces :as surfaces]
+    ["@mui/icons-material/Add" :default AddIcon]
+    ["@mui/icons-material/Refresh" :default Refresh]
+    ["@mui/icons-material/ViewList" :default ViewList]
+    ["@mui/icons-material/ViewModule" :default ViewModule]))
 
 
 (defn add-proposal-fab [props]
@@ -98,8 +98,7 @@
       (i18n/tr "Login to add new argument"))))
 
 (defn main-list-toolbar [{:keys [left right]} & children]
-  (layout/box {:my 1 :clone true}
-    (apply surfaces/toolbar {:disableGutters true :variant :dense} children)))
+  (apply surfaces/toolbar {:disableGutters true :variant :dense, :sx {:my 1}} children))
 
 (defn info-toolbar-item [{:keys [label]}]
   (grid/item {}
@@ -175,15 +174,16 @@
         (main-list-toolbar {}
           ;; left side
           (grid/container {:spacing 2, :alignItems :center}
-            (inputs/button
-              {:onClick #(df/refresh! this {:marker ::loading-proposals})
-               :variant :outlined
-               :disabled loading-proposals?
-               :startIcon
-               (if loading-proposals?
-                 (feedback/circular-progress {:size "20px" :color :inherit})
-                 (dom/create-element Refresh))}
-              (i18n/trc "Reload content" "Refresh"))
+            (grid/item {}
+              (inputs/button
+                {:onClick #(df/refresh! this {:marker ::loading-proposals})
+                 :variant :outlined
+                 :disabled loading-proposals?
+                 :startIcon
+                 (if loading-proposals?
+                   (feedback/circular-progress {:size "20px" :color :inherit})
+                   (dom/create-element Refresh))}
+                (i18n/trc "Reload content" "Refresh")))
             (info-toolbar-item
               {:label (i18n/trf "Proposals {count}" {:count (max no-of-proposals (count sorted-proposals))})})
             (info-toolbar-item

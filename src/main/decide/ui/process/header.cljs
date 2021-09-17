@@ -7,15 +7,15 @@
     [decide.models.process :as process]
     [decide.models.user :as user]
     [decide.utils.time :as time]
-    [material-ui.data-display :as dd]
-    [material-ui.feedback :as feedback]
-    [material-ui.inputs :as inputs]
-    [material-ui.lab.alert :as alert]
-    [material-ui.layout :as layout]
-    [material-ui.layout.grid :as grid]
-    [material-ui.transitions :as transitions]
-    ["@material-ui/icons/ExpandLess" :default ExpandLess]
-    ["@material-ui/icons/ExpandMore" :default ExpandMore]
+    [mui.data-display :as dd]
+    [mui.feedback :as feedback]
+    [mui.inputs :as inputs]
+    [mui.feedback.alert :as alert]
+    [mui.layout :as layout]
+    [mui.layout.grid :as grid]
+    [mui.transitions :as transitions]
+    ["@mui/icons-material/ExpandLess" :default ExpandLess]
+    ["@mui/icons-material/ExpandMore" :default ExpandMore]
     [taoensso.timbre :as log]))
 
 
@@ -72,11 +72,11 @@
 
 
       (transitions/collapse {:in description-open?}
-        (layout/box {:py 2 :clone true}
-          (dd/typography {:variant :body1
-                          :style {:whiteSpace :pre-line
-                                  :maxWidth "800px"}}
-            description)))
+        (dd/typography {:variant :body1
+                        :sx {:py 2}
+                        :style {:whiteSpace :pre-line
+                                :maxWidth "800px"}}
+          description))
       (grid/container {:spacing 1 :alignItems :center}
         (grid/item {:xs 12 :sm :auto}
           (inputs/button {:variant (if has-end-time? :text :outlined)
@@ -96,12 +96,11 @@
                   (alert/title {} (ends-in-label end-time)))
 
                 (when (and has-start-time? has-end-time?)
-                  (layout/box {:sx {:width "200px"}
-                               :aria-hidden true
-                               :clone true}
-                    (feedback/linear-progress
-                      {:variant :determinate
-                       :value (progress start-time end-time)})))))))
+                  (feedback/linear-progress
+                    {:variant :determinate
+                     :sx {:width "200px"}
+                     :aria-hidden true
+                     :value (progress start-time end-time)}))))))
         #_(when (contains? features :process.feature/single-approve)
             (grid/item {}
               (alert/alert {:severity :info :py 0}

@@ -5,8 +5,8 @@
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
     [decide.ui.proposal.card :as proposal-card]
-    [material-ui.data-display :as dd]
-    [material-ui.layout.grid :as grid]))
+    [mui.data-display :as dd]
+    [mui.layout.grid :as grid]))
 
 (defsc Parent
   "Item on the right side"

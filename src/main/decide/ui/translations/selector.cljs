@@ -9,9 +9,9 @@
     [decide.models.user :as user]
     [decide.models.user.api :as user.api]
     [decide.ui.meta :as meta]
-    [material-ui.inputs :as inputs]
-    [material-ui.inputs.form :as form]
-    [material-ui.inputs.input :as input]))
+    [mui.inputs :as inputs]
+    [mui.inputs.form :as form]
+    [mui.inputs.input :as input]))
 
 (defmutation change-language [{:keys [locale]}]
   (action [{:keys [component state]}]

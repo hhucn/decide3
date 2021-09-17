@@ -4,13 +4,14 @@
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.dom :as dom :refer [i br]]
     [decide.utils.breakpoint :as breakpoint]
-    [material-ui.data-display :as dd]
-    [material-ui.inputs :as inputs]
-    [material-ui.lab.alert :as alert]
-    [material-ui.layout :as layout]
-    [material-ui.layout.grid :as grid]
-    [material-ui.surfaces :as surfaces]
-    ["@material-ui/icons/Mail" :default MailIcon]))
+    [mui.data-display :as dd]
+    [mui.inputs :as inputs]
+    [mui.feedback.alert :as alert]
+    [mui.layout :as layout]
+    [mui.layout.grid :as grid]
+    [mui.surfaces :as surfaces]
+    [mui.surfaces.card :as card]
+    ["@mui/icons-material/Mail" :default MailIcon]))
 
 (defn content [& content]
   (apply dd/typography {:paragraph true #_#_:style {:white-space :pre-line}}
@@ -95,15 +96,15 @@
    :initial-state {}
    :route-segment ["help"]
    :use-hooks? true}
-  (layout/box {:mt 2 :clone true}
-    (layout/container
-      {:maxWidth :md
-       :disableGutters (breakpoint/<=? "xs")}
-      (surfaces/card {}
-        (alert/alert {:severity :warning}
-          (i18n/tr "The instructions are currently only available in german. Please send us a mail via the button at
+  (layout/container
+    {:maxWidth :md
+     :sx {:mt 2}
+     :disableGutters (breakpoint/<=? "xs")}
+    (card/card {}
+      (alert/alert {:severity :warning}
+        (i18n/tr "The instructions are currently only available in german. Please send us a mail via the button at
           the end of this page, if you have questions."))
-        (surfaces/card-content {}
-          (case locale
-            :de (help-page)
-            (help-page)))))))
+      (card/content {}
+        (case locale
+          :de (help-page)
+          (help-page))))))

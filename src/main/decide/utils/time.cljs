@@ -3,9 +3,7 @@
     [cljs.spec.alpha :as s]
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.dom :as dom]
-    [com.fulcrologic.guardrails.core :refer [>defn =>]]
-    ["@date-io/date-fns" :as date-fns]
-    ["@material-ui/pickers" :refer [DateTimePicker MuiPickersUtilsProvider]]))
+    [com.fulcrologic.guardrails.core :refer [>defn =>]]))
 
 (s/def :js/Date #(instance? js/Date %))
 
@@ -88,12 +86,3 @@
   (dom/time {:dateTime (.toISOString datetime)
              :title datetime}
     (nice-string datetime)))
-
-(defn datetime-picker [props]
-  (dom/create-element MuiPickersUtilsProvider #js {:utils date-fns}
-    (dom/create-element DateTimePicker
-      (clj->js
-        (merge
-          {:ampm false
-           :labelFunc (fn [date _invalidLabel] (or date ""))}
-          props)))))

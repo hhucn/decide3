@@ -19,9 +19,9 @@
     [decide.ui.proposal.detail-page :as proposal.detail-page]
     [decide.ui.proposal.main-proposal-list :as proposal.main-list]
     [decide.ui.proposal.new-proposal :as new-proposal]
-    [material-ui.layout :as layout]
-    [material-ui.navigation.tabs :as tabs]
-    [material-ui.surfaces :as surfaces]
+    [mui.layout :as layout]
+    [mui.navigation.tabs :as tabs]
+    [mui.surfaces :as surfaces]
     [taoensso.timbre :as log]))
 
 (defrouter ProcessRouter [_this _]

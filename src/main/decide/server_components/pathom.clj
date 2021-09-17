@@ -68,7 +68,7 @@
   [env err]
   (let [msg (.getMessage err)
         data (or (ex-data err) {})]
-    (log/error err "Parser Error:" msg data)
+    (log/error err "Parser Error:" msg #_data)
     {::rad-pathom/errors {:message msg
                           :data data}}))
 

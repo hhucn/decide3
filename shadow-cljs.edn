@@ -9,6 +9,7 @@
                                     :entries [decide.client]
                                     :depends-on #{:shared}}
                            :shared {:entries [decide.application]}}
+                 :js-options {:entry-keys ["module" "browser" "main"]}
                  ;; guardrails enforcement only during dev
                  :dev {:compiler-options
                        {:external-config {:guardrails {:defn-macro nil

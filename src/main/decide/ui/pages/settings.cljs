@@ -13,12 +13,12 @@
     [decide.models.user.api :as user.api]
     [decide.models.user.ui :as user.ui]
     [decide.ui.components.snackbar :as snackbar]
-    [material-ui.feedback :as feedback]
-    [material-ui.inputs :as inputs]
-    [material-ui.lab :refer [skeleton]]
-    [material-ui.layout :as layout]
-    [material-ui.layout.grid :as grid]
-    [material-ui.surfaces :as surfaces]))
+    [mui.feedback :as feedback]
+    [mui.inputs :as inputs]
+    [mui.feedback.skeleton :refer [skeleton]]
+    [mui.layout :as layout]
+    [mui.layout.grid :as grid]
+    [mui.surfaces.card :as card]))
 
 (def settings-page-ident [:SCREEN ::settings])
 
@@ -49,7 +49,7 @@
                        :old-password-error nil
                        :new-password-error nil
                        :ui/success-open? false}}
-  (surfaces/card
+  (card/card
     {:component :form
      :onSubmit (fn submit-change-password [e]
                  (evt/prevent-default! e)
@@ -57,8 +57,8 @@
                    [(m/set-props {:ui/old-password ""
                                   :ui/new-password ""})
                     (user/change-password {:old-password old-password :new-password new-password})]))}
-    (surfaces/card-header {:title (i18n/tr "Change Password")})
-    (surfaces/card-content {}
+    (card/header {:title (i18n/tr "Change Password")})
+    (card/content {}
       (wide-textfield {:label (i18n/tr "Old password")
                        :type :password
                        :error (boolean old-password-error)
@@ -83,7 +83,7 @@
                        :onChange (fn [e]
                                    (m/set-value!! this :ui/new-password-error nil)
                                    (m/set-string!! this :ui/new-password :event e))}))
-    (surfaces/card-actions {}
+    (card/actions {}
       (save-button))
     (feedback/snackbar
       {:autoHideDuration 6000
@@ -139,7 +139,7 @@
    (fn [this]
      (comp/transact! this [(fs/reset-form! {:form-ident (comp/get-ident this)})]))}
 
-  (surfaces/card
+  (card/card
     {:component :form
      :onSubmit
      (fn [e]
@@ -163,9 +163,9 @@
                               (assoc ::user/id id)))}})]
              {:optimistic? false}))))}
 
-    (surfaces/card-header {:title (i18n/tr "Personal Details")})
+    (card/header {:title (i18n/tr "Personal Details")})
 
-    (surfaces/card-content {}
+    (card/content {}
       (grid/container {:spacing 1}
         (grid/item {}
           (user.ui/ui-avatar avatar {:avatar-props {:style {:width "70px" :height "70px" :fontSize "3rem"}}}))
@@ -192,7 +192,7 @@
            :onBlur #(comp/transact! this [(fs/mark-complete! {:field :user/email})])
            :onChange #(m/set-string!! this :user/email :event %)})))
 
-    (surfaces/card-actions {}
+    (card/actions {}
       (inputs/button
         {:color :primary
          :type :submit

@@ -10,17 +10,18 @@
     [decide.models.opinion.api :as opinion.api]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
-    [material-ui.data-display.list :as list]
-    [material-ui.layout :as layout]
-    [material-ui.layout.grid :as grid]
-    [material-ui.surfaces :as surfaces]
-    ["@material-ui/icons/UnfoldMore" :default UnfoldMoreIcon]
-    ["@material-ui/icons/UnfoldLess" :default UnfoldLessIcon]
-    ["@material-ui/icons/ThumbUpAltTwoTone" :default ThumbUpAltTwoTone]
+    [mui.data-display.list :as list]
+    [mui.layout :as layout]
+    [mui.layout.grid :as grid]
+    [mui.surfaces :as surfaces]
+    [mui.surfaces.card :as card]
+    ["@mui/icons-material/UnfoldMore" :default UnfoldMoreIcon]
+    ["@mui/icons-material/UnfoldLess" :default UnfoldLessIcon]
+    ["@mui/icons-material/ThumbUpAltTwoTone" :default ThumbUpAltTwoTone]
     [taoensso.timbre :as log]
-    [material-ui.inputs :as inputs]
+    [mui.inputs :as inputs]
     [com.fulcrologic.fulcro.dom :as dom]
-    [material-ui.data-display :as dd]))
+    [mui.data-display :as dd]))
 
 (defsc ProposalListItem [this {::proposal/keys [id nice-id title pro-votes my-opinion-value]} {:keys [compact?] :or {compact? false}}]
   {:query [::proposal/id ::proposal/title ::proposal/nice-id ::proposal/created ::proposal/pro-votes ::proposal/my-opinion-value]
@@ -58,14 +59,14 @@
       :MY/personal-proposals []})
    :use-hooks? true}
   (let [[compact? set-compact] (hooks/use-state false)]
-    (surfaces/card {}
-      (surfaces/card-header
+    (card/card {}
+      (card/header
         {:title (i18n/tr "Proposals you approve")
          #_:action #_(inputs/icon-button {:onClick #(set-compact (not compact?))}
                        (if compact?
                          (dom/create-element UnfoldMoreIcon)
                          (dom/create-element UnfoldLessIcon)))})
-      (surfaces/card-content {}
+      (card/content {}
         (if (seq personal-proposals)
           (list/list {}
             (->> personal-proposals
@@ -89,15 +90,15 @@
    :use-hooks? true}
   (let [[compact? set-compact] (hooks/use-state false)]
     (when-not (empty? proposal-recommendations)
-      (surfaces/card {}
-        (surfaces/card-header
+      (card/card {}
+        (card/header
           {:title (i18n/tr "Proposals you might be interested in")
            :subheader (i18n/tr "These are proposals derived from proposals you already approved.")
            #_:action #_(inputs/icon-button {:onClick #(set-compact (not compact?))}
                          (if compact?
                            (dom/create-element UnfoldMoreIcon)
                            (dom/create-element UnfoldLessIcon)))})
-        (surfaces/card-content {}
+        (card/content {}
           (list/list {}
             (->> proposal-recommendations
               proposal/rank

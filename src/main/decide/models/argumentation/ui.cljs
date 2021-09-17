@@ -15,21 +15,22 @@
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
     [decide.models.user.ui :as user.ui]
-    [material-ui.data-display :as dd]
-    [material-ui.data-display.list :as list]
-    [material-ui.inputs :as inputs]
-    [material-ui.lab :refer [skeleton]]
-    [material-ui.lab.toggle-button :as toggle]
-    [material-ui.layout :as layout]
-    [material-ui.layout.grid :as grid]
-    [material-ui.surfaces :as surfaces]
-    [material-ui.transitions :as transitions]
-    ["@material-ui/icons/AddCircleOutline" :default AddCircleOutline]
-    ["@material-ui/icons/AddComment" :default AddComment]
-    ["@material-ui/icons/Comment" :default Comment]
-    ["@material-ui/icons/ExpandLess" :default ExpandLess]
-    ["@material-ui/icons/ExpandMore" :default ExpandMore]
-    ["@material-ui/icons/Send" :default Send]))
+    [mui.data-display :as dd]
+    [mui.data-display.list :as list]
+    [mui.inputs :as inputs]
+    [mui.feedback.skeleton :refer [skeleton]]
+    [mui.inputs.toggle-button :as toggle]
+    [mui.layout :as layout]
+    [mui.layout.grid :as grid]
+    [mui.surfaces :as surfaces]
+    [mui.surfaces.card :as card]
+    [mui.transitions :as transitions]
+    ["@mui/icons-material/AddCircleOutline" :default AddCircleOutline]
+    ["@mui/icons-material/AddComment" :default AddComment]
+    ["@mui/icons-material/Comment" :default Comment]
+    ["@mui/icons-material/ExpandLess" :default ExpandLess]
+    ["@mui/icons-material/ExpandMore" :default ExpandMore]
+    ["@mui/icons-material/Send" :default Send]))
 
 (defn ui-argument-placeholder [_]
   (layout/box {:mx 4 :my 1}
@@ -78,7 +79,7 @@
    {:belongs-to :param/belongs-to
     :new-argument ""
     :attitude :neutral}}
-  (surfaces/card
+  (card/card
     {:component :form
      :onSubmit
      (fn [e]
@@ -87,7 +88,7 @@
        (onClose)
        (comp/transact!! this [(m/set-props {:new-argument "", :attitude :neutral})] {:compressible? true}))}
 
-    (surfaces/card-content {}
+    (card/content {}
       (grid/container
         {:spacing 1}
 
@@ -118,7 +119,7 @@
                :onChange #(some->> %2 keyword (m/set-value!! this :attitude))}
               (for [type [:pro :neutral :contra]]
                 (toggle/button {:key type :value type} (type-label type))))))))
-    (surfaces/card-actions {}
+    (card/actions {}
       (inputs/button {:type :submit,
                       :variant :contained
                       :color :secondary,
@@ -138,19 +139,18 @@
 
 (defn type-indicator [type]
   (when (#{:pro :contra} type)
-    (layout/box {:clone true :mr 1}
-      (dd/chip {:label (type-label type)
-                :size :small
-                :color (case type
-                         :pro :primary
-                         :contra :secondary
-                         :default)}))))
+    (dd/chip {:label (type-label type)
+              :size :small
+              :sx {:mr 1}
+              :color (case type
+                       :pro :primary
+                       :contra :secondary
+                       :default)})))
 
 (defn argument-header [{:keys [author onClick show-premises?]}]
-  (surfaces/card-header
-    {:avatar (layout/box {:clone true :color "text.secondary"}
-               (user.ui/chip (set/rename-keys author {::user/display-name :user/display-name
-                                                      ::user/id :user/id})))
+  (card/header
+    {:avatar (user.ui/chip (set/rename-keys author {::user/display-name :user/display-name
+                                                    ::user/id :user/id}))
      :action (inputs/icon-button
                {:size :small
                 :onClick onClick
@@ -193,8 +193,8 @@
                        (set-show-premises (not show-premises?)))
 
         {:statement/keys [author]} premise]
-    (surfaces/card {:variant :outlined
-                    :component :article}
+    (card/card {:variant :outlined
+                :component :article}
 
       (argument-header {:argument props
                         :author author
@@ -203,7 +203,7 @@
 
       (argument-content props)
 
-      (surfaces/card-actions {}
+      (card/actions {}
         (inputs/button
           {:size :small
            :startIcon (dom/create-element Comment)
@@ -225,7 +225,7 @@
 
       (transitions/collapse {:in (and new-argument-open? new-argument-form)}
         (when new-argument-form
-          (surfaces/card-content {}
+          (card/content {}
             (ui-new-argument-form-card new-argument-form
               {:use-type? type-feature?
                :onClose #(set-new-argument-open false)

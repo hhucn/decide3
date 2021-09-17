@@ -2,7 +2,7 @@
   (:require
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
-    [material-ui.feedback.dialog :as dialog]))
+    [mui.feedback.dialog :as dialog]))
 
 (defmutation open [{:keys [id]}]
   (action [{:keys [state]}]

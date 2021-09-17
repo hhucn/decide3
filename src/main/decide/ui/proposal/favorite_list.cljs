@@ -9,12 +9,12 @@
     [decide.ui.proposal.new-proposal :as new-proposal]
     [decide.ui.proposal.plain-list :as plain-list]
     [decide.utils.breakpoint :as breakpoint]
-    [material-ui.data-display :as dd]
-    [material-ui.inputs :as inputs]
-    [material-ui.lab.alert :as alert]
-    [material-ui.layout :as layout]
-    [material-ui.layout.grid :as grid]
-    [material-ui.transitions :as transitions]))
+    [mui.data-display :as dd]
+    [mui.inputs :as inputs]
+    [mui.feedback.alert :as alert]
+    [mui.layout :as layout]
+    [mui.layout.grid :as grid]
+    [mui.transitions :as transitions]))
 
 (defn line-divider [{:keys [label]}]
   (grid/item {:xs 12}

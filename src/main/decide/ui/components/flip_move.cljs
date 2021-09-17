@@ -1,6 +1,6 @@
 (ns decide.ui.components.flip-move
   (:require
-    ["react-flip-move" :as FlipMove]
+    ["react-flip-move" :default FlipMove]
     [com.fulcrologic.fulcro.algorithms.react-interop :as interop]))
 
 (def

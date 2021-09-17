@@ -7,9 +7,9 @@
     [decide.models.opinion.api :as opinion.api]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
-    [material-ui.data-display :as dd]
-    [material-ui.data-display.list :as list]
-    [material-ui.inputs :as inputs]))
+    [mui.data-display :as dd]
+    [mui.data-display.list :as list]
+    [mui.inputs :as inputs]))
 
 (defsc Entry [this {::proposal/keys [id title pro-votes my-opinion-value]}]
   {:query [::proposal/id

@@ -3,8 +3,8 @@
     [decide.models.process :as process]
     [decide.ui.process.list :as list]
     [decide.ui.theming.themes :as themes]
-    ["@material-ui/icons/EmojiObjectsOutlined" :default EmojiObjectsOutlinedIcon]
-    [material-ui.styles :as styles]
+    ["@mui/icons-material/EmojiObjectsOutlined" :default EmojiObjectsOutlinedIcon]
+    [mui.styles :as styles]
     [nubank.workspaces.card-types.fulcro3 :as ct.fulcro]
     [nubank.workspaces.card-types.react :as ct.react]
     [nubank.workspaces.card-types.util :as ct.util]
@@ -13,7 +13,7 @@
     [com.fulcrologic.fulcro.dom :as dom]
     [taoensso.timbre :as log]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
-    [material-ui.utils :as m.utils]))
+    [mui.utils :as m.utils]))
 
 
 (ws/defcard process-list-item-card

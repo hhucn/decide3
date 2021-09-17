@@ -6,9 +6,9 @@
     [com.fulcrologic.fulcro.mutations :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [decide.application :refer [SPA]]
-    [material-ui.feedback :as feedback]
-    [material-ui.inputs :as inputs]
-    ["@material-ui/icons/Close" :default Close]))
+    [mui.feedback :as feedback]
+    [mui.inputs :as inputs]
+    ["@mui/icons-material/Close" :default Close]))
 
 (def container-ident [:component/id ::Snackbar])
 
@@ -49,8 +49,7 @@
             (when (not= reason "clickaway")
               (comp/transact! this [(close-first-snackbar {})]) [])))]
     (feedback/snackbar
-      {:anchorOrigin {:vertical "bottom" :horizontal "center"}
-       :open open?
+      {:open open?
        :onClose handle-close
        :autoHideDuration 6000
        :TransitionProps {:onExited

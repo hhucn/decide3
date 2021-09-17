@@ -1,7 +1,10 @@
 (ns decide.ui.theming.themes
-  (:require [material-ui.styles :refer [create-mui-theme]]
-            ["@material-ui/core/styles" :refer [responsiveFontSizes createTheme]]
-            [decide.ui.theming.styles :as styles]))
+  (:require
+    [mui.styles :refer [create-mui-theme]]
+    ["@mui/utils" :refer [deepmerge]]
+    ["@mui/material/styles" :refer [responsiveFontSizes createTheme]]
+    [decide.ui.theming.styles :as styles]
+    [taoensso.timbre :as log]))
 
 (def shared
   {:overrides
@@ -11,24 +14,18 @@
 
 (def light-theme
   {:palette
-   {:type "light"
+   {:mode "light"
     :primary {:main styles/hhu-blue}
     :secondary {:main "#b3006b"}
     :success {:main "#008127"}}})
 
 (def dark-theme
   {:palette
-   {:type "dark"
+   {:mode "dark"
+    :background {:default "#121416", :paper "#101519"}
     :primary {:main "#68b9e9"}
     :secondary {:main "#ea90bc"}
-    :success {:main "#7fef97"}
-    :background {:default "#121212"
-                 :paper "#212121"}}
-   :overrides
-   {:MuiAppBar
-    {:colorPrimary
-     {:background-color "#212121fa"
-      :color "#fff"}}}})
+    :success {:main "#7fef97"}}})
 
 (def themes
   {:dark dark-theme
@@ -40,5 +37,6 @@
     (fn [theme-key]
       (responsiveFontSizes
         (createTheme
-          (clj->js (get themes theme-key light-theme))
-          (clj->js shared))))))
+          (deepmerge
+            (clj->js shared)
+            (clj->js (get themes theme-key light-theme))))))))

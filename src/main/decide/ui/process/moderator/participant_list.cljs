@@ -8,12 +8,12 @@
     [decide.models.user :as user]
     [decide.models.user.ui :as user.ui]
     [decide.models.process.mutations :as process.api]
-    [material-ui.data-display.list :as list]
-    [material-ui.inputs :as inputs]
-    [material-ui.lab :as lab]
-    [material-ui.layout.grid :as grid]
+    [mui.data-display.list :as list]
+    [mui.inputs :as inputs]
+    [mui.lab :as lab]
+    [mui.layout.grid :as grid]
     [com.fulcrologic.fulcro.dom :as dom]
-    ["@material-ui/icons/RemoveCircleOutline" :default RemoveIcon]))
+    ["@mui/icons-material/RemoveCircleOutline" :default RemoveIcon]))
 
 (defsc UserOption [this {::user/keys [display-name] :keys [user/nickname >/avatar]}]
   {:query [::user/id ::user/display-name :user/nickname
@@ -50,12 +50,13 @@
        ; :clearOnEscape true
        :loading loading?
        :getOptionLabel (fn [option] (::user/display-name option))
-       :getOptionSelected =
+       :isOptionEqualToValue =
 
        :renderOption
-       (fn [option _state]
-         (comp/with-parent-context this
-           (ui-user-option option)))
+       (fn [props option _state]
+         (dom/li props
+           (comp/with-parent-context this
+             (ui-user-option option))))
 
        :onChange
        (fn [_e value _reason]

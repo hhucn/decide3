@@ -8,15 +8,16 @@
     [decide.models.process :as process]
     [decide.models.process.mutations :as process.mutations]
     [decide.ui.process.process-forms :as process-forms]
-    [material-ui.data-display :as dd]
-    [material-ui.feedback.dialog :as dialog]
-    [material-ui.inputs :as inputs]
-    [material-ui.lab :refer [skeleton]]
-    [material-ui.layout :as layout]
-    [material-ui.layout.grid :as grid]
-    [material-ui.surfaces :as surfaces]
-    ["@material-ui/icons/EmojiObjectsOutlined" :default EmojiObjectsOutlinedIcon]
-    ["@material-ui/icons/Group" :default GroupIcon]))
+    [mui.data-display :as dd]
+    [mui.feedback.dialog :as dialog]
+    [mui.inputs :as inputs]
+    [mui.feedback.skeleton :refer [skeleton]]
+    [mui.layout :as layout]
+    [mui.layout.grid :as grid]
+    [mui.surfaces :as surfaces]
+    [mui.surfaces.card :as card]
+    ["@mui/icons-material/EmojiObjectsOutlined" :default EmojiObjectsOutlinedIcon]
+    ["@mui/icons-material/Group" :default GroupIcon]))
 
 (def page-ident [:PAGE :processes-list-page])
 
@@ -37,13 +38,13 @@
    :ident ::process/slug
    :use-hooks? true}
   (grid/item {:xs 12}
-    (surfaces/card {}
-      (surfaces/card-action-area {:href (str "/decision/" slug "/home")}
-        (surfaces/card-header {:title title})
-        (surfaces/card-content {} description))
+    (card/card {}
+      (card/action-area {:href (str "/decision/" slug "/home")}
+        (card/header {:title title})
+        (card/content {} description))
 
       (dd/divider {})
-      (surfaces/card-actions {}
+      (card/actions {}
         (icon-badge (i18n/tr "Number of proposals") (or no-of-proposals 0) EmojiObjectsOutlinedIcon)
         (icon-badge (i18n/tr "Number of participants") (max no-of-participants 0) GroupIcon)))))
 
@@ -108,25 +109,25 @@
     (layout/container {}
       (dd/typography {:component :h1 :variant :h2} (i18n/tr "Active decision-processes"))
 
-      (layout/box {:my 2 :clone true}
-        (inputs/button {:variant :contained
-                        :color :primary
-                        :disabled (not logged-in?)
-                        :fullWidth true
-                        :size :large
-                        :onClick #(m/toggle! this :ui/new-process-dialog-open?)}
-          (i18n/tr "Create new decision-process")))
+      (inputs/button {:variant :contained
+                      :color :primary
+                      :disabled (not logged-in?)
+                      :fullWidth true
+                      :size :large
+                      :sx {:my 2}
+                      :onClick #(m/toggle! this :ui/new-process-dialog-open?)}
+        (i18n/tr "Create new decision-process"))
 
       (ui-all-process-list all-processes-list)
 
-      (layout/box {:my 2 :clone true}
-        (inputs/button {:variant :text
-                        :color :primary
-                        :disabled (not logged-in?)
-                        :fullWidth true
-                        :size :large
-                        :onClick #(m/toggle! this :ui/new-process-dialog-open?)}
-          (i18n/tr "Create new decision-process")))
+      (inputs/button {:variant :text
+                      :color :primary
+                      :disabled (not logged-in?)
+                      :fullWidth true
+                      :size :large
+                      :sx {:my 2}
+                      :onClick #(m/toggle! this :ui/new-process-dialog-open?)}
+        (i18n/tr "Create new decision-process"))
 
       (new-process-dialog this {:close #(m/set-value! this :ui/new-process-dialog-open? false)
                                 :new-process-dialog-open? new-process-dialog-open?
