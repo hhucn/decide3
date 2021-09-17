@@ -15,6 +15,7 @@
 (def light-theme
   {:palette
    {:mode "light"
+    :background {:default "#fbfbfc"}
     :primary {:main styles/hhu-blue}
     :secondary {:main "#b3006b"}
     :success {:main "#008127"}}})
