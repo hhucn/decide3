@@ -1,11 +1,11 @@
 FROM clojure:openjdk-17-tools-deps-buster AS clj-build
 
 USER root
-RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
-    echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
-    apt-get update && \
+RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
+    apt-get -y update && \
     apt-get -y dist-upgrade && \
-    apt-get -y install yarn
+    apt-get install -y nodejs && \
+    npm install --global yarn
 
 WORKDIR /code
 ENV REPO="/code/.m2/repository"
