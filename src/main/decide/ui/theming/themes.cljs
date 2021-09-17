@@ -28,8 +28,15 @@
    {:mode "dark"
     :background {:default "#121416", :paper "#101519"}
     :primary {:main "#68b9e9"}
-    :secondary {:main "#ea90bc"}
-    :success {:main "#7fef97"}}})
+    :secondary {:main "#f996c7"}
+    :success {:main "#7dc75f"}
+    :error {:main "#e8415d"}}
+   :components
+   {:MuiButton
+    {:variations
+     {:props {:variation "label"}
+      :defaultProps {:size "small"
+                     :color "inherit"}}}}})
 
 (def themes
   {:dark dark-theme

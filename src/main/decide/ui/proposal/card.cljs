@@ -314,6 +314,7 @@
           (grid/item {}
             (inputs/button
               {:startIcon (dom/create-element Comment)
+               :variant :label
                :href proposal-href}
               (str no-of-arguments))))))))
 

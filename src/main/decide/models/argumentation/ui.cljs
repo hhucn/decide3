@@ -16,9 +16,8 @@
     [decide.models.user :as user]
     [decide.models.user.ui :as user.ui]
     [mui.data-display :as dd]
-    [mui.data-display.list :as list]
-    [mui.inputs :as inputs]
     [mui.feedback.skeleton :refer [skeleton]]
+    [mui.inputs :as inputs]
     [mui.inputs.toggle-button :as toggle]
     [mui.layout :as layout]
     [mui.layout.grid :as grid]
@@ -143,8 +142,8 @@
               :size :small
               :sx {:mr 1}
               :color (case type
-                       :pro :primary
-                       :contra :secondary
+                       :pro :success
+                       :contra :error
                        :default)})))
 
 (defn argument-header [{:keys [author onClick show-premises?]}]
@@ -206,12 +205,12 @@
       (card/actions {}
         (inputs/button
           {:size :small
+           :variant :label
            :startIcon (dom/create-element Comment)
            :onClick toggle-list!}
           (str no-of-arguments))
         (dd/tooltip
-          {:title (if (comp/shared this :logged-in?) "" (i18n/tr "Login to add argument"))
-           :arrow true}
+          {:title (if (comp/shared this :logged-in?) "" (i18n/tr "Login to add argument"))}
           (dom/span {}
             (inputs/button
               {:onClick (fn []
@@ -276,6 +275,7 @@
           (dom/div {}
             (inputs/button
               {:variant :outlined
+               :color :primary
                :onClick (fn []
                           (when (not new-argument-open?)    ; about to open?
                             (comp/transact! this [(init-new-argument-form {:belongs-to [::proposal/id id]})]))
