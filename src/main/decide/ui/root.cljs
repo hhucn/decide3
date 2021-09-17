@@ -74,7 +74,7 @@
                                                 (comp/transact! (comp/any->app this)
                                                   [(set-theme {:theme new-theme})])))))
   (lab/localization-provider #js {:dateAdapter DateAdapter}
-    (styles/theme-provider {:theme (themes/get-mui-theme :dark)}
+    (styles/theme-provider {:theme (themes/get-mui-theme :light)}
       (meta/ui-meta (get props meta/root-key))
       (m.utils/css-baseline {})
       (appbar/ui-appbar app-bar {:menu-onClick nav-drawer/toggle-navdrawer!})
