@@ -59,6 +59,7 @@
                        :ns-regexp "-(test|ws|cards)$"
                        :output-dir "resources/public/workspaces/js"
                        :asset-path "/workspaces/js"
+                       :js-options {:entry-keys ["module" "browser" "main"]}
                        :devtools {:preloads [com.fulcrologic.fulcro.inspect.websocket-preload
                                              decide.development-preload]
                                   :http-root "resources/public"

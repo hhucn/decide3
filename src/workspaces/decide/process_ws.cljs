@@ -1,6 +1,7 @@
 (ns decide.process-ws
   (:require
     [decide.models.process :as process]
+    [decide.ui.proposal.card :as card]
     [decide.ui.process.list :as list]
     [decide.ui.theming.themes :as themes]
     ["@mui/icons-material/EmojiObjectsOutlined" :default EmojiObjectsOutlinedIcon]
@@ -13,13 +14,18 @@
     [com.fulcrologic.fulcro.dom :as dom]
     [taoensso.timbre :as log]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
-    [mui.utils :as m.utils]))
+    [mui.utils :as m.utils]
+    [com.fulcrologic.fulcro.algorithms.react-interop :as interop]
+    ["@mui/material/ScopedCssBaseline" :default ScopedCssBaseline]
+    [com.fulcrologic.fulcro.components :as comp]))
 
+
+(def scoped-css-baseline (interop/react-factory ScopedCssBaseline))
 
 (ws/defcard process-list-item-card
-  {::wsm/card-width  7
+  {::wsm/card-width 7
    ::wsm/card-height 5
-   ::wsm/align       {:flex 1}}
+   ::wsm/align {:flex 1}}
   (ct.fulcro/fulcro-card
     {::ct.fulcro/root list/ProcessListEntry
      ::ct.fulcro/initial-state
@@ -35,21 +41,34 @@
 
 (defn fulcro-theme-card-init [card config]
   (let [{::wsm/keys [render] :as react-card
-         :keys [::ct.fulcro/app]} (ct.fulcro/fulcro-card-init card config)]
-    (assoc react-card
+         :keys [::ct.fulcro/app]} (log/spy :info (ct.fulcro/fulcro-card-init card config))]
+    (update react-card
       ::wsm/render
-      (fn [node]
-        (let [theme-provider
-              (m.utils/scoped-css-baseline {}
-                (styles/theme-provider
-                  {:theme (themes/get-mui-theme :dark)}
-                  (dom/div {} "Container")))]
-          (js/ReactDOM.render theme-provider node
-            #(render (.-firstChild (.-firstChild node)))))))))
+      (fn [render]
+        (fn [node]
+          (render node)))
+      #_(fn [node]
+          (let [theme-provider
+                (scoped-css-baseline {}
+                  (styles/theme-provider
+                    {:theme (themes/get-mui-theme :dark)}
+                    (dom/div {} "Container")))]
+            (js/ReactDOM.render theme-provider node
+              #(render (.-firstChild (.-firstChild node)))))))))
 
 (defn fulcro-theme-card [config]
   {::wsm/init
    #(fulcro-theme-card-init % config)})
+
+(ws/defcard proposal-VotingArea-card
+  (fulcro-theme-card
+    {::ct.fulcro/root card/VotingArea
+     ::ct.fulcro/initial-state
+     (fn [] (comp/computed
+              #:decide.models.proposal{:id #uuid"550e8400-e29b-11d4-a716-446655440000"
+                                       :pro-votes 42
+                                       :my-opinion-value 1}
+              {:process {}}))}))
 
 (ws/defcard process-all-processes-list
   (fulcro-theme-card

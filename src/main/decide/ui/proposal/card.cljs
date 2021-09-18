@@ -22,13 +22,12 @@
     [mui.inputs :as inputs]
     [mui.layout :as layout]
     [mui.layout.grid :as grid]
-    [mui.surfaces :as surfaces]
+    [mui.surfaces.card :as card]
     ["@mui/icons-material/Comment" :default Comment]
-    ["@mui/icons-material/ThumbDownAltOutlined" :default ThumbDownOutlined]
-    ["@mui/icons-material/ThumbDownAlt" :default ThumbDown]
-    ["@mui/icons-material/ThumbUpAltOutlined" :default ThumbUpOutlined]
-    ["@mui/icons-material/ThumbUpAlt" :default ThumbUp]
-    [mui.surfaces.card :as card]))
+    ["@mui/icons-material/ThumbDownOutlined" :default ThumbDownOutlined]
+    ["@mui/icons-material/ThumbDown" :default ThumbDown]
+    ["@mui/icons-material/ThumbUpOutlined" :default ThumbUpOutlined]
+    ["@mui/icons-material/ThumbUp" :default ThumbUp]))
 
 (defn id-part [proposal-id]
   (dom/data {:className "proposal-id"
@@ -138,20 +137,6 @@
     (dissoc props :icon)
     (dom/create-element icon #js {"fontSize" "small"})))
 
-(defn approve-toggle
-  [{:keys [approved?
-           onClick
-           disabled?]}]
-  (toggle-button
-    {:aria-label
-     (if approved?
-       (i18n/trc "Proposal has been approved" "Approved")
-       (i18n/trc "Approve a proposal" "Approve"))
-     :color (if approved? "primary" "default")
-     :disabled disabled?
-     :onClick onClick
-     :icon (if approved? ThumbUp ThumbUpOutlined)}))
-
 (defn reject-toggle
   [{:keys [toggled?
            onClick
@@ -161,17 +146,33 @@
      (if toggled?
        (i18n/trc "Proposal has been rejected by you" "Rejected")
        (i18n/trc "Reject a proposal" "Reject"))
-     :color (if toggled? "secondary" "default")
+     :color (if toggled? :error :default)
      :disabled disabled?
      :onClick onClick
      :icon (if toggled? ThumbDown ThumbDownOutlined)}))
 
-(defn disabled-approve-toggle [{:keys [approved?]}]
-  (dom/create-element ThumbUpOutlined
-    #js {:fontSize "small"
-         :color (if approved? "primary" "disabled")}))
+(defn approve-icon [{:keys [approved? disabled?]}]
+  (dom/create-element (if approved? ThumbUp ThumbUpOutlined)
+    (clj->js
+      {:color (if (and approved? (not disabled?)) :success :inherit)})))
 
-(defsc VotingArea [this {::proposal/keys [id pro-votes my-opinion opinions]}
+(defsc ApproveToggle [_ {:keys [approved? disabled? votes]} {:keys [onToggle]}]
+  (inputs/button
+    {:onClick onToggle
+     :disabled disabled?
+     :color :inherit
+     :size :large
+     :aria-label (str
+                   (if approved?
+                     (i18n/trc "Proposal has been approved" "Approved")
+                     (i18n/trc "Approve a proposal" "Approve"))
+                   " [" votes "]")
+     :startIcon (approve-icon {:approved? approved?, :disabled? disabled?})}
+    (dd/typography {:color :text.primary :fontSize :inherit} votes)))
+
+(def ui-approve-toggle (comp/computed-factory ApproveToggle))
+
+(defsc VotingArea [this {::proposal/keys [id pro-votes my-opinion-value my-opinion opinions]}
                    {:keys [process]}]
   {:query [::proposal/id
            ::proposal/pro-votes
@@ -184,16 +185,20 @@
   (let [logged-in? (comp/shared this :logged-in?)
         disabled? (or (not logged-in?) (not (process/running? process)))
         [reject-open? set-reject-dialog-open] (hooks/use-state false)
-        [approved? rejected?] ((juxt pos? neg?) (::opinion/value my-opinion))]
-    (grid/container {:alignItems :center}
-      (grid/item {}
-        (if (process/running? process)
-          (approve-toggle
-            {:approved? approved?
-             :disabled? disabled?
-             :onClick #(comp/transact! this [(opinion.api/add {::proposal/id id
-                                                               :opinion (if approved? 0 1)})])})
-          (disabled-approve-toggle approved?)))
+        [approved? rejected?] ((juxt pos? neg?) my-opinion-value)]
+    (layout/stack
+      {:direction :row
+       :alignItems :center
+       :className "voting-area"
+       :spacing 1
+       :divider (dd/divider {:orientation :vertical, :flexItem true})}
+
+      (ui-approve-toggle
+        {:approved? approved?
+         :disabled? disabled?
+         :votes pro-votes}
+        {:onToggle #(comp/transact! this [(opinion.api/add {::proposal/id id
+                                                            :opinion (if approved? 0 1)})])})
 
       (when (process/allows-rejects? process)
         (comp/fragment
@@ -206,27 +211,21 @@
                :parents parents
                :onClose #(set-reject-dialog-open false)}))
 
-          (grid/item {}
-            (reject-toggle
-              {:toggled? rejected?
-               :disabled? disabled?
-               :onClick
-               (fn [_e]
-                 (if (and (process/show-reject-dialog? process) (not rejected?))
-                   (set-reject-dialog-open true)            ; only
-                   (comp/transact! this [(opinion.api/add {::proposal/id id
-                                                           :opinion (if rejected? 0 -1)})])))}))))
+          (reject-toggle
+            {:toggled? rejected?
+             :disabled? disabled?
+             :onClick
+             (fn [_e]
+               (if (and (process/show-reject-dialog? process) (not rejected?))
+                 (set-reject-dialog-open true)              ; only
+                 (comp/transact! this [(opinion.api/add {::proposal/id id
+                                                         :opinion (if rejected? 0 -1)})])))})))
 
-
-      (grid/item {}
-        (if (process/public-voting? process)
-          (->> opinions
-            (filter #(pos? (::opinion/value %)))
-            (map ::opinion/user)
-            (user.ui/avatar-group {:max 5}))
-          (dd/typography {:variant :body1
-                          :aria-label (i18n/trc "[ARIA]" "pro votes")}
-            pro-votes))))))
+      (when (process/public-voting? process)
+        (->> opinions
+          (filter #(pos? (::opinion/value %)))
+          (map ::opinion/user)
+          (user.ui/avatar-group {:max 5 :sx {:px 1}}))))))
 
 (def ui-voting-area (comp/computed-factory VotingArea {:keyfn ::proposal/id}))
 
@@ -260,8 +259,7 @@
                         [slug id])]
     (card/card
       (merge
-        {:raised false
-         :component :article
+        {:component :article
          :style {:height "100%"
                  :display :flex
                  :flexDirection "column"}}
@@ -284,16 +282,16 @@
             body)))
 
       (dd/divider {:variant :middle})
-      (card/actions {}
+      (card/actions {:sx {:px 1.5}}
         (grid/container
           {:alignItems :center
            :justifyContent :space-between
            :direction :row
            :spacing 1}
-          (grid/item {:xs :auto}
+          (grid/item {:xs true}
             (ui-voting-area voting-area {:process current-process}))
 
-          (grid/item {}
+          (grid/item {:xs :auto}
             (inputs/button
               {:startIcon (dom/create-element Comment)
                :variant :label
