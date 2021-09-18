@@ -53,36 +53,17 @@
 
 (defn sort-selector [selected set-selected!]
   (form/control {:size :small}
-    (input/label {:htmlFor "main-proposal-list-sort"} (i18n/trc "Label for sort order selection" "Sort"))
-    (inputs/native-select
+    (input/label {:id "main-proposal-list-sort"} (i18n/trc "Label for sort order selection" "Sort"))
+    (inputs/select
       {:value selected
        :onChange (fn [e]
                    (set-selected! (evt/target-value e)))
-       :inputProps {:id "main-proposal-list-sort"}}
-      (dom/option {:value "new->old"} (i18n/trc "Sort order option" "New → Old"))
-      (dom/option {:value "old->new"} (i18n/trc "Sort order option" "Old → New"))
-      (dom/option {:value "most-approvals"} (i18n/trc "Sort order option" "Approvals ↓")))))
-
-(def filter-types
-  {"merges" "Merges"
-   "forks" "Forks"
-   "parents" "Parents"})
-
-(defn filter-selector [selected set-selected!]
-  (form/control {:size :small :disabled true}
-    (input/label {:htmlFor "main-proposal-list-filter"} (i18n/trc "Label for filter selection" "Filter"))
-    (inputs/select
-      {:multiple true
        :autoWidth true
-       :value (to-array selected)
-       :style {:minWidth "150px"}
-       :onChange (fn [e] (set-selected! (set (evt/target-value e))))
-       :inputProps {:id "main-proposal-list-filter"}
-       :renderValue (fn [v] (str/join ", " (map filter-types (js->clj v))))}
-      (for [[value label] filter-types]
-        (navigation/menu-item {:key value :value value}
-          (inputs/checkbox {:checked (contains? selected value)})
-          (list/item-text {:primary label}))))))
+       :labelId "main-proposal-list-sort"
+       :label (i18n/trc "Label for sort order selection" "Sort")}
+      (navigation/menu-item {:value "new->old"} (i18n/trc "Sort order option" "New → Old"))
+      (navigation/menu-item {:value "old->new"} (i18n/trc "Sort order option" "Old → New"))
+      (navigation/menu-item {:value "most-approvals"} (i18n/trc "Sort order option" "Approvals ↓")))))
 
 (defn new-proposal-card [{:keys [disabled? onClick]}]
   (inputs/button {:style {:height "100%"
