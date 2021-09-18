@@ -171,24 +171,6 @@
     #js {:fontSize "small"
          :color (if approved? "primary" "disabled")}))
 
-(defn avatar-group [{:keys [max] :as props} children]
-  (dd/avatar-group (update props :max inc)
-    (doall
-      (let [[to-display overflow] (split-at (dec max) children)]
-        (concat
-          (map #(user.ui/ui-avatar % {:tooltip? true}) to-display)
-          [(cond
-             (= 1 (count overflow)) (user.ui/ui-avatar (first overflow) {:tooltip? true})
-
-             ;; Display "+42" overflow Avatar
-             (< 1 (count overflow))
-             (dd/tooltip {:title (list/list {:dense true}
-                                   (doall
-                                     (for [{::user/keys [display-name]} overflow]
-                                       (list/item {:disableGutters true} display-name))))
-                          :arrow true}
-               (dd/avatar {} (str "+" (count overflow)))))])))))
-
 (defsc VotingArea [this {::proposal/keys [id pro-votes my-opinion opinions]}
                    {:keys [process]}]
   {:query [::proposal/id
