@@ -6,7 +6,9 @@
     ["@mui/icons-material/Brightness7" :default LightModeIcon]
     ["@mui/icons-material/BrightnessAuto" :default BrightnessAutoIcon]
     [com.fulcrologic.fulcro.dom :as dom]
-    [decide.ui.storage :as storage]))
+    [decide.ui.storage :as storage]
+    [mui.inputs.form :as form]
+    [mui.inputs.input :as input]))
 
 (defsc DarkModeToggle [this props]
   {:query [[storage/localstorage-key :theme]]
@@ -15,6 +17,8 @@
     (toggle/button-group
       {:value theme
        :exclusive true
+       :fullWidth true
+       :size :small
        :onChange
        (fn [e new-value]
          (when new-value

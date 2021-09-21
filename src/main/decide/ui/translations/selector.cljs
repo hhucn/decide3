@@ -23,7 +23,7 @@
 (defsc LocaleSwitcher [this {:keys [::i18n/current-locale]}]
   {:query [{[::i18n/current-locale '_] (comp/get-query i18n/Locale)}]
    :initial-state {}}
-  (form/control {:fullWidth true}
+  (form/control {:fullWidth true, :size :small}
     (input/label {:id "language-select"} (i18n/trc "Lable for language switcher" "Language"))
     (inputs/select
       {:value (name (::i18n/locale current-locale :en))

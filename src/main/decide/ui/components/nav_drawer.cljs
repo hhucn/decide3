@@ -91,21 +91,15 @@
                 (list/item-icon {} (dom/create-element AccountCircle))
                 (list/item-text {} (i18n/tr "Login"))))))
 
-        (layout/box {}
-          (dark-mode-toggle/ui-dark-mode-toggle dark-mode-toggle))
+        (layout/stack {:orientation :vertical, :spacing 2, :p 1, :alignItems :center}
+          (dark-mode-toggle/ui-dark-mode-toggle dark-mode-toggle)
 
-        (layout/box {:px 1}
-          (i18n.switcher/ui-language-switcher locale-switcher))
+          (i18n.switcher/ui-language-switcher locale-switcher)
 
-        (layout/box
-          {:width 250
-           :bottom 0
-           :align "center"}
-          (dd/divider {:light false})
-          (layout/box {:p 1 :component :footer}
-            (dd/typography {:variant "caption"
-                            :color "textSecondary"}
-              "decide v3")))))))
+          (dd/typography {:variant :caption
+                          :component :footer
+                          :color :textSecondary}
+            "decide v3"))))))
 
 (def ui-navdrawer (comp/computed-factory NavDrawer))
 
