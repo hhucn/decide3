@@ -24,5 +24,5 @@
      :shared-fn
      (fn shared-fn [db]
        (merge
-         (::i18n/current-locale db)
-         {:logged-in? (get-in db [:root/current-session :session/valid?] false)}))}))
+         {:logged-in? (get-in db [:root/current-session :session/valid?] false)}
+         (::i18n/current-locale db)))}))
