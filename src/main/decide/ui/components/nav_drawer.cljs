@@ -23,7 +23,8 @@
     ["@mui/icons-material/Settings" :default SettingsIcon]
     ["@mui/icons-material/DeviceHub" :default DeviceHubIcon]
     ["@mui/icons-material/Translate" :default TranslateIcon]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [decide.ui.components.dark-mode-toggle :as dark-mode-toggle]))
 
 (def ident [:component/id ::NavDrawer])
 
@@ -37,14 +38,16 @@
   (comp/transact! SPA [(toggle-open? {:open? nil})]
     {:compressible? true}))
 
-(defsc NavDrawer [this {:keys [ui/open? ui/locale-switcher]}]
+(defsc NavDrawer [this {:keys [ui/open? ui/locale-switcher ui/dark-mode-toggle]}]
   {:query [:ui/open?
-           {:ui/locale-switcher (comp/get-query i18n.switcher/LocaleSwitcher)}]
+           {:ui/locale-switcher (comp/get-query i18n.switcher/LocaleSwitcher)}
+           {:ui/dark-mode-toggle (comp/get-query dark-mode-toggle/DarkModeToggle)}]
    :ident (fn [] ident)
    :initial-state
    (fn [_]
      {:ui/open? false
-      :ui/locale-switcher (comp/get-initial-state i18n.switcher/LocaleSwitcher)})
+      :ui/locale-switcher (comp/get-initial-state i18n.switcher/LocaleSwitcher)
+      :ui/dark-mode-toggle (comp/get-initial-state dark-mode-toggle/DarkModeToggle)})
    :use-hooks? true}
   (let [on-close (hooks/use-callback #(m/set-value!! this :ui/open? false))]
     (nav/drawer
@@ -87,6 +90,9 @@
                  :onClick #(comp/transact! this [(login/show-signinup-dialog {:which-form :sign-in})] {})}
                 (list/item-icon {} (dom/create-element AccountCircle))
                 (list/item-text {} (i18n/tr "Login"))))))
+
+        (layout/box {}
+          (dark-mode-toggle/ui-dark-mode-toggle dark-mode-toggle))
 
         (layout/box {:px 1}
           (i18n.switcher/ui-language-switcher locale-switcher))
