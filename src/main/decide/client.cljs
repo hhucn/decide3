@@ -3,7 +3,10 @@
     [com.fulcrologic.fulcro.algorithms.server-render :as ssr]
     [com.fulcrologic.fulcro.algorithms.timbre-support :refer [console-appender prefix-output-fn]]
     [com.fulcrologic.fulcro.application :as app]
+    [com.fulcrologic.fulcro.components :as comp]
     [com.fulcrologic.fulcro.data-fetch :as df]
+    [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.react.error-boundaries :as eb]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [decide.application :refer [SPA]]
     [decide.models.authorization :as auth]
@@ -24,6 +27,18 @@
        :appenders {:console (console-appender)}})
     (log/info "Application starting.")
     (app/set-root! SPA root/Root {:initialize-state? true})
+
+    (set! eb/*render-error*
+      (fn [this cause]
+        (dom/div
+          (dom/h2 :.header " Unexpected Error ")
+          (dom/p "An error occurred while rendering the user interface. ")
+          (dom/p (str cause))
+          (when goog.DEBUG
+            (dom/button {:onClick (fn []
+                                    (comp/set-state! this {:error false
+                                                           :cause nil}))} " Dev Mode: Retry rendering ")))))
+
     (log/trace "Swap in server provided state")
     (swap! (::app/state-atom SPA) merge db)
 
