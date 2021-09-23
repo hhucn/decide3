@@ -10,8 +10,6 @@
   [key val]
   (.setItem (.-localStorage js/window) (name key) val))
 
-(set-item! :my-key2 "value")
-
 (defn- get-item
   "Returns value of `key' from browser's localStorage."
   [key]
@@ -44,16 +42,11 @@
     (map (fn [[k v]] [(keyword k) v]))
     (js->clj (js/Object.entries (.-localStorage js/window)))))
 
-(defmutation -init-localstorage [_]
-  (action [{:keys [state]}]
-    (swap! state assoc localstorage-key (get-localstorage))))
-
 (defsc LocalStorage [_ _]
   {:query ['*]
-   :initial-state {}
+   :initial-state (fn [_] (get-localstorage))
    :componentDidMount
    (fn [this]
-     (comp/transact! this [(-init-localstorage {})])
      (.addEventListener js/window "storage"
        (fn [e]
          (let [key (keyword (.-key e))
