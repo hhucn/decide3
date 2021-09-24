@@ -154,31 +154,11 @@
                      :flexDirection :row-reverse}
 
           (if-not logged-in?
-            (dom/form
-              {:onSubmit (fn [e]
-                           (evt/prevent-default! e)
-                           (comp/transact! this [(login/sign-in #:decide.models.user{:email temp-nickname :password temp-nickname})]))}
-              (inputs/textfield
-                {:variant :filled
-                 :name :username
-                 :size :small
-                 :required true
-                 :value temp-nickname
-                 :onChange #(set-temp-nickname (str/replace (evt/target-value %) #"\s" ""))
-                 :label (i18n/trc "Temp Nickname for login" "Nickname")
-                 :style {:color "inherit"}
-                 :InputLabelProps {:style {:color :inherit}}
-                 :InputProps
-                 {:style {:color :inherit
-                          :border "1px solid rgba(255,255,255,0.77)"}
-                  :endAdornment
-                  (inputs/button
-                    {:variant :text
-                     :color :inherit
-                     :type :submit}
-                    ; :onClick #(comp/transact! this [(login/show-signinup-dialog {:which-form :sign-in})] {:compressible? true})}
-                    (i18n/trc "Label of login button" "Login"))}}))
-
+            (inputs/button
+              {:variant :outlined
+               :color :inherit
+               :onClick #(comp/transact! this [(login/show-signinup-dialog {:which-form :sign-in})] {:compressible? true})}
+              (i18n/trc "Label of login button" "Login"))
 
             (comp/fragment
 

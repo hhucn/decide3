@@ -17,7 +17,7 @@
 (defn reset-password-field! [component]
   (m/set-string! component ::user/password :value ""))
 
-(def login-modal-ident [:component/id ::LoginDialog])
+(def login-modal-ident [:dialog/id ::LoginDialog])
 
 (defmutation show-signinup-dialog [{:keys [which-form] :or {which-form :sign-in}}]
   (action [{:keys [state]}]
