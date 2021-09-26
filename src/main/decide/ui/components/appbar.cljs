@@ -82,7 +82,7 @@
     (dialog/title {} (i18n/tr "Receive notifications"))
     (dialog/content {}
       (dialog/content-text {}
-        (i18n/tr "Get notifications for processes you participate in when something happened. You get at most one email per hour."))
+        (i18n/tr "Get notifications when something changes. You will receive at most one email per hour."))
       (form/control-label
         {:label (i18n/tr "Receive notifications")
          :checked receive-notifications?
