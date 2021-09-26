@@ -1,18 +1,17 @@
 (ns decide.ui.login
   (:require
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
+    [com.fulcrologic.fulcro.application :as app]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.dom :as dom]
     [com.fulcrologic.fulcro.dom.events :as evt]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
-
     [decide.models.authorization :as auth]
     [decide.models.user :as user]
-
     [mui.data-display :as dd]
     [mui.feedback.dialog :as dialog]
     [mui.inputs :as inputs]
-    [mui.layout.grid :as grid]
-    [com.fulcrologic.fulcro.application :as app]))
+    [mui.layout.grid :as grid]))
 
 (defn reset-password-field! [component]
   (m/set-string! component ::user/password :value ""))
@@ -30,7 +29,7 @@
   (action [{:keys [state]}]
     (swap! state update-in login-modal-ident assoc :ui/open? false)))
 
-(defmutation sign-up [{:user/keys [_email _password]}]
+(defmutation sign-up [{::user/keys [_email _password]}]
   (action [_] true)
   (ok-action [{:keys [app component result]}]
     (let [{:keys [errors]} (get-in result [:body `user/sign-up])]
@@ -41,14 +40,14 @@
           (app/force-root-render! app))
         (cond
           (contains? errors :email-in-use)
-          (m/set-string! component :ui/email-error :value (i18n/tr "Email already in use!"))))))
+          (m/set-string! component :ui/nickname-error :value (i18n/tr "Nickname already in use"))))))
   (remote [env]
     (-> env
       (m/with-server-side-mutation `user/sign-up)
       (m/returning auth/Session)
       (m/with-target [:root/current-session]))))
 
-(defmutation sign-in [{:user/keys [_email _password]}]
+(defmutation sign-in [{::user/keys [_email _password]}]
   (action [_] true)
   (ok-action [{:keys [app component] :as env}]
     (let [{:keys [errors]}
@@ -63,7 +62,7 @@
             (or
               (contains? errors :account-does-not-exist)
               (contains? errors :invalid-credentials))
-            (m/set-string!! component :ui/password-error :value (i18n/tr "Email or password is wrong")))))))
+            (m/set-string!! component :ui/password-error :value (i18n/tr "Nickname or password wrong")))))))
   (remote [env]
     (-> env
       (m/with-server-side-mutation `user/sign-in)
@@ -75,89 +74,96 @@
   [props]
   (inputs/textfield
     (merge
-      {:variant :outlined
-       :fullWidth true}
+      {:fullWidth true}
       props)))
 
-;; TODO Rename email to nickname and add "real" optional contact email
-(defsc SignUpForm [this {::user/keys [email password]
-                         :ui/keys [email-error password-error]}]
-  {:query [::user/email ::user/password
-           :ui/email-error :ui/password-error]
+(defsc SignUpForm [this {:keys [:user/nickname ::user/password]
+                         :ui/keys [nickname-error password-error]}]
+  {:query [:user/nickname ::user/password
+           :ui/nickname-error :ui/password-error]
    :ident (fn [] [:component/id ::SignInForm])
    :initial-state
-   (fn [_] {::user/email ""
-            :ui/email-error nil
+   (fn [_] {:user/nickname ""
+            :ui/nickname-error nil
 
             ::user/password ""
             :ui/password-error nil})}
-  (comp/fragment
-    (dialog/title {:disableTypography true}
-      (dd/typography {:align "center" :variant "h5" :component "h2"}
-        (i18n/trc "Dialog header" "Sign up")))
+
+  (dom/form
+    {:onSubmit
+     (fn submit-sign-up [e]
+       (evt/prevent-default! e)
+       (comp/transact! this [(sign-up {::user/email nickname ::user/password password})]))}
+    (dialog/title {:sx {:textAlign "center"}}
+      (i18n/trc "Dialog header" "Sign up"))
     (dialog/content {}
       (grid/container
-        {:spacing 1
-         :component :form
-         :noValidate true
-         :onSubmit (fn submit-sign-up [e]
-                     (evt/prevent-default! e)
-                     (comp/transact! this [(sign-up #:user{::user/email email ::user/password password})]))}
-        (grid/item {:xs 12}
-          (wide-textfield {:label (i18n/tr "Nickname")
-                           :value email
-                           :name :username
-                           :error (boolean email-error)
-                           :helperText email-error
-                           :autoFocus true
-                           :inputProps {:aria-label (i18n/tr "Nickname")
-                                        :autoComplete :username
-                                        :minLength 4 :maxLength 15
-                                        :required true}
-                           :onChange (fn [e]
-                                       (when email-error (m/set-value!! this :ui/email-error nil))
-                                       (m/set-string!! this ::user/email :event e))}))
-        (grid/item {:xs 12}
-          (wide-textfield {:label (i18n/tr "Password")
-                           :type :password
-                           :value password
-                           :error (boolean password-error)
-                           :helperText password-error
-                           :inputProps {:aria-label (i18n/tr "Password")
-                                        :autoComplete :new-password
-                                        :required true}
-                           :onChange (fn [e]
-                                       (when password-error (m/set-value!! this :ui/password-error nil))
-                                       (m/set-string!! this ::user/password :event e))}))
-        (grid/item {:xs 12}
-          (inputs/button {:variant :contained
-                          :color :primary
-                          :type :submit
-                          :fullWidth true}
-            (i18n/trc "Label of submit form" "Sign up")))
-        (grid/container
-          {:item true
-           :justifyContent :flex-end}
-          (grid/item {}
-            (inputs/button
-              {:color "inherit"
-               :onClick #(comp/transact! this [(show-signinup-dialog {:which-form :sign-in})])}
-              (i18n/tr "Already have an account? Sign In"))))))))
+         {:spacing 2
+          :component :form
+          :noValidate true
+          :pt 1}
+         (grid/item {:xs 12}
+           (inputs/textfield
+             {:label (i18n/tr "Nickname")
+              :value nickname
+              :name :username
+              :required true
+              :fullWidth true
+              :error (boolean nickname-error)
+              :helperText nickname-error
+              :autoFocus true
+              :inputProps {:aria-label (i18n/tr "Nickname")
+                           :autoComplete :username
+                           :minLength 4 :maxLength 15
+                           :required true}
+              :onChange (fn [e]
+                          (when nickname-error (m/set-value!! this :ui/nickname-error nil))
+                          (m/set-string!! this :user/nickname :event e))}))
+
+         (grid/item {:xs 12}
+           (inputs/textfield
+             {:label (i18n/tr "Password")
+              :fullWidth true
+              :type :password
+              :required true
+              :value password
+              :error (boolean password-error)
+              :helperText password-error
+              :inputProps {:aria-label (i18n/tr "Password")
+                           :autoComplete :new-password
+                           :required true}
+              :onChange (fn [e]
+                          (when password-error (m/set-value!! this :ui/password-error nil))
+                          (m/set-string!! this ::user/password :event e))}))
+
+         (grid/item {:xs 12}
+           (inputs/button {:variant :contained
+                           :color :primary
+                           :type :submit
+                           :fullWidth true}
+             (i18n/trc "Label of submit form" "Sign up")))
+         (grid/container
+           {:item true
+            :justifyContent :flex-end}
+           (grid/item {}
+             (inputs/button
+               {:color "inherit"
+                :onClick #(comp/transact! this [(show-signinup-dialog {:which-form :sign-in})])}
+               (i18n/tr "Already have an account? Sign In"))))))))
 
 (def ui-signup-form (comp/computed-factory SignUpForm))
 
-;; TODO Rename email to nickname and add "real" optional contact email
-(defsc LoginForm [this {:keys [::user/email ::user/password]
-                        :ui/keys [email-error password-error]}]
-  {:query [::user/email
-           :ui/email-error
+(defsc LoginForm [this {:keys [:user/nickname ::user/password]
+                        :ui/keys [nickname-error password-error]}]
+  {:query [:user/nickname
+           :ui/nickname-error
 
            ::user/password
            :ui/password-error]
    :ident (fn [] [:component/id ::LoginForm])
    :initial-state
-   (fn [_] {::user/email ""
-            :ui/email-error nil
+   (fn [_] {:user/nickname ""
+            :ui/nickname-error nil
 
             ::user/password ""
             :ui/password-error nil})}
@@ -172,22 +178,22 @@
          :noValidate true
          :onSubmit (fn submit-login [e]
                      (evt/prevent-default! e)
-                     (comp/transact! this [(sign-in #:user{::user/email email
-                                                           ::user/password password})]))}
+                     (comp/transact! this [(sign-in {::user/email nickname
+                                                     ::user/password password})]))}
         (grid/item {:xs 12}
           (wide-textfield {:label (i18n/tr "Nickname")
                            :name :username
-                           :error (boolean email-error)
-                           :helperText email-error
+                           :error (boolean nickname-error)
+                           :helperText nickname-error
                            :inputProps {:aria-label (i18n/tr "Nickname")
                                         :autoComplete :username
                                         :minLength 4 :maxLength 15
                                         :required true}
-                           :value email
+                           :value nickname
                            :autoFocus true
                            :onChange (fn [e]
-                                       (when email-error (m/set-value! this :ui/email-error nil))
-                                       (m/set-string!! this ::user/email :event e))}))
+                                       (when nickname-error (m/set-value! this :ui/nickname-error nil))
+                                       (m/set-string!! this :user/nickname :event e))}))
         (grid/item {:xs 12}
           (wide-textfield {:label (i18n/tr "Password")
                            :type :password
