@@ -68,12 +68,17 @@
        (::process/participants process))}))
 
 (defresolver resolve-proposals [{:keys [db] :as env} {::process/keys [slug]}]
-  {::pc/output [{::process/proposals [::proposal/id]}
+  {::pc/output [{::process/proposals
+                 [::proposal/id
+                  ::process/slug
+                  {::proposal/process [::process/slug]}]}
                 ::process/no-of-proposals]}
   (if-let [{::process/keys [proposals]} (d/pull db [{::process/proposals [::proposal/id]}] [::process/slug slug])]
     (do
       (access/allow-many! env (map #(find % ::proposal/id) proposals))
-      {::process/proposals proposals
+      {::process/proposals (map #(assoc % ::process/slug slug
+                                          ::proposal/process {::process/slug slug})
+                             proposals)
        ::process/no-of-proposals (count proposals)})
     {::process/proposals []
      ::process/no-of-proposals 0}))
