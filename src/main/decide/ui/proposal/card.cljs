@@ -27,7 +27,8 @@
     ["@mui/icons-material/ThumbDownOutlined" :default ThumbDownOutlined]
     ["@mui/icons-material/ThumbDown" :default ThumbDown]
     ["@mui/icons-material/ThumbUpOutlined" :default ThumbUpOutlined]
-    ["@mui/icons-material/ThumbUp" :default ThumbUp]))
+    ["@mui/icons-material/ThumbUp" :default ThumbUp]
+    [mui.feedback :as feedback]))
 
 (defn id-part [proposal-id]
   (dom/data {:className "proposal-id"
@@ -172,10 +173,16 @@
 
 (def ui-approve-toggle (comp/computed-factory ApproveToggle))
 
-(defsc VotingArea [this {::proposal/keys [id pro-votes my-opinion-value my-opinion opinions]}
+(defsc TotalVotesProcess [_ _]
+  {:query [::process/slug :process/total-votes]
+   :ident ::process/slug})
+
+(defsc VotingArea [this {::proposal/keys [id pro-votes my-opinion-value my-opinion opinions]
+                         {:keys [process/total-votes]} ::proposal/process}
                    {:keys [process]}]
   {:query [::proposal/id
            ::proposal/pro-votes
+           {::proposal/process (comp/get-query TotalVotesProcess)}
            ::proposal/my-opinion-value
            {::proposal/my-opinion [::opinion/value :opinion/rank]}
            {::proposal/opinions [::opinion/value
@@ -220,6 +227,23 @@
                  (set-reject-dialog-open true)              ; only
                  (comp/transact! this [(opinion.api/add {::proposal/id id
                                                          :opinion (if rejected? 0 -1)})])))})))
+
+      (when total-votes
+        (let [majority 50
+              percent (* 100 (/ pro-votes total-votes))]
+          (dd/tooltip {:title (i18n/tr "Voting share")}
+            (layout/box {:p 0.5}
+              (dd/typography {:color :textSecondary} (Math/round percent) " %")
+              (feedback/linear-progress
+                {:variant :determinate
+                 :color
+                 (cond
+                   (zero? percent) :error
+                   (< percent majority) :warning
+                   (>= percent majority) :success
+                   :else :primary)
+                 :value percent
+                 :sx {:width "100%"}})))))
 
       (when (process/public-voting? process)
         (->> opinions
