@@ -9,8 +9,7 @@
     [decide.models.opinion :as opinion]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
-    [decide.models.user :as user]
-    [taoensso.timbre :as log]))
+    [decide.models.user :as user]))
 
 (>defn slug-in-use? [db slug]
   [d.core/db? ::process/slug => boolean?]
@@ -167,3 +166,16 @@
   (when-let [process-eid (d/q '[:find ?e . :in $ ?slug :where [?e ::process/slug ?slug]] db slug)]
     (d/entity db process-eid)))
 
+(defn total-votes
+  "Get the total number of votes for a process."
+  [process]
+  (or
+    (d/q
+      '[:find (count ?opinion) .
+        :in $ ?process
+        :where
+        [?process ::process/proposals ?proposal]
+        [?proposal ::proposal/opinions ?opinion]
+        [?opinion :decide.models.opinion/value]]
+      (d/entity-db process) (:db/id process))
+    0))

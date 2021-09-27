@@ -126,6 +126,11 @@
        (find process ::process/slug)
        (:db/id user))}))
 
+(defresolver resolve-total-votes [env {::process/keys [slug]}]
+  {::pc/output [:process/total-votes]}
+  (let [process (get-process-entity env slug)]
+    {:process/total-votes (process.db/total-votes process)}))
+
 (def all-resolvers
   [process.mutations/all-mutations
 
@@ -144,6 +149,8 @@
    resolve-proposals
    resolve-proposal-process
    resolve-no-of-proposals
+
+   resolve-total-votes
 
    resolve-personal-approved-proposals
 
