@@ -1,6 +1,5 @@
 (ns decide.ui.proposal.main-proposal-list
   (:require
-    [clojure.string :as str]
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.data-fetch :as df]
@@ -19,11 +18,8 @@
     [decide.utils.breakpoint :as breakpoint]
     [decide.utils.time :as time]
     [mui.data-display :as dd]
-    [mui.data-display.list :as list]
     [mui.feedback :as feedback]
     [mui.inputs :as inputs]
-    [mui.inputs.form :as form]
-    [mui.inputs.input :as input]
     [mui.inputs.toggle-button :as toggle]
     [mui.layout :as layout]
     [mui.layout.grid :as grid]
@@ -51,19 +47,21 @@
       (layout/box {:ml 1}
         (i18n/tr "New proposal")))))
 
-(defn sort-selector [selected set-selected!]
-  (form/control {:size :small}
-    (input/label {:id "main-proposal-list-sort"} (i18n/trc "Label for sort order selection" "Sort"))
-    (inputs/select
-      {:value selected
-       :onChange (fn [e]
-                   (set-selected! (evt/target-value e)))
-       :autoWidth true
-       :labelId "main-proposal-list-sort"
-       :label (i18n/trc "Label for sort order selection" "Sort")}
-      (navigation/menu-item {:value "new->old"} (i18n/trc "Sort order option" "New → Old"))
-      (navigation/menu-item {:value "old->new"} (i18n/trc "Sort order option" "Old → New"))
-      (navigation/menu-item {:value "most-approvals"} (i18n/trc "Sort order option" "Approvals ↓")))))
+(defsc SortSelector [_ {:keys [selected]} {:keys [set-selected!]}]
+  ;; query + initial-state are not used for now.
+  {:query [:selected]
+   :initial-state {:selected "most-approvals"}}
+  (inputs/textfield
+    {:label (i18n/trc "Label for sort order selection" "Sort")
+     :select true
+     :value selected
+     :onChange #(set-selected! (evt/target-value %))
+     :size :small}
+    (navigation/menu-item {:value "new->old"} (i18n/trc "Sort order option" "New → Old"))
+    (navigation/menu-item {:value "old->new"} (i18n/trc "Sort order option" "Old → New"))
+    (navigation/menu-item {:value "most-approvals"} (i18n/trc "Sort order option" "Approvals ↓"))))
+
+(def ui-sort-selector (comp/computed-factory SortSelector))
 
 (defn new-proposal-card [{:keys [disabled? onClick]}]
   (inputs/button {:style {:height "100%"
@@ -181,7 +179,7 @@
                 (cond-> {:favorite ViewModule}
                   large-ui? (assoc :hierarchy ViewList))))
 
-            (grid/item {} (sort-selector selected-sort set-selected-sort!))))
+            (grid/item {} (ui-sort-selector {:selected selected-sort} {:set-selected! set-selected-sort!}))))
 
         ; main list
         (error-boundaries/error-boundary
