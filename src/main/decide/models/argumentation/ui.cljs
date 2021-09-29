@@ -1,6 +1,5 @@
 (ns decide.models.argumentation.ui
   (:require
-    [clojure.set :as set]
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.algorithms.merge :as mrg]
     [com.fulcrologic.fulcro.application :as app]
@@ -148,8 +147,7 @@
 
 (defn argument-header [{:keys [author onClick show-premises?]}]
   (card/header
-    {:avatar (user.ui/chip (set/rename-keys author {::user/display-name :user/display-name
-                                                    ::user/id :user/id}))
+    {:avatar (user.ui/chip author)
      :action (inputs/icon-button
                {:size :small
                 :onClick onClick
