@@ -1,7 +1,6 @@
 (ns decide.ui.proposal.detail-page
   (:require
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
-    [com.fulcrologic.fulcro.algorithms.react-interop :as interop]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.data-fetch :as df]
     [com.fulcrologic.fulcro.dom :as dom]
@@ -252,6 +251,7 @@
          #(comp/transact! app [(init-proposal-page {})]
             {:ref ident :only-refresh [ident]}))))}
   (let [{::process/keys [slug] :as process} current-process
+        logged-in? (comp/shared this :logged-in?)
         process-over? (process/over? process)
         has-children? (seq (:child-relations children-section))
         show-similar-section? (and (process/single-approve? process)
@@ -287,6 +287,7 @@
                 (when-not process-over?
                   (inputs/button
                     {:color :primary
+                     :disabled (not logged-in?)
                      :variant :contained
                      :size :small
                      :onClick #(comp/transact! this [(new-proposal/show {:parents [(comp/get-ident this)]})])}
