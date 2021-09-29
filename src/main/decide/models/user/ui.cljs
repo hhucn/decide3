@@ -6,7 +6,8 @@
     [decide.utils.color :as color-utils]
     [mui.data-display :as dd]
     [mui.data-display.list :as list]
-    [mui.styles :as styles]))
+    [mui.styles :as styles]
+    [clojure.set :as set]))
 
 (def emoji-expr #"^(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff])[\ufe0e\ufe0f]?(?:[\u0300-\u036f\ufe20-\ufe23\u20d0-\u20f0]|\ud83c[\udffb-\udfff])?(?:\u200d(?:[^\ud800-\udfff]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff])[\ufe0e\ufe0f]?(?:[\u0300-\u036f\ufe20-\ufe23\u20d0-\u20f0]|\ud83c[\udffb-\udfff])?)*")
 
@@ -34,14 +35,6 @@
 
 (def ui-colored-avatar (interop/react-factory ColoredAvatar))
 
-(defn avatar
-  "DEPRECTATED - Use `ui-avatar` or `ui-colored-avatar`"
-  [{:user/keys [id display-name]}]
-  (ui-colored-avatar {:color (color-utils/hash-color id)
-                      :alt display-name
-                      :title display-name}
-    (or (first-char display-name) \?)))
-
 (defn- wrap-with-user-tooltip [user & body]
   (apply
     dd/tooltip
@@ -51,8 +44,9 @@
     body))
 
 (defsc Avatar [this {::user/keys [id display-name] :as user}
-               {:keys [avatar-props tooltip?] :or {avatar-props {}
-                                                   tooltip? false}}]
+               {:keys [avatar-props tooltip?]
+                :or {avatar-props {}
+                     tooltip? false}}]
   {:query [::user/id ::user/display-name]
    :ident ::user/id}
   (let [color (color-utils/hash-color id)
@@ -80,7 +74,7 @@
    (dd/chip
      (merge
        {:label display-name
-        :avatar (avatar user)
+        :avatar (ui-avatar #::user{:id id, :display-name display-name})
         :sx {:border 0}
         :variant :outlined}
        chip-props))))
