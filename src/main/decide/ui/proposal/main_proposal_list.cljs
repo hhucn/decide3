@@ -77,8 +77,8 @@
   (dd/typography {:variant :overline} label))
 
 (defn- layout-button [{:keys [key icon label]}]
-  (dd/tooltip {:title (or label "")}
-    (toggle/button {:value key :key key}
+  (toggle/button {:value key :key key}
+    (dd/tooltip {:title (or label "")}
       (dom/create-element icon))))
 
 (defn layout-selector [{:keys [value onChange layouts]}]
