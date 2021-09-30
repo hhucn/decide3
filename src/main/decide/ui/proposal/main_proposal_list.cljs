@@ -31,20 +31,18 @@
 (declare MainProposalList)
 
 (defn add-proposal-fab [props]
-  (layout/box
-    {:position :fixed
-     :bottom "16px"
-     :right "16px"}
-    (inputs/fab
-      (merge
-        {:aria-label (i18n/tr "New proposal")
-         :title (i18n/tr "New proposal")
-         :color :secondary
-         :variant :extended}
-        props)
-      (dom/create-element AddIcon)
-      (layout/box {:ml 1}
-        (i18n/tr "New proposal")))))
+  (inputs/fab
+    (merge
+      {:aria-label (i18n/tr "New proposal")
+       :title (i18n/tr "New proposal")
+       :color :secondary
+       :variant :extended
+       :sx {:position :fixed
+            :bottom "16px"
+            :right "16px"}}
+      props)
+    (dom/create-element AddIcon #js {:sx #js{:mr 1}})
+    (i18n/tr "New proposal")))
 
 (defsc SortSelector [_ {:keys [selected]} {:keys [set-selected!]}]
   ;; query + initial-state are not used for now.
