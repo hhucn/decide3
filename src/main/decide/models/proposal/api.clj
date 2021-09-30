@@ -35,7 +35,7 @@
 
 (defresolver resolve-no-of-parents [{:keys [db]} {::proposal/keys [id]}]
   {::proposal/no-of-parents
-   (d/q '[:find (count ?e)
+   (d/q '[:find (count ?e) .
           :in $ ?proposal
           :where
           [?proposal ::proposal/parents ?e]]
