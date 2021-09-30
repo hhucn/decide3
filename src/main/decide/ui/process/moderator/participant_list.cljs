@@ -110,9 +110,9 @@
            {:ui/add-participant-form (comp/get-query UserAutocomplete)}]
    :ident ::process/slug
    :pre-merge
-   (fn [{:keys [normalized-state data-tree]}]
+   (fn [{:keys [current-normalized data-tree]}]
      (merge
-       normalized-state
+       current-normalized
        data-tree
        {:ui/add-participant-form (comp/get-initial-state UserAutocomplete {:id ::ParticipantList})}))}
   (grid/container {}

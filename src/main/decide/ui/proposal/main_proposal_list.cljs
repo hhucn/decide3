@@ -128,6 +128,17 @@
           {:focus [::process/slug ::process/proposals :>/favorite-list :>/hierarchy-list]
            :marker ::loading-proposals})))))
 
+(defmutation select-layout [{:keys [layout]}]
+  (action [{:keys [state component ref]}]
+    (swap! state update-in ref assoc :ui/layout layout)
+    (df/load-field! component
+      [::process/slug
+       (case layout
+         :favorite :>/favorite-list
+         :hierarchy :>/hierarchy-list)]
+      {:marker ::loading-proposals})))
+
+
 ; TODO This component has become way to big.
 ; TODO Add empty state.
 (defsc MainProposalList [this {::process/keys [slug proposals no-of-participants no-of-proposals]
@@ -178,7 +189,7 @@
             (dd/typography {:variant :overline} (i18n/trf "Participants {count}" {:count no-of-participants}))]
            :end
            [(layout-selector
-              {:value layout, :onChange #(m/set-value! this :ui/layout %)
+              {:value layout, :onChange #(comp/transact! this [(select-layout {:layout %})])
                :layouts (remove nil? [{:key :favorite
                                        :icon ViewModule
                                        :label (i18n/trc "Proposal list layout" "Favourite layout")}
@@ -191,8 +202,7 @@
         ; main list
         (error-boundaries/error-boundary
           (let [context {::process/slug slug
-                         :process-over? process-over?
-                         :card-props {:variant (when large-ui? :outlined)}}
+                         :process-over? process-over?}
                 list-options (merge
                                {:items (mapv #(comp/computed % context) sorted-proposals)}
                                context)]
