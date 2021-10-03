@@ -9,6 +9,7 @@
     [decide.models.authorization :as auth]
     [decide.models.user :as user]
     [mui.data-display :as dd]
+    [mui.feedback.alert :as alert]
     [mui.feedback.dialog :as dialog]
     [mui.inputs :as inputs]
     [mui.layout.grid :as grid]))
@@ -106,7 +107,6 @@
            (inputs/textfield
              {:label (i18n/tr "Nickname")
               :value nickname
-              :name :username
               :required true
               :fullWidth true
               :error (boolean nickname-error)
@@ -172,6 +172,11 @@
       (dd/typography {:align "center" :variant "h5" :component "h2"}
         (i18n/trc "Dialog header" "Sign in")))
     (dialog/content {}
+      (alert/alert {:severity :info}
+        (i18n/tr "Don't have an account?")
+        (inputs/button {:color :inherit, :size :small
+                        :onClick #(comp/transact! this [(show-signinup-dialog {:which-form :sign-up})])}
+          (i18n/tr "Sign Up")))
       (grid/container
         {:spacing 1
          :component :form
