@@ -26,17 +26,17 @@ msgid "Close"
 msgstr "Schließen"
 
 msgid "Nickname already in use"
-msgstr "Nickname ist bereits vergeben"
+msgstr "Nutzername ist bereits vergeben"
 
 msgid "Nickname or password wrong"
-msgstr "Nickname oder Passwort ist falsch"
+msgstr "Nutzername oder Passwort ist falsch"
 
 msgctxt "Dialog header"
 msgid "Sign up"
 msgstr "Registrierung"
 
 msgid "Nickname"
-msgstr "Nickname"
+msgstr "Nutzername"
 
 msgid "Password"
 msgstr "Passwort"
