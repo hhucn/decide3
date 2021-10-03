@@ -310,10 +310,11 @@
             (ui-voting-area voting-area {:process current-process}))
 
           (grid/item {:xs :auto}
-            (inputs/button
-              {:startIcon (dom/create-element Comment)
-               :variant :label
-               :href proposal-href}
-              (str no-of-arguments))))))))
+            (dd/tooltip {:title (i18n/trf "{noOf, plural, =1 {# argument} other {# arguments}}" {:noOf no-of-arguments})}
+              (inputs/button
+                {:startIcon (dom/create-element Comment)
+                 :variant :label
+                 :href proposal-href}
+                (str no-of-arguments)))))))))
 
 (def ui-proposal-card (comp/computed-factory ProposalCard {:keyfn ::proposal/id}))
