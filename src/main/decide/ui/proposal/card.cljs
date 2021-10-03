@@ -222,22 +222,22 @@
                  (comp/transact! this [(opinion.api/add {::proposal/id id
                                                          :opinion (if rejected? 0 -1)})])))})))
 
-      (when total-votes
-        (let [majority 50
-              percent (* 100 (/ pro-votes total-votes))]
-          (dd/tooltip {:title (i18n/tr "Voting share")}
-            (layout/box {:p 0.5}
-              (dd/typography {:color :textSecondary} (Math/round percent) " %")
-              (feedback/linear-progress
-                {:variant :determinate
-                 :color
-                 (cond
-                   (zero? percent) :error
-                   (< percent majority) :warning
-                   (>= percent majority) :success
-                   :else :primary)
-                 :value percent
-                 :sx {:width "100%"}})))))
+      #_(when total-votes
+          (let [majority 50
+                percent (* 100 (/ pro-votes total-votes))]
+            (dd/tooltip {:title (i18n/tr "Voting share")}
+              (layout/box {:p 0.5}
+                (dd/typography {:color :textSecondary} (Math/round percent) " %")
+                (feedback/linear-progress
+                  {:variant :determinate
+                   :color
+                   (cond
+                     (zero? percent) :error
+                     (< percent majority) :warning
+                     (>= percent majority) :success
+                     :else :primary)
+                   :value percent
+                   :sx {:width "100%"}})))))
 
       (when (process/public-voting? process)
         (->> opinions
