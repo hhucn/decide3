@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: decide3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-07-18 23:58+0200\n"
-"PO-Revision-Date: 2021-07-19 00:13+0200\n"
+"POT-Creation-Date: 2021-10-03 21:35+0200\n"
+"PO-Revision-Date: 2021-10-03 21:39+0200\n"
 "Last-Translator: Björn Ebbinghaus <ebbinghaus@hhu.de>\n"
 "Language-Team: Björn Ebbinghaus\n"
 "Language: de\n"
@@ -25,11 +25,11 @@ msgctxt "[aria]"
 msgid "Close"
 msgstr "Schließen"
 
-msgid "Email already in use!"
-msgstr "E-Mail ist bereits vergeben!"
+msgid "Nickname already in use"
+msgstr "Nickname ist bereits vergeben"
 
-msgid "Email or password is wrong"
-msgstr "E-Mail oder Passwort ist falsch"
+msgid "Nickname or password wrong"
+msgstr "Nickname oder Passwort ist falsch"
 
 msgctxt "Dialog header"
 msgid "Sign up"
@@ -52,6 +52,12 @@ msgctxt "Dialog header"
 msgid "Sign in"
 msgstr "Anmelden"
 
+msgid "Don't have an account?"
+msgstr "Noch keinen Account?"
+
+msgid "Sign Up"
+msgstr "Registrieren"
+
 msgctxt "Label of submit form"
 msgid "Sign in"
 msgstr "Anmelden"
@@ -66,11 +72,11 @@ msgid "Receive notifications"
 msgstr "Benachrichtigungen erhalten"
 
 msgid ""
-"Get notifications for processes you participate in when something happened. "
-"You get at most one email per hour."
+"Get notifications when something changes. You will receive at most one email "
+"per hour."
 msgstr ""
-"Erhalte Benachrichtigungen, wenn sich etwas ändert in Prozessen, an denen du "
-"teilnimmst. Du bekommst höchstens eine E-Mail in der Stunde."
+"Erhalte Benachrichtigungen, wenn sich etwas ändert. Du erhältst höchstens "
+"eine E-Mail pro Stunde."
 
 msgid "Email"
 msgstr "E-Mail"
@@ -84,10 +90,6 @@ msgstr "Fertig"
 msgctxt "[aria] navigation menu"
 msgid "navigation menu"
 msgstr "navigations menü"
-
-msgctxt "Temp Nickname for login"
-msgid "Nickname"
-msgstr "Name"
 
 msgctxt "Label of login button"
 msgid "Login"
@@ -135,7 +137,6 @@ msgctxt "Nickname"
 msgid "Public, unique identifier"
 msgstr "Öffentlicher, eindeutiger Name"
 
-#, fuzzy
 msgctxt "Email field"
 msgid "This is private. Leave empty if you don't want notification mails."
 msgstr ""
@@ -282,6 +283,9 @@ msgstr "Hinzufügen"
 msgid "Login to add argument"
 msgstr "Melde dich an um ein neues Argument hinzuzufügen"
 
+msgid "Reply"
+msgstr "Antworten"
+
 msgid "Add argument"
 msgstr "Argument hinzufügen"
 
@@ -322,20 +326,20 @@ msgctxt "Start of new proposal stepper"
 msgid "Start"
 msgstr "Start"
 
-msgctxt "Input is optional"
-msgid "Optional"
-msgstr "Optional"
-
 msgctxt "Parents of a proposal"
 msgid "Choose proposals"
 msgstr "Vorschläge auswählen"
 
-msgid "Title and details must not be empty"
-msgstr "Titel or Details dürfen nicht leer sein"
+msgctxt "Input is optional"
+msgid "Optional"
+msgstr "Optional"
 
 msgctxt "Details of a proposal"
 msgid "Add details"
 msgstr "Details hinzufügen"
+
+msgid "Title and details must not be empty"
+msgstr "Titel or Details dürfen nicht leer sein"
 
 msgid "Chosen proposals"
 msgstr "Ausgewählte Vorschläge"
@@ -422,7 +426,7 @@ msgid ""
 "This proposal has a chain of {count} proposals, that lead up to this proposal"
 msgstr ""
 "Dieser Vorschlag hat eine Kette von {count} Vorschlägen, die zu diesem "
-"Vorschlag geführt haben."
+"Vorschlag geführt haben"
 
 msgid "Gen. {generation}"
 msgstr "Gen. {generation}"
@@ -447,6 +451,14 @@ msgstr "Schlage eine Verbesserung vor"
 msgid "Propose an alternative"
 msgstr "Schlage eine Alternative vor"
 
+msgctxt "Proposal has been rejected by you"
+msgid "Rejected"
+msgstr "Abgelehnt"
+
+msgctxt "Reject a proposal"
+msgid "Reject"
+msgstr "Ablehnen"
+
 msgctxt "Proposal has been approved"
 msgid "Approved"
 msgstr "Zugestimmt"
@@ -455,13 +467,11 @@ msgctxt "Approve a proposal"
 msgid "Approve"
 msgstr "Zustimmen"
 
-msgctxt "Proposal has been rejected by you"
-msgid "Rejected"
-msgstr "Abgelehnt"
+msgid "{votes} approved"
+msgstr "{votes} haben zugestimmt"
 
-msgctxt "Reject a proposal"
-msgid "Reject"
-msgstr "Ablehnen"
+msgid "{noOf, plural, =1 {# argument} other {# arguments}}"
+msgstr "{noOf, plural, =1 {1 Argument} other {# Argumente}}"
 
 msgid "Winner"
 msgstr "Gewinner"
@@ -493,15 +503,15 @@ msgstr "Hinzufügen"
 msgid "Edit process"
 msgstr "Prozess bearbeiten"
 
-msgid "Edit"
-msgstr "Bearbeiten"
+msgid "Edited"
+msgstr "Bearbeitet"
+
+msgid "Optional"
+msgstr "Optional"
 
 msgctxt "Start of a process"
 msgid "Start"
 msgstr "Startzeitpunkt"
-
-msgid "Optional"
-msgstr "Optional"
 
 msgid "Advanced"
 msgstr "Erweitert"
@@ -560,11 +570,14 @@ msgstr "Dies ist der bisher beste Vorschlag"
 msgid "All other proposals"
 msgstr "Alle Vorschläge"
 
+msgid "Based on"
+msgstr "Basiert auf"
+
+msgid "Nothing"
+msgstr "Nichts"
+
 msgid "New proposal"
 msgstr "Neuer Vorschlag"
-
-msgid "So far there are no arguments"
-msgstr "Bisher gibt es keine Argumente"
 
 msgctxt "Label for sort order selection"
 msgid "Sort"
@@ -582,13 +595,6 @@ msgctxt "Sort order option"
 msgid "Approvals ↓"
 msgstr "Zustimmungen ↓"
 
-msgctxt "Label for filter selection"
-msgid "Filter"
-msgstr "Filter"
-
-msgid "Children"
-msgstr "Kinder"
-
 msgid "Login to add new argument"
 msgstr "Anmelden um ein neues Argument hinzuzufügen"
 
@@ -601,6 +607,14 @@ msgstr "Vorschläge {count}"
 
 msgid "Participants {count}"
 msgstr "Teilnehmer {count}"
+
+msgctxt "Proposal list layout"
+msgid "Favourite layout"
+msgstr "Favoriten Layout"
+
+msgctxt "Proposal list layout"
+msgid "Hierarchy layout"
+msgstr "Hierarchisches Layout"
 
 msgctxt "Overview over process"
 msgid "Overview"
@@ -616,19 +630,33 @@ msgctxt "Link to moderation page"
 msgid "Moderation"
 msgstr "Moderation"
 
-msgctxt "Dismiss warning alert"
-msgid "Dismiss"
-msgstr "Ausblenden"
+#~ msgctxt "Temp Nickname for login"
+#~ msgid "Nickname"
+#~ msgstr "Name"
 
-msgid "Work in progress!"
-msgstr "In Arbeit!"
+#~ msgid "So far there are no arguments"
+#~ msgstr "Bisher gibt es keine Argumente"
 
-msgid ""
-"Components marked with a yellow outline are in progress, and may not work "
-"yet!"
-msgstr ""
-"Gelb markierte Bereich werden aktiv bearbeitet und funktionieren eventuell "
-"nicht richtig!"
+#~ msgctxt "Label for filter selection"
+#~ msgid "Filter"
+#~ msgstr "Filter"
+
+#~ msgid "Children"
+#~ msgstr "Kinder"
+
+#~ msgctxt "Dismiss warning alert"
+#~ msgid "Dismiss"
+#~ msgstr "Ausblenden"
+
+#~ msgid "Work in progress!"
+#~ msgstr "In Arbeit!"
+
+#~ msgid ""
+#~ "Components marked with a yellow outline are in progress, and may not work "
+#~ "yet!"
+#~ msgstr ""
+#~ "Gelb markierte Bereich werden aktiv bearbeitet und funktionieren "
+#~ "eventuell nicht richtig!"
 
 #~ msgid "Enhance"
 #~ msgstr "Erweitern"
