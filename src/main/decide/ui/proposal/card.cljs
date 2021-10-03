@@ -18,7 +18,6 @@
     [decide.utils.time :as time]
     [mui.data-display :as dd]
     [mui.data-display.list :as list]
-    [mui.feedback :as feedback]
     [mui.feedback.dialog :as dialog]
     [mui.inputs :as inputs]
     [mui.layout :as layout]
@@ -30,12 +29,12 @@
     ["@mui/icons-material/ThumbDownOutlined" :default ThumbDownOutlined]
     ["@mui/icons-material/ThumbDown" :default ThumbDown]))
 
-(defn id-part [proposal-id]
+(defn- id-part [nice-id]
   (dom/data {:className "proposal-id"
-             :value proposal-id}
-    (str "#" (if (tempid/tempid? proposal-id) "?" proposal-id))))
+             :value nice-id}
+    (str "#" (if (tempid/tempid? nice-id) "?" nice-id))))
 
-(defn time-part [^js/Date created]
+(defn- time-part [^js/Date created]
   (comp/fragment
     " "
     (time/nice-time-element created)))
@@ -60,38 +59,32 @@
            ::proposal/no-of-parents
            {::proposal/original-author (comp/get-query Author)}]
    :ident ::proposal/id}
-  (dom/span {:classes ["subheader"]
-             :style {:height "24px"}}
+  (layout/stack {:className "subheader"
+                 :direction :row
+                 :spacing 0.5
+                 :divider (dom/span {:aria-hidden true} "·")}
     (id-part nice-id)
 
     (when (and author? original-author)
-      (comp/fragment
-        " · "
-        (ui-author original-author)))
-    " · "
+      (ui-author original-author))
+
     (when (and created? (instance? js/Date created))
       (time-part created))
+
     (when (and gen? generation)
-      (comp/fragment
-        " · "
-        (dd/tooltip
-          {:title (i18n/trf "This proposal has a chain of {count} proposals, that lead up to this proposal" {:count generation})}
-          (dom/span {} (i18n/trf "Gen. {generation}" {:generation generation})))))
+      (dd/tooltip
+        {:title (i18n/trf "This proposal has a chain of {count} proposals, that lead up to this proposal" {:count generation})}
+        (dom/span {} (i18n/trf "Gen. {generation}" {:generation generation}))))
+
     (when (and type? no-of-parents)
       (case no-of-parents
         0 nil
         1
         (dd/tooltip {:title (i18n/tr "This proposal is derived from one other proposal")}
-          (dd/chip
-            {:size :small
-             :color :primary
-             :label (i18n/trc "Type of proposal" "Fork")}))
+          (dd/typography {} (i18n/trc "Type of proposal" "Fork")))
 
         (dd/tooltip {:title (i18n/tr "This proposal is derived from two or more other proposals")}
-          (dd/chip
-            {:size :small
-             :color :secondary
-             :label (i18n/trc "Type of proposal" "Merge")}))))))
+          (dd/typography {} (i18n/trc "Type of proposal" "Merge")))))))
 
 (def ui-subheader (comp/computed-factory Subheader (:keyfn ::proposal/id)))
 
