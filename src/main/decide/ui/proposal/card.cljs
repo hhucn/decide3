@@ -18,17 +18,17 @@
     [decide.utils.time :as time]
     [mui.data-display :as dd]
     [mui.data-display.list :as list]
+    [mui.feedback :as feedback]
     [mui.feedback.dialog :as dialog]
     [mui.inputs :as inputs]
     [mui.layout :as layout]
     [mui.layout.grid :as grid]
     [mui.surfaces.card :as card]
+    ["@mui/icons-material/CheckCircleOutlineRounded" :default CheckCircleOutline]
+    ["@mui/icons-material/CheckCircleRounded" :default CheckCircle]
     ["@mui/icons-material/Comment" :default Comment]
     ["@mui/icons-material/ThumbDownOutlined" :default ThumbDownOutlined]
-    ["@mui/icons-material/ThumbDown" :default ThumbDown]
-    ["@mui/icons-material/ThumbUpOutlined" :default ThumbUpOutlined]
-    ["@mui/icons-material/ThumbUp" :default ThumbUp]
-    [mui.feedback :as feedback]))
+    ["@mui/icons-material/ThumbDown" :default ThumbDown]))
 
 (defn id-part [proposal-id]
   (dom/data {:className "proposal-id"
@@ -152,24 +152,18 @@
      :onClick onClick
      :icon (if toggled? ThumbDown ThumbDownOutlined)}))
 
-(defn approve-icon [{:keys [approved? disabled?]}]
-  (dom/create-element (if approved? ThumbUp ThumbUpOutlined)
-    (clj->js
-      {:color (if (and approved? (not disabled?)) :success :inherit)})))
-
 (defsc ApproveToggle [_ {:keys [approved? disabled? votes]} {:keys [onToggle]}]
-  (inputs/button
-    {:onClick onToggle
-     :disabled disabled?
-     :color :inherit
-     :size :large
-     :aria-label (str
-                   (if approved?
-                     (i18n/trc "Proposal has been approved" "Approved")
-                     (i18n/trc "Approve a proposal" "Approve"))
-                   " [" votes "]")
-     :startIcon (approve-icon {:approved? approved?, :disabled? disabled?})}
-    (dd/typography {:color :text.primary :fontSize :inherit} votes)))
+  (dd/tooltip {:title (str
+                        (if approved?
+                          (i18n/trc "Proposal has been approved" "Approved")
+                          (i18n/trc "Approve a proposal" "Approve"))
+                        " [" (i18n/trf "{votes} approved" {:votes votes}) "]")}
+    (inputs/button
+      {:onClick onToggle
+       :disabled disabled?
+       :color (if (and approved? (not disabled?)) :success :inherit)
+       :startIcon (dom/create-element (if approved? CheckCircle CheckCircleOutline))}
+      (dd/typography {:color :text.primary, :fontSize :inherit, :variant :button} votes))))
 
 (def ui-approve-toggle (comp/computed-factory ApproveToggle))
 
