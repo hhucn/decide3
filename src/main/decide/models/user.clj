@@ -140,16 +140,16 @@
          :errors #{:invalid-credentials}}))
 
     ;; TODO register for now if not in DB...revert this later
-    (let [{::keys [id] :as user} (tx-map {::email email ::password password})
-          tx-report (d/transact conn [user [:db/add "datomic.tx" :db/txUser [::id id]]])]
-      (wrap-session env
-        {:signup/result :success
-         ::id id
-         :user {::id id}
-         :session/valid? true
-         ::p/env (assoc env :db (:db-after tx-report))}))
-    #_{:signin/result :fail
-       :errors #{:account-does-not-exist}}))
+    #_(let [{::keys [id] :as user} (tx-map {::email email ::password password})
+            tx-report (d/transact conn [user [:db/add "datomic.tx" :db/txUser [::id id]]])]
+        (wrap-session env
+          {:signup/result :success
+           ::id id
+           :user {::id id}
+           :session/valid? true
+           ::p/env (assoc env :db (:db-after tx-report))}))
+    {:signin/result :fail
+     :errors #{:account-does-not-exist}}))
 
 ;; API
 (defmutation sign-up [{:keys [conn] :as env} {::keys [email password]}]
