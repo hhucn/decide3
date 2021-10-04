@@ -14,7 +14,8 @@
 
 (defn close! [this id]
   (comp/transact! this [(close {:id id})]
-    {:compressible? true}))
+    {:compressible? true
+     :only-refresh [[:dialog/id id]]}))
 
 (defmutation toggle [{:keys [id]}]
   (action [{:keys [state]}]
@@ -23,7 +24,7 @@
 (defn toggle! [this id]
   (comp/transact! this [(toggle {:id id})]
     {:compressible? true
-     :refresh [:dialog/id id]}))
+     :only-refresh [[:dialog/id id]]}))
 
 (defsc Dialog [this
                {:keys [dialog/id ui/open?]}
