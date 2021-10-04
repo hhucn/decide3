@@ -11,7 +11,6 @@
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.raw.components :as rc]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
-    [decide.models.authorization :as auth]
     [decide.models.user :as user]
     [decide.models.user.api :as user.api]
     [decide.ui.components.snackbar :as snackbar]
@@ -107,6 +106,70 @@
 
 (def ui-add-email-for-notification-dialog (comp/factory AddEmailForNotificationDialog))
 
+;; region Account Menu
+
+(defmutation toggle-menu [{:keys [menu/id]}]
+  (action [{:keys [state]}]
+    (swap! state update-in [:menu/id id :ui/open?] not)))
+
+(defsc AccountMenu [this {:keys [menu/id ui/open?]} {:keys [ref]}]
+  {:query [:menu/id :ui/open?]
+   :ident :menu/id
+   :initial-state
+   {:menu/id :param/id
+    :ui/open? false}}
+  (letfn [(toggle [] (comp/transact! this [(toggle-menu {:menu/id id})]
+                       {:compressible? true
+                        :only-refresh [(comp/get-ident this)]}))]
+    (navigation/menu
+      {:id id
+       :open open?
+       :onClose toggle
+
+       :keepMounted true
+       :anchorEl (.-current ref)
+       :transformOrigin {:vertical :top, :horizontal :center}}
+      (navigation/menu-item {:component :a
+                             :href "/settings"
+                             :onClick toggle}
+        (i18n/tr "Settings"))
+      (navigation/menu-item {:onClick #(comp/transact! this [(user/sign-out nil)
+                                                             (toggle-menu {:menu/id id})])}
+        (i18n/trc "Label of logout button" "Logout")))))
+
+(def ui-account-menu (comp/computed-factory AccountMenu))
+
+(defsc AccountMenuButton [_ {::user/keys [display-name]} {:keys [onClick ref]}]
+  {:query [::user/id ::user/display-name]
+   :ident ::user/id}
+  (inputs/button
+    {:ref ref
+     :title (i18n/tr "Open account menu")
+     :color :inherit
+     :onClick onClick
+     :endIcon (dom/create-element AccountCircleIcon)}
+    display-name))
+
+(def ui-account-menu-button (comp/computed-factory AccountMenuButton))
+
+(defsc AccountDisplay [this {:keys [ui/account-menu] :as props}]
+  {:query [{[:root/current-session :user] (comp/get-query AccountMenuButton)}
+           {:ui/account-menu (comp/get-query AccountMenu)}]
+   :initial-state {:ui/account-menu {:id ::account-menu}}
+   :use-hooks? true}
+  (let [menu-ref (hooks/use-ref)
+        menu-id (:menu/id account-menu)]
+    (comp/fragment
+      (ui-account-menu-button (get props [:root/current-session :user])
+        {:ref menu-ref
+         :onClick #(comp/transact! this [(toggle-menu {:menu/id menu-id})]
+                     {:compressible? true
+                      :only-refresh [(comp/get-ident AccountMenu account-menu)]})})
+      (ui-account-menu account-menu {:ref menu-ref}))))
+
+(def ui-account-display (comp/factory AccountDisplay))
+;; endregion
+
 (defsc Logo [_ _]
   {:use-hooks? true}
   (let [[easteregg-count set-easteregg-count!] (hooks/use-state 0)
@@ -124,19 +187,17 @@
 
 (defsc AppBar
   [this
-   {:keys [ui/account-menu-open? root/current-session ui/notification-mail-dialog]}
+   {:keys [ui/notification-mail-dialog ui/account-display]}
    {:keys [menu-onClick]}]
-  {:query [:ui/account-menu-open?
-           {[:root/current-session '_] (comp/get-query auth/Session)}
-           {:ui/notification-mail-dialog (comp/get-query AddEmailForNotificationDialog)}]
+  {:query [{:ui/notification-mail-dialog (comp/get-query AddEmailForNotificationDialog)}
+           {:ui/account-display (comp/get-query AccountDisplay)}]
    :ident (fn [] [:component/id ::AppBar])
    :initial-state
-   {:ui/account-menu-open? false
-    :ui/notification-mail-dialog {:ui/open? false}}
+   (fn [_]
+     {:ui/notification-mail-dialog {:ui/open? false}
+      :ui/account-display (comp/get-initial-state AccountDisplay)})
    :use-hooks? true}
-  (let [logged-in? (get current-session :session/valid?)
-        display-name (get-in current-session [:user ::user/display-name])
-        menu-ref (hooks/use-ref)]
+  (let [logged-in? (comp/shared this :logged-in?)]
     (surfaces/app-bar
       {:position "sticky"
        :color "primary"}
@@ -151,48 +212,13 @@
         (ui-logo {})
 
         ; Spacer
-        (layout/box {:display :flex
-                     :flexGrow 1
-                     :alignItems :center
-                     :flexDirection :row-reverse}
+        (layout/stack {:direction :row
+                       :ml :auto}
 
-          (if-not logged-in?
-            (inputs/button
-              {:variant :outlined
-               :color :inherit
-               :onClick #(comp/transact! this [(login/show-signinup-dialog {:which-form :sign-in})] {:compressible? true})}
-              (i18n/trc "Label of login button" "Login"))
-
-            (comp/fragment
-
-              (inputs/icon-button
-                {:ref menu-ref
-                 :edge "end"
-                 :aria-label (i18n/trc "[aria]" "account of current user")
-                 :aria-controls "menuId"
-                 :aria-haspopup true
-                 :onClick #(m/set-value! this :ui/account-menu-open? true)
-                 :color "inherit"}
-                (dom/create-element AccountCircleIcon))
-
-              (layout/box {:p 1}
-                (dd/typography {:color :inherit} display-name))
-
-              (navigation/menu
-                {:keepMounted true
-                 :id "menuId"
-                 :anchorEl (.-current menu-ref)
-                 :anchorOrigin {:vertical "bottom"
-                                :horizontal "left"}
-                 :transformOrigin {:vertical "top"
-                                   :horizontal "center"}
-                 :open account-menu-open?
-                 :onClose #(m/set-value! this :ui/account-menu-open? false)}
-                (navigation/menu-item {:component :a
-                                       :href "/settings"}
-                  (i18n/tr "Settings"))
-                (navigation/menu-item {:onClick #(comp/transact! this [(user/sign-out nil)])}
-                  (i18n/trc "Label of logout button" "Logout")))))
+          (inputs/icon-button {:color :inherit
+                               :component :a
+                               :href "/help"}
+            (dom/create-element HelpIcon))
 
           (when logged-in?
             (comp/fragment
@@ -202,9 +228,13 @@
                 (dom/create-element Notifications))
               (ui-add-email-for-notification-dialog notification-mail-dialog)))
 
-          (inputs/icon-button {:color :inherit
-                               :component :a
-                               :href "/help"}
-            (dom/create-element HelpIcon)))))))
+          (if-not logged-in?
+            (inputs/button
+              {:variant :outlined
+               :color :inherit
+               :onClick #(comp/transact! this [(login/show-signinup-dialog {:which-form :sign-in})] {:compressible? true})}
+              (i18n/trc "Label of login button" "Login"))
+
+            (ui-account-display account-display)))))))
 
 (def ui-appbar (comp/computed-factory AppBar))
