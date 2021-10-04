@@ -49,4 +49,6 @@
   outdated
   {:depends [outdated:clj outdated:js]}
 
-  deploy (shell "ssh root@ebbinghaus.me 'cd decide ; ./deploy.sh'")}}
+  deploy (shell "ssh root@ebbinghaus.me 'cd decide ; ./deploy.sh'")
+  deploy:experiment (shell "ssh root@ebbinghaus.me 'cd decide-experiment ; ./deploy.sh'")
+  deploy:all {:depends [deploy deploy:experiment]}}}

@@ -21,7 +21,7 @@
         io.replikativ/datahike {:mvn/version "0.3.6"}
         com.github.mrebbinghaus/fulcro-material-ui-wrapper
         {:git/url "https://github.com/MrEbbinghaus/fulcro-material-ui-wrapper"
-         :sha "b14eb546f14079a9cc7d5cfac3a95de584cce2de"}
+         :sha "058f1dd4b85542914f92f48a4010ea9ad497e48f"}
 
         buddy/buddy {:mvn/version "2.0.0"}
 
@@ -35,7 +35,7 @@
 
  :aliases {:clj-tests {:extra-paths ["src/test"]
                        :main-opts ["-m" "kaocha.runner"]
-                       :extra-deps {lambdaisland/kaocha {:mvn/version "1.0.887"}
+                       :extra-deps {lambdaisland/kaocha {:mvn/version "1.0.902"}
                                     lambdaisland/kaocha-junit-xml {:mvn/version "0.0.76"}
                                     orchestra/orchestra {:mvn/version "2021.01.01-1"}}}
 
