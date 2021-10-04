@@ -26,7 +26,8 @@
     ["@mui/icons-material/Add" :default AddIcon]
     ["@mui/icons-material/Refresh" :default Refresh]
     ["@mui/icons-material/ViewList" :default ViewList]
-    ["@mui/icons-material/ViewModule" :default ViewModule]))
+    ["@mui/icons-material/ViewModule" :default ViewModule]
+    [taoensso.timbre :as log]))
 
 (declare MainProposalList)
 
@@ -130,13 +131,16 @@
 
 (defmutation select-layout [{:keys [layout]}]
   (action [{:keys [state component ref]}]
-    (swap! state update-in ref assoc :ui/layout layout)
-    (df/load-field! component
-      [::process/slug
-       (case layout
-         :favorite :>/favorite-list
-         :hierarchy :>/hierarchy-list)]
-      {:marker ::loading-proposals})))
+    (if (#{:favorite :hierarchy} layout)
+      (do
+        (swap! state update-in ref assoc :ui/layout layout)
+        (df/load-field! component
+          [::process/slug
+           (case layout
+             :favorite :>/favorite-list
+             :hierarchy :>/hierarchy-list)]
+          {:marker ::loading-proposals}))
+      (log/warn layout " is not a valid layout."))))
 
 
 ; TODO This component has become way to big.
@@ -207,7 +211,12 @@
                                {:items (mapv #(comp/computed % context) sorted-proposals)}
                                context)]
             (case layout
-              :favorite
+              :hierarchy
+              (hierarchy-list/ui-hierarchy-list hierarchy-list {:process-over? process-over?
+                                                                :sort-order (keyword sort-by)})
+
+
+              ; :favorite = default
               (grid/container {:spacing (if large-ui? 2 1)
                                :alignItems "stretch"
                                :style {:position "relative"}}
@@ -219,11 +228,7 @@
                               :style {:flexGrow 1
                                       :minHeight "100px"}}
                     (new-proposal-card {:disabled? (not logged-in?)
-                                        :onClick show-new-proposal-dialog}))))
-
-              :hierarchy
-              (hierarchy-list/ui-hierarchy-list hierarchy-list {:process-over? process-over?
-                                                                :sort-order (keyword sort-by)})))))
+                                        :onClick show-new-proposal-dialog}))))))))
 
       ; fab
       (when process-running?
