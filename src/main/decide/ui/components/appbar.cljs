@@ -107,6 +107,21 @@
 
 (def ui-add-email-for-notification-dialog (comp/factory AddEmailForNotificationDialog))
 
+(defsc Logo [_ _]
+  {:use-hooks? true}
+  (let [[easteregg-count set-easteregg-count!] (hooks/use-state 0)
+        easteregg? (and (zero? (mod easteregg-count 5)) (pos? easteregg-count))]
+    (dd/typography
+      {:component :span
+       :variant :h5
+       :color :inherit
+       :onClick #(set-easteregg-count! (inc easteregg-count))}
+      (if easteregg?
+        "d-cider 🍾"
+        "decide"))))
+
+(def ui-logo (comp/factory Logo))
+
 (defsc AppBar
   [this
    {:keys [ui/account-menu-open? root/current-session ui/notification-mail-dialog]}
@@ -118,15 +133,10 @@
    :initial-state
    {:ui/account-menu-open? false
     :ui/notification-mail-dialog {:ui/open? false}}
-
    :use-hooks? true}
   (let [logged-in? (get current-session :session/valid?)
         display-name (get-in current-session [:user ::user/display-name])
-        menu-ref (hooks/use-ref)
-        [easteregg-count set-easteregg-count!] (hooks/use-state 0)
-        show-easteregg? (and (zero? (mod easteregg-count 5)) (pos? easteregg-count))
-
-        [temp-nickname set-temp-nickname] (hooks/use-state "")]
+        menu-ref (hooks/use-ref)]
     (surfaces/app-bar
       {:position "sticky"
        :color "primary"}
@@ -138,14 +148,7 @@
              :aria-label (i18n/trc "[aria] navigation menu" "navigation menu")
              :onClick menu-onClick}
             (dom/create-element Menu)))
-        (dd/typography
-          {:component :span
-           :variant :h5
-           :color "inherit"
-           :onClick #(set-easteregg-count! (inc easteregg-count))}
-          (if show-easteregg?
-            "d-cider 🍾"
-            "decide"))
+        (ui-logo {})
 
         ; Spacer
         (layout/box {:display :flex
