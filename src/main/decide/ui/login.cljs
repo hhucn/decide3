@@ -12,7 +12,8 @@
     [mui.feedback.alert :as alert]
     [mui.feedback.dialog :as dialog]
     [mui.inputs :as inputs]
-    [mui.layout.grid :as grid]))
+    [mui.layout.grid :as grid]
+    [taoensso.timbre :as log]))
 
 (defn reset-password-field! [component]
   (m/set-string! component ::user/password :value ""))
@@ -91,65 +92,63 @@
             :ui/password-error nil})}
 
   (dom/form
-    {:onSubmit
+    {:name "signup"
+     :onSubmit
      (fn submit-sign-up [e]
        (evt/prevent-default! e)
        (comp/transact! this [(sign-up {::user/email nickname ::user/password password})]))}
-    (dialog/title {:sx {:textAlign "center"}}
+    (dialog/title {:sx {:textAlign :center}}
       (i18n/trc "Dialog header" "Sign up"))
     (dialog/content {}
-      (grid/container
-         {:spacing 2
-          :component :form
-          :noValidate true
-          :pt 1}
-         (grid/item {:xs 12}
-           (inputs/textfield
-             {:label (i18n/tr "Nickname")
-              :value nickname
-              :required true
-              :fullWidth true
-              :error (boolean nickname-error)
-              :helperText nickname-error
-              :autoFocus true
-              :inputProps {:aria-label (i18n/tr "Nickname")
-                           :autoComplete :username
-                           :minLength 4 :maxLength 15
-                           :required true}
-              :onChange (fn [e]
-                          (when nickname-error (m/set-value!! this :ui/nickname-error nil))
-                          (m/set-string!! this :user/nickname :event e))}))
+      (grid/container {:spacing 2, :pt 1}
+        (grid/item {:xs 12}
+          (inputs/textfield
+            {:label (i18n/tr "Nickname")
+             :value nickname
+             :name :username
+             :required true
+             :fullWidth true
+             :error (boolean nickname-error)
+             :helperText nickname-error
+             :autoFocus true
+             :inputProps {:aria-label (i18n/tr "Nickname")
+                          :autoComplete :username
+                          :minLength 4 :maxLength 15
+                          :required true}
+             :onChange (fn [e]
+                         (when nickname-error (m/set-value!! this :ui/nickname-error nil))
+                         (m/set-string!! this :user/nickname :event e))})
 
-         (grid/item {:xs 12}
-           (inputs/textfield
-             {:label (i18n/tr "Password")
-              :fullWidth true
-              :type :password
-              :required true
-              :value password
-              :error (boolean password-error)
-              :helperText password-error
-              :inputProps {:aria-label (i18n/tr "Password")
-                           :autoComplete :new-password
-                           :required true}
-              :onChange (fn [e]
-                          (when password-error (m/set-value!! this :ui/password-error nil))
-                          (m/set-string!! this ::user/password :event e))}))
+          (grid/item {:xs 12}
+            (inputs/textfield
+              {:label (i18n/tr "Password")
+               :fullWidth true
+               :type :password
+               :required true
+               :value password
+               :error (boolean password-error)
+               :helperText password-error
+               :inputProps {:aria-label (i18n/tr "Password")
+                            :autoComplete :new-password
+                            :required true}
+               :onChange (fn [e]
+                           (when password-error (m/set-value!! this :ui/password-error nil))
+                           (m/set-string!! this ::user/password :event e))}))
 
          (grid/item {:xs 12}
            (inputs/button {:variant :contained
                            :color :primary
                            :type :submit
                            :fullWidth true}
-             (i18n/trc "Label of submit form" "Sign up")))
-         (grid/container
-           {:item true
-            :justifyContent :flex-end}
-           (grid/item {}
-             (inputs/button
-               {:color "inherit"
-                :onClick #(comp/transact! this [(show-signinup-dialog {:which-form :sign-in})])}
-               (i18n/tr "Already have an account? Sign In"))))))))
+             (i18n/trc "Label of submit form" "Sign up"))
+          (grid/container
+            {:item true
+             :justifyContent :flex-end}
+            (grid/item {}
+              (inputs/button
+                {:color "inherit"
+                 :onClick #(comp/transact! this [(show-signinup-dialog {:which-form :sign-in})])}
+                (i18n/tr "Already have an account? Sign In"))))))))))
 
 (def ui-signup-form (comp/computed-factory SignUpForm))
 
