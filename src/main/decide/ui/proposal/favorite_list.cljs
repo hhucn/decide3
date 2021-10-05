@@ -10,8 +10,8 @@
     [decide.ui.proposal.plain-list :as plain-list]
     [decide.utils.breakpoint :as breakpoint]
     [mui.data-display :as dd]
-    [mui.inputs :as inputs]
     [mui.feedback.alert :as alert]
+    [mui.inputs :as inputs]
     [mui.layout :as layout]
     [mui.layout.grid :as grid]
     [mui.transitions :as transitions]))
@@ -21,19 +21,25 @@
     (dd/divider {})
     (dd/typography {:variant :overline} label)))
 
-(defn merge-alert [{:keys [onNewProposal]}]
-  (alert/alert {:severity :warning
-                :action
-                (inputs/button
-                  {:color :inherit
-                   :variant :outlined
-                   :onClick onNewProposal}
-                  (i18n/tr "Propose coalition"))}
-    (i18n/tr "Your favourite proposal is not winning right now. Can you propose a coalition?")))
+(defn merge-alert [{:keys [message onNewProposal]}]
+  (alert/alert
+    {:severity :warning
+     :action
+     (inputs/button
+       {:color :inherit
+        :variant :outlined
+        :size :small
+        :onClick onNewProposal}
+       (i18n/tr "Propose coalition"))}
+    message))
 
 (defn- show-merge-alert? [proposals]
-  (let [my-proposal (->> proposals (filter #(-> % ::proposal/my-opinion-value pos?)) first)]
-    (and my-proposal (not= (first proposals) my-proposal))))
+  (let [winner (proposal/best proposals)
+        my-proposals (proposal/my-approved proposals)]
+    (or
+      (< 1 (count my-proposals))                            ; if I have more than one approved proposals, one is guaranteed to lose.
+      (not= winner (first my-proposals)))))
+
 
 (defsc FavoriteList [this {::process/keys [slug proposals end-time]
                            :keys [process/features]}]
@@ -61,11 +67,16 @@
                  :card-props {:elevation 12}})))))
 
       ;; THOUGHT This could be sensible even with multiple approves. But what would the button do on click?
-      (when (contains? features :process.feature/single-approve)
-        (let [[my-proposal] (proposal/my-approved proposals)]
-          ;; THOUGHT Maybe don't show, if you approve a coalition, that contains the current leader?
-          (transitions/collapse {:in (show-merge-alert? proposals)}
-            (merge-alert {:onNewProposal #(comp/transact! this [(new-proposal/show {:parents [(comp/get-ident proposal-card/ProposalCard my-proposal)]})])}))))
+      (let [[my-proposal] (proposal/my-approved proposals)]
+        ;; THOUGHT Maybe don't show, if you approve a coalition, that contains the current leader?
+        (transitions/collapse {:in (show-merge-alert? proposals)}
+          (merge-alert {:message (cond
+                                   (contains? features :process.feature/single-approve)
+                                   (i18n/tr "Your favourite proposal is not winning right now. Can you propose a coalition?")
+
+                                   :else
+                                   (i18n/tr "You approved proposals that aren't winning right now. Can you propose a coalition?"))
+                        :onNewProposal #(comp/transact! this [(new-proposal/show {:parents [(comp/get-ident proposal-card/ProposalCard my-proposal)]})])})))
 
       (line-divider {:label (i18n/tr "All other proposals")})
       (plain-list/plain-list
