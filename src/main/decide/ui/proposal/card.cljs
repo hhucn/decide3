@@ -152,17 +152,20 @@
      :icon (if toggled? ThumbDown ThumbDownOutlined)}))
 
 (defsc ApproveToggle [_ {:keys [approved? disabled? votes]} {:keys [onToggle]}]
-  (dd/tooltip {:title (str
-                        (if approved?
-                          (i18n/trc "Proposal has been approved" "Approved")
-                          (i18n/trc "Approve a proposal" "Approve"))
-                        " [" (i18n/trf "{votes} approved" {:votes votes}) "]")}
-    (inputs/button
-      {:onClick onToggle
-       :disabled disabled?
-       :color (if (and approved? (not disabled?)) :success :inherit)
-       :startIcon (dom/create-element (if approved? CheckCircle CheckCircleOutline))}
-      (dd/typography {:color :text.primary, :fontSize :inherit, :variant :button} votes))))
+  (dd/tooltip
+    {:title (str
+              (if approved?
+                (i18n/trc "Proposal has been approved" "Approved") ; Always show that you have approved.
+                (when-not disabled?                         ; Hide that you can approve, when you can not approve.
+                  (i18n/trc "Approve a proposal" "Approve")))
+              " [" (i18n/trf "{votes} approved" {:votes votes}) "]")}
+    (dom/span {}                                            ; A disabled button would disable the tooltip as well
+      (inputs/button
+        {:onClick onToggle
+         :disabled disabled?
+         :color (if (and approved? (not disabled?)) :success :inherit)
+         :startIcon (dom/create-element (if approved? CheckCircle CheckCircleOutline))}
+        (dd/typography {:color :text.primary, :fontSize :inherit, :variant :button} votes)))))
 
 (def ui-approve-toggle (comp/computed-factory ApproveToggle))
 
