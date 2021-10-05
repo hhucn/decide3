@@ -81,10 +81,16 @@
         0 nil
         1
         (dd/tooltip {:title (i18n/tr "This proposal is derived from one other proposal")}
-          (dd/typography {} (i18n/trc "Type of proposal" "Fork")))
+          (dd/chip
+            {:size :small
+             :color :primary
+             :label (i18n/trc "Type of proposal" "Fork")}))
 
         (dd/tooltip {:title (i18n/tr "This proposal is derived from two or more other proposals")}
-          (dd/typography {} (i18n/trc "Type of proposal" "Merge")))))))
+          (dd/chip
+            {:size :small
+             :color :secondary
+             :label (i18n/trc "Type of proposal" "Merge")}))))))
 
 (def ui-subheader (comp/computed-factory Subheader (:keyfn ::proposal/id)))
 
