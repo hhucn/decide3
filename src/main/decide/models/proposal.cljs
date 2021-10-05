@@ -19,13 +19,13 @@
 (defmulti rank-by (fn [sort-order _] (keyword sort-order)))
 
 (defmethod rank-by :old->new [_ proposals]
-  (sort-by ::nice-id < proposals))
+  (sort-by ::nice-id proposals))
 
 (defmethod rank-by :new->old [_ proposals]
-  (sort-by ::nice-id > proposals))
+  (reverse (sort-by ::nice-id proposals)))
 
 (defmethod rank-by :most-approvals [_ proposals]
-  (sort-by approval-order > proposals))
+  (reverse (sort-by approval-order proposals)))
 
 (defmethod rank-by :default [_ proposals]
   (rank-by :most-approvals proposals))
