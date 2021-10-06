@@ -5,7 +5,9 @@
     [decide.ui.theming.styles :as styles]))
 
 (def shared
-  {:components
+  {:palette {:gold {:main "#ffd700"}}
+
+   :components
    {:MuiTooltip
     {:defaultProps
      {:arrow true}}
@@ -30,7 +32,8 @@
     :primary {:main "#68b9e9"}
     :secondary {:main "#f996c7"}
     :success {:main "#7dc75f"}
-    :error {:main "#e8415d"}}
+    :error {:main "#e8415d"}
+    :gold {:main "#ffd700"}}
    :components
    {:MuiButton
     {:variations
