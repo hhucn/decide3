@@ -46,9 +46,10 @@
 
 (defresolver resolve-proposal-opinions [{:keys [db]} {::proposal/keys [id]}]
   {::pc/input #{::proposal/id}
-   ::pc/output [::proposal/pro-votes ::proposal/con-votes]}
+   ::pc/output [::proposal/pro-votes ::proposal/con-votes ::proposal/favorite-votes]}
   (let [opinions (opinion.db/get-values-for-proposal db [::proposal/id id])]
     {::proposal/pro-votes (get opinions 1 0)
+     ::proposal/favorite-votes (get opinions 2 0)
      ::proposal/con-votes (get opinions -1 0)}))
 
 (defn- get-public-opinions [proposal]
