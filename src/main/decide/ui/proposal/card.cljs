@@ -26,6 +26,8 @@
     ["@mui/icons-material/CheckCircleOutlineRounded" :default CheckCircleOutline]
     ["@mui/icons-material/CheckCircleRounded" :default CheckCircle]
     ["@mui/icons-material/Comment" :default Comment]
+    ["@mui/icons-material/StarOutlineRounded" :default StarOutline]
+    ["@mui/icons-material/StarRounded" :default Star]
     ["@mui/icons-material/ThumbDownOutlined" :default ThumbDownOutlined]
     ["@mui/icons-material/ThumbDown" :default ThumbDown]))
 
@@ -173,11 +175,12 @@
   {:query [::process/slug :process/total-votes]
    :ident ::process/slug})
 
-(defsc VotingArea [this {::proposal/keys [id pro-votes my-opinion-value my-opinion opinions]
+(defsc VotingArea [this {::proposal/keys [id pro-votes my-opinion-value my-opinion opinions favorite-votes]
                          {:keys [process/total-votes]} ::proposal/process}
                    {:keys [process]}]
   {:query [::proposal/id
            ::proposal/pro-votes
+           ::proposal/favorite-votes
            {::proposal/process (comp/get-query TotalVotesProcess)}
            ::proposal/my-opinion-value
            {::proposal/my-opinion [::opinion/value :opinion/rank]}
@@ -193,7 +196,7 @@
       {:direction :row
        :alignItems :center
        :className "voting-area"
-       :spacing 1
+       :spacing 0.5
        :divider (dd/divider {:orientation :vertical, :flexItem true})}
 
       (ui-approve-toggle
@@ -202,6 +205,17 @@
          :votes pro-votes}
         {:onToggle #(comp/transact! this [(opinion.api/add {::proposal/id id
                                                             :opinion (if approved? 0 1)})])})
+
+      (inputs/button
+        {:startIcon (if (not= 2 my-opinion-value)
+                      (dom/create-element Star)
+                      (dom/create-element StarOutline))
+         :disabled disabled?
+         :color :gold
+         :onClick #(comp/transact! this [(opinion.api/add {::proposal/id id
+                                                           :opinion (if approved? 1 2)})])}
+        (dd/typography {:color :text.primary, :fontSize :inherit, :variant :button}
+          (or favorite-votes 0)))
 
       (when (process/allows-rejects? process)
         (comp/fragment
