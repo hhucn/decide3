@@ -38,17 +38,20 @@
 
 (defresolver resolve-personal-opinion-value [{:keys [db AUTH/user]} {::proposal/keys [id]}]
   {::pc/input #{::proposal/id}
-   ::pc/output [::proposal/my-opinion-value]}
+   ::pc/output [{::proposal/my-opinion [::opinion/value]}
+                ::proposal/my-opinion-value]}
   (when user
     (when-let [proposal (d/entity db [::proposal/id id])]
-      {::proposal/my-opinion-value (get (opinion.db/get-opinion db user proposal) ::opinion/value 0)})))
+      (let [opinion (opinion.db/get-opinion db user proposal)]
+        {::proposal/my-opinion (update (select-keys opinion #{::opinion/value}) ::opinion/value #(or % 0))
+         ::proposal/my-opinion-value (get opinion ::opinion/value 0)}))))
 
 
 (defresolver resolve-proposal-opinions [{:keys [db]} {::proposal/keys [id]}]
   {::pc/input #{::proposal/id}
    ::pc/output [::proposal/pro-votes ::proposal/con-votes ::proposal/favorite-votes]}
   (let [opinions (opinion.db/get-values-for-proposal db [::proposal/id id])]
-    {::proposal/pro-votes (get opinions 1 0)
+    {::proposal/pro-votes (+ (get opinions 1 0) (get opinions 2 0))
      ::proposal/favorite-votes (get opinions 2 0)
      ::proposal/con-votes (get opinions -1 0)}))
 

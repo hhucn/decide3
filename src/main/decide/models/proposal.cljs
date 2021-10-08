@@ -7,14 +7,14 @@
   (rc/nc [::id
           ::title
           ::body
-          ::pro-votes ::con-votes
+          ::pro-votes ::con-votes ::favorite-votes
           ::created
           ::my-opinion-value
           {::parents '...}                                  ; this is a recursion
           {::original-author [::user/id ::user/display-name]}]
     {:componentName ::Proposal}))
 
-(def approval-order (juxt ::pro-votes ::created))
+(def approval-order (juxt ::pro-votes ::favorite-votes ::created))
 
 (defmulti rank-by (fn [sort-order _] (keyword sort-order)))
 

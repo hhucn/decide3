@@ -104,6 +104,7 @@
         (raw.comp/nc
           [::proposal/id
            ::proposal/my-opinion-value
+           {::proposal/my-opinion [::opinion/value]}
            ::proposal/pro-votes
            {::proposal/opinions
             [::opinion/value

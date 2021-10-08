@@ -191,7 +191,8 @@
   (let [logged-in? (comp/shared this :logged-in?)
         disabled? (or (not logged-in?) (not (process/running? process)))
         [reject-open? set-reject-dialog-open] (hooks/use-state false)
-        [approved? rejected?] ((juxt pos? neg?) my-opinion-value)]
+        [approved? rejected?] ((juxt pos? neg?) my-opinion-value)
+        favorite? (or (opinion/favorite-value? my-opinion-value) (opinion/favorite? my-opinion))]
     (layout/stack
       {:direction :row
        :alignItems :center
@@ -207,13 +208,13 @@
                                                             :opinion (if approved? 0 1)})])})
 
       (inputs/button
-        {:startIcon (if (not= 2 my-opinion-value)
+        {:startIcon (if favorite?
                       (dom/create-element Star)
                       (dom/create-element StarOutline))
          :disabled disabled?
          :color :gold
          :onClick #(comp/transact! this [(opinion.api/add {::proposal/id id
-                                                           :opinion (if approved? 1 2)})])}
+                                                           :opinion (if favorite? 1 2)})])}
         (dd/typography {:color :text.primary, :fontSize :inherit, :variant :button}
           (or favorite-votes 0)))
 
@@ -278,6 +279,7 @@
            ::proposal/no-of-arguments
            ::proposal/created
            ::proposal/pro-votes
+           ::proposal/favorite-votes
            {:>/subheader (comp/get-query Subheader)}
            {:>/voting-area (comp/get-query VotingArea)}
            {[:ui/current-process '_] (comp/get-query Process)}]
