@@ -84,11 +84,29 @@
       (remove #{id})
       (map #(vector :db.fn/retractEntity %)))))
 
+(defn- ->de-favorite-others
+  [db user process proposal]
+  (let [id (:db/id (get-opinion db user proposal))]
+    (->>
+      (d/q '[:find [?e ...]
+             :in $ ?user ?process
+             :where
+             [?user ::user/opinions ?e]
+             [?e ::opinion/value 2]
+             [?proposal ::proposal/opinions ?e]
+             [?process ::process/proposals ?proposal]]
+        db (:db/id user) (:db/id process))
+      (remove #{id})
+      (map #(vector :db/add % ::opinion/value 1)))))
+
+
 (defn ->set [db user process proposal value]
   [d.core/db? ::user/entity ::process/entity ::proposal/entity ::opinion/value => vector?]
   (concat
     (when (process/single-approve? process)
       (->neutralize-others db user process proposal))
+    (when (opinion/favorite-value? value)
+      (->de-favorite-others db user process proposal))
     (->set-value db user proposal value)))
 
 (defn get-values-for-proposal [db proposal-ident]
