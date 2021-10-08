@@ -4,6 +4,7 @@
     #?(:clj  [clojure.spec.alpha :as s]
        :cljs [cljs.spec.alpha :as s])
     [clojure.string :as str]
+    [com.fulcrologic.fulcro.algorithms.normalized-state :as norm-state]
     [com.fulcrologic.fulcro.raw.components :as rc]
     [com.fulcrologic.guardrails.core :refer [>defn => | <- ?]]
     [decide.models.proposal :as proposal]
@@ -190,3 +191,6 @@
   (and
     (feature-enabled? process :process.feature/rejects)
     (feature-enabled? process :process.feature/reject-popup)))
+
+(defn current [state]
+  (norm-state/get-in-graph state [:ui/current-process]))

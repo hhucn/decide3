@@ -40,6 +40,9 @@
 (defn reject? [opinion]
   (reject-value? (::value opinion)))
 
+(defn favorite? [opinion]
+  (favorite-value? (::value opinion)))
+
 (>defn votes
   "Provided a proposal with opinions, enhances the proposal with a total of pro- and con-votes."
   [{::proposal/keys [opinions] :as proposal}]

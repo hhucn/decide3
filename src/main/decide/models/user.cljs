@@ -1,6 +1,7 @@
 (ns decide.models.user
   (:require
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
+    [com.fulcrologic.fulcro.algorithms.normalized-state :as norm-state]
     [com.fulcrologic.fulcro.application :as app]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.raw.components :as rc]
@@ -10,6 +11,9 @@
 (def sign-up `sign-up)
 
 (def User (rc/nc [::id ::display-name] {:componentName ::User}))
+
+(defn current [state]
+  (norm-state/get-in-graph state [:root/current-session :user]))
 
 (defmutation sign-out [_]
   (action [{:keys [app state]}]
