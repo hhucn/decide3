@@ -34,8 +34,8 @@
     <orderEntry type="library" name="Deps: io.lambdaforge/datalog-parser:0.1.8" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/tools.analyzer:1.1.0" level="project" />
     <orderEntry type="library" name="Deps: com.bhauman/cljs-test-display:0.1.1" level="project" />
-    <orderEntry type="library" name="Deps: com.fulcrologic/fulcro-rad:1.0.23" level="project" />
-    <orderEntry type="library" name="Deps: com.fulcrologic/guardrails:1.1.5" level="project" />
+    <orderEntry type="library" name="Deps: com.fulcrologic/fulcro-rad:1.0.31" level="project" />
+    <orderEntry type="library" name="Deps: com.fulcrologic/guardrails:1.1.7" level="project" />
     <orderEntry type="library" name="Deps: com.wsscode/async:2021.01.14" level="project" />
     <orderEntry type="library" name="Deps: com.draines/postal:2.0.4" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/tools.logging:1.0.0" level="project" />
@@ -74,7 +74,7 @@
     <orderEntry type="library" name="Deps: com.cognitect/transit-cljs:0.8.269" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/google-closure-library:0.0-20201211-3e6c510d" level="project" />
     <orderEntry type="library" name="Deps: io.aviso/pretty:0.1.37" level="project" />
-    <orderEntry type="library" name="Deps: thheller/shadow-cljs:2.15.10" level="project" />
+    <orderEntry type="library" name="Deps: thheller/shadow-cljs:2.15.12" level="project" />
     <orderEntry type="library" name="Deps: org.graalvm.sdk/graal-sdk:21.1.0" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/clojurescript:1.10.879" level="project" />
     <orderEntry type="library" name="Deps: fress:0.3.1" level="project" />
@@ -117,7 +117,7 @@
     <orderEntry type="library" name="Deps: com.github.awkay/workspaces:1.0.3" level="project" />
     <orderEntry type="library" name="Deps: org.graalvm.truffle/truffle-api:21.1.0" level="project" />
     <orderEntry type="library" name="Deps: adzerk/boot-test:1.1.2" level="project" />
-    <orderEntry type="library" name="Deps: binaryage/devtools:1.0.3" level="project" />
+    <orderEntry type="library" name="Deps: binaryage/devtools:1.0.4" level="project" />
     <orderEntry type="library" name="Deps: net.cgrand/macrovich:0.2.0" level="project" />
     <orderEntry type="library" name="Deps: buddy:2.0.0" level="project" />
     <orderEntry type="library" name="Deps: org.msgpack/msgpack:0.6.12" level="project" />
