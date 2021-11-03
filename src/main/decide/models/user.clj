@@ -70,7 +70,7 @@
 
 (>defn hash-password [password]
   [::password => ::encrypted-password]
-  (hs/derive password))
+  (hs/derive password {:alg :bcrypt+sha512}))
 
 (>defn exists? [db user-id]
   [d.core/db? ::id => boolean?]
