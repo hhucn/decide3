@@ -34,7 +34,7 @@
     <orderEntry type="library" name="Deps: io.lambdaforge/datalog-parser:0.1.8" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/tools.analyzer:1.1.0" level="project" />
     <orderEntry type="library" name="Deps: com.bhauman/cljs-test-display:0.1.1" level="project" />
-    <orderEntry type="library" name="Deps: com.fulcrologic/fulcro-rad:1.1.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Deps: com.fulcrologic/fulcro-rad:c7703a" level="project" />
     <orderEntry type="library" name="Deps: com.fulcrologic/guardrails:1.1.7" level="project" />
     <orderEntry type="library" name="Deps: com.wsscode/async:2021.01.14" level="project" />
     <orderEntry type="library" name="Deps: com.draines/postal:2.0.4" level="project" />
