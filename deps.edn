@@ -19,7 +19,10 @@
         http-kit/http-kit {:mvn/version "2.5.3"}
         mount/mount {:mvn/version "0.1.16"}
 
-        clj-commons/pushy {:mvn/version "0.3.10"}
+        metosin/reitit-core {:mvn/version "0.5.5"}
+        metosin/reitit-spec {:mvn/version "0.5.5"}
+        metosin/reitit-frontend {:mvn/version "0.5.5"}
+
         io.replikativ/datahike {:mvn/version "0.3.6"}
         com.github.mrebbinghaus/fulcro-material-ui-wrapper
         {:git/url "https://github.com/MrEbbinghaus/fulcro-material-ui-wrapper"

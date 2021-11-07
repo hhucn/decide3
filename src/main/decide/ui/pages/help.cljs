@@ -3,13 +3,13 @@
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.dom :as dom :refer [i br]]
+    [decide.routes :as routes]
     [decide.utils.breakpoint :as breakpoint]
     [mui.data-display :as dd]
-    [mui.inputs :as inputs]
     [mui.feedback.alert :as alert]
+    [mui.inputs :as inputs]
     [mui.layout :as layout]
     [mui.layout.grid :as grid]
-    [mui.surfaces :as surfaces]
     [mui.surfaces.card :as card]
     ["@mui/icons-material/Mail" :default MailIcon]))
 
@@ -94,7 +94,7 @@
   {:query [::i18n/current-locale]
    :ident (fn [] [:PAGE ::InstructionPage])
    :initial-state {}
-   :route-segment ["help"]
+   :route-segment (routes/segment ::routes/help)
    :use-hooks? true}
   (layout/container
     {:maxWidth :md

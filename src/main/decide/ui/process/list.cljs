@@ -7,6 +7,7 @@
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [decide.models.process :as process]
     [decide.models.process.mutations :as process.mutations]
+    [decide.routes :as routes]
     [decide.ui.process.process-forms :as process-forms]
     [mui.data-display :as dd]
     [mui.feedback.dialog :as dialog]
@@ -104,7 +105,7 @@
    :initial-state (fn [_] {:all-processes-list (comp/get-initial-state AllProcessesList)
                            :ui/new-process-dialog-open? false
                            :new-process-form (comp/get-initial-state process-forms/NewProcessForm)})
-   :route-segment ["decisions"]}
+   :route-segment (routes/segment ::routes/process-list)}
   (let [logged-in? (get current-session :session/valid? false)]
     (layout/container {}
       (dd/typography {:component :h1 :variant :h2} (i18n/tr "Active decision-processes"))

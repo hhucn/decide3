@@ -16,6 +16,7 @@
     [decide.ui.proposal.lists.hierarchy :as hierarchy-list]
     [decide.ui.proposal.plain-list :as plain-list]
     [decide.utils.breakpoint :as breakpoint]
+    [decide.routes :as routes]
     [mui.data-display :as dd]
     [mui.inputs :as inputs]
     [mui.inputs.toggle-button :as toggle]
@@ -170,8 +171,8 @@
                    :ui/layout :favorite}
                   current-normalized
                   data-tree))
-   :route-segment ["proposals"]
-   :will-enter (fn [app {::process/keys [slug]}]
+   :route-segment (routes/segment ::routes/process-all-proposals)
+   :will-enter (fn [app {:process/keys [slug]}]
                  (let [ident (comp/get-ident MainProposalList {::process/slug slug})]
                    (dr/route-deferred ident
                      #(comp/transact! app [(enter-proposal-list {})] {:ref ident}))))

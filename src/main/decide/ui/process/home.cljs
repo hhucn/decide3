@@ -7,6 +7,7 @@
     [decide.models.opinion.api :as opinion.api]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
+    [decide.routes :as routes]
     [decide.ui.process.ballot :as ballot]
     [decide.ui.proposal.card :as proposal-card]
     [mui.data-display :as dd]
@@ -105,10 +106,10 @@
 (defsc ProcessOverviewScreen [_ {:keys [ui/current-process]}]
   {:query [{[:ui/current-process '_] (comp/get-query ProcessHome)}]
    :ident (fn [] [:SCREEN ::ProcessOverviewScreen])
-   :route-segment ["home"]
+   :route-segment (routes/segment ::routes/process-home)
    :initial-state {:ui/current-process {}}
    :will-enter
-   (fn will-enter-ProcessOverviewScreen [app {::process/keys [slug]}]
+   (fn will-enter-ProcessOverviewScreen [app {:process/keys [slug]}]
      (let [ident (comp/get-ident ProcessOverviewScreen {})]
        (dr/route-deferred ident
          (fn []

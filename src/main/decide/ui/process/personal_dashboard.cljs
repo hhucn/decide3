@@ -4,24 +4,24 @@
     [com.fulcrologic.fulcro.algorithms.merge :as mrg]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.data-fetch :as df]
+    [com.fulcrologic.fulcro.dom :as dom]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [decide.models.opinion.api :as opinion.api]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
+    [decide.routes :as routes]
+    [mui.data-display :as dd]
     [mui.data-display.list :as list]
+    [mui.inputs :as inputs]
     [mui.layout :as layout]
     [mui.layout.grid :as grid]
     [mui.surfaces :as surfaces]
     [mui.surfaces.card :as card]
     ["@mui/icons-material/UnfoldMore" :default UnfoldMoreIcon]
     ["@mui/icons-material/UnfoldLess" :default UnfoldLessIcon]
-    ["@mui/icons-material/ThumbUpAltTwoTone" :default ThumbUpAltTwoTone]
-    [taoensso.timbre :as log]
-    [mui.inputs :as inputs]
-    [com.fulcrologic.fulcro.dom :as dom]
-    [mui.data-display :as dd]))
+    ["@mui/icons-material/ThumbUpAltTwoTone" :default ThumbUpAltTwoTone]))
 
 (defsc ProposalListItem [this {::proposal/keys [id nice-id title pro-votes my-opinion-value]} {:keys [compact?] :or {compact? false}}]
   {:query [::proposal/id ::proposal/title ::proposal/nice-id ::proposal/created ::proposal/pro-votes ::proposal/my-opinion-value]
@@ -134,9 +134,9 @@
        {::process/slug slug
         ::personal-proposal-list (comp/get-initial-state PersonalProposalsList {::process/slug slug})
         ::personal-recommendations-list (comp/get-initial-state PersonalRecommendationsList {::process/slug slug})}))
-   :route-segment ["dashboard"]
+   :route-segment (routes/segment ::routes/process-dashboard)
    :will-enter
-   (fn [app {::process/keys [slug]}]
+   (fn [app {:process/keys [slug]}]
      (let [ident (comp/get-ident PersonalProcessDashboard {::process/slug slug})]
        (dr/route-deferred ident
          #(comp/transact! app

@@ -11,7 +11,7 @@
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr :refer [defrouter]]
     [decide.models.authorization :as auth]
     [decide.models.process :as process]
-    [decide.routing :as r]
+    [decide.routes :as routes]
     [decide.ui.process.header :as process.header]
     [decide.ui.process.home :as process.home]
     [decide.ui.process.moderator-tab :as process.moderator]
@@ -21,8 +21,7 @@
     [decide.ui.proposal.new-proposal :as new-proposal]
     [mui.layout :as layout]
     [mui.navigation.tabs :as tabs]
-    [mui.surfaces :as surfaces]
-    [taoensso.timbre :as log]))
+    [mui.surfaces :as surfaces]))
 
 (defrouter ProcessRouter [_this _]
   {:router-targets
@@ -55,7 +54,7 @@
        :textColor "secondary"
        :component :nav}
       (for [{:keys [target] :as tab-props} targets
-            :let [href (r/path->absolute-url (dr/into-path current-path target))]]
+            :let [href (routes/path->href (dr/into-path current-path target))]]
         (tabs/tab
           (merge (dissoc tab-props :target :path)
             {:href href
@@ -128,9 +127,9 @@
                     :ui/process-router (comp/get-initial-state ProcessRouter)
                     :ui/process-header (comp/get-initial-state process.header/ProcessHeader {:slug slug})
                     :ui/new-proposal-dialog (comp/get-initial-state new-proposal/NewProposalFormDialog {:slug slug})})))
-   :route-segment ["decision" ::process/slug]
+   :route-segment (routes/segment ::routes/process-context)
    :will-enter
-   (fn will-enter-ProcessContext [app {slug ::process/slug}]
+   (fn will-enter-ProcessContext [app {slug :process/slug}]
      (let [ident (comp/get-ident ProcessContext {::process/slug slug})]
        (if (current-process-already-set? (app/current-state app) [::process/slug slug])
          (dr/route-immediate ident)

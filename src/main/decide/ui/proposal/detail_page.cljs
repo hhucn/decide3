@@ -11,6 +11,7 @@
     [decide.models.opinion.api :as opinion.api]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
+    [decide.routes :as routes]
     [decide.ui.proposal.new-proposal :as new-proposal]
     [decide.utils.breakpoint :as breakpoint]
     [mui.data-display :as dd]
@@ -242,11 +243,11 @@
            {[:ui/current-process '_] (comp/get-query Process)}]
    :ident ::proposal/id
    :use-hooks? true
-   :route-segment ["proposal" ::proposal/id]
+   :route-segment (routes/segment ::routes/proposal-detail-page)
    :will-enter
    (fn will-enter-proposal-page
-     [app {::proposal/keys [id]}]
-     (let [ident (comp/get-ident ProposalPage {::proposal/id (uuid id)})]
+     [app {:proposal/keys [id]}]
+     (let [ident (comp/get-ident ProposalPage {::proposal/id (cond-> id (string? id) uuid)})]
        (dr/route-deferred ident
          #(comp/transact! app [(init-proposal-page {})]
             {:ref ident :only-refresh [ident]}))))}

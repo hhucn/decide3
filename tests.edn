@@ -8,7 +8,8 @@
               :type :kaocha.type/spec.test.check
               :source-paths ["src/main/decide/models/process.cljc"
                              "src/main/decide/models/argumentation.cljc"
-                             "src/main/decide/models/opinion.cljc"]
+                             "src/main/decide/models/opinion.cljc"
+                             "src/main/decide/routes.cljc"]
               :clojure.spec.test.check/opts {}}]
      :reporter [kaocha.report/documentation]
      :plugins #profile {:default [:kaocha.plugin/randomize

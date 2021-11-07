@@ -11,7 +11,7 @@
     [decide.application :refer [SPA]]
     [decide.models.authorization :as auth]
     [decide.models.user :as user]
-    [decide.routing :as routing]
+    [decide.client.router :as routing]
     [decide.ui.root :as root]
     [taoensso.timbre :as log]))
 
@@ -44,7 +44,7 @@
 
     (log/trace "Initialize client routing")
     (dr/initialize! SPA)
-    (routing/start-history! SPA)
+    (routing/start! SPA)
 
     ;; This makes the app start without a flicker of not-logged in state.
     ;; Does this hurt performance a lot? Think about that...
@@ -52,7 +52,6 @@
       {:target [:root/current-session]
        :post-action
        (fn [_]
-         (routing/start!)
          (app/mount! SPA root/Root "decide"
            {:initialize-state? false
             :hydrate false}))})))

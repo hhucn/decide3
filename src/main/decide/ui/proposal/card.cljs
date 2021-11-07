@@ -5,15 +5,13 @@
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.dom :as dom]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
-    [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [decide.models.opinion :as opinion]
     [decide.models.opinion.api :as opinion.api]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
     [decide.models.user.ui :as user.ui]
-    [decide.routing :as routing]
-    [decide.ui.proposal.detail-page :as detail-page]
+    [decide.routes :as routes]
     [decide.ui.proposal.new-proposal :as new-proposal]
     [decide.utils.time :as time]
     [mui.data-display :as dd]
@@ -289,43 +287,40 @@
                      ::proposal/title title
                      ::proposal/body body})
    :use-hooks? true}
-  (let [proposal-href (hooks/use-memo
-                        #(routing/path->absolute-url
-                           (dr/into-path ["decision" slug] detail-page/ProposalPage (str id)))
-                        [slug id])]
-    (card/card
-      (merge
-        {:component :article
-         :style {:height "100%"
-                 :display :flex
-                 :flexDirection "column"}}
-        card-props)
+  (card/card
+    (merge
+      {:component :article
+       :style {:height "100%"
+               :display :flex
+               :flexDirection "column"}}
+      card-props)
 
-      (card/action-area {:href proposal-href
-                         :style {:flexGrow 1}}
-        (card/header
-          {:title title
-           :titleTypographyProps {:component "h3"}
-           :subheader (ui-subheader subheader {:type? true :gen? true :created? true :author? false})})
-        
-        (card/content {:sx {:maxHeight max-height
-                            :overflow "hidden"}}
-          (dd/typography
-            {:component "p"
-             :variant "body2"
-             :color "textSecondary"
-             :style {:whiteSpace "pre-line"}}
-            body)))
+    (card/action-area {:href (rfe/href ::routes/proposal-detail-page {:process/slug slug
+                                                                      :proposal/id id})
+                       :style {:flexGrow 1}}
+      (card/header
+        {:title title
+         :titleTypographyProps {:component "h3"}
+         :subheader (ui-subheader subheader {:type? true :gen? true :created? true :author? false})})
 
-      (dd/divider {:variant :middle})
-      (card/actions {:sx {:px 1.5}}
-        (grid/container
-          {:alignItems :center
-           :justifyContent :space-between
-           :direction :row
-           :spacing 1}
-          (grid/item {:xs true}
-            (ui-voting-area voting-area {:process current-process}))
+      (card/content {:sx {:maxHeight max-height
+                          :overflow "hidden"}}
+        (dd/typography
+          {:component "p"
+           :variant "body2"
+           :color "textSecondary"
+           :style {:whiteSpace "pre-line"}}
+          body)))
+
+    (dd/divider {:variant :middle})
+    (card/actions {:sx {:px 1.5}}
+      (grid/container
+        {:alignItems :center
+         :justifyContent :space-between
+         :direction :row
+         :spacing 1}
+        (grid/item {:xs :auto}
+          (ui-voting-area voting-area {:process current-process}))
 
           (grid/item {:xs :auto}
             (dd/tooltip {:title (i18n/trf "{noOf, plural, =1 {# argument} other {# arguments}}" {:noOf no-of-arguments})}

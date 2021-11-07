@@ -13,14 +13,13 @@
     [decide.models.process.mutations :as process.mutations]
     [decide.models.user :as user]
     [decide.ui.process.moderator.participant-list :as participant-list]
-    [decide.utils.time :as time]
+    [decide.routes :as routes]
     [mui.data-display :as dd]
     [mui.data-display.list :as list]
     [mui.inputs :as inputs]
     [mui.inputs.form :as form]
     [mui.layout :as layout]
     [mui.layout.grid :as grid]
-    [mui.surfaces :as surfaces]
     [mui.surfaces.card :as card]
     [mui.surfaces.accordion :as accordion]
     ["@mui/icons-material/Clear" :default ClearIcon]
@@ -250,9 +249,9 @@
            {:moderator-list (comp/get-query ModeratorList)}
            {:participant-list (comp/get-query participant-list/ParticipantList)}]
    :ident (fn [] [::ProcessModeratorTab (::process/slug process)])
-   :route-segment ["moderate"]
+   :route-segment (routes/segment ::routes/process-moderation)
    :will-enter
-   (fn [app {::process/keys [slug]}]
+   (fn [app {:process/keys [slug]}]
      (let [ident (comp/get-ident ProcessModeratorTab {:process {::process/slug slug}})]
        (dr/route-deferred ident
          #(comp/transact! app [(init-moderator-tab {:slug slug})] {:ref ident}))))}

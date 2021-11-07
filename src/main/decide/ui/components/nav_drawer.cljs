@@ -3,14 +3,12 @@
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.dom :as dom]
-    [com.fulcrologic.fulcro.dom.events :as evt]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [decide.application :refer [SPA]]
-    [decide.routing :as r]
+    [decide.routes :as routes]
+    [decide.ui.components.dark-mode-toggle :as dark-mode-toggle]
     [decide.ui.login :as login]
-    [decide.ui.pages.settings :as settings]
-    [decide.ui.process.list :as process.list]
     [decide.ui.translations.selector :as i18n.switcher]
     [mui.data-display :as dd]
     [mui.data-display.list :as list]
@@ -18,13 +16,12 @@
     [mui.layout :as layout]
     [mui.navigation :as nav]
     [mui.surfaces :as surfaces]
+    [reitit.frontend.easy :as rfe]
     ["@mui/icons-material/AccountCircle" :default AccountCircle]
     ["@mui/icons-material/ChevronLeft" :default ChevronLeftIcon]
     ["@mui/icons-material/Settings" :default SettingsIcon]
     ["@mui/icons-material/DeviceHub" :default DeviceHubIcon]
-    ["@mui/icons-material/Translate" :default TranslateIcon]
-    [taoensso.timbre :as log]
-    [decide.ui.components.dark-mode-toggle :as dark-mode-toggle]))
+    ["@mui/icons-material/Translate" :default TranslateIcon]))
 
 (def ident [:component/id ::NavDrawer])
 
@@ -74,7 +71,7 @@
             (list/item {:button true
                         :component :a
                         :onClick toggle-navdrawer!
-                        :href (r/path-to->absolute-url process.list/ProcessesPage)}
+                        :href (rfe/href ::routes/process-list)}
               (list/item-icon {} (dom/create-element DeviceHubIcon))
               (list/item-text {} (i18n/tr "All decisions")))
             (dd/divider {})
@@ -82,7 +79,7 @@
               (list/item {:button true
                           :component :a
                           :onClick toggle-navdrawer!
-                          :href (r/path-to->absolute-url settings/SettingsPage)}
+                          :href (rfe/href ::routes/settings)}
                 (list/item-icon {} (dom/create-element SettingsIcon))
                 (list/item-text {} (i18n/tr "Settings")))
               (list/item

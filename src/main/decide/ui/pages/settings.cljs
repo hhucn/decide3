@@ -7,15 +7,15 @@
     [com.fulcrologic.fulcro.data-fetch :as df]
     [com.fulcrologic.fulcro.dom.events :as evt]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
-    [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [decide.models.user :as user]
     [decide.models.user.api :as user.api]
     [decide.models.user.ui :as user.ui]
+    [decide.routes :as routes]
     [decide.ui.components.snackbar :as snackbar]
     [mui.feedback :as feedback]
-    [mui.inputs :as inputs]
     [mui.feedback.skeleton :refer [skeleton]]
+    [mui.inputs :as inputs]
     [mui.layout :as layout]
     [mui.layout.grid :as grid]
     [mui.surfaces.card :as card]))
@@ -218,7 +218,7 @@
            {:ui/user-information (comp/get-query UserInformation)}
            [df/marker-table ::load-user-information]]
    :ident (fn [] settings-page-ident)
-   :route-segment ["settings"]
+   :route-segment (routes/segment ::routes/settings)
    :will-enter
    (fn [app]
      (dr/route-deferred settings-page-ident
