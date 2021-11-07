@@ -230,6 +230,16 @@
   dependencies:
     tslib "^2.1.0"
 
+"@js-joda/core@4.3.1":
+  version "4.3.1"
+  resolved "https://registry.yarnpkg.com/@js-joda/core/-/core-4.3.1.tgz#1df9f197d060f1eb087a895a5e33adb7f12b58fc"
+  integrity sha512-oeaetlodcqVsiZDxnEcqsbs+sXBkASxua0mXs5OXuPQXz3/wdPTMlxwfQ4z2HKcOik3S9voW3QJkp/KLWDhvRQ==
+
+"@js-joda/timezone@2.10.0":
+  version "2.10.0"
+  resolved "https://registry.yarnpkg.com/@js-joda/timezone/-/timezone-2.10.0.tgz#4161988b6e08d457a5783f6f3a3ba01138512d80"
+  integrity sha512-A6kyVXA60ZRPUI1fQPxxBfhsDRTXLOm12JGc9AtrQmFWgJkBeUYmoDYFEc6vso4I8XMbZyJVrMYUnjTbne6Ynw==
+
 "@mui/core@5.0.0-alpha.53":
   version "5.0.0-alpha.53"
   resolved "https://registry.yarnpkg.com/@mui/core/-/core-5.0.0-alpha.53.tgz#ede1445be3bf5a93d25bdd8ead23afdfb1b68f8b"
@@ -479,6 +489,11 @@ base64id@2.0.0, base64id@~2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/base64id/-/base64id-2.0.0.tgz#2770ac6bc47d312af97a8bf9a634342e0cd25cb6"
   integrity sha512-lGe34o6EHj9y3Kts9R4ZYs/Gr+6N7MCaMlIFA3F1R2O5/m7K06AxfSeO5530PEERE6/WyEg3lsuyw4GHlPZHog==
+
+big.js@6.1.1:
+  version "6.1.1"
+  resolved "https://registry.yarnpkg.com/big.js/-/big.js-6.1.1.tgz#63b35b19dc9775c94991ee5db7694880655d5537"
+  integrity sha512-1vObw81a8ylZO5ePrtMay0n018TcftpTA5HFKDaSuiUDBo8biRBtjIobw60OpwuvrGk+FsxKamqN4cnmj/eXdg==
 
 binary-extensions@^2.0.0:
   version "2.2.0"
@@ -2220,10 +2235,10 @@ shadow-cljs-jar@1.3.2:
   resolved "https://registry.yarnpkg.com/shadow-cljs-jar/-/shadow-cljs-jar-1.3.2.tgz#97273afe1747b6a2311917c1c88d9e243c81957b"
   integrity sha512-XmeffAZHv8z7451kzeq9oKh8fh278Ak+UIOGGrapyqrFBB773xN8vMQ3O7J7TYLnb9BUwcqadKkmgaq7q6fhZg==
 
-shadow-cljs@^2.15.12:
-  version "2.15.12"
-  resolved "https://registry.yarnpkg.com/shadow-cljs/-/shadow-cljs-2.15.12.tgz#056ff707356538aefe8f5f07b7cb01e46758d10a"
-  integrity sha512-DKkQ9HIkQgV2yeWlwPUU02iw6Ucdw+Ks6r1XxESV/2I5V8ci4EJdZYcYiNS/GHYKDYaikJKSgmocxP+VtbYGJg==
+shadow-cljs@^2.16.0:
+  version "2.16.0"
+  resolved "https://registry.yarnpkg.com/shadow-cljs/-/shadow-cljs-2.16.0.tgz#d6798032f5634179481f2a9bd7aa956a73494fcb"
+  integrity sha512-nLFFrBhoC3m2xV//L1RGowAtnxbDrS736QaVty3/FIAcrbA6bU1xx46GJ1eA+bgoXJ2xvhZketkjGSy15T/QCA==
   dependencies:
     node-libs-browser "^2.2.1"
     readline-sync "^1.4.7"
