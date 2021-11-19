@@ -20,12 +20,16 @@
   i18n
   {:task (shell "clj -M:dev -m \"shadow.cljs.devtools.cli\" release :i18n")}
 
-  test-clj
+  test:clj
   {:task (shell "clj -J-Dguardrails.enabled=true -M:dev:clj-tests")}
+
+  test:watch-cljs
+  {:task (shell "clj -M:dev -m \"shadow.cljs.devtools.cli\" watch :test")}
 
   test:watch-clj
   {:task (shell "clj -J-Dguardrails.enabled=true -M:dev:clj-tests --watch")}
 
+  ;; Release jobs
   release:js
   {:task (shell "clj -M:dev -m \"shadow.cljs.devtools.cli\" release :main")}
 
