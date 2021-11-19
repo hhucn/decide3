@@ -215,10 +215,10 @@
                           (when (not new-argument-open?)    ; about to open?
                             (comp/transact! this [(init-new-argument-form {:belongs-to [:argument/id id]})]))
                           (set-new-argument-open (not new-argument-open?)))
-               :size :small
+               :variant :text
                :disabled (not (comp/shared this :logged-in?))
-               :startIcon (dom/create-element AddComment)}
-              (i18n/tr "Add argument")))))
+               :endIcon (dom/create-element AddComment)}
+              (i18n/tr "Reply")))))
 
       (transitions/collapse {:in (and new-argument-open? new-argument-form)}
         (when new-argument-form
