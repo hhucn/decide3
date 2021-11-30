@@ -55,9 +55,5 @@
                               com.github.awkay/workspaces {:mvn/version "1.0.3"}
                               org.clojure/tools.namespace {:mvn/version "1.1.0"}}}
 
-           :uberjar {:replace-deps {com.github.seancorfield/depstar {:mvn/version "2.1.303"}}
-                     :exec-fn hf.depstar/uberjar
-                     :exec-args {:jar "decide.jar"
-                                 :aot true
-                                 :sync-pom true
-                                 :main-class decide.server-main}}}}
+           :build {:deps {io.github.clojure/tools.build {:git/tag "v0.6.8" :git/sha "d79ae84"}}
+                   :ns-default build}}}

@@ -7,13 +7,19 @@
         <option value="test" />
       </set>
     </option>
+    <option name="toolAliases">
+      <set>
+        <option value="build" />
+        <option value="outdated" />
+      </set>
+    </option>
   </component>
   <component name="DepsProjectsManager">
     <option name="projectFiles">
-      <list>
+      <set>
         <option value="file://$PROJECT_DIR$/deps.edn" />
         <option value="file://$PROJECT_DIR$/../fulcro-material-ui/deps.edn" />
-      </list>
+      </set>
     </option>
   </component>
 </project>

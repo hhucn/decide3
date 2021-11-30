@@ -34,7 +34,7 @@
   {:task (shell "clj -M:dev -m \"shadow.cljs.devtools.cli\" release :main")}
 
   release:uberjar
-  {:task (shell "clj -X:uberjar")}
+  {:task (shell "clj -T:build uber")}
 
   release
   {:depends [cljs:clean release:js release:uberjar]}
