@@ -46,7 +46,7 @@
 (>def ::raw-route (s/with-gen (s/and sequential? ::rs/raw-route)
                     #(gen/cat (s/gen (s/cat :path ::path :arg (s/? ::arg))))))
 
-(>defn path->segment
+(>defn- path->segment
   "Returns a segment for a given path."
   [path]
   [::path | #(seq (rest (str/split path #"/(?![^{]*})"))) => ::segment]
