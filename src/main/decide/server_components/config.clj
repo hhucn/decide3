@@ -23,13 +23,15 @@
       (assoc :middleware [pretty-print-middleware])
       log/merge-config!)))
 
+(defn scripts-manifest [path]
+  (some-> path io/resource slurp edn/read-string))
 
 (defstate config
-  :start (let [{:keys [config] :or {config "config/dev.edn"}} (args)
-               configuration (load-config! {:config-path config})
-               manifest (edn/read-string (slurp (io/resource "public/js/main/manifest.edn")))]
-           (log/info "Loaded config" config)
-           (configure-logging! configuration)
-           (-> configuration
-             (assoc :script-manifest manifest))))
+  :start
+  (let [{:keys [config] :or {config "config/dev.edn"}} (args)
+        configuration (load-config! {:config-path config})]
+    (log/info "Loaded config" config)
+    (configure-logging! configuration)
+    (-> configuration
+      (assoc :script-manifest (scripts-manifest "public/js/main/manifest.edn")))))
 
