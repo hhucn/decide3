@@ -32,13 +32,14 @@
 
 (>defn get-opinion [db user proposal]
   [d.core/db? ::user/entity ::proposal/entity => (s/nilable ::opinion/entity)]
-  (when-let [opinion-id (d/q '[:find ?opinion .
-                               :in $ ?user ?proposal
-                               :where
-                               [?user ::user/opinions ?opinion]
-                               [?proposal ::proposal/opinions ?opinion]]
-                          db (:db/id user) (:db/id proposal))]
-    (d/entity db opinion-id)))
+  (when-not (string? (:db/id proposal))                     ; catch tempid
+    (when-let [opinion-id (d/q '[:find ?opinion .
+                                 :in $ ?user ?proposal
+                                 :where
+                                 [?user ::user/opinions ?opinion]
+                                 [?proposal ::proposal/opinions ?opinion]]
+                            db (:db/id user) (:db/id proposal))]
+      (d/entity db opinion-id))))
 
 ;; Thought Maybe make a tx function out if this?
 (defn ->retract
