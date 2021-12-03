@@ -122,7 +122,7 @@
   [d.core/conn? any? map?]
   (let [user-id (if (uuid? user-or-id) user-or-id (:decide.models.user/id user-or-id))]
     (d/transact conn
-      (update arg-map :tx-data conj [:db/add "datomic.tx" :db/txUser [::user/id user-id]]))))
+      (update arg-map :tx-data conj [:db/add "datomic.tx" :tx/by [::user/id user-id]]))))
 
 (defn- empty-or-nil-field? [[_ v]]
   (or

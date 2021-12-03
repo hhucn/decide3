@@ -58,7 +58,7 @@
           {:tx-data
            (process.db/->add db
              (-> process
-               (update ::process/moderators conj user)  ; remove that here? let the user come through parameters?
+               (update ::process/moderators conj user)      ; remove that here? let the user come through parameters?
                (update ::process/participants concat (map #(vector ::user/email %) existing-emails))))})]
     {::process/slug slug
      ::p/env (assoc env :db db-after)}))
@@ -79,7 +79,7 @@
 (defn add-moderator! [conn process-lookup moderator-id new-moderator-lookup]
   (d/transact conn
     [[:db/add process-lookup ::process/moderators new-moderator-lookup]
-     [:db/add "datomic.tx" :db/txUser [::user/id moderator-id]]]))
+     [:db/add "datomic.tx" :tx/by [::user/id moderator-id]]]))
 
 (defmutation add-moderator [{:keys [conn db AUTH/user-id] :as env} {::process/keys [slug] email ::user/email}]
   {::pc/output [::user/id]
@@ -104,7 +104,7 @@
             {:tx-data
              (concat
                (process.db/->enter process user)
-               [[:db/add "datomic.tx" :db/txUser [::user/id user-id]]])})]
+               [[:db/add "datomic.tx" :tx/by [::user/id user-id]]])})]
       {::user/id (::user/id user)
        ::process/slug slug
        ::p/env (assoc env :db db-after)})))
@@ -122,7 +122,7 @@
             {:tx-data
              (concat
                (process.db/->remove-participant process user)
-               [[:db/add "datomic.tx" :db/txUser [::user/id user-id]]])})]
+               [[:db/add "datomic.tx" :tx/by [::user/id user-id]]])})]
       {::process/slug slug
        ::p/env (assoc env :db db-after)})))
 

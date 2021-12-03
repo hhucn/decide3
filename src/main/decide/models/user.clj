@@ -45,7 +45,12 @@
     :db/valueType :db.type/keyword
     :db/cardinality :db.cardinality/many}
 
-   {:db/ident :db/txUser
+   #_{:db/ident :db/txUser
+      :db/doc "DEPRECATED: Ref to user who authored the transaction. Useful for audits."
+      :db/valueType :db.type/ref
+      :db/cardinality :db.cardinality/one}
+
+   {:db/ident :tx/by
     :db/doc "Ref tu user who authored the transaction. Useful for audits."
     :db/valueType :db.type/ref
     :db/cardinality :db.cardinality/one}
@@ -141,7 +146,7 @@
 
     ;; TODO register for now if not in DB...revert this later
     #_(let [{::keys [id] :as user} (tx-map {::email email ::password password})
-            tx-report (d/transact conn [user [:db/add "datomic.tx" :db/txUser [::id id]]])]
+            tx-report (d/transact conn [user [:db/add "datomic.tx" :tx/by [::id id]]])]
         (wrap-session env
           {:signup/result :success
            ::id id
@@ -160,7 +165,7 @@
   (if (email-in-db? @conn email)
     {:errors #{:email-in-use}}
     (let [{::keys [id] :as user} (tx-map {::email email ::password password})
-          tx-report (d/transact conn [user [:db/add "datomic.tx" :db/txUser [::id id]]])]
+          tx-report (d/transact conn [user [:db/add "datomic.tx" :tx/by [::id id]]])]
       (wrap-session env
         {:signup/result :success
          ::id id
@@ -178,7 +183,7 @@
   (if (password-valid? (::password user) old-password)
     (do (d/transact! conn [{:db/id [::id user-id]
                             ::password new-password}
-                           [:db/add "datomic.tx" :db/txUser [::id user-id]]])
+                           [:db/add "datomic.tx" :tx/by [::id user-id]]])
         {})
     {:errors #{:invalid-credentials}}))
 

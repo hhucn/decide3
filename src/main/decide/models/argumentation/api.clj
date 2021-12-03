@@ -89,7 +89,7 @@
             [(-> new-argument
                (assoc :argument/premise new-statement)
                (assoc :argument/conclusion (find conclusion :statement/id)))
-             [:db/add "datomic.tx" :db/txUser [::user/id user-id]]])]
+             [:db/add "datomic.tx" :tx/by [::user/id user-id]]])]
       {:tempids {temp-argument-id real-argument-id
                  temp-premise-id real-premise-id}
        ::p/env (assoc env :db (:db-after tx-report))
@@ -121,7 +121,7 @@
              (assoc :argument/premise new-statement)
              (assoc :db/id "new-argument"))
            [:db/add (find proposal ::proposal/id) ::proposal/arguments "new-argument"]
-           [:db/add "datomic.tx" :db/txUser [::user/id user-id]]])]
+           [:db/add "datomic.tx" :tx/by [::user/id user-id]]])]
     {:tempids {temp-argument-id real-argument-id
                temp-premise-id real-premise-id}
      ::p/env (assoc env :db (:db-after tx-report))

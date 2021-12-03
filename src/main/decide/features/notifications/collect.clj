@@ -45,7 +45,7 @@
                            :argument/id
                            :decide.models.proposal/id
                            ::proposal/title])
-           (pull ?tx [:db/id :db/txInstant :db/txUser])
+           (pull ?tx [:db/id :db/txInstant :tx/by])
            :keys entity transaction
            :where
            [?e ?a _ ?tx]

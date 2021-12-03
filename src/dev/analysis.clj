@@ -22,7 +22,7 @@
            :in $ ?user
            :where
            [?e :db/txInstant]
-           [?e :db/txUser ?user]]
+           [?e :tx/by ?user]]
       db user-eid)
     (sort-by :db/txInstant)))
 
@@ -109,7 +109,7 @@
       (d/q '[:find ?nick ?when
              :keys who when
              :where
-             [?e :db/txUser ?who]
+             [?e :tx/by ?who]
              [?e :db/txInstant ?when]
              [?who :decide.models.user/email ?nick]]
         (d/history db))))
