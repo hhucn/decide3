@@ -23,6 +23,8 @@
         metosin/reitit-spec {:mvn/version "0.5.15"}
         metosin/reitit-frontend {:mvn/version "0.5.15"}
 
+        dev.weavejester/ragtime.core {:mvn/version "0.9.0"}
+
         io.replikativ/datahike {:mvn/version "0.4.0"}
         com.github.mrebbinghaus/fulcro-material-ui-wrapper
         {:git/url "https://github.com/MrEbbinghaus/fulcro-material-ui-wrapper"

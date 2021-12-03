@@ -5,21 +5,14 @@
     [decide.models.opinion :as opinion]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
-    [decide.models.argumentation :as argumentation]
     [decide.models.user :as user]
     [decide.server-components.config :refer [config]]
     [com.fulcrologic.guardrails.core :refer [>defn =>]]
     [mount.core :refer [defstate args]]
     [taoensso.timbre :as log]
-    [datahike.core :as d.core]))
-
-(def schema
-  (into [] cat
-    [user/schema
-     process/schema
-     proposal/schema
-     opinion/schema
-     argumentation/schema]))
+    [datahike.core :as d.core]
+    [decide.server-components.db.migrate :as migrate]
+    [decide.server-components.db.schema :as schema]))
 
 (def dev-db
   (vec
@@ -147,16 +140,12 @@
 
 (>defn transact-schema! [conn]
   [d.core/conn? => map?]
-  (d/transact conn schema))
+  (d/transact conn schema/schema))
 
 (defn ensure-database! [db-config]
-  (let [db-exists? (d/database-exists? db-config)]
-    (log/info "Database exists?" db-exists?)
-    (log/info "Create database connection with URI:" db-config)
-    (when-not db-exists?
-      (log/info "Database does not exist! Creating...")
-      (d/create-database db-config))))
-
+  (when-not (d/database-exists? db-config)
+    (log/info "Database does not exist! Creating...")
+    (d/create-database db-config)))
 
 (defn test-database [initial-db]
   (d/create-database)
@@ -177,9 +166,9 @@
 
     (log/info "Database exists. Connecting...")
     (let [conn (d/connect db-config)]
-      (log/info "Transacting schema...")
       (try
-        (transact-schema! conn)
+        (migrate/upsert! conn schema/schema)
+        (migrate/migrate-data! conn schema/migrations)
         (when reset? (d/transact conn dev-db))
         (catch Exception e (println e)))
       conn))
