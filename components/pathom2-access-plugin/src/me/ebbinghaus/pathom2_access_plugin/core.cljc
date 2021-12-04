@@ -1,4 +1,4 @@
-(ns decide.server-components.access-plugin
+(ns me.ebbinghaus.pathom2-access-plugin.core
   (:require
     [com.wsscode.pathom.connect :as pc]
     [com.wsscode.pathom.core :as p]))
