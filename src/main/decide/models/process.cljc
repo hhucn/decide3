@@ -9,6 +9,8 @@
     [com.fulcrologic.guardrails.core :refer [>defn => | <- ?]]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
+    [decide.process :as process]
+    [decide.specs.process]
     [decide.utils.time :as time]))
 
 (def feature-set
@@ -72,17 +74,18 @@
       :db/cardinality :db.cardinality/many
       :db/valueType :db.type/keyword}]))
 
-(def slug-pattern #"^[a-z0-9]+(?:[-_][a-z0-9]+)*$")
-(s/def ::slug (s/and string? (partial re-matches slug-pattern)))
-(s/def ::title (s/and string? (complement str/blank?)))
-(s/def ::description string?)
-(s/def ::latest-id (s/and int? #(<= 0 %)))
-(s/def ::end-time (s/nilable inst?))
-(s/def ::start-time (s/nilable inst?))
-(s/def ::type #{::type.public ::type.private})
-(s/def ::feature feature-set)
-(s/def :process/features (s/coll-of ::feature))
-(s/def ::moderators (s/coll-of (s/keys :req [::user/id])))
+(s/def ::slug ::process/slug)
+(s/def ::title ::process/title)
+(s/def ::description ::process/description)
+(s/def ::latest-id ::process/latest-id)
+(s/def ::end-time (s/nilable ::process/end-time))
+(s/def ::start-time (s/nilable ::process/start-time))
+(s/def ::type ::process/type)
+(s/def ::feature ::process/feature)
+(s/def :process/features (s/coll-of ::process/feature))
+(s/def ::moderators (s/or
+                      :legacy (s/coll-of (s/keys :req [::user/id]))
+                      :main ::process/moderators))
 
 (s/def ::ident (s/tuple #{::slug} ::slug))
 (s/def ::lookup (s/or :ident ::ident :db/id pos-int?))

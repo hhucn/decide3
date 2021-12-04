@@ -3,6 +3,8 @@
  :deps {org.clojure/clojure {:mvn/version "1.10.3"}
         org.clojure/core.async {:mvn/version "1.5.640"}
 
+        decide/domain {:local/root "components/domain"}
+
         bk/ring-gzip {:mvn/version "0.3.0"}
         com.taoensso/timbre {:mvn/version "5.1.2"}
         com.taoensso/tufte {:mvn/version "2.2.0"}

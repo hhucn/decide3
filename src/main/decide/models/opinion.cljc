@@ -1,17 +1,19 @@
 (ns decide.models.opinion
   (:require
-    [#?(:clj clojure.spec.alpha
+    [#?(:clj  clojure.spec.alpha
         :cljs cljs.spec.alpha) :as s]
     [com.fulcrologic.guardrails.core :refer [>defn =>]]
     [decide.models.proposal :as proposal]
-    [decide.models.user :as user]))
+    [decide.models.user :as user]
+    [decide.opinion :as opinion]
+    [decide.specs.opinion]))
 
-(def schema [{:db/ident       ::user/opinions
+(def schema [{:db/ident ::user/opinions
               :db/cardinality :db.cardinality/many
-              :db/valueType   :db.type/ref
+              :db/valueType :db.type/ref
               :db/isComponent true}
 
-             {:db/ident       ::proposal/opinions
+             {:db/ident ::proposal/opinions
               :db/cardinality :db.cardinality/many
               :db/valueType :db.type/ref
               :db/isComponent true}
@@ -21,7 +23,7 @@
               :db/cardinality :db.cardinality/one
               :db/valueType :db.type/long}])
 
-(s/def ::value #{-1 0 +1 +2})
+(s/def ::value ::opinion/value)
 (s/def ::opinion (s/keys :req [::value]))
 (s/def ::proposal/opinions (s/coll-of ::opinion))
 (s/def ::entity (s/and associative? #(contains? % :db/id)))
