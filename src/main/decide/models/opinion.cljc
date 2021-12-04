@@ -28,22 +28,17 @@
 (s/def ::proposal/opinions (s/coll-of ::opinion))
 (s/def ::entity (s/and associative? #(contains? % :db/id)))
 
-(def approval-value? pos?)
-(def neutral-value? zero?)
-(def reject-value? neg?)
-(defn favorite-value? [x] (= x 2))
-
 (defn approval? [opinion]
-  (approval-value? (::value opinion)))
+  (opinion/approval-value? (::value opinion)))
 
 (defn neutral? [opinion]
-  (neutral-value? (::value opinion)))
+  (opinion/neutral-value? (::value opinion)))
 
 (defn reject? [opinion]
-  (reject-value? (::value opinion)))
+  (opinion/reject-value? (::value opinion)))
 
 (defn favorite? [opinion]
-  (favorite-value? (::value opinion)))
+  (opinion/favorite-value? (::value opinion)))
 
 (>defn votes
   "Provided a proposal with opinions, enhances the proposal with a total of pro- and con-votes."

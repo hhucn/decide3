@@ -5,13 +5,14 @@
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.dom :as dom]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
-    [decide.models.opinion :as opinion]
+    [decide.models.opinion :as opinion.legacy]
     [decide.models.opinion.api :as opinion.api]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
     [decide.models.user.ui :as user.ui]
     [decide.routes :as routes]
+    [decide.opinion :as opinion]
     [decide.ui.proposal.new-proposal :as new-proposal]
     [decide.utils.time :as time]
     [mui.data-display :as dd]
@@ -182,16 +183,16 @@
            ::proposal/favorite-votes
            {::proposal/process (comp/get-query TotalVotesProcess)}
            ::proposal/my-opinion-value
-           {::proposal/my-opinion [::opinion/value :opinion/rank]}
-           {::proposal/opinions [::opinion/value
-                                 {::opinion/user (comp/get-query user.ui/Avatar)}]}]
+           {::proposal/my-opinion [::opinion.legacy/value :opinion/rank]}
+           {::proposal/opinions [::opinion.legacy/value
+                                 {::opinion.legacy/user (comp/get-query user.ui/Avatar)}]}]
    :ident ::proposal/id
    :use-hooks? true}
   (let [logged-in? (comp/shared this :logged-in?)
         disabled? (or (not logged-in?) (not (process/running? process)))
         [reject-open? set-reject-dialog-open] (hooks/use-state false)
         [approved? rejected?] ((juxt pos? neg?) my-opinion-value)
-        favorite? (or (opinion/favorite-value? my-opinion-value) (opinion/favorite? my-opinion))]
+        favorite? (or (opinion/favorite-value? my-opinion-value) (opinion.legacy/favorite? my-opinion))]
     (layout/stack
       {:direction :row
        :alignItems :center
@@ -257,8 +258,8 @@
 
       (when (process/public-voting? process)
         (->> opinions
-          (filter #(pos? (::opinion/value %)))
-          (map ::opinion/user)
+          (filter #(pos? (::opinion.legacy/value %)))
+          (map ::opinion.legacy/user)
           (user.ui/avatar-group {:max 5 :sx {:px 1}}))))))
 
 (def ui-voting-area (comp/computed-factory VotingArea {:keyfn ::proposal/id}))

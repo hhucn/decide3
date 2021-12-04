@@ -3,22 +3,23 @@
   (:require
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.raw.components :as raw.comp]
-    [decide.models.opinion :as opinion]
+    [decide.models.opinion :as opinion.legacy]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
-    [decide.models.user :as user]))
+    [decide.models.user :as user]
+    [decide.opinion :as opinion]))
 
 (defn user's-opinion? [opinion user]
-  (= (::user/id user) (-> opinion ::opinion/user second)))  ; `second` as the opinion is normalized
+  (= (::user/id user) (-> opinion ::opinion.legacy/user second)))  ; `second` as the opinion is normalized
 
 (defn remove-opinion-of-user [opinions user]
   (vec (remove #(user's-opinion? % user) opinions)))
 
 (defn conj-opinion-to-opinions [proposal opinion]
-  (let [opinion (update opinion ::opinion/user #(find % ::user/id))] ; manual ident.. :-/
+  (let [opinion (update opinion ::opinion.legacy/user #(find % ::user/id))] ; manual ident.. :-/
     (-> proposal
       ;; remove and add opinion, so that there no duplicates
-      (update ::proposal/opinions remove-opinion-of-user (::opinion/user opinion))
+      (update ::proposal/opinions remove-opinion-of-user (::opinion.legacy/user opinion))
       (update ::proposal/opinions conj opinion))))
 
 (defn- votes-field-updater
@@ -40,13 +41,13 @@
 ;; TODO Add test for this
 (defn set-opinion [proposal opinion]
   (let [old-value (::proposal/my-opinion-value proposal)
-        new-value (::opinion/value opinion)]
+        new-value (::opinion.legacy/value opinion)]
     (if (= old-value new-value)
       proposal
       (-> proposal
         (assoc
           ::proposal/my-opinion opinion
-          ::proposal/my-opinion-value (::opinion/value opinion))
+          ::proposal/my-opinion-value (::opinion.legacy/value opinion))
         (update-vote-fields old-value new-value)
         (conj-opinion-to-opinions opinion)))))
 
@@ -61,22 +62,22 @@
 (defn neutralize-all-proposals [state process-ref user]
   (update-proposals state process-ref
     set-opinion
-    {::opinion/value 0
-     ::opinion/user user}))
+    {::opinion.legacy/value 0
+     ::opinion.legacy/user user}))
 
 {::proposal/id {42 {::proposal/id 42
                     ::proposal/my-opinion-value 1
                     ::proposal/pro-votes 5
-                    ::proposal/opinions [{::opinion/value 1
-                                          ::opinion/user [::user/id 1337]}]}}}
+                    ::proposal/opinions [{::opinion.legacy/value 1
+                                          ::opinion.legacy/user [::user/id 1337]}]}}}
 
 (defn de-favorite-all [state process-ref user]
   (update-proposals state process-ref
     (fn [proposal]
       (cond-> proposal
-        (opinion/favorite? (::proposal/my-opinion proposal))
-        (set-opinion {::opinion/value 1
-                      ::opinion/user user})))))
+        (opinion.legacy/favorite? (::proposal/my-opinion proposal))
+        (set-opinion {::opinion.legacy/value 1
+                      ::opinion.legacy/user user})))))
 
 (defmutation add [{::proposal/keys [id]
                    opinion-value :opinion}]                 ; TODO refactor this
@@ -87,13 +88,13 @@
         (let [current-user (user/current state)
               current-process (process/current state)
               process-ref (find current-process ::process/slug)
-              new-opinion {::opinion/value opinion-value
-                           ::opinion/user current-user}]
+              new-opinion {::opinion.legacy/value opinion-value
+                           ::opinion.legacy/user current-user}]
           (cond-> state
             (process/single-approve? current-process)
             (neutralize-all-proposals process-ref current-user)
 
-            (opinion/favorite? new-opinion)
+            (opinion.legacy/favorite? new-opinion)
             (de-favorite-all process-ref current-user)
 
             :always
@@ -104,9 +105,9 @@
         (raw.comp/nc
           [::proposal/id
            ::proposal/my-opinion-value
-           {::proposal/my-opinion [::opinion/value]}
+           {::proposal/my-opinion [::opinion.legacy/value]}
            ::proposal/pro-votes
            {::proposal/opinions
-            [::opinion/value
-             {::opinion/user
+            [::opinion.legacy/value
+             {::opinion.legacy/user
               [::user/id]}]}])))))
