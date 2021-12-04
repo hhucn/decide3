@@ -1,9 +1,10 @@
 (ns decide.models.proposal
   (:require
     [clojure.spec.alpha :as s]
-    [clojure.string :as str]
     [com.fulcrologic.guardrails.core :refer [>defn => | <-]]
-    [datahike.core :as d.core])
+    [datahike.core :as d.core]
+    [decide.proposal :as proposal]
+    [decide.specs.proposal])
   (:import (java.util Date)))
 
 (def schema
@@ -47,13 +48,13 @@
     :db/cardinality :db.cardinality/many
     :db/valueType :db.type/ref}])
 
-(s/def ::id uuid?)
-(s/def ::nice-id pos-int?)
-(s/def ::title (s/and string? (complement str/blank?)))
-(s/def ::body string?)
-(s/def ::created inst?)
-(s/def ::pro-votes nat-int?)
-(s/def ::con-votes nat-int?)
+(s/def ::id ::proposal/id)
+(s/def ::nice-id ::proposal/nice-id)
+(s/def ::title ::proposal/title)
+(s/def ::body ::proposal/body)
+(s/def ::created ::proposal/created)
+(s/def ::pro-votes ::proposal/pro-votes)
+(s/def ::con-votes ::proposal/con-votes)
 (s/def ::parents (s/coll-of (s/keys :req [::id]) :distinct true))
 (s/def ::proposal (s/keys :req [::id] :opt [::title ::body ::created ::parents ::pro-votes ::con-votes ::nice-id ::arguments]))
 

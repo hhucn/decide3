@@ -7,7 +7,9 @@
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
     [com.wsscode.pathom.core :as p]
     [datahike.api :as d]
-    [datahike.core :as d.core]))
+    [datahike.core :as d.core]
+    [decide.specs.user]
+    [decide.user :as user]))
 
 
 (def schema
@@ -60,16 +62,15 @@
     :db/valueType :db.type/keyword
     :db/cardinality :db.cardinality/one}])
 
-(s/def ::id uuid?)
+(s/def ::id ::user/id)
 (s/def ::ident (s/tuple #{::id} ::id))
 (s/def ::lookup (s/or :ident ::ident :db/id pos-int?))
 (s/def ::email string?)
-(s/def :user/email string?)
-(s/def ::encrypted-password string?)
-(s/def ::password (s/or :encrypted ::encrypted-password :raw string?))
-(s/def ::display-name (s/and string? #(< 0 (count %) 50)))
-(s/def :iso/ISO-639-3 #(>= 3 (count (name %))))
-(s/def :user/language (s/and simple-keyword? :iso/ISO-639-3))
+(s/def :user/email ::user/email)
+(s/def ::encrypted-password ::user/encrypted-password)
+(s/def ::password ::user/password)
+(s/def ::display-name ::user/display-name)
+(s/def :user/language ::user/language)
 
 (s/def ::entity (s/and associative? #(contains? % :db/id)))
 
@@ -129,7 +130,7 @@
      ::password (hash-password password)}))
 
 
-(defmutation sign-in [{:keys [conn db] :as env} {::keys [email password]}]
+(defmutation sign-in [{:keys [db] :as env} {::keys [email password]}]
   {::pc/params [::email ::password]
    ::pc/output [:session/valid? ::id {:user [::id]}
                 :signin/result :errors]}
