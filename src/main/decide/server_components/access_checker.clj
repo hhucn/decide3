@@ -3,7 +3,7 @@
     [decide.models.process.database :as process.db]
     [decide.models.proposal.core :as proposal.core]
     [decide.models.proposal.database :as proposal.db]
-    [decide.server-components.access-plugin :as access]
+    [me.ebbinghaus.pathom2-access-plugin.core :as access]
     [taoensso.timbre :as log]))
 
 (defmulti *check-access! (fn [_env [k v]] k))

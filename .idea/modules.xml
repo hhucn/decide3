@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/decide3.iml" filepath="$PROJECT_DIR$/.idea/decide3.iml" />
       <module fileurl="file://$PROJECT_DIR$/components/domain/domain.iml" filepath="$PROJECT_DIR$/components/domain/domain.iml" />
       <module fileurl="file://$PROJECT_DIR$/../fulcro-material-ui/fulcro-material-ui.iml" filepath="$PROJECT_DIR$/../fulcro-material-ui/fulcro-material-ui.iml" />
+      <module fileurl="file://$PROJECT_DIR$/components/pathom2-access-plugin/pathom2-access-plugin.iml" filepath="$PROJECT_DIR$/components/pathom2-access-plugin/pathom2-access-plugin.iml" />
     </modules>
   </component>
 </project>

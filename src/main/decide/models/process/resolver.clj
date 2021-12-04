@@ -10,7 +10,7 @@
     [decide.models.process.mutations :as process.mutations]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
-    [decide.server-components.access-plugin :as access]))
+    [me.ebbinghaus.pathom2-access-plugin.core :as access]))
 
 (defn get-process-entity [{:keys [db] :as env} slug]
   (let [process-ident [::process/slug slug]]
