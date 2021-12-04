@@ -184,5 +184,6 @@
     <orderEntry type="library" name="Deps: org.clojure/data.codec:0.1.1" level="project" />
     <orderEntry type="library" name="Deps: javax.xml.bind/jaxb-api:2.3.0" level="project" />
     <orderEntry type="library" name="Deps: http-kit:2.5.3" level="project" />
+    <orderEntry type="module" module-name="domain" />
   </component>
 </module>
