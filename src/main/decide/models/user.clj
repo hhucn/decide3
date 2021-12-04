@@ -1,6 +1,5 @@
 (ns decide.models.user
   (:require
-    [buddy.hashers :as hs]
     [clojure.spec.alpha :as s]
     [com.fulcrologic.fulcro.server.api-middleware :as fmw]
     [com.fulcrologic.guardrails.core :refer [>defn >defn- => | ? <-]]
@@ -67,16 +66,11 @@
 (s/def ::lookup (s/or :ident ::ident :db/id pos-int?))
 (s/def ::email string?)
 (s/def :user/email ::user/email)
-(s/def ::encrypted-password ::user/encrypted-password)
 (s/def ::password ::user/password)
 (s/def ::display-name ::user/display-name)
 (s/def :user/language ::user/language)
 
 (s/def ::entity (s/and associative? #(contains? % :db/id)))
-
-(>defn hash-password [password]
-  [::password => ::encrypted-password]
-  (hs/derive password {:alg :bcrypt+sha512}))
 
 (>defn exists? [db user-id]
   [d.core/db? ::id => boolean?]
@@ -98,10 +92,6 @@
   ([db email query]
    [d.core/db? ::email vector? => map?]
    (d/pull db query [::email email])))
-
-(>defn password-valid? [{:keys [::password]} attempt]
-  [(s/keys :req [::password]) ::password => boolean?]
-  (hs/check attempt password))
 
 (>defn response-updating-session
   "Uses `mutation-response` as the actual return value for a mutation, but also stores the data into the (cookie-based) session."
@@ -127,7 +117,7 @@
     {::id id
      ::email email
      ::display-name display-name
-     ::password (hash-password password)}))
+     ::password (user/hash-password password)}))
 
 
 (defmutation sign-in [{:keys [db] :as env} {::keys [email password]}]
@@ -136,7 +126,7 @@
                 :signin/result :errors]}
   (if (email-in-db? db email)
     (let [{::keys [id] :as user} (get-by-email db email [::id ::password])]
-      (if (password-valid? user password)
+      (if (user/password-valid? password (::user/password user))
         (wrap-session env
           {:signin/result :success
            :session/valid? true
@@ -181,7 +171,7 @@
 (defmutation change-password [{:keys [conn AUTH/user-id AUTH/user]} {:keys [old-password new-password]}]
   {::pc/params [:old-password :new-password]
    ::pc/output [:errors]}
-  (if (password-valid? (::password user) old-password)
+  (if (user/password-valid? old-password (::password user))
     (do (d/transact! conn [{:db/id [::id user-id]
                             ::password new-password}
                            [:db/add "datomic.tx" :tx/by [::id user-id]]])

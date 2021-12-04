@@ -12,8 +12,22 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Deps: org.bouncycastle/bcprov-jdk15on:1.68" level="project" />
+    <orderEntry type="library" name="Deps: buddy/buddy-core:1.10.1" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/clojure:1.10.3" level="project" />
-    <orderEntry type="library" name="Deps: org.clojure/spec.alpha:0.2.194" level="project" />
+    <orderEntry type="library" name="Deps: commons-codec:1.15" level="project" />
+    <orderEntry type="library" name="Deps: com.fulcrologic/guardrails:1.1.9" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/core.specs.alpha:0.2.56" level="project" />
+    <orderEntry type="library" name="Deps: org.bouncycastle/bcpkix-jdk15on:1.68" level="project" />
+    <orderEntry type="library" name="Deps: expound:0.8.5" level="project" />
+    <orderEntry type="library" name="Deps: org.clojure/spec.alpha:0.2.194" level="project" />
+    <orderEntry type="library" name="Deps: com.fasterxml.jackson.dataformat/jackson-dataformat-cbor:2.10.2" level="project" />
+    <orderEntry type="library" name="Deps: com.fasterxml.jackson.core/jackson-core:2.10.2" level="project" />
+    <orderEntry type="library" name="Deps: buddy/buddy-hashers:1.8.1" level="project" />
+    <orderEntry type="library" name="Deps: com.lambdaworks/scrypt:1.4.0" level="project" />
+    <orderEntry type="library" name="Deps: clojurewerkz/scrypt:1.2.0" level="project" />
+    <orderEntry type="library" name="Deps: cheshire:5.10.0" level="project" />
+    <orderEntry type="library" name="Deps: tigris:0.1.2" level="project" />
+    <orderEntry type="library" name="Deps: com.fasterxml.jackson.dataformat/jackson-dataformat-smile:2.10.2" level="project" />
   </component>
 </module>

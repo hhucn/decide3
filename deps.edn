@@ -32,8 +32,6 @@
         {:git/url "https://github.com/MrEbbinghaus/fulcro-material-ui-wrapper"
          :sha "058f1dd4b85542914f92f48a4010ea9ad497e48f"}
 
-        buddy/buddy-hashers {:mvn/version "1.8.1"}
-
         ring/ring-core {:mvn/version "1.9.4"}
         ring/ring-defaults {:mvn/version "0.3.3"}
 
