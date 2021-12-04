@@ -5,7 +5,6 @@
     [clojure.string :as str]
     [decide.process :as process]
     [decide.user :as user]
-    [decide.specs.user]
     [decide.specs.common :as common]))
 
 (def slug-pattern #"^[a-z0-9]+(?:[-_][a-z0-9]+)*$")

@@ -7,7 +7,6 @@
     [com.wsscode.pathom.core :as p]
     [datahike.api :as d]
     [datahike.core :as d.core]
-    [decide.specs.user]
     [decide.user :as user]))
 
 
