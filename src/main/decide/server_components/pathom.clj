@@ -27,7 +27,7 @@
     (into {})))
 
 (pc/defresolver index-explorer [env _]
-  {::pc/input  #{:com.wsscode.pathom.viz.index-explorer/id}
+  {::pc/input #{:com.wsscode.pathom.viz.index-explorer/id}
    ::pc/output [:com.wsscode.pathom.viz.index-explorer/index]}
   {:com.wsscode.pathom.viz.index-explorer/index
    (-> (get env ::pc/indexes)
@@ -55,6 +55,7 @@
            (mutate env sym params)
            (do
              (log/debug (s/explain spec params))
+             ;; TODO Errors are data too!
              (throw (ex-info "Failed validation!" (s/explain-data spec params)))))
          (mutate env sym params))))})
 

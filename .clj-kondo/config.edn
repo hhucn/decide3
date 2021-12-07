@@ -4,7 +4,8 @@
            com.fulcrologic.fulcro.routing.dynamic-routing/defrouter   clojure.core/defn
            mount.core/defstate                                        clojure.core/def
            nubank.workspaces.core/defcard                             clojure.core/def
-           com.fulcrologic.fulcro.algorithms.normalized-state/swap!-> clojure.core/->}
+           com.fulcrologic.fulcro.algorithms.normalized-state/swap!-> clojure.core/->
+           failjure.core/attempt-all clojure.core/let}
  :linters {:misplaced-docstring {:level :error}
            :not-empty?          {:level :off}
            :unresolved-symbol   {:exclude

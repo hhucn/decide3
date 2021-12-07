@@ -20,6 +20,7 @@
     <item key="com.fulcrologic.fulcro.components/defsc" resolves-as="clojure.core/defn" />
     <item key="com.fulcrologic.guardrails.core/&gt;defn-" resolves-as="clojure.core/defn-" />
     <item key="mount.core/defstate" resolves-as="cljs.core/def" />
+    <item key="failjure.core/attempt-all" resolves-as="clojure.core/let" />
     <currentScheme>PROJECT</currentScheme>
   </component>
 </project>
