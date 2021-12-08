@@ -1,7 +1,7 @@
 image: clojure:openjdk-15-tools-deps
 
 services:
-  - docker:stable-dind
+  - docker:dind
 
 cache: &global_cache
   key: ${CI_JOB_NAME}
