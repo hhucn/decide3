@@ -21,6 +21,7 @@
     [mui.layout :as layout]
     [mui.layout.grid :as grid]
     [mui.surfaces.card :as card]
+    [reitit.frontend.easy :as rfe]
     ["@mui/icons-material/CheckCircleOutlineRounded" :default CheckCircleOutline]
     ["@mui/icons-material/CheckCircleRounded" :default CheckCircle]
     ["@mui/icons-material/Comment" :default Comment]
@@ -323,11 +324,12 @@
           (ui-voting-area voting-area {:process current-process}))
 
         (grid/item {:xs :auto}
-          (dd/tooltip {:title (i18n/trf "{noOf, plural, =1 {# argument} other {# arguments}}" {:noOf no-of-arguments})}
-            (inputs/button
-              {:startIcon (dom/create-element Comment)
-                :variant :label
-                :href proposal-href}
-              (str no-of-arguments))))))))
+          (layout/stack {:direction :row}
+            (dd/tooltip {:title (i18n/trf "{noOf, plural, =1 {# argument} other {# arguments}}" {:noOf no-of-arguments})}
+              (inputs/button
+                {:startIcon (dom/create-element Comment)
+                 :variant :label
+                 :href (rfe/href ::routes/proposal-detail-page {:process/slug slug :proposal/id id})}
+                (str no-of-arguments)))))))))
 
 (def ui-proposal-card (comp/computed-factory ProposalCard {:keyfn ::proposal/id}))
