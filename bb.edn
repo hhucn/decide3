@@ -18,16 +18,22 @@
    :task (shell "clj -M:dev -m \"shadow.cljs.devtools.cli\" watch :main")}
 
   i18n
-  {:task (shell "clj -M:dev -m \"shadow.cljs.devtools.cli\" release :i18n")}
+  {:task (clojure "-M:dev -m \"shadow.cljs.devtools.cli\" release :i18n")}
 
   test:clj
-  {:task (shell "clj -J-Dguardrails.enabled=true -M:dev:clj-tests")}
+  {:task (clojure "-M:dev:clj-tests")}
+
+  test:cljs
+  {:task
+   (do
+     (clojure "-M:dev -m \"shadow.cljs.devtools.cli\" compile ci-tests")
+     (shell "yarn karma start --single-run --reporters junit"))}
 
   test:watch-cljs
-  {:task (shell "clj -M:dev -m \"shadow.cljs.devtools.cli\" watch :test")}
+  {:task (clojure "-M:dev -m \"shadow.cljs.devtools.cli\" watch :test")}
 
   test:watch-clj
-  {:task (shell "clj -J-Dguardrails.enabled=true -M:dev:clj-tests --watch")}
+  {:task (shell "clj -M:dev:clj-tests --watch")}
 
   ;; Release jobs
   release:js

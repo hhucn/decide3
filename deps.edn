@@ -43,6 +43,7 @@
 
  :aliases {:clj-tests {:extra-paths ["src/test"]
                        :main-opts ["-m" "kaocha.runner"]
+                       :jvm-opts ["-Dguardrails.enabled=true"]
                        :extra-deps {lambdaisland/kaocha {:mvn/version "1.60.945"}
                                     lambdaisland/kaocha-junit-xml {:mvn/version "0.0.76"}
                                     orchestra/orchestra {:mvn/version "2021.01.01-1"}}}

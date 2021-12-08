@@ -1,0 +1,40 @@
+name: CLJ Test
+
+on:
+  push:
+  pull_request:
+    types: [assigned, reopened, auto_merge_enabled]
+
+jobs:
+  clj-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+
+      - name: Cache MVN
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/deps.edn') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Install clojure tools
+        uses: DeLaGuardo/setup-clojure@3.6
+        with:
+          cli: latest
+
+      - name: "Setup Java"
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '17'
+
+      - name: Install babashka
+        run: bash < <(curl -s https://raw.githubusercontent.com/babashka/babashka/master/install)
+
+      - name: Run tests
+        run: bb test:clj
