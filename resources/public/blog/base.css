@@ -1096,38 +1096,6 @@ body {
   outline-offset: 2px;
 }
 
-@media (prefers-color-scheme: dark) {
-  .dark\:prose-light {
-    color: white;
-  }
-
-  .dark\:prose-light h1 {
-    color: white;
-  }
-
-  .dark\:prose-light h2 {
-    color: white;
-  }
-
-  .dark\:prose-light h3 {
-    color: white;
-  }
-
-  .dark\:prose-light a {
-    color: white;
-  }
-
-  .dark\:bg-gray-800 {
-    --tw-bg-opacity: 1;
-    background-color: rgba(31, 41, 55, var(--tw-bg-opacity));
-  }
-
-  .dark\:text-white {
-    --tw-text-opacity: 1;
-    color: rgba(255, 255, 255, var(--tw-text-opacity));
-  }
-}
-
 @media (min-width: 640px) {
   .sm\:justify-between {
     justify-content: space-between;

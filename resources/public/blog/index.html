@@ -13,233 +13,40 @@
 
 <div class="mx-auto antialiased">
     <header class="dark:bg-gray-800">
-        <div class="max-w-screen-lg mx-auto flex max-h-20 sm:justify-between overflow-x-hidden border-b-2 border-opacity-20">
-            <img class="pl-4 w-1/2 object-left object-scale-down" src="assets/logos/fkop_text.svg"
-                 alt="Logo Forschungskolleg NRW">
-            <img class="w-1/2 object-right object-scale-down" src="assets/logos/HHU_Logo.svg" alt="Logo HHU">
-        </div>
-    </header>
-
-    <div class="p-4 md:p-6 lg:p-8">
-        <article class="prose dark:prose-light lg:prose-lg xl:prose-xl 2xl:prose-2xl mx-auto"
-                 role="main">
-            <time datetime="2021-12-10"></time>
-            <h1 class="py-4">Better Decision-Making through Collaborative Development of Proposals</h1>
-
-
-            <p><a class="author" href="mailto:ebbinghaus@hhu.de">Björn Ebbinghaus</a>, <a class="author"
-                                                                                          href="mailto:mauve@hhu.de">Martin
-                Mauve</a></p>
-            <p>
-            <ol>
-                <li><a href="#intro">Introduction</a></li>
-                <li><a href="#features">Features</a></li>
-                <li><a href="#experiments">Experiments</a></li>
-                <li><a href="#demo">Demo</a></li>
-                <li><a href="#references">References</a></li>
-            </ol>
-            </p><h2>Introduction <a id="intro"></a></h2>
-            <p>Our goal is to understand how a potentially large group of participants can be supported to conduct
-                collaborative online decision-making processes with a least amount of external governing factors. Since
-                there exists a multitude of systems that are regularly used for tasks such as online participation, much
-                of the required functionality is well known. This includes mechanisms for proposing an item, discussing
-                it and voting on alternatives. However, there is one aspect of collaborative online decision-making that
-                is not yet well understood: how can a large group of participants work together to come up with and <em>decide</em>
-                on proposals? In real-world politics, there is a vast array of instruments to refine proposals and form
-                coalitions in order to reach a final decision. Our idea is to take two of the key underlying elements of
-                these instruments and translate them to an online setting. Namely, improving an existing proposal to
-                gather more support for it and forming a coalition to join the support of two or more proposals. We
-                believe that these elements can be translated to mechanisms that are used for collaborative software
-                development through distributed version control systems.</p>
-            <p>Based on this idea, we have developed <em>decide</em>, an application for collaborative online
-                decision-making that supports the participants to work together to come up with the best possible
-                solution for a given issue. This does not require the participants to have homogenous interests and
-                agree on a solution. It gives them all the tools they need to come up with good proposals, improve them,
-                form coalitions and <em>decide</em> on the result.</p>
-            <p>We have conducted several experiments using <em>decide</em>. The results of those experiments are
-                encouraging. Participants understand and use the new mechanisms provided for improving and merging
-                proposals. Our experiments also suggest that the specific voting system employed may have a significant
-                impact on how the participants use the option to improve and merge proposals. This opens a very
-                challenging and interesting line of future research.</p>
-            <h2>Features of <em>decide</em> <a id="features"></a></h2>
-            <p>Our application decide gives participants several ways to participate in a collaborative decision-making
-                process. This includes common functions like creating new proposals and commenting on them. What is
-                unique, however, is that participants have the possibility to create proposals based on other proposals.
-                When creating a new proposal, they are given the choice whether they want to fork (enhance, develop, …)
-                or merge (coalition, compromise, …) existing proposals. Forks and merges are ordinary proposals by
-                themselves, with the exception that they have relations to their parent proposals. They especially do
-                not replace their parents.</p>
-            <p>As we want to encourage the participants to collaborate, we decided to use a public, iterative voting <a
-                    href='#fn-1' id='fnref1'><sup>1</sup></a> process. It is possible at any time to see how many other
-                participants have approved the proposals. This also means that the current forerunner is always visible.
-                We believe this is essential for collaboration, because only when participants know the intentions of
-                their peers can they meaningfully improve their proposals.</p>
-            <p>With this in mind, we support participants at various points in the development of their proposals. For
-                example, if a participant´s preferred proposal is not in the lead right now, they get a prompt to look
-                for a coalition.</p>
-            <h2>Findings from our lab experiments <a id="experiments"></a></h2>
-            <p>We tested our idea in two experiments with untrained students. The two processes differed only in their
-                voting procedure. In one, participants could only give one approval at a time (plurality voting) and in
-                the other, as many as they wanted (approval voting).</p>
-            <p>Through the experiments we discovered advantages and disadvantages with both methods. Plurality voting
-                was deemed unfair by some participants due to vote splitting—a problem that is amplified with public
-                votes. On the other hand, the fact that they could only approve one proposal resulted in a busier
-                process. The amount of forking and merging is well visible in the figure below. With plurality voting
-                approvals had to be withdrawn as new proposals were introduced. This leads to considerations about older
-                approvals participants in the experiment with approval voting did not have to make. In this case,
-                significant withdrawals of approvals occurred only shortly before the end of the process in order to
-                avoid a draw and ensure victory for the</p>
-            <p>
-            <figure>
-                <svg class="fill-current dark:text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 620">
-                    <style> .text {
-                        font-size: 38px;
-                        font-family: sans-serif;
-                    }
-
-                    .original, .fork, .merge {
-                        fill: transparent;
-                        stroke-width: 1.527;
-                        stroke-linecap: butt;
-                        stroke-linejoin: miter;
-                        stroke-miterlimit: 8
-                    }
-
-                    .fork {
-                        stroke: #ee7f00;
-                    }
-
-                    .merge {
-                        stroke: #8cb110
-                    }
-
-                    .original {
-                        stroke: #003964;
-                    } </style>
-                    <g>
-                        <circle class="original" cx="239" cy="57" r="38"/>
-                        <text x="228.5" y="69" class="text">1</text>
-                        <circle class="fork" cx="350" cy="97" r="38"/>
-                        <text x="339.7" y="109" class="text">2</text>
-                        <circle class="original" cx="461" cy="136" r="38"/>
-                        <text x="451" y="148.1" class="text">3</text>
-                        <circle class="original" cx="572" cy="175" r="38"/>
-                        <text x="562.2" y="187.6" class="text">4</text>
-                        <circle class="original" cx="683" cy="215" r="38"/>
-                        <text x="673.5" y="227.2" class="text">5</text>
-                        <circle class="fork" cx="238" cy="255" r="38"/>
-                        <text x="228.5" y="267.1" class="text">6</text>
-                        <circle class="original" cx="572" cy="294" r="38"/>
-                        <text x="562.2" y="306.2" class="text">7</text>
-                        <circle class="merge" cx="461" cy="334" r="38"/>
-                        <text x="451" y="346.2" class="text">8</text>
-                        <circle class="fork" cx="130" cy="373" r="38"/>
-                        <text x="120.2" y="385.7" class="text">9</text>
-                        <circle class="fork" cx="684" cy="413" r="38"/>
-                        <text x="662.9" y="425.7" class="text">10</text>
-                        <circle class="fork" cx="805" cy="453" r="38"/>
-                        <text x="785.1" y="465.3" class="text">11</text>
-                        <circle class="merge" cx="565" cy="496" r="38"/>
-                        <text x="545" y="508.3" class="text">12</text>
-                        <circle class="merge" cx="350" cy="535" r="38"/>
-                        <text x="329.1" y="547.8" class="text">13</text>
-                        <circle class="fork" cx="239" cy="575" r="38"/>
-                        <text x="217.8" y="587.4" class="text">14</text>
-                        <path d="m299.6 78.1-1.5-.5-22-7.9" class="original"/>
-                        <path d="m295.7 84.5 16.2-2-11.3-11.8Z" class="original"/>
-                        <path d="m148.3 321.9.4-1.4 77.7-226.8" class="original"/>
-                        <path d="m141.8 318.1 2.2 16.2 11.7-11.5Z" class="original"/>
-                        <path d="M350.3 480.6V136.9" class="original"/>
-                        <path d="m343 479.1 7.3 14.7 7.4-14.7Z" class="original"/>
-                        <path d="m330.5 484.4-.6-1.4-75.8-190.8" class="original"/>
-                        <path d="m323.1 485.7 12.2 10.9 1.4-16.3Z" class="original"/>
-                        <path d="M239.1 520.2V295" class="original"/>
-                        <path d="m231.8 518.6 7.3 14.7 7.3-14.7Z" class="original"/>
-                        <path d="M239.1 200.4V95.8" class="original"/>
-                        <path d="m231.8 198.9 7.3 14.6 7.3-14.6Z" class="original"/>
-                        <path d="m438.7 284.6-.6-1.4L367.7 133" class="original"/>
-                        <path d="m431.4 286.3 12.9 10.1.4-16.3Z" class="original"/>
-                        <path d="M461.6 279.5V174.9" class="original"/>
-                        <path d="m454.3 277.9 7.3 14.7 7.3-14.7Z" class="original"/>
-                        <path d="m512.4 315.3 1.4-.5 22.1-7.9" class="original"/>
-                        <path d="M511.4 307.9 500 319.7l16.3 2Z" class="original"/>
-                        <path d="M684.1 358.5V254" class="original"/>
-                        <path d="m676.8 357 7.3 14.7 7.3-14.7Z" class="original"/>
-                        <path d="m754.1 435.2-1.4-.4-29.8-9.8" class="original"/>
-                        <path d="m750.4 441.7 16.2-2.4-11.7-11.5Z" class="original"/>
-                        <path d="m610.4 464 1.3-.8 39-27.4" class="original"/>
-                        <path d="m607.5 457.2-7.9 14.4 16.3-2.4Z" class="original"/>
-                        <path d="m537 449.7-.9-1.2-52.3-80.9" class="original"/>
-                        <path d="m530 452.4 14.1 8.4-1.8-16.3Z" class="original"/>
-                        <path d="M44 582.7h-6.4l10.2 28.9 10.1-28.9h-6.4V6.3H44Z" class="original"/>
-                        <text class="text" dx="0 -1.1 0 0" transform="rotate(-90 188.35 155.15)">Time</text>
-                    </g>
-                </svg>
-                </p>
-                <p>
-                    <style>.fork {
-                        color: #ee7f00;
-                    }
-
-                    .merge {
-                        color: #8cb110
-                    }
-
-                    .original {
-                        color: #003964;
-                    }</style>
-                <figcaption>IDs of proposals and their relations in a process with plurality voting. (<span
-                        class="merge">3 merges</span>, <span class="fork">6 forks</span>, <span class="original">5 independent</span>)
-                </figcaption>
-            </figure>
-            </p><h2>Demo <a id="demo"></a></h2>
-            <p>Please feel free to play with this demo. Note that it is a prototype and work in progress and you should
-                not enter confidential information. Feedback is most welcome to <a
-                        href="mailto:&#x65;&#x62;&#x62;&#x69;&#x6e;&#x67;&#x68;&#x61;&#x75;&#x73;&#x40;&#x68;&#x68;&#x75;&#x2e;&#x64;&#x65;">&#x65;&#x62;&#x62;&#x69;&#x6e;&#x67;&#x68;&#x61;&#x75;&#x73;&#x40;&#x68;&#x68;&#x75;&#x2e;&#x64;&#x65;</a>.
-            </p>
-            <p>If you have problems to interact with the demo on mobile, you can visit the real instance here: <a
-                    href="/decision/how-can-we-improve-studies-at-the-university/proposals" target="_blank">decide.ebbinghaus.me</a>.
-            </p>
-            <p>
-                <iframe height="600px" title="decide - Demo" loading="lazy"
-                        src="/decision/how-can-we-improve-studies-at-the-university/proposals"
-                        style="margin: 2px;"></iframe>
-            </p>
-            <h2>Open research questions <a id="questions"></a></h2>
-            <h3>How can we encourage evolution of proposals, while keeping the set of candidate small and relevant?</h3>
-            <p>Since we want to encourage change and therefore progress towards better decisions we naturally increase
-                the total number of proposals that were made, by a far greater amount than a traditional system that
-                allow proposals. As every proposal should be respected, we can not just hide a proposal which has a
-                child that may or may not be an improvement for some. How can we determine a relevance for a given
-                proposal?</p>
-            <h3>How to vote on candidates with relations between them?</h3>
-            <p>Imagine you expressed your approval with a certain proposal. Later on you approve a child of that
-                proposal. How should your vote be counted? Should we prioritize the vote for a newer proposal, because
-                we assume new = better? This may also be important when making a decision with multiple possible winner,
-                as in reality proposals that are very closely related are often not suited to be implemented at the same
-                time. E.g. <em>Add a slide to the playground</em> and*Add a jungle gym to the playground* may be
-                constricted by available space on the playground.</p>
-            <h3>How can we help participants find candidates for a coalition?</h3>
-            <p>We are already experimenting with <em>similar proposals</em>. Similarity for now is based on the size of
-                the shared voters. This can be useful (if not crucial) when trying to settle a decision in a unanimous
-                agreement.</p>
-            <h3>How can we help participants find candidates for a coalition?</h3>
-            <p>We are already experimenting with <em>similar proposals</em>. Similarity for now is based on the size of
-                the shared voters. This can be useful (if not crucial) when trying to settle a decision in a unanimous
-                agreement.</p>
-            <h2>References <a id="references"></a></h2>
-            <ol class='footnotes'>
-                <li id='fn-1'>R. Meir, "Iterative Voting," in Trends in Computational Social Choice, AI Access, 2017,
-                    pp. 69-86.<a href='#fnref1'>&#8617;</a></li>
-            </ol>
-
-            <footer>
-                <a href="https://www.fkop.de/en">www.fkop.de</a>
-                <a href="https://www.cn.hhu.de/en">cn.hhu.de</a>
-            </footer>
-        </article>
+    <div class="max-w-screen-lg mx-auto flex max-h-20 sm:justify-between overflow-x-hidden border-b-2 border-opacity-20">
+        <img class="pl-4 w-1/2 object-left object-scale-down" src="assets/logos/fkop_text.svg"
+             alt="Logo Forschungskolleg NRW">
+        <img class="w-1/2 object-right object-scale-down" src="assets/logos/HHU_Logo.svg" alt="Logo HHU">
     </div>
+</header>
 
+<div class="p-4 md:p-6 lg:p-8">
+    <article class="prose dark:prose-light lg:prose-lg xl:prose-xl 2xl:prose-2xl mx-auto"
+             role="main">
+        <time datetime="2021-12-10"></time>
+        <h1 class="py-4">Better Decision-Making through Collaborative Development of Proposals</h1>
+
+
+        <p><a class="author" href="mailto:ebbinghaus@hhu.de">Björn Ebbinghaus</a>, <a class="author" href="mailto:mauve@hhu.de">Martin Mauve</a></p><p><ol>     <li><a href="#intro">Introduction</a></li>     <li><a href="#features">Features</a></li>     <li><a href="#experiments">Experiments</a></li>     <li><a href="#demo">Demo</a></li>     <li><a href="#references">References</a></li> </ol></p><h2>Introduction <a id="intro"></a></h2><p>Our goal is to understand how a potentially large group of participants can be supported to conduct collaborative online decision-making processes with a least amount of external governing factors. Since there exists a multitude of systems that are regularly used for tasks such as online participation, much of the required functionality is well known. This includes mechanisms for proposing an item, discussing it and voting on alternatives. However, there is one aspect of collaborative online decision-making that is not yet well understood: how can a large group of participants work together to come up with and <em>decide</em> on proposals? In real-world politics, there is a vast array of instruments to refine proposals and form coalitions in order to reach a final decision. Our idea is to take two of the key underlying elements of these instruments and translate them to an online setting. Namely, improving an existing proposal to gather more support for it and forming a coalition to join the support of two or more proposals. We believe that these elements can be translated to mechanisms that are used for collaborative software development through distributed version control systems.</p><p>Based on this idea, we have developed <em>decide</em>, an application for collaborative online decision-making that supports the participants to work together to come up with the best possible solution for a given issue. This does not require the participants to have homogenous interests and agree on a solution. It gives them all the tools they need to come up with good proposals, improve them, form coalitions and <em>decide</em> on the result.</p><p>We have conducted several experiments using <em>decide</em>. The results of those experiments are encouraging. Participants understand and use the new mechanisms provided for improving and merging proposals. Our experiments also suggest that the specific voting system employed may have a significant impact on how the participants use the option to improve and merge proposals. This opens a very challenging and interesting line of future research.</p><h2>Features of <em>decide</em> <a id="features"></a></h2><p>Our application decide gives participants several ways to participate in a collaborative decision-making process. This includes common functions like creating new proposals and commenting on them. What is unique, however, is that participants have the possibility to create proposals based on other proposals. When creating a new proposal, they are given the choice whether they want to fork (enhance, develop, …) or merge (coalition, compromise, …) existing proposals. Forks and merges are ordinary proposals by themselves, with the exception that they have relations to their parent proposals. They especially do not replace their parents.</p><p>As we want to encourage the participants to collaborate, we decided to use a public, iterative voting <a href='#fn-1' id='fnref1'><sup>1</sup></a> process. It is possible at any time to see how many other participants have approved the proposals. This also means that the current forerunner is always visible. We believe this is essential for collaboration, because only when participants know the intentions of their peers can they meaningfully improve their proposals.</p><p>With this in mind, we support participants at various points in the development of their proposals. For example, if a participant´s preferred proposal is not in the lead right now, they get a prompt to look for a coalition.</p><h2>Findings from our lab experiments <a id="experiments"></a></h2><p>We tested our idea in two experiments with untrained students. The two processes differed only in their voting procedure. In one, participants could only give one approval at a time (plurality voting) and in the other, as many as they wanted (approval voting).</p><p>Through the experiments we discovered advantages and disadvantages with both methods. Plurality voting was deemed unfair by some participants due to vote splitting—a problem that is amplified with public votes. On the other hand, the fact that they could only approve one proposal resulted in a busier process. The amount of forking and merging is well visible in the figure below. With plurality voting approvals had to be withdrawn as new proposals were introduced. This leads to considerations about older approvals participants in the experiment with approval voting did not have to make. In this case, significant withdrawals of approvals occurred only shortly before the end of the process in order to avoid a draw and ensure victory for the</p><p><figure> <svg class="fill-current dark:text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 620"> <style> .text { font-size: 38px; font-family: sans-serif; } .original, .fork, .merge { fill: transparent; stroke-width: 1.527; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 8 } .fork { stroke: #ee7f00; } .merge { stroke: #8cb110 } .original { stroke: #003964; } </style> <g> <circle class="original" cx="239" cy="57" r="38"/> <text x="228.5" y="69" class="text">1</text> <circle class="fork" cx="350" cy="97" r="38"/> <text x="339.7" y="109" class="text">2</text> <circle class="original" cx="461" cy="136" r="38"/> <text x="451" y="148.1" class="text">3</text> <circle class="original" cx="572" cy="175" r="38"/> <text x="562.2" y="187.6" class="text">4</text> <circle class="original" cx="683" cy="215" r="38"/> <text x="673.5" y="227.2" class="text">5</text> <circle class="fork" cx="238" cy="255" r="38"/> <text x="228.5" y="267.1" class="text">6</text> <circle class="original" cx="572" cy="294" r="38"/> <text x="562.2" y="306.2" class="text">7</text> <circle class="merge" cx="461" cy="334" r="38"/> <text x="451" y="346.2" class="text">8</text> <circle class="fork" cx="130" cy="373" r="38"/> <text x="120.2" y="385.7" class="text">9</text> <circle class="fork" cx="684" cy="413" r="38"/> <text x="662.9" y="425.7" class="text">10</text> <circle class="fork" cx="805" cy="453" r="38"/> <text x="785.1" y="465.3" class="text">11</text> <circle class="merge" cx="565" cy="496" r="38"/> <text x="545" y="508.3" class="text">12</text> <circle class="merge" cx="350" cy="535" r="38"/> <text x="329.1" y="547.8" class="text">13</text> <circle class="fork" cx="239" cy="575" r="38"/> <text x="217.8" y="587.4" class="text">14</text> <path d="m299.6 78.1-1.5-.5-22-7.9" class="original"/> <path d="m295.7 84.5 16.2-2-11.3-11.8Z" class="original"/> <path d="m148.3 321.9.4-1.4 77.7-226.8" class="original"/> <path d="m141.8 318.1 2.2 16.2 11.7-11.5Z" class="original"/> <path d="M350.3 480.6V136.9" class="original"/> <path d="m343 479.1 7.3 14.7 7.4-14.7Z" class="original"/> <path d="m330.5 484.4-.6-1.4-75.8-190.8" class="original"/> <path d="m323.1 485.7 12.2 10.9 1.4-16.3Z" class="original"/> <path d="M239.1 520.2V295" class="original"/> <path d="m231.8 518.6 7.3 14.7 7.3-14.7Z" class="original"/> <path d="M239.1 200.4V95.8" class="original"/> <path d="m231.8 198.9 7.3 14.6 7.3-14.6Z" class="original"/> <path d="m438.7 284.6-.6-1.4L367.7 133" class="original"/> <path d="m431.4 286.3 12.9 10.1.4-16.3Z" class="original"/> <path d="M461.6 279.5V174.9" class="original"/> <path d="m454.3 277.9 7.3 14.7 7.3-14.7Z" class="original"/> <path d="m512.4 315.3 1.4-.5 22.1-7.9" class="original"/> <path d="M511.4 307.9 500 319.7l16.3 2Z" class="original"/> <path d="M684.1 358.5V254" class="original"/> <path d="m676.8 357 7.3 14.7 7.3-14.7Z" class="original"/> <path d="m754.1 435.2-1.4-.4-29.8-9.8" class="original"/> <path d="m750.4 441.7 16.2-2.4-11.7-11.5Z" class="original"/> <path d="m610.4 464 1.3-.8 39-27.4" class="original"/> <path d="m607.5 457.2-7.9 14.4 16.3-2.4Z" class="original"/> <path d="m537 449.7-.9-1.2-52.3-80.9" class="original"/> <path d="m530 452.4 14.1 8.4-1.8-16.3Z" class="original"/> <path d="M44 582.7h-6.4l10.2 28.9 10.1-28.9h-6.4V6.3H44Z" class="original"/> <text class="text" dx="0 -1.1 0 0" transform="rotate(-90 188.35 155.15)">Time</text> </g> </svg></p><p><style>.fork {color: #ee7f00;} .merge {color: #8cb110} .original {color: #003964;}</style> <figcaption>IDs of proposals and their relations in a process with plurality voting. (<span class="merge">3 merges</span>, <span class="fork">6 forks</span>, <span class="original">5 independent</span>)</figcaption> </figure></p><h2>Demo <a id="demo"></a></h2><p>Please feel free to play with this demo. Note that it is a prototype and work in progress and you should not enter confidential information. Feedback is most welcome to <a href="mailto:&#x65;&#x62;&#x62;&#x69;&#x6e;&#x67;&#x68;&#x61;&#x75;&#x73;&#x40;&#x68;&#x68;&#x75;&#x2e;&#x64;&#x65;">&#x65;&#x62;&#x62;&#x69;&#x6e;&#x67;&#x68;&#x61;&#x75;&#x73;&#x40;&#x68;&#x68;&#x75;&#x2e;&#x64;&#x65;</a>.</p><p>If you have problems to interact with the demo on mobile, you can visit the real instance here: <a href="/decision/how-can-we-improve-studies-at-the-university/proposals" target="_blank">decide.ebbinghaus.me</a>.</p><p><iframe height="600px" width="100%" title="decide - Demo" loading="lazy" src="https://decide.ebbinghaus.me/decision/wie-digitalisieren-wir-die-hhu/home" style="margin: 2px;"> </iframe></p><h2>Open research questions <a id="questions"></a></h2><h3>How can we encourage evolution of proposals, while keeping the set of candidate small and relevant?</h3><p>Since we want to encourage change and therefore progress towards better decisions we naturally increase the total number of proposals that were made, by a far greater amount than a traditional system that allow proposals. As every proposal should be respected, we can not just hide a proposal which has a child that may or may not be an improvement for some. How can we determine a relevance for a given proposal?</p><h3>How to vote on candidates with relations between them?</h3><p>Imagine you expressed your approval with a certain proposal. Later on you approve a child of that proposal. How should your vote be counted? Should we prioritize the vote for a newer proposal, because we assume new = better? This may also be important when making a decision with multiple possible winner, as in reality proposals that are very closely related are often not suited to be implemented at the same time. E.g. <em>Add a slide to the playground</em> and*Add a jungle gym to the playground* may be constricted by available space on the playground.</p><h3>How can we help participants find candidates for a coalition?</h3><p>We are already experimenting with <em>similar proposals</em>. Similarity for now is based on the size of the shared voters. This can be useful (if not crucial) when trying to settle a decision in a unanimous agreement.</p><h3>How can we help participants find candidates for a coalition?</h3><p>We are already experimenting with <em>similar proposals</em>. Similarity for now is based on the size of the shared voters. This can be useful (if not crucial) when trying to settle a decision in a unanimous agreement.</p><h2>References <a id="references"></a></h2><ol class='footnotes'><li id='fn-1'>R. Meir, "Iterative Voting," in Trends in Computational Social Choice, AI Access, 2017, pp. 69-86.<a href='#fnref1'>&#8617;</a></li></ol>
+
+        <footer>
+            <a href="https://www.fkop.de/en">www.fkop.de</a>
+            <a href="https://www.cn.hhu.de/en">cn.hhu.de</a>
+        </footer>
+    </article>
+</div>
+
+
+
+
+
+
+
+    
+    <div class="object-right">
+        <a class="page-link" href="archive.html">Archive</a>
+    </div>
+    
 </div>
 
 
