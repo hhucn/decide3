@@ -65,7 +65,8 @@
 (s/def ::lookup (s/or :ident ::ident :db/id pos-int?))
 (s/def ::email string?)
 (s/def :user/email ::user/email)
-(s/def ::password ::user/password)
+(s/def ::password (s/or :plain ::user/plain-password
+                    :encrypted ::user/encrypted-password))
 (s/def ::display-name ::user/display-name)
 (s/def :user/language ::user/language)
 
@@ -125,7 +126,7 @@
                 :signin/result :errors]}
   (if (email-in-db? db email)
     (let [{::keys [id] :as user} (get-by-email db email [::id ::password])]
-      (if (user/password-valid? password (::user/password user))
+      (if (user/password-valid? (::user/password user) password)
         (wrap-session env
           {:signin/result :success
            :session/valid? true
@@ -170,7 +171,7 @@
 (defmutation change-password [{:keys [conn AUTH/user-id AUTH/user]} {:keys [old-password new-password]}]
   {::pc/params [:old-password :new-password]
    ::pc/output [:errors]}
-  (if (user/password-valid? old-password (::password user))
+  (if (user/password-valid? (::password user) old-password)
     (do (d/transact! conn [{:db/id [::id user-id]
                             ::password new-password}
                            [:db/add "datomic.tx" :tx/by [::id user-id]]])

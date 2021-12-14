@@ -3,7 +3,6 @@
     [clojure.set :as set]
     #?(:clj  [clojure.spec.alpha :as s]
        :cljs [cljs.spec.alpha :as s])
-    [clojure.string :as str]
     [com.fulcrologic.fulcro.algorithms.normalized-state :as norm-state]
     [com.fulcrologic.fulcro.raw.components :as rc]
     [com.fulcrologic.guardrails.core :refer [>defn => | <- ?]]
@@ -81,8 +80,8 @@
 (s/def ::end-time (s/nilable ::process/end-time))
 (s/def ::start-time (s/nilable ::process/start-time))
 (s/def ::type ::process/type)
-(s/def ::feature ::process/feature)
-(s/def :process/features (s/coll-of ::process/feature))
+(s/def ::feature feature-set)
+(s/def :process/features (s/coll-of ::feature))
 (s/def ::moderators (s/or
                       :legacy (s/coll-of (s/keys :req [::user/id]))
                       :main ::process/moderators))
@@ -153,18 +152,6 @@
     (if (< 1 (count most-approved-proposals))
       (newest-proposal most-approved-proposals)
       (first most-approved-proposals))))
-
-(defn- keep-chars [s re]
-  (apply str (re-seq re s)))
-
-(>defn slugify [s]
-  [(s/and string? (complement str/blank?)) => ::slug]
-  (-> s
-    str/lower-case
-    str/trim
-    (str/replace #"[\s-]+" "-")                             ; replace multiple spaces and dashes with a single dash
-    (keep-chars #"[a-z0-9-]")
-    (str/replace #"^-|" "")))                               ; remove dash prefix
 
 (def Basics
   (rc/nc [::slug
