@@ -10,12 +10,12 @@
         com.taoensso/timbre {:mvn/version "5.1.2"}
         com.taoensso/tufte {:mvn/version "2.2.0"}
         com.wsscode/pathom {:mvn/version "2.4.0"}
-        com.fulcrologic/fulcro {:mvn/version "3.5.8"}
+        com.fulcrologic/fulcro {:mvn/version "3.5.12"}
         com.fulcrologic/fulcro-garden-css {:mvn/version "3.0.9"}
         com.fulcrologic/fulcro-i18n {:mvn/version "0.0.5-alpha"}
         com.fulcrologic/fulcro-rad
         {:git/url "https://github.com/fulcrologic/fulcro-rad"
-         :sha "6cc048b0b198757da7bfd4a3ae4dfd62bc681b9c"}
+         :sha "392ff8c8385cc6e7627e7d347cf64d2423f7a748"}
         com.fulcrologic/guardrails {:mvn/version "1.1.10"}
         garden/garden {:mvn/version "1.3.10"}
         hiccup/hiccup {:mvn/version "1.0.5"}
@@ -28,12 +28,12 @@
 
         dev.weavejester/ragtime.core {:mvn/version "0.9.0"}
 
-        io.replikativ/datahike {:mvn/version "0.4.1473"}
+        io.replikativ/datahike {:mvn/version "0.4.1480"}
         com.github.mrebbinghaus/fulcro-material-ui-wrapper
         {:git/url "https://github.com/MrEbbinghaus/fulcro-material-ui-wrapper"
          :sha "058f1dd4b85542914f92f48a4010ea9ad497e48f"}
 
-        ring/ring-core {:mvn/version "1.9.4"}
+        ring/ring-core {:mvn/version "1.9.5"}
         ring/ring-defaults {:mvn/version "0.3.3"}
 
         com.draines/postal {:mvn/version "2.0.5"}
@@ -44,20 +44,20 @@
  :aliases {:clj-tests {:extra-paths ["src/test"]
                        :main-opts ["-m" "kaocha.runner"]
                        :jvm-opts ["-Dguardrails.enabled=true"]
-                       :extra-deps {lambdaisland/kaocha {:mvn/version "1.60.945"}
+                       :extra-deps {lambdaisland/kaocha {:mvn/version "1.60.977"}
                                     lambdaisland/kaocha-junit-xml {:mvn/version "0.0.76"}
                                     orchestra/orchestra {:mvn/version "2021.01.01-1"}}}
 
            ;; See https://github.com/clojure-emacs/cider-nrepl/blob/master/deps.edn for Emacs support
            :dev {:extra-paths ["src/test" "src/dev" "src/workspaces"]
                  :jvm-opts ["-XX:-OmitStackTraceInFastThrow"]
-                 :extra-deps {org.clojure/clojurescript {:mvn/version "1.10.896"}
-                              thheller/shadow-cljs {:mvn/version "2.16.8"}
-                              expound/expound {:mvn/version "0.8.10"}
+                 :extra-deps {org.clojure/clojurescript {:mvn/version "1.11.4"}
+                              thheller/shadow-cljs {:mvn/version "2.16.12"}
+                              expound/expound {:mvn/version "0.9.0"}
                               fulcrologic/fulcro-spec {:mvn/version "3.1.12"}
                               binaryage/devtools {:mvn/version "1.0.4"}
                               com.github.awkay/workspaces {:mvn/version "1.0.3"}
                               org.clojure/tools.namespace {:mvn/version "1.2.0"}}}
 
-           :build {:deps {io.github.clojure/tools.build {:git/tag "v0.7.2" :git/sha "e6ff67c"}}
+           :build {:deps {io.github.clojure/tools.build {:git/tag "v0.7.5" :git/sha "e6ff67c"}}
                    :ns-default build}}}
