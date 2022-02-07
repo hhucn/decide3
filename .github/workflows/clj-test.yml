@@ -23,7 +23,7 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Install clojure tools
-        uses: DeLaGuardo/setup-clojure@3.6
+        uses: DeLaGuardo/setup-clojure@3.7
         with:
           cli: latest
 

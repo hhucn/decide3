@@ -6,9 +6,9 @@
     [com.fulcrologic.fulcro.dom :as dom]
     [com.fulcrologic.fulcro.dom.events :as evt]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
-    [decide.models.process :as process]
+    [decide.models.process :as model.process]
     [decide.models.user :as user]
-    [decide.utils.time :as time]
+    [decide.process :as process]
     [mui.data-display :as dd]
     [mui.inputs :as inputs]
     [mui.inputs.form :as form]
@@ -60,11 +60,11 @@
     (layout/box {:component :form
                  :onSubmit (fn [e]
                              (evt/prevent-default! e)
-                             (onSubmit {::process/title title
-                                        ::process/slug (process/slugify (if auto-slug? title slug))
-                                        ::process/description description
-                                        ::process/end-time (when with-end? end-time)
-                                        ::process/type (if public? ::process/type.public ::process/type.private)
+                             (onSubmit {::model.process/title title
+                                        ::model.process/slug (process/slugify (if auto-slug? title slug))
+                                        ::model.process/description description
+                                        ::model.process/end-time (when with-end? end-time)
+                                        ::model.process/type (if public? ::model.process/type.public ::model.process/type.private)
                                         :participant-emails (vec participants)}))}
       (let [length (count title)
             close-to-max? (< (- title-max-length 10) length)]
@@ -161,23 +161,23 @@
 (def ui-new-process-form (comp/computed-factory NewProcessForm))
 
 (defsc Process [_ _]
-  {:query [::process/slug ::process/title ::process/moderators ::process/description
+  {:query [::model.process/slug ::model.process/title ::model.process/moderators ::model.process/description
            :process/features]
-   :ident ::process/slug})
+   :ident ::model.process/slug})
 
 
 (defsc EditProcessForm
   "The form a moderator can use to edit a process. Duh."
   [_
-   {{:keys [::process/slug ::process/title ::process/moderators ::process/description ::process/end-time :process/features]} :process}
+   {{:keys [::model.process/slug ::model.process/title ::model.process/moderators ::model.process/description ::model.process/end-time :process/features]} :process}
    {:keys [onSubmit]}]
   {:query [{:process (comp/get-query Process)}]
    :initial-state
    (fn [{:keys [process] :as params}]
-     (if (::process/slug process)
+     (if (::model.process/slug process)
        {:process process}
        (log/error
-         "Initial state for" `EditProcessForm "needs to have a" :process "key with the key" ::process/slug "."
+         "Initial state for" `EditProcessForm "needs to have a" :process "key with the key" ::model.process/slug "."
          "Provided: " params)))
    :use-hooks? true}
   (let [[title change-title] (hooks/use-state title)
@@ -189,10 +189,10 @@
        :onSubmit (fn [e]
                    (evt/prevent-default! e)
                    (onSubmit
-                     {::process/title title
-                      ::process/slug slug
-                      ::process/description description
-                      ::process/end-time (and end-time (js/Date. end-time))}))}
+                     {::model.process/title title
+                      ::model.process/slug slug
+                      ::model.process/description description
+                      ::model.process/end-time (and end-time (js/Date. end-time))}))}
       (inputs/textfield
         (merge default-input-props
           {:label (i18n/trc "Title of a process" "Title")
