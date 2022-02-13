@@ -3,7 +3,7 @@
  :deps {org.clojure/clojure {:mvn/version "1.10.3"}
         org.clojure/core.async {:mvn/version "1.5.648"}
 
-        decide/domain {:local/root "components/domain"}
+        decide/domain {:local/root "components/domain", :deps/manifest :deps}
         me.ebbinghaus/pathom2-access-plugin {:local/root "components/pathom2-access-plugin"
                                              :deps/manifest :deps}
 
