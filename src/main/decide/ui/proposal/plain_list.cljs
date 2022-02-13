@@ -5,10 +5,11 @@
     [decide.models.proposal :as proposal]
     [decide.ui.components.flip-move :as flip-move]
     [decide.ui.proposal.card :as proposal-card]
-    [mui.layout.grid :as grid]))
+    [mui.layout.grid :as grid]
+    ["react" :as react]))
 
 (def flip-move-item
-  (js/React.forwardRef
+  (react/forwardRef
     (fn [props ref]
       (grid/item {:xs 12 :md 6 :lg 4 :style {:flexGrow 1} :ref ref}
         (.-children props)))))

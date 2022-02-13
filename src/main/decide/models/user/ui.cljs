@@ -6,7 +6,8 @@
     [decide.utils.color :as color-utils]
     [mui.data-display :as dd]
     [mui.data-display.list :as list]
-    [mui.styles :as styles]))
+    [mui.styles :as styles]
+    ["react" :as react]))
 
 (def emoji-expr #"^(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff])[\ufe0e\ufe0f]?(?:[\u0300-\u036f\ufe20-\ufe23\u20d0-\u20f0]|\ud83c[\udffb-\udfff])?(?:\u200d(?:[^\ud800-\udfff]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff])[\ufe0e\ufe0f]?(?:[\u0300-\u036f\ufe20-\ufe23\u20d0-\u20f0]|\ud83c[\udffb-\udfff])?)*")
 
@@ -19,7 +20,7 @@
       (str (first s)))))
 
 (def ^:private ColoredAvatar
-  (js/React.forwardRef
+  (react/forwardRef
     (fn [props ref]
       (let [{:keys [color children] :as props} (js->clj props :keywordize-keys true)
             get-contrast-text (get-in (styles/use-theme) [:palette :getContrastText])]

@@ -172,9 +172,9 @@
   {::pc/params [:old-password :new-password]
    ::pc/output [:errors]}
   (if (user/password-valid? (::password user) old-password)
-    (do (d/transact! conn [{:db/id [::id user-id]
-                            ::password new-password}
-                           [:db/add "datomic.tx" :tx/by [::id user-id]]])
+    (do (d/transact conn [{:db/id [::id user-id]
+                           ::password new-password}
+                          [:db/add "datomic.tx" :tx/by [::id user-id]]])
         {})
     {:errors #{:invalid-credentials}}))
 

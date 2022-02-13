@@ -35,7 +35,7 @@
     <orderEntry type="library" name="Deps: com.wsscode/pathom:2.4.0" level="project" />
     <orderEntry type="library" name="Deps: com.ibm.icu/icu4j:68.2" level="project" />
     <orderEntry type="library" name="Deps: commons-codec:1.15" level="project" />
-    <orderEntry type="library" name="Deps: io.lambdaforge/datalog-parser:0.1.9" level="project" />
+    <orderEntry type="library" name="Deps: io.lambdaforge/datalog-parser:0.1.10" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/tools.analyzer:1.1.0" level="project" />
     <orderEntry type="library" name="Deps: com.bhauman/cljs-test-display:0.1.1" level="project" />
     <orderEntry type="library" name="Deps: com.fulcrologic/fulcro-rad:c290a1" level="project" />
@@ -78,8 +78,8 @@
     <orderEntry type="library" name="Deps: com.cognitect/transit-cljs:0.8.269" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/google-closure-library:0.0-20211011-0726fdeb" level="project" />
     <orderEntry type="library" name="Deps: io.aviso/pretty:0.1.37" level="project" />
-    <orderEntry type="library" name="Deps: thheller/shadow-cljs:2.17.0" level="project" />
-    <orderEntry type="library" name="Deps: dev.weavejester/ragtime.core:0.9.0" level="project" />
+    <orderEntry type="library" name="Deps: thheller/shadow-cljs:2.17.2" level="project" />
+    <orderEntry type="library" name="Deps: dev.weavejester/ragtime.core:0.9.1" level="project" />
     <orderEntry type="library" name="Deps: org.graalvm.sdk/graal-sdk:21.1.0" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/clojurescript:1.11.4" level="project" />
     <orderEntry type="library" name="Deps: fress:0.3.1" level="project" />
@@ -154,7 +154,7 @@
     <orderEntry type="library" name="Deps: com.taoensso/nippy:2.14.0" level="project" />
     <orderEntry type="library" name="Deps: com.github.mrebbinghaus/fulcro-material-ui-wrapper:5ea53e" level="project" />
     <orderEntry type="library" name="Deps: javax.servlet/javax.servlet-api:3.1.0" level="project" />
-    <orderEntry type="library" name="Deps: io.replikativ/datahike:0.4.1480" level="project" />
+    <orderEntry type="library" name="Deps: io.replikativ/datahike:0.4.1482" level="project" />
     <orderEntry type="library" name="Deps: potemkin:0.4.5" level="project" />
     <orderEntry type="library" name="Deps: nrepl:0.9.0" level="project" />
     <orderEntry type="library" name="Deps: mount:0.1.16" level="project" />
