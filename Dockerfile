@@ -12,7 +12,6 @@ ENV REPO="/code/.m2/repository"
 
 COPY package.json deps.edn yarn.lock ./
 RUN yarn install --non-interactive --frozen-lockfile
-RUN clj -Sdeps "{:mvn/local-repo \"$REPO\"}" -M:dev -e ":ok"
 
 COPY . .
 RUN echo "Compile CLJS..." && \
