@@ -1,4 +1,4 @@
-(ns decide.models.argumentation.ui
+(ns decide.ui.argumentation
   (:require
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
     [com.fulcrologic.fulcro.algorithms.merge :as mrg]
