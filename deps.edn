@@ -16,19 +16,19 @@
         com.fulcrologic/fulcro-rad
         {:git/url "https://github.com/fulcrologic/fulcro-rad"
          :sha "c290a1960d3d61d1d7e4bb8d767679e0e424fad0"}
-        com.fulcrologic/guardrails {:mvn/version "1.1.10"}
+        com.fulcrologic/guardrails {:mvn/version "1.1.11"}
         garden/garden {:mvn/version "1.3.10"}
         hiccup/hiccup {:mvn/version "1.0.5"}
         http-kit/http-kit {:mvn/version "2.5.3"}
         mount/mount {:mvn/version "0.1.16"}
 
-        metosin/reitit-core {:mvn/version "0.5.15"}
-        metosin/reitit-spec {:mvn/version "0.5.15"}
-        metosin/reitit-frontend {:mvn/version "0.5.15"}
+        metosin/reitit-core {:mvn/version "0.5.17"}
+        metosin/reitit-spec {:mvn/version "0.5.17"}
+        metosin/reitit-frontend {:mvn/version "0.5.17"}
 
         dev.weavejester/ragtime.core {:mvn/version "0.9.1"}
 
-        io.replikativ/datahike {:mvn/version "0.4.1482"}
+        io.replikativ/datahike {:mvn/version "0.4.1484"}
         com.github.mrebbinghaus/fulcro-material-ui-wrapper
         {:git/url "https://github.com/MrEbbinghaus/fulcro-material-ui-wrapper"
          :sha "5ea53e0150ac332d6e844343540e07f9ee210805"}
@@ -44,7 +44,7 @@
  :aliases {:clj-tests {:extra-paths ["src/test"]
                        :main-opts ["-m" "kaocha.runner"]
                        :jvm-opts ["-Dguardrails.enabled=true"]
-                       :extra-deps {lambdaisland/kaocha {:mvn/version "1.62.993"}
+                       :extra-deps {lambdaisland/kaocha {:mvn/version "1.63.998"}
                                     lambdaisland/kaocha-junit-xml {:mvn/version "0.0.76"}
                                     orchestra/orchestra {:mvn/version "2021.01.01-1"}}}
 
@@ -52,12 +52,12 @@
            :dev {:extra-paths ["src/test" "src/dev" "src/workspaces"]
                  :jvm-opts ["-XX:-OmitStackTraceInFastThrow"]
                  :extra-deps {org.clojure/clojurescript {:mvn/version "1.11.4"}
-                              thheller/shadow-cljs {:mvn/version "2.17.2"}
+                              thheller/shadow-cljs {:mvn/version "2.17.8"}
                               expound/expound {:mvn/version "0.9.0"}
                               fulcrologic/fulcro-spec {:mvn/version "3.1.12"}
-                              binaryage/devtools {:mvn/version "1.0.4"}
+                              binaryage/devtools {:mvn/version "1.0.5"}
                               com.github.awkay/workspaces {:mvn/version "1.0.3"}
                               org.clojure/tools.namespace {:mvn/version "1.2.0"}}}
 
-           :build {:deps {io.github.clojure/tools.build {:git/tag "v0.7.5" :git/sha "34727f7"}}
+           :build {:deps {io.github.clojure/tools.build {:git/tag "v0.8.0" :git/sha "e3e3532"}}
                    :ns-default build}}}
