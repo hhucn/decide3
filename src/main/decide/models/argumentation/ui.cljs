@@ -13,7 +13,7 @@
     [decide.models.argumentation.api :as argumentation.api]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
-    [decide.models.user.ui :as user.ui]
+    [decide.ui.user :as user.ui]
     [mui.data-display :as dd]
     [mui.feedback.skeleton :refer [skeleton]]
     [mui.inputs :as inputs]

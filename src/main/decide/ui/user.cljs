@@ -1,4 +1,4 @@
-(ns decide.models.user.ui
+(ns decide.ui.user
   (:require
     [com.fulcrologic.fulcro.algorithms.react-interop :as interop]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]

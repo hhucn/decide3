@@ -12,8 +12,9 @@
     [decide.models.process :as process]
     [decide.models.process.mutations :as process.mutations]
     [decide.models.user :as user]
-    [decide.ui.process.moderator.participant-list :as participant-list]
     [decide.routes :as routes]
+    [decide.ui.process.moderator.participant-list :as participant-list]
+    [decide.ui.user :as user.ui]
     [mui.data-display :as dd]
     [mui.data-display.list :as list]
     [mui.inputs :as inputs]
@@ -25,7 +26,6 @@
     ["@mui/icons-material/Clear" :default ClearIcon]
     ["@mui/icons-material/ExpandMore" :default ExpandMoreIcon]
     ["@mui/icons-material/RemoveCircleOutline" :default RemoveCircleIcon]
-    [decide.models.user.ui :as user.ui]
     [taoensso.timbre :as log]
     [mui.lab :as lab]))
 
