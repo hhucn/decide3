@@ -94,7 +94,7 @@
 (defmutation add-participant [{:keys [conn db] :as env}
                               {user-id ::user/id slug ::process/slug}]
   {::pc/params [::process/slug ::user/id]
-   ::pc/output [::user/id ::process/slug]
+   ::pc/output [::process/slug]
    ::s/params (s/keys :req [::process/slug])
    ::pc/transform (comp auth/check-logged-in check-slug-exists needs-moderator)}
   (when-let [user (user.db/entity db user-id)]
@@ -105,8 +105,7 @@
              (concat
                (process.db/->enter process user)
                [[:db/add "datomic.tx" :tx/by [::user/id user-id]]])})]
-      {::user/id (::user/id user)
-       ::process/slug slug
+      {::process/slug slug
        ::p/env (assoc env :db db-after)})))
 
 (defmutation remove-participant [{:keys [conn db] :as env}
