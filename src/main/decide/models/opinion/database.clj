@@ -43,7 +43,7 @@
       (d/entity db opinion-id))))
 
 ;; Thought Maybe make a tx function out if this?
-(defn ->retract
+(defn ->remove
   "Generate a transaction for retracting an opinion from the database. If the opinion is preferred between two opinions,
    the list of"
   [opinion]
@@ -70,7 +70,7 @@
       (= (::opinion.legacy/value opinion) new-value) []     ; do nothing
 
       (zero? new-value)
-      (->retract opinion)
+      (->remove opinion)
 
       :else
       [[:db/add (:db/id opinion) ::opinion.legacy/value new-value]]) ; update
