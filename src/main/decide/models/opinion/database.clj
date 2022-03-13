@@ -1,7 +1,7 @@
 (ns decide.models.opinion.database
   (:require
     [clojure.spec.alpha :as s]
-    [com.fulcrologic.guardrails.core :refer [>defn >defn- =>]]
+    [com.fulcrologic.guardrails.core :refer [>defn >defn- => ?]]
     [datahike.api :as d]
     [datahike.core :as d.core]
     [decide.models.opinion :as opinion.legacy]
@@ -53,23 +53,32 @@
        [:db/add (:db/id previous-opinion) :opinion/preferred-over (:db/id next-opinion)])
      [:db.fn/retractEntity (:db/id opinion)]]))
 
+(defn ->add [opinion]
+  [(s/keys :req [::opinion.legacy/proposal ::opinion.legacy/user ::opinion.legacy/value]) => vector?]
+  (let [{::opinion.legacy/keys [user proposal value]} opinion]
+    [{:db/id "temp" ::opinion.legacy/value value}
+     [:db/add (:db/id proposal) ::proposal/opinions "temp"]
+     [:db/add (:db/id user) ::user/opinions "temp"]]))
+
+
 (>defn- ->set-value
-  "Generate a transaction to set `new-value` as an opinion of a user for a proposal. A value of `0` removes the opinion.
-  DOES NOT VALIDATE ANYTHING!"
+  "Generate a transaction to set `new-value` as an opinion of a user for a proposal. A value of `0` removes the opinion."
   [db user proposal new-value]
   [d.core/db? ::user/entity ::proposal/entity ::opinion.legacy/value => vector?]
   (if-let [opinion (get-opinion db user proposal)]
     (cond
       (= (::opinion.legacy/value opinion) new-value) []     ; do nothing
-      (zero? new-value) (->retract opinion)
-      :else [[:db/add (:db/id opinion) ::opinion.legacy/value new-value]]) ; update
 
-    ; add new opinion
-    (when-not (zero? new-value)
-      [{:db/id "temp" ::opinion.legacy/value new-value}
-       [:db/add (:db/id proposal) ::proposal/opinions "temp"]
-       [:db/add (:db/id user) ::user/opinions "temp"]])))
+      (zero? new-value)
+      (->retract opinion)
 
+      :else
+      [[:db/add (:db/id opinion) ::opinion.legacy/value new-value]]) ; update
+
+    (->add
+      #::opinion.legacy{:value new-value
+                        :proposal proposal
+                        :user user})))
 
 (defn- ->neutralize-others
   "Transaction to retract all opinions of the `user` in a `process` except for `proposal`."
