@@ -1,4 +1,4 @@
-image: clojure:openjdk-15-tools-deps
+image: clojure:tools-deps
 
 services:
   - docker:dind
