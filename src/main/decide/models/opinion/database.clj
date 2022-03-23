@@ -55,21 +55,24 @@
      [:db/add (:db/id proposal) ::proposal/opinions id]
      [:db/add (:db/id user) ::user/opinions id]]))
 
+(defn ->update [old-opinion new-opinion]
+  (let [old-value (::opinion.legacy/value old-opinion)
+        new-value (::opinion.legacy/value new-opinion)]
+    (if (= new-value old-value)
+      []                                                    ; do nothing
+      [[:db/add (:db/id new-opinion) ::opinion.legacy/value new-value]])))
+
+(defn ->un-favorite [opinion]
+  (if (opinion.legacy/favorite? opinion)
+    (->update opinion (assoc opinion ::opinion.legacy/value 1))
+    []))
 
 (>defn- ->set-value
-  "Generate a transaction to set `new-value` as an opinion of a user for a proposal. A value of `0` removes the opinion."
+  "Generate a transaction to set `new-value` as an opinion of a user for a proposal."
   [db user proposal new-value]
   [d.core/db? ::user/entity ::proposal/entity ::opinion.legacy/value => vector?]
   (if-let [opinion (get-opinion db user proposal)]
-    (cond
-      (= (::opinion.legacy/value opinion) new-value) []     ; do nothing
-
-      (zero? new-value)
-      (->remove opinion)
-
-      :else
-      [[:db/add (:db/id opinion) ::opinion.legacy/value new-value]]) ; update
-
+    (->update opinion {::opinion.legacy/value new-value})
     (->add
       #::opinion.legacy{:db/id "temp"
                         :value new-value
@@ -89,7 +92,7 @@
              [?proposal ::proposal/opinions ?e]]
         db (:db/id user) (:db/id process))
       (remove #{id})
-      (map #(vector :db.fn/retractEntity %)))))
+      (mapcat #(->remove {:db/id %})))))
 
 (defn- ->de-favorite-others
   [db user process proposal]
@@ -104,7 +107,7 @@
              [?process ::process/proposals ?proposal]]
         db (:db/id user) (:db/id process))
       (remove #{id})
-      (map #(vector :db/add % ::opinion.legacy/value 1)))))
+      (mapcat #(->un-favorite {:db/id %})))))
 
 
 (defn ->set [db user process proposal value]
