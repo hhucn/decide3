@@ -27,10 +27,8 @@
         metosin/reitit-frontend {:mvn/version "0.5.17"}
 
         dev.weavejester/ragtime.core {:mvn/version "0.9.1"}
-
-        io.replikativ/datahike {:git/url "https://github.com/MrEbbinghaus/datahike"
-                                :sha "7aa1b15d3a93fbf7034e6a2423c074ff077ac24f"}
-        ;io.replikativ/datahike {:mvn/version "0.4.1484"}
+        
+        io.replikativ/datahike {:mvn/version "0.4.1484"}
         com.github.mrebbinghaus/fulcro-material-ui-wrapper
         {:git/url "https://github.com/MrEbbinghaus/fulcro-material-ui-wrapper"
          :sha "5ea53e0150ac332d6e844343540e07f9ee210805"}
