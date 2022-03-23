@@ -44,14 +44,8 @@
 
 ;; Thought Maybe make a tx function out if this?
 (defn ->remove
-  "Generate a transaction for retracting an opinion from the database. If the opinion is preferred between two opinions,
-   the list of"
   [opinion]
-  (let [next-opinion (:opinion/preferred-over opinion)
-        previous-opinion (:opinion/_preferred-over opinion)]
-    [(when (and previous-opinion next-opinion)
-       [:db/add (:db/id previous-opinion) :opinion/preferred-over (:db/id next-opinion)])
-     [:db.fn/retractEntity (:db/id opinion)]]))
+  [[:db.fn/retractEntity (:db/id opinion)]])
 
 (defn ->add [opinion]
   [(s/keys :req [::opinion.legacy/proposal ::opinion.legacy/user ::opinion.legacy/value]) => vector?]
