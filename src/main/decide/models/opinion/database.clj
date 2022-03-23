@@ -42,7 +42,38 @@
                             db (:db/id user) (:db/id proposal))]
       (d/entity db opinion-id))))
 
-;; Thought Maybe make a tx function out if this?
+(def opinion-pattern
+  [:db/id
+   ::opinion.legacy/value
+   {::proposal/_opinions [:db/id]}
+   {::user/_opinions [:db/id]}])
+
+(defn- enrich [opinion]
+  (merge opinion
+    {::opinion.legacy/user (::user/_opinions opinion)
+     ::opinion.legacy/proposal (::proposal/_opinions opinion)}))
+
+
+(defn get-by-user+proposal [db user proposal]
+  (when-let [opinion
+             (d/q '[:find (pull ?opinion pattern) .
+                    :in $ pattern ?user ?proposal
+                    :where
+                    [?user ::user/opinions ?opinion]
+                    [?proposal ::proposal/opinions ?opinion]]
+               db opinion-pattern
+               (:db/id user)
+               (:db/id proposal))]
+    (enrich opinion)))
+
+(defn get-by-user+process [db user process]
+  (map enrich
+    (d/q '[:find [(pull ?opinion pattern) ...]
+           :in $ % pattern ?process ?user
+           :where
+           (users-process-opinions ?user ?process ?opinion)]
+      db rules opinion-pattern (:db/id process) (:db/id user))))
+
 (defn ->remove
   [opinion]
   [[:db.fn/retractEntity (:db/id opinion)]])
