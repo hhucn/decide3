@@ -10,6 +10,9 @@
     [decide.models.user :as user]
     [decide.opinion :as opinion]))
 
+(defn =by [f & xs]
+  (apply = (map f xs)))
+
 (def rules
   '[[(approves? ?user ?proposal)
      [?user ::user/opinions ?opinion]
@@ -103,57 +106,29 @@
     (->update opinion (assoc opinion ::opinion.legacy/value 1))
     []))
 
-(>defn- ->set-value
-  "Generate a transaction to set `new-value` as an opinion of a user for a proposal."
-  [db user proposal new-value]
-  [d.core/db? ::user/entity ::proposal/entity ::opinion.legacy/value => vector?]
-  (if-let [opinion (get-opinion db user proposal)]
-    (->update opinion {::opinion.legacy/value new-value})
-    (->add
-      #::opinion.legacy{:db/id "temp"
-                        :value new-value
-                        :proposal proposal
-                        :user user})))
+(defn ->set [db opinion]
+  [d.core/db? (s/keys :req [::opinion.legacy/value
+                            ::opinion.legacy/user
+                            ::opinion.legacy/proposal])
+   => vector?]
+  (let [{::opinion.legacy/keys [user proposal]} opinion
+        process (::proposal/process proposal)
+        existing-opinion (::proposal/my-opinion proposal)
 
-(defn- ->neutralize-others
-  "Transaction to retract all opinions of the `user` in a `process` except for `proposal`."
-  [db user process proposal]
-  (let [id (:db/id (get-opinion db user proposal))]
-    (->>
-      (d/q '[:find [?e ...]
-             :in $ ?user ?process
-             :where
-             [?user ::user/opinions ?e]
-             [?process ::process/proposals ?proposal]
-             [?proposal ::proposal/opinions ?e]]
-        db (:db/id user) (:db/id process))
-      (remove #{id})
-      (mapcat #(->remove {:db/id %})))))
+        all-opinions-of-user (get-by-user+process db user process)
+        other-opinions-of-user (remove #(=by :db/id existing-opinion %) all-opinions-of-user)]
 
-(defn- ->de-favorite-others
-  [db user process proposal]
-  (let [id (:db/id (get-opinion db user proposal))]
-    (->>
-      (d/q '[:find [?e ...]
-             :in $ ?user ?process
-             :where
-             [?user ::user/opinions ?e]
-             [?e ::opinion.legacy/value 2]
-             [?proposal ::proposal/opinions ?e]
-             [?process ::process/proposals ?proposal]]
-        db (:db/id user) (:db/id process))
-      (remove #{id})
-      (mapcat #(->un-favorite {:db/id %})))))
+    (cond->
+      (if existing-opinion
+        (->update existing-opinion opinion)
+        (->add opinion))
 
+      (opinion.legacy/favorite? opinion)
+      (into (mapcat ->un-favorite) other-opinions-of-user)
 
-(defn ->set [db user process proposal value]
-  [d.core/db? ::user/entity ::process/entity ::proposal/entity ::opinion.legacy/value => vector?]
-  (concat
-    (when (process/single-approve? process)
-      (->neutralize-others db user process proposal))
-    (when (opinion/favorite-value? value)
-      (->de-favorite-others db user process proposal))
-    (->set-value db user proposal value)))
+      (process/single-approve? process)
+      (into (mapcat ->remove) other-opinions-of-user))))
+
 
 (defn get-values-for-proposal [db proposal-ident]
   (merge

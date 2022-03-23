@@ -25,6 +25,9 @@
 
 (s/def ::value ::opinion/value)
 (s/def ::opinion (s/keys :req [::value]))
+(s/def ::proposal (s/keys :req [:db/id]))
+(s/def ::user (s/keys :req [:db/id]))
+
 (s/def ::proposal/opinions (s/coll-of ::opinion))
 (s/def ::entity (s/and associative? #(contains? % :db/id)))
 

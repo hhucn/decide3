@@ -2,6 +2,7 @@
   (:require
     [datahike.api :as d]
     [decide.models.argumentation.database :as argumentation.db]
+    [decide.models.opinion :as opinion]
     [decide.models.opinion.database :as opinion.db]
     [decide.models.process :as process]
     [decide.models.process.database :as process.db]
@@ -36,7 +37,14 @@
             (update ::proposal/arguments #(map :db/id %)))
           [:db/add (:db/id process) ::process/proposals new-proposal-id]
           [:db/add "datomic.tx" :tx/by (:db/id user)]]
-         (opinion.db/->set db user process new-proposal +1))})))
+
+         (opinion.db/->set db
+           #::opinion{:db/id "new-opinion"
+                      :value +1
+                      :proposal
+                      (assoc new-proposal
+                        ::proposal/process process)
+                      :user user}))})))
 
 (defn has-access? [proposal user]
   (let [process (::process/_proposals proposal)]

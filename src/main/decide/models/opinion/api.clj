@@ -28,10 +28,13 @@
              (concat
                (process.db/->enter process user)
                (opinion.db/->set @conn
-                 user
-                 process
-                 proposal
-                 opinion)))})]
+                 #::opinion{:db/id "new-opinion"
+                            :value (::opinion/value opinion)
+                            :user user
+                            :proposal
+                            (merge proposal
+                              {::proposal/process process
+                               ::proposal/my-opinion (opinion.db/get-by-user+proposal db user proposal)})})))})]
     {::proposal/id id
      ::process/slug (::process/slug process)
      ::p/env (assoc env :db (:db-after tx-report))}))
