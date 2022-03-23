@@ -78,10 +78,15 @@
   [opinion]
   [[:db.fn/retractEntity (:db/id opinion)]])
 
+(defn- tempid [opinion]
+  (str
+    "new-opinion-" (get-in opinion [::opinion.legacy/user :db/id])
+    "-" (get-in opinion [::opinion.legacy/proposal :db/id])))
+
 (defn ->add [opinion]
   [(s/keys :req [::opinion.legacy/proposal ::opinion.legacy/user ::opinion.legacy/value]) => vector?]
   (let [{::opinion.legacy/keys [user proposal value]} opinion
-        id (:db/id opinion)]
+        id (:db/id opinion (tempid opinion))]
     [{:db/id id ::opinion.legacy/value value}
      [:db/add (:db/id proposal) ::proposal/opinions id]
      [:db/add (:db/id user) ::user/opinions id]]))
