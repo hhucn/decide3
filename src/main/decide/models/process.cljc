@@ -132,16 +132,6 @@
   (let [parent-ids (set (map ::proposal/id (mapcat ::proposal/parents proposals)))]
     (remove (comp parent-ids ::proposal/id) proposals)))
 
-(>defn newest-proposal
-  "Takes a collection of `proposals` and returns a single winner."
-  [proposals]
-  [(s/coll-of (s/keys :req [::proposal/created]) :min-count 1)
-   => (s/keys :req [::proposal/created])
-   | #(contains? (set proposals) %)]
-  (->> proposals
-    (sort-by ::proposal/created)
-    reverse
-    first))
 
 (>defn winner
   "Determines a winner for set of proposals.
@@ -151,7 +141,7 @@
    => (? ::proposal/proposal)]
   (let [most-approved-proposals (get-most-approved-proposals proposals)]
     (if (< 1 (count most-approved-proposals))
-      (newest-proposal most-approved-proposals)
+      (proposal/newest most-approved-proposals)
       (first most-approved-proposals))))
 
 (def Basics

@@ -61,6 +61,16 @@
 (>def ::lookup (s/or :ident ::ident :db/id pos-int?))
 (>def ::entity (s/and associative? #(contains? % :db/id)))
 
+(>defn newest
+  "Returns the newest proposal from a collection of `proposals`."
+  [proposals]
+  [(s/coll-of (s/keys :req [::created]) :min-count 1)
+   => (s/keys :req [::created])
+   | #(contains? (set proposals) %)]
+  (->> proposals
+    (sort-by ::created)
+    reverse
+    first))
 
 (def approval-order (juxt ::pro-votes ::favorite-votes ::created))
 
