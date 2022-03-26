@@ -3,7 +3,7 @@
     [#?(:clj  clojure.spec.alpha
         :cljs cljs.spec.alpha) :as s]
     [com.fulcrologic.guardrails.core :refer [>defn =>]]
-    [decide.models.proposal :as proposal]
+    [decide.models.proposal :as-alias proposal]
     [decide.models.user :as user]
     [decide.opinion :as opinion]
     [decide.specs.opinion]))

@@ -7,9 +7,20 @@
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.raw.components :as rc]
     [decide.models.process :as process]
-    [decide.models.proposal :as proposal]
+    [decide.models.proposal :as-alias proposal]
     [decide.models.user :as user]
     [taoensso.timbre :as log]))
+
+(def Proposal
+  (rc/nc [::proposal/id
+          ::proposal/title
+          ::proposal/body
+          ::proposal/pro-votes ::proposal/con-votes ::proposal/favorite-votes
+          ::proposal/created
+          ::proposal/my-opinion-value
+          {::proposal/parents '...}                         ; this is a recursion
+          {::proposal/original-author [::user/id ::user/display-name]}]
+    {:componentName ::proposal/Proposal}))
 
 (defsc Process [_ _]
   {:query
@@ -18,17 +29,17 @@
     ::process/description
     ::process/end-time
     ::process/type
-    {::process/proposals (rc/get-query proposal/Proposal)}]
+    {::process/proposals (rc/get-query Proposal)}]
    :ident ::process/slug})
 
 (defmutation add-proposal [{::proposal/keys [_id _title _body _parents]
                             ::process/keys [slug]
                             :as params}]
   (action [{:keys [app]}]
-    (mrg/merge-component! app proposal/Proposal params
+    (mrg/merge-component! app Proposal params
       :append (conj (rc/get-ident Process {::process/slug slug}) ::process/proposals)))
   (remote [env]
-    (m/returning env proposal/Proposal)))
+    (m/returning env Proposal)))
 
 
 (defmutation add-process [{::process/keys [slug title description] :as process}]
