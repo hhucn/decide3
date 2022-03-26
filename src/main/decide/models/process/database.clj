@@ -45,22 +45,23 @@
         ::process/participants participants}
        end-time (assoc ::process/end-time end-time))]))
 
-(defn ->set-feature-set [db process-ref features]
-  [d.core/db? ::process/ident (s/coll-of ::process/feature :kind set?)]
+(defn ->set-feature-set [process features]
+  [(s/keys :req [:db/id :process/features]) (s/coll-of ::process/feature :kind set?) => vector?]
   (let [features (into #{} (filter process/feature-set) features)
-        current-features (set (:process/features (d/pull db [:process/features] process-ref)))
+        current-features (:process/features process)
         features-to-add (set/difference features current-features)
         features-to-remove (set/difference current-features features)]
     (into [] cat
-      [[{:db/id process-ref :process/features (vec features-to-add)}]
-       (map #(vector :db/retract process-ref :process/features %) features-to-remove)])))
+      [[{:db/id (:db/id process) :process/features (vec features-to-add)}]
+       (map #(vector :db/retract (:db/id process) :process/features %) features-to-remove)])))
 
 (>defn ->update
   "Generates a transaction data to update an existing process.
   Any explicit nil key will be retracted."
   [db {::process/keys [slug] :as process}]
   [d.core/db? (s/keys :req [::process/slug]) => vector?]
-  (let [process-ident [::process/slug slug]]
+  (let [process-ident [::process/slug slug]
+        existing-process (d/pull db [:db/id :process/features] process-ident)]
     (into [] cat
       [(mapv
          (fn [[k v]]
@@ -68,7 +69,7 @@
              [:db/add process-ident k v]
              [:db/retract process-ident k]))
          (dissoc process ::process/slug :process/features))
-       (when (contains? process :process/features) (->set-feature-set db process-ident (:process/features process)))])))
+       (when (contains? process :process/features) (->set-feature-set existing-process (:process/features process)))])))
 
 (>defn ->upsert [db {::process/keys [slug] :as process}]
   [d.core/db? (s/keys :req [::process/slug])
