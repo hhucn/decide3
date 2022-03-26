@@ -8,7 +8,7 @@
     [datahike.core :as d.core]
     [decide.models.opinion :as opinion]
     [decide.models.process :as process]
-    [decide.models.proposal :as proposal]
+    [decide.models.proposal :as-alias proposal]
     [decide.models.user :as user]
     [decide.server-components.database :as db]))
 

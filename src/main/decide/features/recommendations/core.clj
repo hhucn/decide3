@@ -4,8 +4,8 @@
     [com.fulcrologic.guardrails.core :refer [>defn => | ? <-]]
     [datahike.api :as d]
     [datahike.core :as d.core]
-    [decide.models.process :as process]
-    [decide.models.proposal :as proposal]
+    [decide.models.process :as-alias process]
+    [decide.models.proposal :as-alias proposal]
     [decide.models.user :as user]
     [decide.schema :as schema]))
 

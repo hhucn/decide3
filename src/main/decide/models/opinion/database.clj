@@ -6,7 +6,7 @@
     [datahike.core :as d.core]
     [decide.models.opinion :as opinion.legacy]
     [decide.models.process :as process]
-    [decide.models.proposal :as proposal]
+    [decide.models.proposal :as-alias proposal]
     [decide.models.user :as user]
     [decide.opinion :as opinion]))
 

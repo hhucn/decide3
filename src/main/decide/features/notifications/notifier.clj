@@ -6,9 +6,9 @@
     [datahike.api :as d]
     [decide.features.notifications.collect :as collect]
     [decide.features.notifications.format-email :as format]
-    [decide.models.process :as process]
-    [decide.models.proposal :as proposal]
-    [decide.models.user :as user]
+    [decide.models.process :as-alias process]
+    [decide.models.proposal :as-alias proposal]
+    [decide.models.user :as-alias user]
     [decide.server-components.database :refer [conn]]
     [decide.server-components.email :refer [mailer-chan]]
     [mount.core :refer [defstate]]
@@ -113,40 +113,6 @@
       (async/put! mailer-chan
         (format/make-message
           (build-payload db grouped-events user))))))
-
-(comment
-
-  (require '[decide.server-components.database :refer [conn]])
-
-  (let [db @conn]
-    (build-mail db {::user/email "ebbinghaus@hhu.de" ::user/display-name "Björn"
-                    ::process/_participants [{:db/id 202}]}
-      (collect/all-events db #inst"2021-05-01")))
-
-  (collect/all-events @conn #inst"2021-06-01")
-
-
-  (notify-user! @conn
-    {::user/email "ebbinghaus@hhu.de" ::user/display-name "Björn"
-     ::process/_participants [{:db/id 202}]}
-    (collect/all-events @conn #inst"2021-06-01"))
-
-
-  (let [db @conn]
-    (spit "email.html" (get-in
-                         (format/make-message
-                           (build-mail db {::user/email "ebbinghaus@hhu.de" ::user/display-name "Björn"
-                                           ::process/_participants [{:db/id 202}]}
-                             (collect/all-events db #inst"2021-06-01")))
-                         [:body 0 :content])))
-
-
-  (sort-by :event/when (collect/get-new-argument-events @conn #inst"2021-06-01"))
-
-  (d/pull-many @conn [{:argument/premise [:statement/content]}] [638 641 643 645 652])
-  (d/pull @conn [::proposal/title] 207)
-
-  :bla)
 
 (defn send-email-notifications! [db events]
   (doseq [user (get-all-users-with-emails db)]

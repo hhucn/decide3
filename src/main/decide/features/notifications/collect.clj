@@ -5,8 +5,8 @@
     [datahike.api :as d]
     [datahike.core :as d.core]
     [decide.models.argumentation.database :as argumentation.db]
-    [decide.models.process :as process]
-    [decide.models.proposal :as proposal])
+    [decide.models.process :as-alias process]
+    [decide.models.proposal :as-alias proposal])
   (:import (java.time Instant)
            (java.util Date)
            (java.time.temporal ChronoUnit)))
@@ -43,7 +43,7 @@
   (->> db
     (d/q '[:find (pull ?e [:db/id
                            :argument/id
-                           :decide.models.proposal/id
+                           ::proposal/id
                            ::proposal/title])
            (pull ?tx [:db/id :db/txInstant :tx/by])
            :keys entity transaction

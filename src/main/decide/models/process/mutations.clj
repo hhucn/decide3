@@ -8,7 +8,7 @@
     [decide.models.authorization :as auth]
     [decide.models.process :as process]
     [decide.models.process.database :as process.db]
-    [decide.models.proposal :as proposal]
+    [decide.models.proposal :as-alias proposal]
     [decide.models.proposal.core :as proposal.core]
     [decide.models.proposal.database :as proposal.db]
     [decide.models.user :as user]

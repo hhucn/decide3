@@ -2,7 +2,7 @@
   (:require
     [clojure.string :as str]
     [decide.models.process :as process]
-    [decide.models.proposal :as proposal]
+    [decide.models.proposal :as-alias proposal]
     [decide.models.user :as user]
     [hiccup.page :refer [html5]]))
 

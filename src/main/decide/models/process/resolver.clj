@@ -8,7 +8,7 @@
     [decide.models.process :as process]
     [decide.models.process.database :as process.db]
     [decide.models.process.mutations :as process.mutations]
-    [decide.models.proposal :as proposal]
+    [decide.models.proposal :as-alias proposal]
     [decide.models.user :as user]
     [me.ebbinghaus.pathom2-access-plugin.core :as access]))
 

@@ -9,9 +9,9 @@
     [com.fulcrologic.fulcro.react.error-boundaries :as eb]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [decide.application :refer [SPA]]
-    [decide.models.authorization :as auth]
-    [decide.models.user :as user]
     [decide.client.router :as routing]
+    [decide.models.authorization :as auth]
+    [decide.models.user :as-alias user]
     [decide.ui.root :as root]
     [taoensso.timbre :as log]))
 

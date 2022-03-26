@@ -4,7 +4,7 @@
     [com.wsscode.pathom.core :as p]
     [datahike.api :as d]
     [decide.models.argumentation :as argumentation]
-    [decide.models.proposal :as proposal]
+    [decide.models.proposal :as-alias proposal]
     [decide.models.proposal.database :as proposal.db]
     [decide.models.user :as user]))
 

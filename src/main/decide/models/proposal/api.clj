@@ -4,9 +4,9 @@
     [com.fulcrologic.guardrails.core :refer [>defn => | <-]]
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
     [datahike.api :as d]
+    [decide.models.process :as process]
     [decide.models.proposal :as proposal]
     [decide.models.proposal.database :as proposal.db]
-    [decide.models.process :as process]
     [decide.models.user :as user]))
 
 (defresolver resolve-proposal [{:keys [db]} input]

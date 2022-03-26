@@ -2,8 +2,8 @@
   (:require
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
     [decide.features.recommendations.core :as core]
-    [decide.models.process :as process]
-    [decide.models.proposal :as proposal]
+    [decide.models.process :as-alias process]
+    [decide.models.proposal :as-alias proposal]
     [decide.models.user :as user]))
 
 (defresolver resolve-personal-proposal-recommendations [{:keys [db AUTH/user]} process]
