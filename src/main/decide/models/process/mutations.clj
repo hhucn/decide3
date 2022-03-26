@@ -76,17 +76,12 @@
     {::process/slug slug
      ::p/env (assoc env :db db-after)}))
 
-(defn add-moderator! [conn process-lookup moderator-id new-moderator-lookup]
-  (d/transact conn
-    [[:db/add process-lookup ::process/moderators new-moderator-lookup]
-     [:db/add "datomic.tx" :tx/by [::user/id moderator-id]]]))
-
 (defmutation add-moderator [{:keys [conn db AUTH/user-id] :as env} {::process/keys [slug] email ::user/email}]
   {::pc/output [::user/id]
    ::s/params (s/keys :req [::process/slug ::user/email])
    ::pc/transform (comp auth/check-logged-in check-slug-exists needs-moderator)}
   (if-let [{::user/keys [id]} (and (user/email-in-db? db email) (user/get-by-email db email))]
-    (let [{:keys [db-after]} (add-moderator! conn [::process/slug slug] user-id [::user/id id])]
+    (let [{:keys [db-after]} (process.db/add-moderator! conn [::process/slug slug] user-id [::user/id id])]
       {::user/id id
        ::p/env (assoc env :db db-after)})
     (throw (ex-info "User with this email doesn't exist!" {:email email}))))

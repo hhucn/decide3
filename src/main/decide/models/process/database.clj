@@ -179,3 +179,8 @@
         [?opinion :decide.models.opinion/value]]
       (d/entity-db process) (:db/id process))
     0))
+
+(defn add-moderator! [conn process-lookup moderator-id new-moderator-lookup]
+  (d/transact conn
+    [[:db/add process-lookup ::process/moderators new-moderator-lookup]
+     [:db/add "datomic.tx" :tx/by [::user/id moderator-id]]]))
