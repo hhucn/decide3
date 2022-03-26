@@ -57,6 +57,7 @@
       :db/cardinality :db.cardinality/many}
 
      {:db/ident ::latest-id
+      :db/doc "DEPRECATED: Query for latest nice-id of proposal instead."
       :db/cardinality :db.cardinality/one
       :db/valueType :db.type/long}
 

@@ -125,16 +125,22 @@
      (get-public-processes db)
      (get-private-processes db user-lookup))))
 
+(defn get-latest-nice-id [db slug]
+  [d.core/db? ::process/slug => ::proposal/nice-id]
+  (or
+    (d/q '[:find (max ?nice-id) .
+           :in $ ?process
+           :where
+           [?process ::process/proposals ?proposal]
+           [?proposal ::proposal/nice-id ?nice-id]]
+      db [::process/slug slug])
+    0))
+
 ;; TODO Make a transaction function out of this.
 (>defn new-nice-id! [conn slug]
   [d.core/conn? ::process/slug => ::proposal/nice-id]
-  (let [{::process/keys [latest-id]
-         :keys [db/id]}
-        (d/pull (d/db conn)
-          [:db/id
-           [::process/latest-id :default 0]]
-          [::process/slug slug])]
-    (d/transact conn [[:db/add id ::process/latest-id (inc latest-id)]])
+  (let [latest-id (get-latest-nice-id @conn slug)]
+    (d/transact conn [[:db/add [::process/slug slug] ::process/latest-id (inc latest-id)]])
     (inc latest-id)))
 
 (>defn get-number-of-participants [db slug]
