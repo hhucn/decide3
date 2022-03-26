@@ -9,7 +9,8 @@
     [decide.models.opinion :as opinion]
     [decide.models.process :as process]
     [decide.models.proposal :as proposal]
-    [decide.models.user :as user]))
+    [decide.models.user :as user]
+    [decide.server-components.database :as db]))
 
 (def process-pattern
   [:db/id
@@ -96,11 +97,18 @@
     (->update existing-process process)
     (->add db process)))
 
+(defn ->add-moderator [process user]
+  [[:db/add (:db/id process) ::process/moderators (:db/id user)]])
+
+(defn ->remove-moderator [process user]
+  [[:db/retract (:db/id process) ::process/moderators (:db/id user)]])
+
 (defn ->enter [process user]
   [[:db/add (:db/id process) ::process/participants (:db/id user)]])
 
 (def ->add-participant ->enter)
 
+;; TODO What happens to proposals, votes, arguments...?
 (defn ->remove-participant
   [process user]
   [[:db/retract (:db/id process) ::process/participants (:db/id user)]])
@@ -206,6 +214,5 @@
     0))
 
 (defn add-moderator! [conn process-lookup moderator-id new-moderator-lookup]
-  (d/transact conn
-    [[:db/add process-lookup ::process/moderators new-moderator-lookup]
-     [:db/add "datomic.tx" :tx/by [::user/id moderator-id]]]))
+  (db/transact-as conn [::user/id moderator-id]
+    {:tx-data [[:db/add process-lookup ::process/moderators new-moderator-lookup]]}))
