@@ -45,7 +45,7 @@
         ::process/participants participants}
        end-time (assoc ::process/end-time end-time))]))
 
-(defn ->set-feature-set [process features]
+(>defn ->set-feature-set [process features]
   [(s/keys :req [:db/id :process/features]) (s/coll-of ::process/feature :kind set?) => vector?]
   (let [features (into #{} (filter process/feature-set) features)
         current-features (:process/features process)
@@ -58,24 +58,24 @@
 (>defn ->update
   "Generates a transaction data to update an existing process.
   Any explicit nil key will be retracted."
-  [db {::process/keys [slug] :as process}]
-  [d.core/db? (s/keys :req [::process/slug]) => vector?]
-  (let [process-ident [::process/slug slug]
-        existing-process (d/pull db [:db/id :process/features] process-ident)]
-    (into [] cat
-      [(mapv
-         (fn [[k v]]
-           (if (some? v)
-             [:db/add process-ident k v]
-             [:db/retract process-ident k]))
-         (dissoc process ::process/slug :process/features))
-       (when (contains? process :process/features) (->set-feature-set existing-process (:process/features process)))])))
+  [existing-process new-process]
+  [(s/keys :req [:db/id :process/features]) (s/keys) => vector?]
+  (into [] cat
+    [(mapv
+       (fn [[k v]]
+         (if (some? v)
+           [:db/add (:db/id existing-process) k v]
+           [:db/retract (:db/id existing-process) k]))
+       (dissoc new-process ::process/slug :process/features))
+     (when (contains? new-process :process/features)
+       (->set-feature-set existing-process (:process/features new-process)))]))
 
 (>defn ->upsert [db {::process/keys [slug] :as process}]
   [d.core/db? (s/keys :req [::process/slug])
    => vector?]
   (if (slug-in-use? db slug)
-    (->update db process)
+    (let [existing-process (d/pull db [:db/id :process/features] [::process/slug slug])]
+      (->update existing-process process))
     (->add db process)))
 
 (defn ->enter [process user]

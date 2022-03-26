@@ -37,3 +37,5 @@
 (s/def ::email #?(:clj  (s/with-gen email? email-gen)
                   :cljs (s/and string? email?)))
 (s/def ::non-blank-string (s/and string? (complement str/blank?)))
+
+(s/def :db/id pos-int?)
