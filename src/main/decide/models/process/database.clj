@@ -11,7 +11,7 @@
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]))
 
-(defn get-process-by-slug [db slug pattern]
+(defn get-by-slug [db slug pattern]
   [d.core/db? ::process/slug => (? (s/keys))]
   (d/q '[:find (pull ?e pattern) .
          :in $ pattern ?slug
@@ -21,7 +21,7 @@
 
 (>defn slug-in-use? [db slug]
   [d.core/db? ::process/slug => boolean?]
-  (boolean (get-process-by-slug db slug [:db/id])))
+  (boolean (get-by-slug db slug [:db/id])))
 
 (>defn ->add
   "Returns a transaction as data, ready to be transacted."
@@ -77,7 +77,7 @@
 (>defn ->upsert [db {::process/keys [slug] :as process}]
   [d.core/db? (s/keys :req [::process/slug])
    => vector?]
-  (if-let [existing-process (get-process-by-slug db slug [:db/id :process/features])]
+  (if-let [existing-process (get-by-slug db slug [:db/id :process/features])]
     (->update existing-process process)
     (->add db process)))
 
@@ -172,7 +172,7 @@
       (contains? (::process/participants process) user)
       (contains? (::process/moderators process) user))))
 
-(defn get-by-slug [db slug]
+(defn get-entity-by-slug [db slug]
   (when-let [process-eid (d/q '[:find ?e . :in $ ?slug :where [?e ::process/slug ?slug]] db slug)]
     (d/entity db process-eid)))
 
