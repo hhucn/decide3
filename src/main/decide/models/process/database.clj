@@ -11,13 +11,28 @@
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]))
 
-(defn get-by-slug [db slug pattern]
-  [d.core/db? ::process/slug => (? (s/keys))]
-  (d/q '[:find (pull ?e pattern) .
-         :in $ pattern ?slug
-         :where
-         [?e ::process/slug ?slug]]
-    db pattern slug))
+(def process-pattern
+  [:db/id
+   ::process/slug
+   ::process/title
+   ::process/description
+   ::process/type
+   ::process/proposals
+   ::process/moderators
+   :process/features
+   ::process/participants])
+
+(defn get-by-slug
+  ([db slug]
+   [d.core/db? ::process/slug => (? (s/keys))]
+   (get-by-slug db slug process-pattern))
+  ([db slug pattern]
+   [d.core/db? ::process/slug vector? => (? (s/keys))]
+   (d/q '[:find (pull ?e pattern) .
+          :in $ pattern ?slug
+          :where
+          [?e ::process/slug ?slug]]
+     db pattern slug)))
 
 (>defn slug-in-use? [db slug]
   [d.core/db? ::process/slug => boolean?]

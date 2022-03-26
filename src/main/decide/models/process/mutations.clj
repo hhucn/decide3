@@ -72,9 +72,11 @@
      :req [::process/slug]
      :opt [::process/title ::process/description ::process/start-time ::process/end-time ::process/type])
    ::pc/transform (comp auth/check-logged-in check-slug-exists needs-moderator)}
-  (let [{:keys [db-after]} (db/transact-as conn user {:tx-data (process.db/->update db process)})]
-    {::process/slug slug
-     ::p/env (assoc env :db db-after)}))
+  (if-let [existing-process (process.db/get-by-slug db slug [:db/id :process/features])]
+    (let [{:keys [db-after]} (db/transact-as conn user {:tx-data (process.db/->update existing-process process)})]
+      {::process/slug slug
+       ::p/env (assoc env :db db-after)})
+    (throw (ex-info "Slug is not in use!" {:slug slug}))))
 
 (defmutation add-moderator [{:keys [conn db AUTH/user-id] :as env} {::process/keys [slug] email ::user/email}]
   {::pc/output [::user/id]
