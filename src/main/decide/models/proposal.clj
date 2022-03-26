@@ -2,10 +2,8 @@
   (:require
     [clojure.spec.alpha :as s]
     [com.fulcrologic.guardrails.core :refer [>defn => | <-]]
-    [datahike.core :as d.core]
     [decide.proposal :as proposal]
-    [decide.specs.proposal])
-  (:import (java.util Date)))
+    [decide.specs.proposal]))
 
 (def schema
   [{:db/ident ::id
@@ -62,18 +60,3 @@
 (s/def ::lookup (s/or :ident ::ident :db/id pos-int?))
 (s/def ::entity (s/and associative? #(contains? % :db/id)))
 
-(defn tx-map [{::keys [id nice-id title body parents argument-idents created original-author]
-               :or {parents []
-                    argument-idents []}}]
-  [(s/keys :req [::title ::body ::nice-id]
-     :opt [::id])
-   => (s/keys :req [::id ::title ::nice-id ::body ::created])]
-  (let [created (or created (Date.))]
-    {::id (or id (d.core/squuid (inst-ms created)))
-     ::title title
-     ::nice-id nice-id
-     ::body body
-     ::parents parents
-     ::arguments argument-idents                            ; TODO check if arguments exist and belog to parents
-     ::original-author original-author
-     ::created created}))
