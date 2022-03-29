@@ -10,7 +10,7 @@
         com.taoensso/timbre {:mvn/version "5.2.1"}
         com.taoensso/tufte {:mvn/version "2.2.0"}
         com.wsscode/pathom {:mvn/version "2.4.0"}
-        com.fulcrologic/fulcro {:mvn/version "3.5.13"}
+        com.fulcrologic/fulcro {:mvn/version "3.5.15"}
         com.fulcrologic/fulcro-garden-css {:mvn/version "3.0.9"}
         com.fulcrologic/fulcro-i18n {:mvn/version "0.0.5-alpha"}
         com.fulcrologic/fulcro-rad
@@ -27,8 +27,8 @@
         metosin/reitit-frontend {:mvn/version "0.5.17"}
 
         dev.weavejester/ragtime.core {:mvn/version "0.9.1"}
-        
-        io.replikativ/datahike {:mvn/version "0.4.1484"}
+
+        io.replikativ/datahike {:mvn/version "0.4.1488"}
         com.github.mrebbinghaus/fulcro-material-ui-wrapper
         {:git/url "https://github.com/MrEbbinghaus/fulcro-material-ui-wrapper"
          :sha "5ea53e0150ac332d6e844343540e07f9ee210805"}
