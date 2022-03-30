@@ -185,6 +185,7 @@
       (wrap-api "/api")
       #_(wrap-api2 "/api2")
       wrap-transit-params
+      wrap-transit-response
       #_(wrap-transit-response {:opts {:handlers eql-api/write-handlers
                                        :transform t/write-meta}})
       (wrap-html-routes (:script-manifest config))
