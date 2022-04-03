@@ -17,10 +17,8 @@ include:
   - template: Security/Secret-Detection.gitlab-ci.yml
 
 cljs-test:
-  image: cimg/clojure:1.10-browsers
+  image: ghcr.io/schnaq/clojure-yarn-chrome
   before_script:
-    - curl -o- -L https://yarnpkg.com/install.sh | bash
-    - export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
     - yarn install --non-interactive --frozen-lockfile
     - clojure -Sdeps '{:mvn/local-repo ".m2"}' -M:dev -m "shadow.cljs.devtools.cli" compile ci-tests
   script:
