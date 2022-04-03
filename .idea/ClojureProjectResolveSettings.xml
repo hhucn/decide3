@@ -21,6 +21,7 @@
     <item key="com.fulcrologic.guardrails.core/&gt;defn-" resolves-as="clojure.core/defn-" />
     <item key="mount.core/defstate" resolves-as="cljs.core/def" />
     <item key="failjure.core/attempt-all" resolves-as="clojure.core/let" />
+    <item key="failjure.core/when-failed" resolves-as="clojure.core/fn" />
     <currentScheme>PROJECT</currentScheme>
   </component>
 </project>

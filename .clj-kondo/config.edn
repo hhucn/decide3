@@ -5,7 +5,8 @@
            mount.core/defstate                                        clojure.core/def
            nubank.workspaces.core/defcard                             clojure.core/def
            com.fulcrologic.fulcro.algorithms.normalized-state/swap!-> clojure.core/->
-           failjure.core/attempt-all clojure.core/let}
+           failjure.core/attempt-all clojure.core/let
+           failjure.core/when-failed clojure.core/fn}
  :linters {:misplaced-docstring {:level :error}
            :not-empty?          {:level :off}
            :unresolved-symbol   {:exclude

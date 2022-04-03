@@ -26,7 +26,7 @@
                    {com.fulcrologic.guardrails.core com.fulcrologic.guardrails.noop}}}
 
                  :devtools {:after-load decide.client/refresh
-                            :preloads [com.fulcrologic.fulcro.inspect.websocket-preload
+                            :preloads [com.fulcrologic.fulcro.inspect.preload
                                        decide.development-preload
                                        com.fulcrologic.fulcro.inspect.dom-picker-preload]}}
 

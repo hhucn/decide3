@@ -21,11 +21,5 @@
       <option name="workingDir" value="$FileDir$" />
       <envs />
     </TaskOptions>
-    <enabled-global>
-      <option value="clj-kondo cljs" />
-      <option value="clj-kondo cljc" />
-      <option value="clj-kondo clj" />
-      <option value="clj-kondo edn" />
-    </enabled-global>
   </component>
 </project>
