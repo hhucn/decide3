@@ -10,7 +10,8 @@
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
     [decide.schema :as schema]
-    [decide.utils.validation :as utils.validation])
+    [decide.utils.validation :as utils.validation]
+    [taoensso.timbre :as log])
   (:import (java.util Date)))
 
 (>defn get-children [db proposal-ident]
@@ -132,7 +133,7 @@
      [?argument :argument/premise ?premise]
      [?sub-argument :argument/conclusion ?premise]]
 
-    [(argument-member ?proposal ?argument)
+    [(argument-member-of-proposal ?proposal ?argument)
      [?proposal ::proposal/arguments ?first-level-argument]
      (or
        [(ground ?first-level-argument) ?argument]
@@ -150,7 +151,7 @@
         '[:find (count-distinct ?argument) .
           :in $ % ?proposal
           :where
-          (argument-member ?proposal ?argument)]
+          (argument-member-of-proposal ?proposal ?argument)]
         db
         argument-member-rules
         (find proposal ::proposal/id))
