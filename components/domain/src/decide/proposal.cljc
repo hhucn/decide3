@@ -15,3 +15,6 @@
 
 (>def ::pro-votes nat-int?)
 (>def ::con-votes nat-int?)
+(>def ::no-of-parents nat-int?)
+(>def ::no-of-children nat-int?)
+(>def ::generation nat-int?)
