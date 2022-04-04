@@ -7,10 +7,9 @@
                [cljs.spec.gen.alpha :as gen]])
     [com.fulcrologic.guardrails.core :refer [>defn => | <- ?]]
     [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
-    [decide.argument :as argument]
-    [decide.statement :as statement]
-    [decide.specs.argument]
-    [decide.specs.statement]))
+    [decide.argument :as-alias argument]
+    [decide.argumentation]
+    [decide.statement :as-alias statement]))
 
 (def schema
   [{:db/ident :author
