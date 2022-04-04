@@ -1,6 +1,6 @@
 module.exports = function (config) {
     config.set({
-        browsers: ['ChromeHeadless', 'ChromeHeadlessCI'],
+        browsers: ['ChromeHeadlessCI'],
         customLaunchers: {
             ChromeHeadlessCI: {
                 base: 'ChromeHeadless',
