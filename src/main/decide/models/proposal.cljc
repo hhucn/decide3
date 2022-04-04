@@ -3,8 +3,7 @@
     #?(:cljs    [cljs.spec.alpha :as s]
        :default [clojure.spec.alpha :as s])
     [com.fulcrologic.guardrails.core :refer [>def >defn => | <-]]
-    [decide.proposal :as proposal]
-    [decide.specs.proposal]))
+    [decide.proposal :as proposal]))
 
 (def schema
   [{:db/ident ::id
