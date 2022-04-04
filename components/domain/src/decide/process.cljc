@@ -36,19 +36,3 @@
 (>def ::features (s/coll-of ::feature))
 (>def ::moderators (s/coll-of (s/keys :req [::user/id])))
 (>def ::participants (s/coll-of (s/keys :req [::user/id])))
-
-(defn now [])
-
-(defn- keep-chars [s re]
-  (apply str (re-seq re s)))
-
-(>defn slugify
-  "Returns a url-friendly slug version"
-  [s]
-  [::common/non-blank-string => ::slug]
-  (-> s
-    str/lower-case
-    str/trim
-    (str/replace #"[\s-]+" "-")                             ; replace multiple spaces and dashes with a single dash
-    (keep-chars #"[a-z0-9-]")
-    (str/replace #"^-|" "")))                               ; remove dash prefix
