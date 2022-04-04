@@ -5,8 +5,7 @@
     [com.fulcrologic.guardrails.core :refer [>defn =>]]
     [decide.models.proposal :as-alias proposal]
     [decide.models.user :as user]
-    [decide.opinion :as opinion]
-    [decide.specs.opinion]))
+    [decide.opinion :as opinion]))
 
 (def schema [{:db/ident ::user/opinions
               :db/cardinality :db.cardinality/many

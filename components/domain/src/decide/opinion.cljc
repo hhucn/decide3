@@ -1,4 +1,8 @@
-(ns decide.opinion)
+(ns decide.opinion
+  (:require
+    [com.fulcrologic.guardrails.core :refer [>def]]))
+
+(>def ::value #{-1 0 +1 +2})
 
 (def approval-value? pos?)
 (def neutral-value? zero?)
