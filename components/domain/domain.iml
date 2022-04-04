@@ -17,7 +17,7 @@
     <orderEntry type="library" name="Deps: org.clojure/clojure:1.11.0" level="project" />
     <orderEntry type="library" name="Deps: commons-codec:1.15" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/tools.analyzer:1.0.0" level="project" />
-    <orderEntry type="library" name="Deps: com.fulcrologic/guardrails:1.1.10" level="project" />
+    <orderEntry type="library" name="Deps: com.fulcrologic/guardrails:1.1.11" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/core.specs.alpha:0.2.62" level="project" />
     <orderEntry type="library" name="Deps: org.bouncycastle/bcpkix-jdk15on:1.70" level="project" />
     <orderEntry type="library" name="Deps: com.fasterxml.jackson.core/jackson-databind:2.12.4" level="project" />
