@@ -16,9 +16,9 @@
     ::feature.voting.show-nothing
 
     ;; Participants will be able to reject a proposal.
-    #_::feature.rejects
+    ::feature.rejects
     ;; Ask the participant to give a reason for a reject.
-    #_::feature.reject-popup})
+    ::feature.reject-popup})
 
 (>def ::slug ::slugify/slug)
 (>def ::title ::common/non-blank-string)
@@ -36,3 +36,19 @@
 (>def ::features (s/coll-of ::feature))
 (>def ::moderators (s/coll-of (s/keys :req [::user/id])))
 (>def ::participants (s/coll-of (s/keys :req [::user/id])))
+
+(defn now [])
+
+(defn participant? [process user]
+  (contains? (::participants process) user))
+
+(defn moderator? [process user]
+  (contains? (::moderators process) user))
+
+(defn running? [process]
+  (< (::start-time process) (now) (::end-time process)))
+
+(defn make
+  "Makes a new process"
+  [{}]
+  {::id 42})
