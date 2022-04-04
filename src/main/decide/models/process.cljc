@@ -9,7 +9,6 @@
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
     [decide.process :as process]
-    [decide.specs.process]
     [decide.utils.time :as time]))
 
 (def feature-set

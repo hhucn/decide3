@@ -8,7 +8,7 @@
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [decide.models.process :as model.process]
     [decide.models.user :as user]
-    [decide.process :as process]
+    [decide.utils.slugify :as slugify]
     [mui.data-display :as dd]
     [mui.inputs :as inputs]
     [mui.inputs.form :as form]
@@ -61,7 +61,7 @@
                  :onSubmit (fn [e]
                              (evt/prevent-default! e)
                              (onSubmit {::model.process/title title
-                                        ::model.process/slug (process/slugify (if auto-slug? title slug))
+                                        ::model.process/slug (slugify/slugify (if auto-slug? title slug))
                                         ::model.process/description description
                                         ::model.process/end-time (when with-end? end-time)
                                         ::model.process/type (if public? ::model.process/type.public ::model.process/type.private)
@@ -83,11 +83,11 @@
         (merge default-input-props
           {:label (i18n/trc "URL of a process" "URL")
            :helperText (i18n/tr "Allowed are: lower case letters (a-z), numbers and hyphens")
-           :value (if auto-slug? (process/slugify title) slug)
+           :value (if auto-slug? (slugify/slugify title) slug)
            :onChange (fn [e]
                        (let [value (evt/target-value e)]
                          (set-auto-slug false)
-                         (change-slug (process/slugify value))))
+                         (change-slug (slugify/slugify value))))
            :inputProps {:maxLength title-max-length}
            :InputProps {:startAdornment (input/adornment {:position :start} (str (-> js/document .-location .-host) "/decision/"))}}))
 
