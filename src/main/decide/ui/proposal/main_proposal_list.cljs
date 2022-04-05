@@ -75,7 +75,7 @@
       (i18n/tr "New proposal")
       (i18n/tr "Login to add new argument"))))
 
-(defn info-toolbar-item [{:keys [label]}]
+(defn toolbar-info-item [{:keys [label]}]
   (dd/typography {:variant :overline} label))
 
 (defn- layout-button [{:keys [key icon label]}]
@@ -144,30 +144,67 @@
       (log/warn layout " is not a valid layout."))))
 
 
+(defmutation refresh-process [{slug ::process/slug}]
+  (action [{:keys [app]}]
+    (df/load! app [::process/slug slug] MainProposalList {:marker ::loading-proposals})))
+
+(defsc ListControlBar [this {::process/keys [slug no-of-proposals no-of-participants]
+                             :keys [ui/layout ui/order-by] :as props}]
+  {:query [::process/slug
+           ::process/no-of-proposals
+           ::process/no-of-participants
+
+           :ui/layout
+           :ui/order-by
+
+           [df/marker-table ::loading-proposals]]
+   :ident ::process/slug
+   :use-hooks? true}
+  (let [large-ui? (breakpoint/>=? "sm")
+        loading-proposals? (df/loading? (get props [df/marker-table ::loading-proposals]))]
+    (ui-toolbar
+      {:start
+       [(refresh-button {:onClick #(comp/transact! this [(refresh-process {::process/slug slug})])
+                         :loading? loading-proposals?})
+        (toolbar-info-item {:label (i18n/trf "Proposals {count}" {:count no-of-proposals})})
+        (toolbar-info-item {:label (i18n/trf "Participants {count}" {:count no-of-participants})})]
+       :end
+       [(layout-selector
+          {:value layout, :onChange #(comp/transact! this [(select-layout {:layout %})])
+           :layouts (remove nil? [{:key :favorite
+                                   :icon ViewModule
+                                   :label (i18n/trc "Proposal list layout" "Favourite layout")}
+                                  (when large-ui?
+                                    {:key :hierarchy
+                                     :icon ViewList
+                                     :label (i18n/trc "Proposal list layout" "Hierarchy layout")})])})
+        (ui-sort-selector {:selected order-by} {:set-selected! #(m/set-value! this :ui/order-by (keyword %))})]})))
+
+(def ui-list-control-bar (comp/computed-factory ListControlBar))
+
+
 ; TODO This component has become way to big.
 ; TODO Add empty state.
-(defsc MainProposalList [this {::process/keys [slug proposals no-of-participants no-of-proposals]
-                               :keys [>/favorite-list >/hierarchy-list ui/layout ui/sort-by]
-                               :as props
-                               :or {no-of-participants 0, no-of-proposals 0}}
+(defsc MainProposalList [this {::process/keys [slug proposals]
+                               :keys [>/favorite-list >/hierarchy-list >/list-control-bar ui/layout ui/order-by]
+                               :as props}
                          {:keys [show-new-proposal-dialog]}]
   {:ident ::process/slug
    :query [::process/slug
+
+           {:>/list-control-bar (comp/get-query ListControlBar)}
+
            {::process/proposals (comp/get-query proposal-card/ProposalCard)}
-           ::process/no-of-proposals
-           ::process/no-of-participants
            ::process/end-time
 
            {:>/favorite-list (comp/get-query favorite-list/FavoriteList)}
            {:>/hierarchy-list (comp/get-query hierarchy-list/HierarchyList)}
 
            :ui/layout
-           :ui/sort-by
-
-           [df/marker-table ::loading-proposals]]
+           :ui/order-by]
    :pre-merge (fn [{:keys [current-normalized data-tree]}]
                 (merge
-                  {:ui/sort-by :most-approvals
+                  {:ui/order-by :most-approvals
                    :ui/layout :favorite}
                   current-normalized
                   data-tree))
@@ -178,7 +215,6 @@
                      #(comp/transact! app [(enter-proposal-list {})] {:ref ident}))))
    :use-hooks? true}
   (let [logged-in? (comp/shared this :logged-in?)
-        loading-proposals? (df/loading? (get props [df/marker-table ::loading-proposals]))
         sorted-proposals (hooks/use-memo #(proposal/rank-by sort-by proposals) [sort-by proposals])
         process-running? (process/running? props)
         process-over? (process/over? props)
@@ -186,23 +222,8 @@
     (comp/fragment
       (layout/container {:maxWidth :xl}
 
-        (ui-toolbar
-          {:start
-           [(refresh-button {:onClick #(df/refresh! this {:marker ::loading-proposals})
-                             :loading? loading-proposals?})
-            (dd/typography {:variant :overline} (i18n/trf "Proposals {count}" {:count no-of-proposals}))
-            (dd/typography {:variant :overline} (i18n/trf "Participants {count}" {:count no-of-participants}))]
-           :end
-           [(layout-selector
-              {:value layout, :onChange #(comp/transact! this [(select-layout {:layout %})])
-               :layouts (remove nil? [{:key :favorite
-                                       :icon ViewModule
-                                       :label (i18n/trc "Proposal list layout" "Favourite layout")}
-                                      (when large-ui?
-                                        {:key :hierarchy
-                                         :icon ViewList
-                                         :label (i18n/trc "Proposal list layout" "Hierarchy layout")})])})
-            (ui-sort-selector {:selected sort-by} {:set-selected! #(m/set-value! this :ui/sort-by (keyword %))})]})
+        ;; Toolbar
+        (ui-list-control-bar list-control-bar)
 
         ; main list
         (error-boundaries/error-boundary
@@ -214,14 +235,14 @@
             (case layout
               :hierarchy
               (hierarchy-list/ui-hierarchy-list hierarchy-list {:process-over? process-over?
-                                                                :sort-order (keyword sort-by)})
+                                                                :sort-order (keyword order-by)})
 
 
               ; :favorite = default
               (grid/container {:spacing (if large-ui? 2 1)
                                :alignItems "stretch"
                                :style {:position "relative"}}
-                (if (and (#{:most-approvals} sort-by) (not (empty? sorted-proposals)))
+                (if (and (#{:most-approvals} order-by) (not (empty? sorted-proposals)))
                   (favorite-list/ui-favorite-list favorite-list)
                   (plain-list/plain-list list-options))
                 (when process-running?
