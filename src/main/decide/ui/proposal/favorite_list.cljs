@@ -52,7 +52,7 @@
   (let [proposals (hooks/use-memo #(proposal/rank proposals) [proposals])
         [best-proposal & rest-proposals] proposals
         >=-sm? (breakpoint/>=? "sm")]
-    (comp/fragment
+    (grid/container {:spacing 2}
       (line-divider {:label (i18n/tr "This is the best proposal for the moment")})
 
       (grid/item {:xs 12}

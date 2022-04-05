@@ -3,4 +3,4 @@
     [decide.ui.proposal.detail-page :as detail-page]
     [decide.ui.proposal.main-proposal-list :as proposal-list]))
 
-(def router-targets [proposal-list/MainProposalList detail-page/ProposalPage])
+(def router-targets [proposal-list/AllProposalsScreen detail-page/ProposalPage])

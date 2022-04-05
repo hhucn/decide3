@@ -26,7 +26,7 @@
 (defrouter ProcessRouter [_this _]
   {:router-targets
    [process.home/ProcessOverviewScreen
-    proposal.main-list/MainProposalList
+    proposal.main-list/AllProposalsScreen
     proposal.detail-page/ProposalPage
     process.moderator/ProcessModeratorTab
     process.dashboard/PersonalProcessDashboard]})
@@ -146,7 +146,7 @@
         (ui-tab-bar tab-bar
           {:targets
            [{:label (i18n/trc "Overview over process" "Overview") :target process.home/ProcessOverviewScreen}
-            {:label (i18n/tr "All proposals") :target proposal.main-list/MainProposalList}
+            {:label (i18n/tr "All proposals") :target proposal.main-list/AllProposalsScreen}
             {:label (i18n/tr "Dashboard") :target process.dashboard/PersonalProcessDashboard}
             (when (process/moderator? current-process (:user current-session))
               {:label (i18n/trc "Link to moderation page" "Moderation") :target process.moderator/ProcessModeratorTab})]}))

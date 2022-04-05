@@ -1,6 +1,7 @@
 (ns decide.ui.proposal.main-proposal-list
   (:require
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
+    [com.fulcrologic.fulcro.algorithms.merge :as mrg]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.data-fetch :as df]
     [com.fulcrologic.fulcro.dom :as dom]
@@ -115,33 +116,18 @@
 
 (def ui-toolbar (comp/factory Toolbar))
 
-
-(defmutation enter-proposal-list [params]
-  (action [{:keys [app state ref]}]
-    (if (get-in @state ref)                                 ; there was 'a' process loaded
-      (do                                                   ;; target ready and refresh
-        (dr/target-ready! app ref)
-        (df/load! app ref MainProposalList {:parallel true :marker ::loading-proposals}))
-      (do                                                   ;; load in two steps
-        (df/load! app ref MainProposalList
-          {:post-mutation `dr/target-ready
-           :post-mutation-params {:target ref}
-           :without #{::process/proposals :>/favorite-list :>/hierarchy-list}})
-        (df/load! app ref MainProposalList
-          {:focus [::process/slug ::process/proposals :>/favorite-list :>/hierarchy-list]
-           :marker ::loading-proposals})))))
-
 (defmutation select-layout [{:keys [layout]}]
-  (action [{:keys [state component ref]}]
+  (action [{:keys [app state ref]}]
     (if (#{:favorite :hierarchy} layout)
       (do
         (swap! state update-in ref assoc :ui/layout layout)
-        (df/load-field! component
-          [::process/slug
-           (case layout
-             :favorite :>/favorite-list
-             :hierarchy :>/hierarchy-list)]
-          {:marker ::loading-proposals}))
+        (df/load! app ref MainProposalList
+          {:focus
+           [::process/slug
+            (case layout
+              :favorite :>/favorite-list
+              :hierarchy :>/hierarchy-list)]
+           :marker ::loading-proposals}))
       (log/warn layout " is not a valid layout."))))
 
 
@@ -160,6 +146,11 @@
 
            [df/marker-table ::loading-proposals]]
    :ident ::process/slug
+   :initial-state
+   (fn [{slug ::process/slug}]
+     {::process/slug slug
+      :ui/layout :favorite
+      :ui/order-by :most-approvals})
    :use-hooks? true}
   (let [large-ui? (breakpoint/>=? "sm")
         loading-proposals? (df/loading? (get props [df/marker-table ::loading-proposals]))]
@@ -167,11 +158,14 @@
       {:start
        [(refresh-button {:onClick #(comp/transact! this [(refresh-process {::process/slug slug})])
                          :loading? loading-proposals?})
-        (toolbar-info-item {:label (i18n/trf "Proposals {count}" {:count no-of-proposals})})
-        (toolbar-info-item {:label (i18n/trf "Participants {count}" {:count no-of-participants})})]
+        (when no-of-proposals
+          (toolbar-info-item {:label (i18n/trf "Proposals {count}" {:count no-of-proposals})}))
+        (when no-of-participants
+          (toolbar-info-item {:label (i18n/trf "Participants {count}" {:count no-of-participants})}))]
        :end
        [(layout-selector
-          {:value layout, :onChange #(comp/transact! this [(select-layout {:layout %})])
+          {:value layout
+           :onChange #(comp/transact! this [(select-layout {:layout %})])
            :layouts (remove nil? [{:key :favorite
                                    :icon ViewModule
                                    :label (i18n/trc "Proposal list layout" "Favourite layout")}
@@ -203,25 +197,24 @@
 
            :ui/layout
            :ui/order-by]
-   :pre-merge (fn [{:keys [current-normalized data-tree]}]
-                (merge
-                  {:ui/order-by :most-approvals
-                   :ui/layout :favorite}
-                  current-normalized
-                  data-tree))
-   :route-segment (routes/segment ::routes/process-all-proposals)
-   :will-enter (fn [app {:process/keys [slug]}]
-                 (let [ident (comp/get-ident MainProposalList {::process/slug slug})]
-                   (dr/route-deferred ident
-                     #(comp/transact! app [(enter-proposal-list {})] {:ref ident}))))
+   :initial-state
+   (fn [{slug ::process/slug}]
+     {::process/slug slug
+      ::process/proposals []
+      :ui/layout :favorite
+      :ui/order-by :most-approvals
+      :>/list-control-bar (comp/get-initial-state ListControlBar {::process/slug slug})
+      :>/favorite-list {::process/slug slug}
+      :>/hierarchy-list {::process/slug slug}})
    :use-hooks? true}
   (let [logged-in? (comp/shared this :logged-in?)
         sorted-proposals (hooks/use-memo #(proposal/rank-by sort-by proposals) [sort-by proposals])
         process-running? (process/running? props)
-        process-over? (process/over? props)
-        large-ui? (breakpoint/>=? "sm")]
+        process-over? (process/over? props)]
     (comp/fragment
-      (layout/container {:maxWidth :xl}
+      (layout/container
+        {:maxWidth :xl,
+         :sx {:pb 10}}                                      ; prevent the fab from blocking content below
 
         ;; Toolbar
         (ui-list-control-bar list-control-bar)
@@ -240,9 +233,7 @@
 
 
               ; :favorite = default
-              (grid/container {:spacing (if large-ui? 2 1)
-                               :alignItems "stretch"
-                               :style {:position "relative"}}
+              (comp/fragment
                 (if (and (#{:most-approvals} order-by) (not (empty? sorted-proposals)))
                   (favorite-list/ui-favorite-list favorite-list)
                   (plain-list/plain-list list-options))
@@ -255,6 +246,36 @@
 
       ; fab
       (when process-running?
-        (layout/box {:pt 10}                                ; prevent the fab from blocking content below
-          (add-proposal-fab {:onClick show-new-proposal-dialog
-                             :disabled (not logged-in?)}))))))
+        (add-proposal-fab {:onClick show-new-proposal-dialog
+                           :disabled (not logged-in?)})))))
+
+(def ui-proposal-list-container (comp/factory MainProposalList))
+
+(declare AllProposalsScreen)
+
+(defmutation init-all-proposals-screen [{slug ::process/slug}]
+  (action [{:keys [app state]}]
+    (when-not (get-in @state [::id slug])
+      (mrg/merge-component! app AllProposalsScreen
+        {::id slug
+         :ui/proposal-list (comp/get-initial-state MainProposalList {::process/slug slug})}))
+    (df/load! app [::process/slug slug] ListControlBar)
+    (df/load! app [::process/slug slug] MainProposalList
+      {:without #{:>/list-control-bar
+                  ({:favorite :>/hierarchy-list
+                    :hierarchy :>/favorite-list}
+                   (get-in @state [::process/slug slug :ui/layout] :favorite))}
+       :marker ::loading-proposals})))
+
+(defsc AllProposalsScreen [_ {:keys [ui/proposal-list]}]
+  {:ident ::id
+   :query [::id {:ui/proposal-list (comp/get-query MainProposalList)}]
+   :route-segment (routes/segment ::routes/process-all-proposals)
+   :will-enter
+   (fn [app {:process/keys [slug]}]
+     (let [ident (comp/get-ident AllProposalsScreen {::id slug})]
+       (dr/route-deferred ident
+         #(comp/transact! app
+            [(init-all-proposals-screen {::process/slug slug})
+             (dr/target-ready {:target ident})]))))}
+  (ui-proposal-list-container proposal-list))

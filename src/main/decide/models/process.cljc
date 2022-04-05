@@ -79,7 +79,7 @@
 (s/def ::latest-id ::process/latest-id)
 (s/def ::end-time (s/nilable ::process/end-time))
 (s/def ::start-time (s/nilable ::process/start-time))
-(s/def ::type ::process/type)
+(s/def ::type (s/or ::process/type #{::type.public ::type.private}))
 (s/def ::feature feature-set)
 (s/def :process/features (s/coll-of ::feature))
 (s/def ::moderators (s/or
