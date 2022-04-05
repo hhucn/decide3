@@ -46,14 +46,15 @@
     (dom/create-element AddIcon #js {:sx #js{:mr 1}})
     (i18n/tr "New proposal")))
 
-(defsc SortSelector [_ {:keys [selected]} {:keys [set-selected!]}]
+(defsc SortSelector [_ {:keys [selected]
+                        :or {selected "most-approvals"}} {:keys [set-selected!]}]
   ;; query + initial-state are not used for now.
   {:query [:selected]
    :initial-state {:selected "most-approvals"}}
   (inputs/textfield
     {:label (i18n/trc "Label for sort order selection" "Sort")
      :select true
-     :value selected
+     :value (or selected "most-approvals")
      :onChange #(set-selected! (evt/target-value %))
      :size :small}
     (navigation/menu-item {:value "new->old"} (i18n/trc "Sort order option" "New → Old"))
