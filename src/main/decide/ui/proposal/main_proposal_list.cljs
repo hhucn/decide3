@@ -233,7 +233,9 @@
 
 
               ; :favorite = default
-              (comp/fragment
+              (grid/container {:spacing {:xs 1, :sm 2}
+                               :alignItems "stretch"
+                               :style {:position "relative"}}
                 (if (and (#{:most-approvals} order-by) (not (empty? sorted-proposals)))
                   (favorite-list/ui-favorite-list favorite-list)
                   (plain-list/plain-list list-options))
