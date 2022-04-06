@@ -5,7 +5,7 @@
        :cljs [cljs.spec.alpha :as s])
     [com.fulcrologic.fulcro.algorithms.normalized-state :as norm-state]
     [com.fulcrologic.fulcro.raw.components :as rc]
-    [com.fulcrologic.guardrails.core :refer [>defn => | <- ?]]
+    [com.fulcrologic.guardrails.core :refer [>def >defn => | <- ?]]
     [decide.models.proposal :as proposal]
     [decide.models.user :as user]
     [decide.process :as process]
@@ -73,22 +73,22 @@
       :db/cardinality :db.cardinality/many
       :db/valueType :db.type/keyword}]))
 
-(s/def ::slug ::process/slug)
-(s/def ::title ::process/title)
-(s/def ::description ::process/description)
-(s/def ::latest-id ::process/latest-id)
-(s/def ::end-time (s/nilable ::process/end-time))
-(s/def ::start-time (s/nilable ::process/start-time))
-(s/def ::type (s/or ::process/type #{::type.public ::type.private}))
-(s/def ::feature feature-set)
-(s/def :process/features (s/coll-of ::feature))
-(s/def ::moderators (s/or
-                      :legacy (s/coll-of (s/keys :req [::user/id]))
-                      :main ::process/moderators))
+(>def ::slug ::process/slug)
+(>def ::title ::process/title)
+(>def ::description ::process/description)
+(>def ::latest-id ::process/latest-id)
+(>def ::end-time (s/nilable ::process/end-time))
+(>def ::start-time (s/nilable ::process/start-time))
+(>def ::type (s/or ::process/type #{::type.public ::type.private}))
+(>def ::feature feature-set)
+(>def :process/features (s/coll-of ::feature))
+(>def ::moderators (s/or
+                     :legacy (s/coll-of (s/keys :req [::user/id]))
+                     :main ::process/moderators))
 
-(s/def ::ident (s/tuple #{::slug} ::slug))
-(s/def ::lookup (s/or :ident ::ident :db/id pos-int?))
-(s/def ::entity (s/and associative? #(contains? % :db/id)))
+(>def ::ident (s/tuple #{::slug} ::slug))
+(>def ::lookup (s/or :ident ::ident :db/id pos-int?))
+(>def ::entity (s/and associative? #(contains? % :db/id)))
 
 (>defn moderator? [{::keys [moderators]} {::user/keys [id]}]
   [(s/keys :req [::moderators]) (s/keys :req [::user/id]) => boolean?]

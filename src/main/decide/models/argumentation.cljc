@@ -5,7 +5,7 @@
                [datahike.core :as d.core]]
         :cljs [[cljs.spec.alpha :as s]
                [cljs.spec.gen.alpha :as gen]])
-    [com.fulcrologic.guardrails.core :refer [>defn => | <- ?]]
+    [com.fulcrologic.guardrails.core :refer [>def >defn => | <- ?]]
     [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
     [decide.argument :as-alias argument]
     [decide.argumentation]
@@ -40,21 +40,21 @@
     :db/cardinality :db.cardinality/one}])
 
 ;;; TODO Move the whole id stuff to a util ns
-(s/def ::tempid/tempid
+(>def ::tempid/tempid
   (s/spec tempid/tempid?
     :gen #(gen/return (tempid/tempid))))
 
-(s/def :argument/id (s/or :main ::argument/id :tempid ::tempid/tempid))
-(s/def :argument/type ::argument/type)
-(s/def :argument/premise
+(>def :argument/id (s/or :main ::argument/id :tempid ::tempid/tempid))
+(>def :argument/type ::argument/type)
+(>def :argument/premise
   (s/or
     :legacy (s/keys :req [:statement/id])
     :main ::argument/premise))
-(s/def :argument/entity (s/and associative? #(contains? % :db/id)))
+(>def :argument/entity (s/and associative? #(contains? % :db/id)))
 
-(s/def :statement/id (s/or :main ::statement/id :tempid ::tempid/tempid))
-(s/def :statement/content ::statement/content)
-(s/def :statement/entity (s/and associative? #(contains? % :db/id)))
+(>def :statement/id (s/or :main ::statement/id :tempid ::tempid/tempid))
+(>def :statement/content ::statement/content)
+(>def :statement/entity (s/and associative? #(contains? % :db/id)))
 
 (defn validate [spec x msg]                                 ; move this to a util ns
   (when-not (s/valid? spec x)

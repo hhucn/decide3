@@ -2,7 +2,7 @@
   (:require
     [#?(:clj  clojure.spec.alpha
         :cljs cljs.spec.alpha) :as s]
-    [com.fulcrologic.guardrails.core :refer [>defn =>]]
+    [com.fulcrologic.guardrails.core :refer [>def >defn =>]]
     [decide.models.proposal :as-alias proposal]
     [decide.models.user :as user]
     [decide.opinion :as opinion]))
@@ -22,13 +22,13 @@
               :db/cardinality :db.cardinality/one
               :db/valueType :db.type/long}])
 
-(s/def ::value ::opinion/value)
-(s/def ::opinion (s/keys :req [::value]))
-(s/def ::proposal (s/keys :req [:db/id]))
-(s/def ::user (s/keys :req [:db/id]))
+(>def ::value ::opinion/value)
+(>def ::opinion (s/keys :req [::value]))
+(>def ::proposal (s/keys :req [:db/id]))
+(>def ::user (s/keys :req [:db/id]))
 
-(s/def ::proposal/opinions (s/coll-of ::opinion))
-(s/def ::entity (s/and associative? #(contains? % :db/id)))
+(>def ::proposal/opinions (s/coll-of ::opinion))
+(>def ::entity (s/and associative? #(contains? % :db/id)))
 
 (defn approval? [opinion]
   (opinion/approval-value? (::value opinion)))
