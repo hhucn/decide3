@@ -6,9 +6,6 @@ on:
       - master
     tags:
       - v*
-  schedule:
-    # * is a special character in YAML so you have to quote this string
-    - cron: '40 3 * * *'
 
 env:
   REGISTRY: ghcr.io
