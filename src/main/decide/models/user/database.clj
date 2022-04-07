@@ -28,7 +28,7 @@
 
 
 (defn search [db search-term pattern]
-  (d/q '[:find (pull ?e pattern)
+  (d/q '[:find [(pull ?e pattern) ...]
          :in $ ?search-term pattern
          :where
          [?e ::user/display-name ?dn]
