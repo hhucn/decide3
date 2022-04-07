@@ -401,3 +401,19 @@
         (inputs/button {:onClick close-dialog} (i18n/trc "Abort form" "Cancel"))))))
 
 (def ui-new-proposal-form (comp/computed-factory NewProposalFormDialog))
+
+
+(defn card [{:keys [disabled? onClick]}]
+  (inputs/button {:key ::card
+                  :style {:height "100%"
+                          :borderStyle "dashed"}
+                  :className "new-proposal-card"
+                  :fullWidth true
+                  :size :large
+                  :disabled disabled?
+                  :variant :outlined
+                  :onClick onClick}
+    (layout/box {:color (when disabled? "text.disabled") :mr 1 :component Add})
+    (if-not disabled?
+      (i18n/tr "New proposal")
+      (i18n/tr "Login to add new argument"))))

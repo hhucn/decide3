@@ -2,24 +2,27 @@
   (:require
     [com.fulcrologic.fulcro.algorithms.react-interop :as interop]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-    [decide.models.proposal :as proposal]
     [decide.ui.components.flip-move :as flip-move]
-    [decide.ui.proposal.card :as proposal-card]
     [mui.layout.grid :as grid]
     ["react" :as react]))
 
 (def flip-move-item
   (react/forwardRef
     (fn [props ref]
-      (grid/item {:xs 12 :md 6 :lg 4 :style {:flexGrow 1} :ref ref}
+      (grid/item {:xs 12, :md 6, :lg 4
+                  :style {:minHeight "100px"}
+                  :ref ref}
         (.-children props)))))
 
-(def ui-flip-move-item (interop/react-factory flip-move-item))
+(def ui-list-item (interop/react-factory flip-move-item))
 
-(defsc PlainList [_ {:keys [items card-props]}]
-  (apply flip-move/flip-move {:typeName nil}
-    (for [{id ::proposal/id :as proposal} items]
-      (ui-flip-move-item {:key id}
-        (proposal-card/ui-proposal-card proposal card-props)))))
+(defsc PlainList [this _]
+  (grid/container {:spacing {:xs 1, :sm 2}
+                   :style {:position :relative}
+                   :alignItems "stretch"}
+    (flip-move/flip-move {:typeName nil}
+      (for [child (comp/children this)
+            :let [key (.-key child)]]
+        (ui-list-item {:key key} child)))))
 
 (def plain-list (comp/factory PlainList))

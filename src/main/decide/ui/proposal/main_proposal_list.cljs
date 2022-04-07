@@ -29,7 +29,8 @@
     ["@mui/icons-material/Refresh" :default Refresh]
     ["@mui/icons-material/ViewList" :default ViewList]
     ["@mui/icons-material/ViewModule" :default ViewModule]
-    [taoensso.timbre :as log]))
+    [taoensso.timbre :as log]
+    [decide.ui.proposal.new-proposal :as new-proposal]))
 
 (declare MainProposalList)
 
@@ -64,18 +65,6 @@
 
 (def ui-sort-selector (comp/computed-factory SortSelector))
 
-(defn new-proposal-card [{:keys [disabled? onClick]}]
-  (inputs/button {:style {:height "100%"
-                          :borderStyle "dashed"}
-                  :fullWidth true
-                  :size :large
-                  :disabled disabled?
-                  :variant :outlined
-                  :onClick onClick}
-    (layout/box {:color (when disabled? "text.disabled") :mr 1 :component AddIcon})
-    (if-not disabled?
-      (i18n/tr "New proposal")
-      (i18n/tr "Login to add new argument"))))
 
 (defn toolbar-info-item [{:keys [label]}]
   (dd/typography {:variant :overline} label))
@@ -182,8 +171,7 @@
 ; TODO Add empty state.
 (defsc MainProposalList [this {::process/keys [slug proposals]
                                :keys [>/favorite-list >/hierarchy-list >/list-control-bar ui/layout ui/order-by]
-                               :as props}
-                         {:keys [show-new-proposal-dialog]}]
+                               :as props}]
   {:ident ::process/slug
    :query [::process/slug
 
@@ -221,37 +209,32 @@
 
         ; main list
         (error-boundaries/error-boundary
-          (let [context {::process/slug slug
-                         :process-over? process-over?}
-                list-options (merge
-                               {:items (mapv #(comp/computed % context) sorted-proposals)}
-                               context)]
-            (case layout
-              :hierarchy
-              (hierarchy-list/ui-hierarchy-list hierarchy-list {:process-over? process-over?
-                                                                :sort-order (keyword order-by)})
+          (case layout
+            :hierarchy
+            (hierarchy-list/ui-hierarchy-list hierarchy-list {:process-over? process-over?
+                                                              :sort-order (keyword order-by)})
 
 
-              ; :favorite = default
-              (grid/container {:spacing {:xs 1, :sm 2}
-                               :alignItems "stretch"
-                               :style {:position "relative"}}
-                (if (and (#{:most-approvals} order-by) (not (empty? sorted-proposals)))
-                  (favorite-list/ui-favorite-list favorite-list)
-                  (plain-list/plain-list list-options))
-                (when process-running?
-                  (grid/item {:xs 12 :md 6 :lg 4
-                              :style {:flexGrow 1
-                                      :minHeight "100px"}}
-                    (new-proposal-card {:disabled? (not logged-in?)
-                                        :onClick show-new-proposal-dialog}))))))))
+            ; :favorite = default
+            (if (and (#{:most-approvals} order-by) (not (empty? sorted-proposals)))
+              (favorite-list/ui-favorite-list favorite-list)
+              (plain-list/plain-list {}
+                (conj
+                  (mapv
+                    #(proposal-card/ui-proposal-card % {::process/slug slug
+                                                        :process-over? process-over?})
+                    sorted-proposals)
+                  (when process-running?
+                    (new-proposal/card {:disabled? (not logged-in?)
+                                        :onClick #(comp/transact! this [(new-proposal/show {:slug slug})])}))))))))
 
       ; fab
       (when process-running?
-        (add-proposal-fab {:onClick show-new-proposal-dialog
+        (add-proposal-fab {:onClick #(comp/transact! this [(new-proposal/show {:slug slug})])
                            :disabled (not logged-in?)})))))
 
 (def ui-proposal-list-container (comp/factory MainProposalList))
+
 
 (declare AllProposalsScreen)
 

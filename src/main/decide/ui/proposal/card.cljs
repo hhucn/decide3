@@ -287,8 +287,7 @@
    :initial-state (fn [{::keys [id title body]}]
                     {::proposal/id id
                      ::proposal/title title
-                     ::proposal/body body})
-   :use-hooks? true}
+                     ::proposal/body body})}
   (card/card
     (merge
       {:component :article
@@ -299,7 +298,7 @@
 
     (card/action-area {:href (rfe/href ::routes/proposal-detail-page {:process/slug slug
                                                                       :proposal/id id})
-                       :style {:flexGrow 1}}
+                       :sx {:flexGrow 1}}
       (card/header
         {:title title
          :titleTypographyProps {:component "h3"}

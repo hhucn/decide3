@@ -14,7 +14,9 @@
     [mui.inputs :as inputs]
     [mui.layout :as layout]
     [mui.layout.grid :as grid]
-    [mui.transitions :as transitions]))
+    [mui.transitions :as transitions]
+    [decide.ui.components.flip-move :as flip-move]
+    [com.fulcrologic.fulcro.dom :as dom]))
 
 (defn line-divider [{:keys [label]}]
   (grid/item {:xs 12}
@@ -42,7 +44,7 @@
 
 
 (defsc FavoriteList [this {::process/keys [slug proposals end-time]
-                           :keys [process/features]}]
+                           :keys [process/features] :as props}]
   {:query [::process/slug
            {::process/proposals (comp/get-query proposal-card/ProposalCard)}
            ::process/end-time
@@ -51,7 +53,8 @@
    :use-hooks? true}
   (let [proposals (hooks/use-memo #(proposal/rank proposals) [proposals])
         [best-proposal & rest-proposals] proposals
-        >=-sm? (breakpoint/>=? "sm")]
+        process-over? (process/over? props)
+        process-running? (process/running? props)]
     (comp/fragment
       (line-divider {:label (i18n/tr "This is the best proposal for the moment")})
 
@@ -79,12 +82,15 @@
                         :onNewProposal #(comp/transact! this [(new-proposal/show {:parents [(comp/get-ident proposal-card/ProposalCard my-proposal)]})])})))
 
       (line-divider {:label (i18n/tr "All other proposals")})
-      (plain-list/plain-list
-        {:items
-         (map #(comp/computed % {::process/slug slug
-                                 :process-over? (process/over? {::process/end-time end-time})
-                                 :features features
-                                 :variant (when >=-sm? :outlined)})
-           rest-proposals)}))))
+      (plain-list/plain-list {}
+        (conj
+          (mapv
+            #(proposal-card/ui-proposal-card % {::process/slug slug
+                                                :process-over? process-over?})
+            rest-proposals)
+          (when process-running?
+            (new-proposal/card {:disabled? (not (comp/shared this :logged-in?))
+                                :onClick #(comp/transact! this [(new-proposal/show {:slug slug})])})))))))
+
 
 (def ui-favorite-list (comp/computed-factory FavoriteList {:keyfn ::process/slug}))
