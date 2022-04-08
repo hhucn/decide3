@@ -219,14 +219,15 @@
             (if (and (#{:most-approvals} order-by) (not (empty? sorted-proposals)))
               (favorite-list/ui-favorite-list favorite-list)
               (plain-list/plain-list {}
-                (conj
-                  (mapv
-                    #(proposal-card/ui-proposal-card % {::process/slug slug
-                                                        :process-over? process-over?})
-                    sorted-proposals)
-                  (when process-running?
-                    (new-proposal/card {:disabled? (not logged-in?)
-                                        :onClick #(comp/transact! this [(new-proposal/show {:slug slug})])}))))))))
+                (let [proposal-cards (mapv
+                                       #(proposal-card/ui-proposal-card % {::process/slug slug
+                                                                           :process-over? process-over?})
+                                       sorted-proposals)]
+                  (cond-> proposal-cards
+
+                    process-running?
+                    (conj (new-proposal/card {:disabled? (not logged-in?)
+                                              :onClick #(comp/transact! this [(new-proposal/show {:slug slug})])})))))))))
 
       ; fab
       (when process-running?

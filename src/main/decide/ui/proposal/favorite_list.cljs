@@ -82,15 +82,18 @@
                         :onNewProposal #(comp/transact! this [(new-proposal/show {:parents [(comp/get-ident proposal-card/ProposalCard my-proposal)]})])})))
 
       (line-divider {:label (i18n/tr "All other proposals")})
-      (plain-list/plain-list {}
-        (conj
-          (mapv
-            #(proposal-card/ui-proposal-card % {::process/slug slug
-                                                :process-over? process-over?})
-            rest-proposals)
-          (when process-running?
-            (new-proposal/card {:disabled? (not (comp/shared this :logged-in?))
-                                :onClick #(comp/transact! this [(new-proposal/show {:slug slug})])})))))))
+      (let [proposal-cards
+            (mapv
+              #(proposal-card/ui-proposal-card % {::process/slug slug
+                                                  :process-over? process-over?})
+              rest-proposals)]
+        (plain-list/plain-list {}
+          (cond-> proposal-cards
+            
+            process-running?
+            (conj (new-proposal/card {:disabled? (not (comp/shared this :logged-in?))
+                                      :onClick #(comp/transact! this [(new-proposal/show {:slug slug})])}))))))))
+
 
 
 (def ui-favorite-list (comp/computed-factory FavoriteList {:keyfn ::process/slug}))
