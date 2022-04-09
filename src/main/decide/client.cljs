@@ -1,11 +1,13 @@
 (ns decide.client
   (:require
+    [com.fulcrologic.fulcro.algorithms.merge :as mrg]
     [com.fulcrologic.fulcro.algorithms.server-render :as ssr]
     [com.fulcrologic.fulcro.algorithms.timbre-support :refer [console-appender prefix-output-fn]]
     [com.fulcrologic.fulcro.application :as app]
     [com.fulcrologic.fulcro.components :as comp]
     [com.fulcrologic.fulcro.data-fetch :as df]
     [com.fulcrologic.fulcro.dom :as dom]
+    [com.fulcrologic.fulcro.raw.components :as rc]
     [com.fulcrologic.fulcro.react.error-boundaries :as eb]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [decide.application :refer [SPA]]
@@ -19,6 +21,13 @@
   (log/info "Hot code Remount")
   #_(comp/refresh-dynamic-queries! SPA)
   (app/mount! SPA root/Root "decide" {:initialize-state? false}))
+
+(defn initialize-routers! [app]
+  (let [routers (dr/all-reachable-routers (app/current-state app) (app/root-class app))
+        merge-initial-state (fn [state component] (mrg/merge-component state component (rc/get-initial-state component {})))]
+    (swap! (::app/state-atom app)
+      (fn [state] (reduce merge-initial-state state routers)))
+    (dr/initialize! SPA)))
 
 (defn ^:export init []
   (let [db (ssr/get-SSR-initial-state)]
@@ -43,7 +52,7 @@
     (swap! (::app/state-atom SPA) merge db)
 
     (log/trace "Initialize client routing")
-    (dr/initialize! SPA)
+    (initialize-routers! SPA)
     (routing/start! SPA)
 
     ;; This makes the app start without a flicker of not-logged in state.
