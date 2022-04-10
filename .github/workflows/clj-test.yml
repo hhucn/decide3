@@ -22,19 +22,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Install clojure tools
-        uses: DeLaGuardo/setup-clojure@4.0
-        with:
-          cli: latest
-
       - name: "Setup Java"
         uses: actions/setup-java@v3
         with:
           distribution: 'adopt'
           java-version: '17'
 
-      - name: Install babashka
-        run: bash < <(curl -s https://raw.githubusercontent.com/babashka/babashka/master/install)
+      - name: Install clojure tools
+        uses: DeLaGuardo/setup-clojure@5.1
+        with:
+          cli: latest
+          bb: latest
 
       - name: Run tests
         run: bb test:clj
