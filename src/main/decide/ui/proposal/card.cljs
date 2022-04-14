@@ -17,6 +17,7 @@
     [decide.utils.time :as time]
     [mui.data-display :as dd]
     [mui.data-display.list :as list]
+    [mui.feedback :as feedback]
     [mui.feedback.dialog :as dialog]
     [mui.inputs :as inputs]
     [mui.layout :as layout]
@@ -172,12 +173,45 @@
 (def ui-approve-toggle (comp/computed-factory ApproveToggle))
 
 (defsc TotalVotesProcess [_ _]
-  {:query [::process/slug :process/total-votes]
+  {:query [::process/slug ::process/no-of-participants]
    :ident ::process/slug})
 
+
+(defn pro-vote-participant-ratio
+  "Display the ratio of `pro-votes`/`no-of-participants` as a percentage and a small bar."
+  [{pro-votes ::proposal/pro-votes
+    no-of-participants ::process/no-of-participants}]
+  (let [majority 0.5
+        two-thirds (/ 2 3)
+        votes-ratio (/ pro-votes no-of-participants)]
+    (dd/tooltip
+      {:title (i18n/trf "{ratio, number, ::percent} of participants approve this proposal" {:ratio votes-ratio})}
+
+      (layout/box
+        {:py 0.5, :px 1.5}
+        (dd/typography
+          {:aria-hidden true
+           :color (if (<= 1 votes-ratio)
+                    :textPrimary
+                    :textSecondary)}
+          (i18n/t "{ratio, number, ::percent}" {:ratio votes-ratio}))
+        (feedback/linear-progress
+          {:variant :determinate
+           :aria-hidden true
+           :color
+           (cond
+             (< votes-ratio majority) :error
+             (< votes-ratio two-thirds) :warning
+             (<= two-thirds votes-ratio) :success
+             :else :gold)
+           :value (* 100 votes-ratio)
+           :sx {:width "100%"}})))))
+
+
 (defsc VotingArea [this {::proposal/keys [id pro-votes my-opinion-value my-opinion opinions favorite-votes]
-                         {:keys [process/total-votes]} ::proposal/process}
-                   {:keys [process]}]
+                         {::process/keys [no-of-participants]} ::proposal/process}
+                   {:keys [process show-ratio?]
+                    :or {show-ratio? false}}]
   {:query [::proposal/id
            ::proposal/pro-votes
            ::proposal/favorite-votes
@@ -239,22 +273,10 @@
                  (comp/transact! this [(opinion.api/add {::proposal/id id
                                                          :opinion (if rejected? 0 -1)})])))})))
 
-      #_(when total-votes
-          (let [majority 50
-                percent (* 100 (/ pro-votes total-votes))]
-            (dd/tooltip {:title (i18n/tr "Voting share")}
-              (layout/box {:p 0.5}
-                (dd/typography {:color :textSecondary} (Math/round percent) " %")
-                (feedback/linear-progress
-                  {:variant :determinate
-                   :color
-                   (cond
-                     (zero? percent) :error
-                     (< percent majority) :warning
-                     (>= percent majority) :success
-                     :else :primary)
-                   :value percent
-                   :sx {:width "100%"}})))))
+      (when (and show-ratio? no-of-participants)
+        (pro-vote-participant-ratio
+          {::proposal/pro-votes pro-votes
+           ::process/no-of-participants no-of-participants}))
 
       (when (process/public-voting? process)
         (->> opinions
@@ -321,7 +343,8 @@
          :direction :row
          :spacing 1}
         (grid/item {:xs :auto}
-          (ui-voting-area voting-area {:process current-process}))
+          (ui-voting-area voting-area {:process current-process
+                                       :show-ratio? true}))
 
         (grid/item {:xs :auto}
           (layout/stack {:direction :row}
