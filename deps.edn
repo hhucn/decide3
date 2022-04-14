@@ -10,12 +10,12 @@
         com.taoensso/timbre {:mvn/version "5.2.1"}
         com.taoensso/tufte {:mvn/version "2.2.0"}
         com.wsscode/pathom {:mvn/version "2.4.0"}
-        com.fulcrologic/fulcro {:mvn/version "3.5.15"}
+        com.fulcrologic/fulcro {:mvn/version "3.5.18"}
         com.fulcrologic/fulcro-garden-css {:mvn/version "3.0.9"}
         com.fulcrologic/fulcro-i18n {:mvn/version "0.0.5-alpha"}
         com.fulcrologic/fulcro-rad
         {:git/url "https://github.com/fulcrologic/fulcro-rad"
-         :sha "36ff4cc48e420218d5e0a3673c3c6b31bf32cef5"}
+         :sha "b21ac2b327fce322dd2cfe067370592b0cdf78bc"}
         com.fulcrologic/guardrails {:mvn/version "1.1.11"}
         garden/garden {:mvn/version "1.3.10"}
         hiccup/hiccup {:mvn/version "1.0.5"}
@@ -28,7 +28,7 @@
 
         dev.weavejester/ragtime.core {:mvn/version "0.9.1"}
 
-        io.replikativ/datahike {:mvn/version "0.4.1489"}
+        io.replikativ/datahike {:mvn/version "0.4.1491"}
         com.github.mrebbinghaus/fulcro-material-ui-wrapper
         {:git/url "https://github.com/MrEbbinghaus/fulcro-material-ui-wrapper"
          :sha "c2ee444f1296f1ae2701da0f61d66eddfe232786"}
@@ -44,7 +44,7 @@
  :aliases {:clj-tests {:extra-paths ["src/test"]
                        :main-opts ["-m" "kaocha.runner"]
                        :jvm-opts ["-Dguardrails.enabled=true"]
-                       :extra-deps {lambdaisland/kaocha {:mvn/version "1.64.1010"}
+                       :extra-deps {lambdaisland/kaocha {:mvn/version "1.65.1029"}
                                     lambdaisland/kaocha-junit-xml {:mvn/version "0.0.76"}
                                     orchestra/orchestra {:mvn/version "2021.01.01-1"}}}
 
@@ -55,7 +55,7 @@
                               thheller/shadow-cljs {:mvn/version "2.18.0"}
                               expound/expound {:mvn/version "0.9.0"}
                               fulcrologic/fulcro-spec {:mvn/version "3.1.12"}
-                              binaryage/devtools {:mvn/version "1.0.5"}
+                              binaryage/devtools {:mvn/version "1.0.6"}
                               com.github.awkay/workspaces {:mvn/version "1.0.3"}
                               org.clojure/tools.namespace {:mvn/version "1.2.0"}}}
 

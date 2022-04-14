@@ -34,10 +34,10 @@
     <orderEntry type="library" name="Deps: thheller/shadow-cljsjs:0.0.22" level="project" />
     <orderEntry type="library" name="Deps: com.wsscode/pathom:2.4.0" level="project" />
     <orderEntry type="library" name="Deps: commons-codec:1.15" level="project" />
-    <orderEntry type="library" name="Deps: io.lambdaforge/datalog-parser:0.1.10" level="project" />
+    <orderEntry type="library" name="Deps: io.lambdaforge/datalog-parser:0.1.11" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/tools.analyzer:1.1.0" level="project" />
     <orderEntry type="library" name="Deps: com.bhauman/cljs-test-display:0.1.1" level="project" />
-    <orderEntry type="library" name="Deps: com.fulcrologic/fulcro-rad:36ff4c" level="project" />
+    <orderEntry type="library" name="Deps: com.fulcrologic/fulcro-rad:b21ac2" level="project" />
     <orderEntry type="library" name="Deps: com.fulcrologic/guardrails:1.1.11" level="project" />
     <orderEntry type="library" name="Deps: com.wsscode/async:2021.01.14" level="project" />
     <orderEntry type="library" name="Deps: com.draines/postal:2.0.5" level="project" />
@@ -107,7 +107,7 @@
     <orderEntry type="library" name="Deps: com.taoensso/truss:1.6.0" level="project" />
     <orderEntry type="library" name="Deps: ring/ring-headers:0.3.0" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/google-closure-library-third-party:0.0-20211011-0726fdeb" level="project" />
-    <orderEntry type="library" name="Deps: com.fulcrologic/fulcro:3.5.15" level="project" />
+    <orderEntry type="library" name="Deps: com.fulcrologic/fulcro:3.5.18" level="project" />
     <orderEntry type="library" name="Deps: org.clojars.mmb90/cljs-cache:0.1.4" level="project" />
     <orderEntry type="library" name="Deps: com.fasterxml.jackson.core/jackson-annotations:2.12.4" level="project" />
     <orderEntry type="library" name="Deps: hiccup:1.0.5" level="project" />
@@ -121,7 +121,7 @@
     <orderEntry type="library" name="Deps: environ:1.2.0" level="project" />
     <orderEntry type="library" name="Deps: com.github.awkay/workspaces:1.0.3" level="project" />
     <orderEntry type="library" name="Deps: adzerk/boot-test:1.1.2" level="project" />
-    <orderEntry type="library" name="Deps: binaryage/devtools:1.0.5" level="project" />
+    <orderEntry type="library" name="Deps: binaryage/devtools:1.0.6" level="project" />
     <orderEntry type="library" name="Deps: net.cgrand/macrovich:0.2.0" level="project" />
     <orderEntry type="library" name="Deps: org.msgpack/msgpack:0.6.12" level="project" />
     <orderEntry type="library" name="Deps: org.jboss.threads/jboss-threads:3.1.0.Final" level="project" />
@@ -152,7 +152,7 @@
     <orderEntry type="library" name="Deps: com.taoensso/nippy:2.14.0" level="project" />
     <orderEntry type="library" name="Deps: com.github.mrebbinghaus/fulcro-material-ui-wrapper:c2ee44" level="project" />
     <orderEntry type="library" name="Deps: javax.servlet/javax.servlet-api:3.1.0" level="project" />
-    <orderEntry type="library" name="Deps: io.replikativ/datahike:0.4.1489" level="project" />
+    <orderEntry type="library" name="Deps: io.replikativ/datahike:0.4.1491" level="project" />
     <orderEntry type="library" name="Deps: potemkin:0.4.5" level="project" />
     <orderEntry type="library" name="Deps: nrepl:0.9.0" level="project" />
     <orderEntry type="library" name="Deps: mount:0.1.16" level="project" />
