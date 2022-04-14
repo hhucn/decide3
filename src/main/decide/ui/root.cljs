@@ -5,7 +5,7 @@
     [com.fulcrologic.fulcro.dom :as dom]
     [com.fulcrologic.fulcro.mutations :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
-    [com.fulcrologic.fulcro.routing.dynamic-routing :as dr :refer [defrouter]]
+    [com.fulcrologic.fulcro.routing.dynamic-routing :refer [defrouter]]
     [decide.models.authorization :as auth]
     [decide.ui.components.appbar :as appbar]
     [decide.ui.components.nav-drawer :as nav-drawer]
@@ -17,13 +17,13 @@
     [decide.ui.pages.splash :as splash]
     [decide.ui.process.core :as process-page]
     [decide.ui.process.list :as process.list]
+    [decide.ui.storage :as storage]
     [decide.ui.theming.dark-mode :as dark-mode]
     [decide.ui.theming.themes :as themes]
-    [mui.lab :as lab]
     [mui.styles :as styles]
     [mui.utils :as m.utils]
+    [mui.x.date-pickers :as date-pickers]
     [taoensso.timbre :as log]
-    [decide.ui.storage :as storage]
     ["@mui/lab/AdapterDateFns" :default DateAdapter]))
 
 (defrouter RootRouter [_this {:keys [current-state]}]
@@ -79,7 +79,7 @@
           #(let [new-theme (if (.-matches %) :dark :light)]
              (comp/transact! (comp/any->app this)
                [(set-theme {:theme new-theme})])))))
-    (lab/localization-provider #js {:dateAdapter DateAdapter}
+    (date-pickers/localization-provider #js {:dateAdapter DateAdapter}
       (styles/theme-provider {:theme (themes/get-mui-theme (if (= :auto manual-theme) theme manual-theme))}
         (meta/ui-meta (get props meta/root-key))
         (storage/ui-localstorage localstorage)

@@ -8,18 +8,18 @@
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [decide.models.process :as model.process]
     [decide.models.user :as user]
-    [decide.utils.slugify :as slugify]
+    [decide.utils.slugify]
     [mui.data-display :as dd]
+    [mui.data-display.list :as list]
     [mui.inputs :as inputs]
     [mui.inputs.form :as form]
     [mui.inputs.input :as input]
     [mui.layout :as layout]
     [mui.layout.grid :as grid]
-    [taoensso.timbre :as log]
-    [mui.transitions :as transitions]
-    [mui.data-display.list :as list]
     [mui.surfaces :as surfaces]
-    [mui.lab :as lab]))
+    [mui.transitions :as transitions]
+    [mui.x.date-pickers :as date-pickers]
+    [taoensso.timbre :as log]))
 
 
 (def default-input-props
@@ -109,7 +109,7 @@
              :control (inputs/switch {})}))
 
         (transitions/collapse {:in with-end?}
-          (lab/date-time-picker
+          (date-pickers/date-time-picker
             {:renderInput #(inputs/textfield (merge (js->clj %) default-input-props {}))
              :value end-time
              :disabled (not with-end?)

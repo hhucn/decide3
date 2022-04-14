@@ -1,12 +1,12 @@
 (ns decide.ui.process.moderator-tab
   (:require
     [com.fulcrologic.fulcro-i18n.i18n :as i18n]
-    [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
+    [com.fulcrologic.fulcro.algorithms.data-targeting]
     [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.data-fetch :as df]
     [com.fulcrologic.fulcro.dom :as dom]
     [com.fulcrologic.fulcro.dom.events :as evt]
-    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+    [com.fulcrologic.fulcro.mutations :refer [defmutation]]
     [com.fulcrologic.fulcro.react.hooks :as hooks]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [decide.models.process :as process]
@@ -21,13 +21,12 @@
     [mui.inputs.form :as form]
     [mui.layout :as layout]
     [mui.layout.grid :as grid]
-    [mui.surfaces.card :as card]
-    [mui.surfaces.accordion :as accordion]
     ["@mui/icons-material/Clear" :default ClearIcon]
     ["@mui/icons-material/ExpandMore" :default ExpandMoreIcon]
     ["@mui/icons-material/RemoveCircleOutline" :default RemoveCircleIcon]
-    [taoensso.timbre :as log]
-    [mui.lab :as lab]))
+    [mui.surfaces.accordion :as accordion]
+    [mui.surfaces.card :as card]
+    [mui.x.date-pickers :as date-pickers]))
 
 (defn- accordion [{:keys [title]} body]
   (accordion/accordion {:defaultExpanded true}
@@ -50,7 +49,7 @@
         (list/item-secondary-action {}
           (inputs/icon-button
             {:edge :end
-             :disabled self? ; can't remove yourself from moderators
+             :disabled self?                                ; can't remove yourself from moderators
              :onClick onDelete}
             (dom/create-element RemoveCircleIcon)))))))
 
@@ -156,7 +155,7 @@
 
         (grid/container {:item true :xs 12 :spacing 2}
           (grid/item {:xs 12 :sm 6}
-            (lab/date-time-picker
+            (date-pickers/date-time-picker
               {:renderInput #(inputs/textfield (merge (js->clj %)
                                                  default-input-props
                                                  {:helperText (i18n/tr "Optional")}))
@@ -167,7 +166,7 @@
                :label (i18n/trc "Start of a process" "Start")}))
 
           (grid/item {:xs 12 :sm 6}
-            (lab/date-time-picker
+            (date-pickers/date-time-picker
               {:renderInput #(inputs/textfield (merge (js->clj %)
                                                  default-input-props
                                                  {:helperText (i18n/tr "Optional")}))
