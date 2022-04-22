@@ -4,23 +4,23 @@
     <item key="com.fulcrologic.guardrails.core/&gt;def" resolves-as="clojure.spec.alpha/def" />
     <item key="com.fulcrologic.fulcro.routing.legacy-ui-routers/defsc-router" resolves-as="clojure.core/defn" />
     <item key="com.fulcrologic.rad.attributes/defattr" resolves-as="clojure.core/def" />
-    <item key="com.fulcrologic.guardrails.core/&gt;fn" resolves-as="cljs.core/fn" />
-    <item key="com.wsscode.pathom.connect/defresolver" resolves-as="clojure.core/defn" />
+    <item key="com.fulcrologic.guardrails.core/&gt;fn" resolves-as="clojure.core/fn" />
     <item key="decide.models.process-test/with-dev-db" resolves-as="clojure.core/def" />
+    <item key="com.wsscode.pathom.connect/defresolver" resolves-as="clojure.core/defn" />
     <item key="com.fulcrologic.fulcro.ui-state-machines/defstatemachine" resolves-as="clojure.core/def" />
     <item key="com.fulcrologic.fulcro.mutations/declare-mutation" resolves-as="clojure.core/def" />
     <item key="com.fulcrologic.fulcro.algorithms.normalized-state/swap!-&gt;" resolves-as="cljs.core/-&gt;" />
     <item key="com.fulcrologic.fulcro.routing.dynamic-routing/defrouter" resolves-as="clojure.core/defn" />
     <item key="com.wsscode.pathom3.connect.operation/defresolver" resolves-as="clojure.core/defn" />
     <item key="nubank.workspaces.core/deftest" resolves-as="clojure.core/def" />
-    <item key="com.fulcrologic.guardrails.core/&gt;defn" resolves-as="clojure.core/defn" />
     <item key="devcards.core/defcard" resolves-as="clojure.core/def" />
+    <item key="com.fulcrologic.guardrails.core/&gt;defn" resolves-as="clojure.core/defn" />
     <item key="action" resolves-as="cljs.core/fn" />
-    <item key="com.wsscode.pathom.connect/defmutation" resolves-as="clojure.core/defn" />
     <item key="nubank.workspaces.core/defcard" resolves-as="clojure.core/def" />
+    <item key="com.wsscode.pathom.connect/defmutation" resolves-as="clojure.core/defn" />
     <item key="com.fulcrologic.fulcro.components/defsc" resolves-as="clojure.core/defn" />
     <item key="com.fulcrologic.guardrails.core/&gt;defn-" resolves-as="clojure.core/defn-" />
-    <item key="mount.core/defstate" resolves-as="cljs.core/def" />
+    <item key="mount.core/defstate" resolves-as="clojure.core/def" />
     <item key="failjure.core/attempt-all" resolves-as="clojure.core/let" />
     <item key="failjure.core/when-failed" resolves-as="clojure.core/fn" />
     <currentScheme>PROJECT</currentScheme>

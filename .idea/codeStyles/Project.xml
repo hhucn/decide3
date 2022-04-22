@@ -1,8 +1,10 @@
 <component name="ProjectCodeStyleConfiguration">
   <code_scheme name="Project" version="173">
-    <ClojureCodeStyleSettings>{
-  :cursive.formatting/align-maps false
-  :cursive.formatting/default-only-indent true
-}</ClojureCodeStyleSettings>
+    <ClojureCodeStyleSettings>
+      <option name="alignMapValues" value="false" />
+      <option name="alignBindingForms" value="true" />
+      <option name="oneSpaceLists" value="true" />
+      <option name="defaultOnlyIndent" value="true" />
+    </ClojureCodeStyleSettings>
   </code_scheme>
 </component>
