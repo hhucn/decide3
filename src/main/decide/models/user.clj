@@ -1,13 +1,13 @@
 (ns decide.models.user
   (:require
-    [clojure.spec.alpha :as s]
-    [com.fulcrologic.fulcro.server.api-middleware :as fmw]
-    [com.fulcrologic.guardrails.core :refer [>defn >defn- => | ? <-]]
-    [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
+   [clojure.spec.alpha :as s]
+   [com.fulcrologic.fulcro.server.api-middleware :as fmw]
+   [com.fulcrologic.guardrails.core :refer [=> >defn]]
+   [com.wsscode.pathom.connect :as pc :refer [defmutation defresolver]
     [com.wsscode.pathom.core :as p]
     [datahike.api :as d]
     [datahike.core :as d.core]
-    [decide.user :as user]))
+    [decide.user :as user]]))
 
 
 (def schema
@@ -126,7 +126,7 @@
                 :signin/result :errors]}
   (if (email-in-db? db email)
     (let [{::keys [id] :as user} (get-by-email db email [::id ::password])]
-      (if (user/password-valid? (::user/password user) password)
+      (if (user/password-valid? (::password user) password)
         (wrap-session env
           {:signin/result :success
            :session/valid? true
