@@ -3,11 +3,11 @@
    [clojure.spec.alpha :as s]
    [com.fulcrologic.fulcro.server.api-middleware :as fmw]
    [com.fulcrologic.guardrails.core :refer [=> >defn]]
-   [com.wsscode.pathom.connect :as pc :refer [defmutation defresolver]
-    [com.wsscode.pathom.core :as p]
-    [datahike.api :as d]
-    [datahike.core :as d.core]
-    [decide.user :as user]]))
+   [com.wsscode.pathom.connect :as pc :refer [defmutation defresolver]]
+   [com.wsscode.pathom.core :as p]
+   [datahike.api :as d]
+   [datahike.core :as d.core]
+   [decide.user :as user]))
 
 
 (def schema
