@@ -21,15 +21,15 @@
 
 (def page-ident [:PAGE :processes-list-page])
 
-(defn icon-badge [title value icon-class]
-  (layout/box {:display :flex
-               :alignItems :center
-               :title title
-               :aria-label title
-               :mx 1
-               :color "text.secondary"}
-    (dd/typography {:color :inherit} value)
-    (layout/box {:m 1 :color :inherit :component icon-class})))
+(defn icon-badge [{:keys [title value icon]}]
+  (dd/tooltip {:title title}
+    (layout/box {:display :flex
+                 :alignItems :center
+                 :aria-label title
+                 :mx 1
+                 :color "text.secondary"}
+      (dd/typography {:color :inherit} value)
+      (layout/box {:m 1 :color :inherit :component icon}))))
 
 (defsc ProcessListEntry [_ {::process/keys [slug title description no-of-participants no-of-proposals]}]
   {:query [::process/slug ::process/title ::process/description
@@ -45,8 +45,20 @@
 
       (dd/divider {})
       (card/actions {}
-        (icon-badge (i18n/tr "Number of proposals") (or no-of-proposals 0) EmojiObjectsOutlinedIcon)
-        (icon-badge (i18n/tr "Number of participants") (max no-of-participants 0) GroupIcon)))))
+        (let [no-of-proposals    (max no-of-proposals 0)
+              no-of-participants (max no-of-participants 0)]
+          (comp/fragment
+            (icon-badge
+              {:title
+               (i18n/trf "{noOfProposals, plural, =1 {# proposal} other {# proposals}}" {:noOfProposals no-of-proposals})
+               :value no-of-proposals
+               :icon EmojiObjectsOutlinedIcon})
+
+            (icon-badge
+              {:title
+               (i18n/trf "{noOfParticipants, plural, =1 {# participant} other {# participants}}" {:noOfParticipants no-of-participants})
+               :value no-of-participants
+               :icon GroupIcon})))))))
 
 
 (def ui-process-list-entry (comp/computed-factory ProcessListEntry {:keyfn ::process/slug}))

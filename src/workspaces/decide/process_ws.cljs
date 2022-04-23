@@ -1,23 +1,20 @@
 (ns decide.process-ws
   (:require
-    [decide.models.process :as process]
-    [decide.ui.proposal.card :as card]
-    [decide.ui.process.list :as list]
-    [decide.ui.theming.themes :as themes]
-    ["@mui/icons-material/EmojiObjectsOutlined" :default EmojiObjectsOutlinedIcon]
-    [mui.styles :as styles]
-    [nubank.workspaces.card-types.fulcro3 :as ct.fulcro]
-    [nubank.workspaces.card-types.react :as ct.react]
-    [nubank.workspaces.card-types.util :as ct.util]
-    [nubank.workspaces.core :as ws]
-    [nubank.workspaces.model :as wsm]
-    [com.fulcrologic.fulcro.dom :as dom]
-    [taoensso.timbre :as log]
-    [com.fulcrologic.fulcro.react.hooks :as hooks]
-    [mui.utils :as m.utils]
-    [com.fulcrologic.fulcro.algorithms.react-interop :as interop]
-    ["@mui/material/ScopedCssBaseline" :default ScopedCssBaseline]
-    [com.fulcrologic.fulcro.components :as comp]))
+   [com.fulcrologic.fulcro.algorithms.react-interop :as interop]
+   [com.fulcrologic.fulcro.components :as comp]
+   [com.fulcrologic.fulcro.dom :as dom]
+   ["@mui/icons-material/EmojiObjectsOutlined" :default EmojiObjectsOutlinedIcon]
+   [decide.models.process :as process]
+   [decide.ui.process.list :as list]
+   [decide.ui.proposal.card :as card]
+   [decide.ui.theming.themes :as themes]
+   [mui.styles :as styles]
+   [nubank.workspaces.card-types.fulcro3 :as ct.fulcro]
+   [nubank.workspaces.card-types.react :as ct.react]
+   [nubank.workspaces.core :as ws]
+   [nubank.workspaces.model :as wsm]
+   ["@mui/material/ScopedCssBaseline" :default ScopedCssBaseline]
+   [taoensso.timbre :as log]))
 
 
 (def scoped-css-baseline (interop/react-factory ScopedCssBaseline))
@@ -89,4 +86,4 @@
                        ::process/no-of-proposals 6}}}}))
 
 (ws/defcard process-icon-badge
-  (ct.react/react-card (list/icon-badge "Anzahl Vorschläge" 42 EmojiObjectsOutlinedIcon)))
+  (ct.react/react-card (list/icon-badge {:title "Anzahl Vorschläge", :value 42, :icon EmojiObjectsOutlinedIcon})))

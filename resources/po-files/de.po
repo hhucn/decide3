@@ -2,17 +2,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: decide3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-10-05 20:05+0200\n"
-"PO-Revision-Date: 2021-10-05 20:06+0200\n"
+"POT-Creation-Date: 2022-04-23 22:16+0200\n"
+"PO-Revision-Date: 2022-04-23 22:18+0200\n"
 "Last-Translator: Björn Ebbinghaus <ebbinghaus@hhu.de>\n"
 "Language-Team: Björn Ebbinghaus\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.0\n"
-"X-Poedit-Basepath: ../public/js/main\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.0.1\n"
+"X-Poedit-Basepath: ../public/js/main\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: trc:1c,2;tr:1;trf:1\n"
 "X-Poedit-Flags-xgettext: --no-location\n"
@@ -105,6 +105,22 @@ msgctxt "Label of login button"
 msgid "Login"
 msgstr "Anmelden"
 
+msgctxt "Lable for language switcher"
+msgid "Language"
+msgstr "Language"
+
+msgid "All decisions"
+msgstr "Alle Entscheidungen"
+
+msgid "Login"
+msgstr "Anmelden"
+
+msgid ""
+"The instructions are currently only available in german. Please send us a "
+"mail via the button at\n"
+"          the end of this page, if you have questions."
+msgstr ""
+
 msgid "Save"
 msgstr "Speichern"
 
@@ -154,86 +170,6 @@ msgstr "gestern um {time}"
 msgid "on {datetime}"
 msgstr "am {datetime}"
 
-msgctxt "Title of a process"
-msgid "Title"
-msgstr "Titel"
-
-msgctxt "URL of a process"
-msgid "URL"
-msgstr "URL"
-
-msgid "Allowed are: lower case letters (a-z), numbers and hyphens"
-msgstr "Erlaubt sind Kleinbuchstaben (a-z), Zahlen und Bindestriche"
-
-msgctxt "What is the process about"
-msgid "What is it about?"
-msgstr "Worum geht es?"
-
-msgid "Does the process end?"
-msgstr "Endet der Prozess?"
-
-msgctxt "When does a process end?"
-msgid "When?"
-msgstr "Wann?"
-
-msgid "Is the process public?"
-msgstr "Ist der Prozess öffentlich?"
-
-msgctxt "Label for list of participants"
-msgid "Participants"
-msgstr "Teilnehmer"
-
-msgctxt "Label for input field"
-msgid "Participant emails"
-msgstr "Teilnehmer E-Mails"
-
-msgctxt "Submit form"
-msgid "Submit"
-msgstr "Fertig"
-
-msgctxt "Description of a process"
-msgid "Description"
-msgstr "Beschreibung"
-
-msgctxt "End of a process"
-msgid "End"
-msgstr "Ende"
-
-msgid "Number of proposals"
-msgstr "Anzahl an Vorschlägen"
-
-msgid "Number of participants"
-msgstr "Anzahl an Teilnehmern"
-
-msgctxt "Load indicator"
-msgid "Loading..."
-msgstr "Laden…"
-
-msgid "New decision-process"
-msgstr "Neuer Entscheidungsprozess"
-
-msgid "Active decision-processes"
-msgstr "Aktive Entscheidungsprozesse"
-
-msgid "Create new decision-process"
-msgstr "Neuen Entscheidungsprozess erstellen"
-
-msgctxt "Lable for language switcher"
-msgid "Language"
-msgstr "Language"
-
-msgid "All decisions"
-msgstr "Alle Entscheidungen"
-
-msgid "Login"
-msgstr "Anmelden"
-
-msgid ""
-"The instructions are currently only available in german. Please send us a "
-"mail via the button at\n"
-"          the end of this page, if you have questions."
-msgstr ""
-
 msgid "Ended on the {endDatetime}!"
 msgstr "Endete am {endDatetime}!"
 
@@ -254,39 +190,6 @@ msgstr "Zustimmungen: {pros}"
 
 msgid "Your approvals"
 msgstr "Deine Zustimmungen"
-
-msgid "by {author}"
-msgstr "von {author}"
-
-msgctxt "Argument type"
-msgid "Pro"
-msgstr "Dafür"
-
-msgctxt "Argument type"
-msgid "Contra"
-msgstr "Dagegen"
-
-msgctxt "Argument type"
-msgid "Neutral"
-msgstr "Neutral"
-
-msgid "Argument"
-msgstr "Argument"
-
-msgid "What is the attitude of this argument?"
-msgstr "Was für eine Art Argument ist es?"
-
-msgid "Add"
-msgstr "Hinzufügen"
-
-msgid "Login to add argument"
-msgstr "Melde dich an um ein neues Argument hinzuzufügen"
-
-msgid "Reply"
-msgstr "Antworten"
-
-msgid "Add argument"
-msgstr "Argument hinzufügen"
 
 msgid "Add a new proposal, develop or merge existing proposals"
 msgstr ""
@@ -372,54 +275,22 @@ msgstr "Details"
 msgid "Derived from {count} other proposals:"
 msgstr "Abgeleitet von {count} anderen Vorschlägen:"
 
+msgctxt "Submit form"
+msgid "Submit"
+msgstr "Fertig"
+
 msgctxt "Abort form"
 msgid "Cancel"
 msgstr "Abbrechen"
 
-msgid "Approved"
-msgstr "Zugestimmt"
+msgid "New proposal"
+msgstr "Neuer Vorschlag"
 
-msgid "Approve"
-msgstr "Zustimmen"
+msgid "Login to add new argument"
+msgstr "Anmelden um ein neues Argument hinzuzufügen"
 
-msgid ""
-"This proposal was derived {count, plural,  =1 {one time} other {# times}}"
-msgstr "Dieser Vorschlag hat {count, plural, =1 {ein Kind} other {# Kinder}}"
-
-msgid ""
-"This proposal {count, plural, =0 {depends on no previous proposals} =1 {is "
-"derived from one proposal} other {combines # proposals}}"
-msgstr ""
-"Dieser Vorschlag {count, plural, =0 {basiert auf keinem anderen Vorschlag} "
-"=1 {basiert auf einem anderen Vorschlag} other {vereinigt # andere "
-"Vorschläge}}"
-
-msgctxt "Overlap of voters"
-msgid "Overlap"
-msgstr "Übereinstimmung"
-
-msgid "{ratioOfVoters, number, ::percent} of approvees"
-msgstr "{ratioOfVoters, number, ::percent} der Wähler"
-
-msgid "Potential approves"
-msgstr "Potentielle Stimmen"
-
-msgid "{ratioOfVoters, number, ::+! percent} more approves"
-msgstr "{ratioOfVoters, number, ::+! percent} mehr Stimmen"
-
-msgctxt "Encourage to form a coalition"
-msgid "Form coalition"
-msgstr "Koalition vorschlagen"
-
-msgctxt "Prompt to merge or fork"
-msgid "Propose a change"
-msgstr "Änderung vorschlagen"
-
-msgid "Argumentation"
-msgstr "Argumentation"
-
-msgid "Possible coalitions"
-msgstr "Mögliche Koalitionen"
+msgid "by {author}"
+msgstr "von {author}"
 
 msgid ""
 "This proposal has a chain of {count} proposals, that lead up to this proposal"
@@ -469,11 +340,25 @@ msgstr "Zustimmen"
 msgid "{votes} approved"
 msgstr "{votes} haben zugestimmt"
 
+msgid "{ratio, number, ::percent} of participants approve this proposal"
+msgstr ""
+"{ratio, number, ::percent} der Wähler:innen stimmen diesem Vorschlag zu"
+
 msgid "{noOf, plural, =1 {# argument} other {# arguments}}"
 msgstr "{noOf, plural, =1 {1 Argument} other {# Argumente}}"
 
+msgid "Approved"
+msgstr "Zugestimmt"
+
+msgid "Approve"
+msgstr "Zustimmen"
+
 msgid "Winner"
 msgstr "Gewinner"
+
+msgctxt "Description of a process"
+msgid "Description"
+msgstr "Beschreibung"
 
 msgid ""
 "{numProposals, plural, =0 {There are no proposals!} =1 {The current best "
@@ -502,8 +387,15 @@ msgstr "Hinzufügen"
 msgid "Edit process"
 msgstr "Prozess bearbeiten"
 
+msgctxt "Title of a process"
+msgid "Title"
+msgstr "Titel"
+
 msgid "Edited"
 msgstr "Bearbeitet"
+
+msgid "Is the process public?"
+msgstr "Ist der Prozess öffentlich?"
 
 msgid "Optional"
 msgstr "Optional"
@@ -511,6 +403,10 @@ msgstr "Optional"
 msgctxt "Start of a process"
 msgid "Start"
 msgstr "Startzeitpunkt"
+
+msgctxt "End of a process"
+msgid "End"
+msgstr "Ende"
 
 msgid "Advanced"
 msgstr "Erweitert"
@@ -529,6 +425,10 @@ msgstr "Öffentlkiche Stimmen"
 
 msgid "Everyone can see who voted for what"
 msgstr "Jeder kann sehen, wer für was gestimmt hat"
+
+msgctxt "Label for list of participants"
+msgid "Participants"
+msgstr "Teilnehmer"
 
 msgid "Approvals {pros}"
 msgstr "Zustimmungen {pros}"
@@ -552,6 +452,75 @@ msgid ""
 msgstr ""
 "Hier findest du eine personalisierte Übersicht und Empfehlungen für diesen "
 "Prozess."
+
+msgctxt "Argument type"
+msgid "Pro"
+msgstr "Dafür"
+
+msgctxt "Argument type"
+msgid "Contra"
+msgstr "Dagegen"
+
+msgctxt "Argument type"
+msgid "Neutral"
+msgstr "Neutral"
+
+msgid "Argument"
+msgstr "Argument"
+
+msgid "What is the attitude of this argument?"
+msgstr "Was für eine Art Argument ist es?"
+
+msgid "Add"
+msgstr "Hinzufügen"
+
+msgid "Login to add argument"
+msgstr "Melde dich an um ein neues Argument hinzuzufügen"
+
+msgid "Reply"
+msgstr "Antworten"
+
+msgid "Add argument"
+msgstr "Argument hinzufügen"
+
+msgid ""
+"This proposal was derived {count, plural,  =1 {one time} other {# times}}"
+msgstr "Dieser Vorschlag hat {count, plural, =1 {ein Kind} other {# Kinder}}"
+
+msgid ""
+"This proposal {count, plural, =0 {depends on no previous proposals} =1 {is "
+"derived from one proposal} other {combines # proposals}}"
+msgstr ""
+"Dieser Vorschlag {count, plural, =0 {basiert auf keinem anderen Vorschlag} "
+"=1 {basiert auf einem anderen Vorschlag} other {vereinigt # andere "
+"Vorschläge}}"
+
+msgctxt "Overlap of voters"
+msgid "Overlap"
+msgstr "Übereinstimmung"
+
+msgid "{ratioOfVoters, number, ::percent} of approvees"
+msgstr "{ratioOfVoters, number, ::percent} der Wähler"
+
+msgid "Potential approves"
+msgstr "Potentielle Stimmen"
+
+msgid "{ratioOfVoters, number, ::+! percent} more approves"
+msgstr "{ratioOfVoters, number, ::+! percent} mehr Stimmen"
+
+msgctxt "Encourage to form a coalition"
+msgid "Form coalition"
+msgstr "Koalition vorschlagen"
+
+msgctxt "Prompt to merge or fork"
+msgid "Propose a change"
+msgstr "Änderung vorschlagen"
+
+msgid "Argumentation"
+msgstr "Argumentation"
+
+msgid "Possible coalitions"
+msgstr "Mögliche Koalitionen"
 
 msgid "Propose coalition"
 msgstr "Koalition vorschlagen"
@@ -582,9 +551,6 @@ msgstr "Basiert auf"
 msgid "Nothing"
 msgstr "Nichts"
 
-msgid "New proposal"
-msgstr "Neuer Vorschlag"
-
 msgctxt "Label for sort order selection"
 msgid "Sort"
 msgstr "Sortierung"
@@ -600,9 +566,6 @@ msgstr "Alt → Neu"
 msgctxt "Sort order option"
 msgid "Approvals ↓"
 msgstr "Zustimmungen ↓"
-
-msgid "Login to add new argument"
-msgstr "Anmelden um ein neues Argument hinzuzufügen"
 
 msgctxt "Reload content"
 msgid "Refresh"
@@ -635,6 +598,54 @@ msgstr "Dashboard"
 msgctxt "Link to moderation page"
 msgid "Moderation"
 msgstr "Moderation"
+
+msgctxt "URL of a process"
+msgid "URL"
+msgstr "URL"
+
+msgid "Allowed are: lower case letters (a-z), numbers and hyphens"
+msgstr "Erlaubt sind Kleinbuchstaben (a-z), Zahlen und Bindestriche"
+
+msgctxt "What is the process about"
+msgid "What is it about?"
+msgstr "Worum geht es?"
+
+msgid "Does the process end?"
+msgstr "Endet der Prozess?"
+
+msgctxt "When does a process end?"
+msgid "When?"
+msgstr "Wann?"
+
+msgctxt "Label for input field"
+msgid "Participant emails"
+msgstr "Teilnehmer E-Mails"
+
+msgid "{noOfProposals, plural, =1 {# proposal} other {# proposals}}"
+msgstr "{noOfProposals, plural, =1 {# Vorschlag} other {# Vorschläge}}"
+
+msgid "{noOfParticipants, plural, =1 {# participant} other {# participants}}"
+msgstr ""
+"{noOfParticipants, plural, =1 {# Teilnehmer:in} other {# Teilnehmer:innen}}"
+
+msgctxt "Load indicator"
+msgid "Loading..."
+msgstr "Laden…"
+
+msgid "New decision-process"
+msgstr "Neuer Entscheidungsprozess"
+
+msgid "Create new decision-process"
+msgstr "Neuen Entscheidungsprozess erstellen"
+
+msgid "Active decision-processes"
+msgstr "Aktive Entscheidungsprozesse"
+
+#~ msgid "Number of proposals"
+#~ msgstr "Anzahl an Vorschlägen"
+
+#~ msgid "Number of participants"
+#~ msgstr "Anzahl an Teilnehmern"
 
 #~ msgctxt "[aria]"
 #~ msgid "account of current user"
