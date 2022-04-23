@@ -1,11 +1,11 @@
 (ns decide.server-components.config
   (:require
-    [mount.core :refer [defstate args]]
-    [com.fulcrologic.fulcro.server.config :refer [load-config!]]
-    [taoensso.timbre :as log]
-    [clojure.pprint :as pprint]
-    [clojure.java.io :as io]
-    [clojure.edn :as edn]))
+   [clojure.edn :as edn]
+   [clojure.java.io :as io]
+   [clojure.pprint :as pprint]
+   [com.fulcrologic.fulcro.server.config :refer [load-config!]]
+   [mount.core :refer [args defstate]]
+   [taoensso.timbre :as log]))
 
 (defn prettify-data [data]
   (if (string? data)
