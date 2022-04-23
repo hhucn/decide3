@@ -11,6 +11,7 @@
    [decide.models.opinion.api :as opinion.api]
    [decide.models.process :as process]
    [decide.models.proposal :as proposal]
+   [decide.opinion :as opinion]
    [decide.routes :as routes]
    [decide.ui.argumentation :as argumentation.ui]
    [decide.ui.proposal.new-proposal :as new-proposal]
@@ -39,19 +40,19 @@
            ::proposal/my-opinion-value]
    :ident ::proposal/id
    :initial-state (fn [{id ::proposal/id}] {::proposal/id id})}
-  (inputs/button
-    {:variant (if (pos? my-opinion-value) :contained :outlined)
-     :color :primary
-     :onClick #(comp/transact! this [(opinion.api/add {::proposal/id id
-                                                       :opinion (if (pos? my-opinion-value) 0 +1)})])}
-    (if (pos? my-opinion-value)
-      (i18n/tr "Approved")
-      (i18n/tr "Approve"))))
+  (let [logged-in? (comp/shared this :logged-in?)
+        approved?  (opinion/approval-value? my-opinion-value)]
+    (inputs/button
+      {:variant (if approved? :contained :outlined)
+       :disabled (not logged-in?)
+       :color :primary
+       :onClick #(comp/transact! this [(opinion.api/add {::proposal/id id
+                                                         :opinion (if approved? 0 +1)})])}
+      (if approved?
+        (i18n/tr "Approved")
+        (i18n/tr "Approve")))))
 
 (def ui-opinion-section (comp/computed-factory OpinionSection {:keyfn ::proposal/id}))
-;; endregion
-
-
 ;; endregion
 
 ;; region Parent section
