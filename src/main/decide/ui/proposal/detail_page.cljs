@@ -241,7 +241,10 @@
          :>/similar-section (comp/get-initial-state SimilarSection params)
          :>/argumentation-section (comp/get-initial-state argumentation.ui/ArgumentList params)})
       (df/load! app ident ProposalPage
-        {:without #{:>/argumentation-section}})
+        {:without #{:>/argumentation-section :>/similar-section}})
+      (df/load! app ident ProposalPage
+        {:focus [:>/similar-section]
+         :marker [::similar-section ident]})
       (df/load! app ident ProposalPage
         {:focus [:>/argumentation-section]
          :without #{:argument/premise->arguments}
@@ -275,8 +278,10 @@
   (let [{::process/keys [slug] :as process} current-process
         logged-in?            (comp/shared this :logged-in?)
         process-over?         (process/over? process)
-        has-children?         (seq (:child-relations children-section))
-        show-similar-section? (and (not (process/single-approve? process)) (seq (:similar similar-section)))
+        has-children?         (not (empty? (:child-relations children-section)))
+        show-similar-section? (and
+                                (not (process/single-approve? process))
+                                (not (empty? (:similar similar-section))))
         show-right-side?      (or has-children? show-similar-section?)
         show-add-dialog       (hooks/use-callback
                                 (fn [& idents]
