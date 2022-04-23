@@ -14,7 +14,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Deps: org.bouncycastle/bcprov-jdk15on:1.70" level="project" />
     <orderEntry type="library" name="Deps: buddy/buddy-core:1.10.413" level="project" />
-    <orderEntry type="library" name="Deps: org.clojure/clojure:1.11.0" level="project" />
+    <orderEntry type="library" name="Deps: org.clojure/clojure:1.11.1" level="project" />
     <orderEntry type="library" name="Deps: commons-codec:1.15" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/tools.analyzer:1.0.0" level="project" />
     <orderEntry type="library" name="Deps: com.fulcrologic/guardrails:1.1.11" level="project" />
