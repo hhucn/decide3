@@ -4,7 +4,7 @@
    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
    [com.fulcrologic.fulcro.data-fetch :as df]
    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
-   [com.fulcrologic.fulcro.react.hooks :as hooks]
+   [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
    [decide.models.process :as process]
    [decide.models.process.mutations :as process.mutations]
    [decide.routes :as routes]
@@ -15,9 +15,9 @@
    [mui.inputs :as inputs]
    [mui.layout :as layout]
    [mui.layout.grid :as grid]
-   [mui.surfaces.card :as card]
    ["@mui/icons-material/EmojiObjectsOutlined" :default EmojiObjectsOutlinedIcon]
-   ["@mui/icons-material/Group" :default GroupIcon]))
+   ["@mui/icons-material/Group" :default GroupIcon]
+   [mui.surfaces.card :as card]))
 
 (def page-ident [:PAGE :processes-list-page])
 
@@ -61,10 +61,7 @@
 (defsc AllProcessesList [this {:root/keys [all-processes] :as props}]
   {:query [{[:root/all-processes '_] (comp/get-query ProcessListEntry)}
            [df/marker-table :all-processes]]
-   :initial-state (fn [_] {})
-   :use-hooks? true}
-  (hooks/use-lifecycle ; TODO This feels bad... Better to load somewhere before this even gets rendered.
-    #(df/load! this :root/all-processes ProcessListEntry {:marker :all-processes}))
+   :initial-state {}}
   (let [loading? (df/loading? (get props [df/marker-table :all-processes]))]
     (comp/fragment
       (grid/container {:spacing 1}
@@ -100,10 +97,16 @@
            :ui/new-process-dialog-open?
            {:new-process-form (comp/get-query process-forms/NewProcessForm)}]
    :ident (fn [] page-ident)
-   :initial-state (fn [_] {:all-processes-list (comp/get-initial-state AllProcessesList)
-                           :ui/new-process-dialog-open? false
-                           :new-process-form (comp/get-initial-state process-forms/NewProcessForm)})
-   :route-segment (routes/segment ::routes/process-list)}
+   :initial-state {:ui/new-process-dialog-open? false
+                   :new-process-form {}
+                   :all-processes-list {}}
+   :route-segment (routes/segment ::routes/process-list)
+   :will-enter (fn [app]
+                 (let [target (comp/get-ident ProcessesPage nil)]
+                   (dr/route-deferred target
+                     (fn []
+                       (df/load! app :root/all-processes ProcessListEntry {:marker :all-processes})
+                       (dr/target-ready! app target)))))}
   (let [logged-in?         (comp/shared this :logged-in?)
         new-process-button (inputs/button {:variant :contained
                                            :color :primary
