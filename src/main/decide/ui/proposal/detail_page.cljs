@@ -1,26 +1,27 @@
 (ns decide.ui.proposal.detail-page
   (:require
-    [com.fulcrologic.fulcro-i18n.i18n :as i18n]
-    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-    [com.fulcrologic.fulcro.data-fetch :as df]
-    [com.fulcrologic.fulcro.dom :as dom]
-    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
-    [com.fulcrologic.fulcro.react.hooks :as hooks]
-    [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
-    [decide.models.opinion.api :as opinion.api]
-    [decide.models.process :as process]
-    [decide.models.proposal :as proposal]
-    [decide.routes :as routes]
-    [decide.ui.argumentation :as argumentation.ui]
-    [decide.ui.proposal.new-proposal :as new-proposal]
-    [decide.utils.breakpoint :as breakpoint]
-    [mui.data-display :as dd]
-    [mui.data-display.list :as list]
-    [mui.inputs :as inputs]
-    [mui.layout :as layout]
-    [mui.layout.grid :as grid]
-    [mui.surfaces :as surfaces]
-    [mui.surfaces.card :as card]))
+   [com.fulcrologic.fulcro-i18n.i18n :as i18n]
+   [com.fulcrologic.fulcro.algorithms.merge :as mrg]
+   [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+   [com.fulcrologic.fulcro.data-fetch :as df]
+   [com.fulcrologic.fulcro.dom :as dom]
+   [com.fulcrologic.fulcro.mutations :refer [defmutation]]
+   [com.fulcrologic.fulcro.react.hooks :as hooks]
+   [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
+   [decide.models.opinion.api :as opinion.api]
+   [decide.models.process :as process]
+   [decide.models.proposal :as proposal]
+   [decide.routes :as routes]
+   [decide.ui.argumentation :as argumentation.ui]
+   [decide.ui.proposal.new-proposal :as new-proposal]
+   [decide.utils.breakpoint :as breakpoint]
+   [mui.data-display :as dd]
+   [mui.data-display.list :as list]
+   [mui.inputs :as inputs]
+   [mui.layout :as layout]
+   [mui.layout.grid :as grid]
+   [mui.surfaces :as surfaces]
+   [mui.surfaces.card :as card]))
 
 (declare ProposalPage)
 
@@ -36,7 +37,8 @@
   {:query [::proposal/id
            ::proposal/pro-votes
            ::proposal/my-opinion-value]
-   :ident ::proposal/id}
+   :ident ::proposal/id
+   :initial-state (fn [{id ::proposal/id}] {::proposal/id id})}
   (inputs/button
     {:variant (if (pos? my-opinion-value) :contained :outlined)
      :color :primary
@@ -79,7 +81,11 @@
 (defsc ChildrenSection [_ {:keys [child-relations]}]
   {:query [::proposal/id
            {:child-relations (comp/get-query Relationship)}]
-   :ident ::proposal/id}
+   :ident ::proposal/id
+   :initial-state
+   (fn [{id ::proposal/id}]
+     {::proposal/id id
+      :child-relations []})}
   (grid/item {:xs 12 :component "section"}
     (section
       (i18n/trf "This proposal was derived {count, plural,  =1 {one time} other {# times}}" {:count (count child-relations)})
@@ -105,7 +111,10 @@
 (defsc SmallParentSection [_ {:keys [parent-relations]}]
   {:query [::proposal/id
            {:parent-relations (comp/get-query Relationship)}]
-   :ident ::proposal/id}
+   :ident ::proposal/id
+   :initial-state
+   (fn [{id ::proposal/id}]
+     {::proposal/id id})}
   (when-not (empty? parent-relations)
     (dd/typography {:component :label
                     :variant :caption}
@@ -195,13 +204,15 @@
                                                    process-over?]}]
   {:query [::proposal/id
            {:similar (comp/get-query SimilarEntry)}]
-   :ident ::proposal/id}
+   :ident ::proposal/id
+   :initial-state (fn [{id ::proposal/id}] {::proposal/id id})}
   (list/list
     {:dense true
      :disablePadding true}
-    (for [sim similar
+    (for [sim (reverse (sort-by (juxt :common-uniques :other-uniques) similar))
           :let [entry (ui-similarity-entry sim {:show-add-dialog show-add-dialog
-                                                :process-over? process-over?})]]
+                                                :process-over? process-over?})]
+          :when (pos? (:other-uniques sim))]
       (list/item
         {:key (.-key entry)
          :disableGutters true}
@@ -217,23 +228,30 @@
 
 (declare ProposalPage)
 
-(defmutation init-proposal-page [_]
-  (action [{:keys [app ref]}]
-    (df/load! app ref ProposalPage
-      {:without #{::proposal/positions}
-       :post-mutation `dr/target-ready
-       :post-mutation-params {:target ref}})
-    (df/load! app ref ProposalPage
-      {:focus [:>/argumentation-section]
-       :without #{:argument/premise->arguments}
-       :marker [:load-argument-section ref]})))
+(defmutation init-proposal-page [{id ::proposal/id :as params}]
+  (action [{:keys [app]}]
+    (let [ident (comp/get-ident ProposalPage {::proposal/id id})]
+      (mrg/merge-component! app ProposalPage
+        {::proposal/id id
+         :>/children-section (comp/get-initial-state ChildrenSection params)
+         :>/parent-section (comp/get-initial-state SmallParentSection params)
+         :>/opinion-section (comp/get-initial-state OpinionSection params)
+         :>/similar-section (comp/get-initial-state SimilarSection params)
+         :>/argumentation-section (comp/get-initial-state argumentation.ui/ArgumentList params)})
+      (df/load! app ident ProposalPage
+        {:without #{:>/argumentation-section}})
+      (df/load! app ident ProposalPage
+        {:focus [:>/argumentation-section]
+         :without #{:argument/premise->arguments}
+         :marker [::load-argument-section ident]}))))
 
 
 (defsc ProposalPage
-  [this {::proposal/keys [title body]
+  [this {::proposal/keys [id title body]
          :keys [ui/current-process]
          :>/keys [parent-section children-section opinion-section similar-section argumentation-section]}]
-  {:query [::proposal/id
+  {:ident ::proposal/id
+   :query [::proposal/id
            ::proposal/title ::proposal/body
            {:>/children-section (comp/get-query ChildrenSection)}
            {:>/parent-section (comp/get-query SmallParentSection)}
@@ -241,30 +259,30 @@
            {:>/similar-section (comp/get-query SimilarSection)}
            {:>/argumentation-section (comp/get-query argumentation.ui/ArgumentList)}
            {[:ui/current-process '_] (comp/get-query Process)}]
-   :ident ::proposal/id
-   :use-hooks? true
    :route-segment (routes/segment ::routes/proposal-detail-page)
    :will-enter
    (fn will-enter-proposal-page
      [app {:proposal/keys [id]}]
-     (let [ident (comp/get-ident ProposalPage {::proposal/id (cond-> id (string? id) uuid)})]
+     (let [id    (cond-> id (string? id) uuid)
+           ident (comp/get-ident ProposalPage {::proposal/id id})]
        (dr/route-deferred ident
-         #(comp/transact! app [(init-proposal-page {})]
-            {:ref ident :only-refresh [ident]}))))}
+         #(comp/transact! app [(init-proposal-page {::proposal/id id})
+                               (dr/target-ready {:target ident})]
+            {:only-refresh [ident]}))))
+   :use-hooks? true}
   (let [{::process/keys [slug] :as process} current-process
-        logged-in? (comp/shared this :logged-in?)
-        process-over? (process/over? process)
-        has-children? (seq (:child-relations children-section))
-        show-similar-section? (and (process/single-approve? process)
-                                (seq (:similar similar-section)))
-        show-right-side? (or has-children? show-similar-section?)
-        show-add-dialog (hooks/use-callback
-                          (fn [& idents]
-                            (comp/transact! this
-                              [(new-proposal/show
-                                 {:slug slug
-                                  :parents (apply vector (comp/get-ident this) idents)})]))
-                          [slug])]
+        logged-in?            (comp/shared this :logged-in?)
+        process-over?         (process/over? process)
+        has-children?         (seq (:child-relations children-section))
+        show-similar-section? (and (not (process/single-approve? process)) (seq (:similar similar-section)))
+        show-right-side?      (or has-children? show-similar-section?)
+        show-add-dialog       (hooks/use-callback
+                                (fn [& idents]
+                                  (comp/transact! this
+                                    [(new-proposal/show
+                                       {:slug slug
+                                        :parents (apply vector (comp/get-ident this) idents)})]))
+                                [slug])]
     (layout/container {:maxWidth :xl :disableGutters (breakpoint/<=? "sm")}
       (surfaces/paper {:sx {:mt 2 :p 2}}
         (grid/container {:spacing 2 :component "main"}
@@ -302,7 +320,7 @@
                 (argumentation.ui/ui-argument-list argumentation-section))))
 
           ;; Right side
-          (when-not show-right-side?
+          (when show-right-side?
             (grid/item {:xs 12 :lg 4 :component "section"}
               (when has-children?
                 (ui-children-section children-section))
