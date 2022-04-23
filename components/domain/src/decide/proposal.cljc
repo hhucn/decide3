@@ -5,10 +5,11 @@
     [com.fulcrologic.guardrails.core :refer [>def]]
     [decide.specs.common :as common]))
 
+(def title-char-limit 80)
 
 (>def ::id uuid?)
 (>def ::nice-id pos-int?)
-(>def ::title ::common/non-blank-string)
+(>def ::title (s/and ::common/non-blank-string (common/limited-str {:max-length title-char-limit})))
 (>def ::body string?)
 (>def ::created inst?)
 (>def ::parents (s/coll-of (s/keys :req [::id]) :distinct true))

@@ -1,35 +1,36 @@
 (ns decide.ui.proposal.new-proposal
   (:require
-    [cljs.spec.alpha :as s]
-    [clojure.string :as str]
-    [com.fulcrologic.fulcro-i18n.i18n :as i18n]
-    [com.fulcrologic.fulcro.algorithms.merge :as mrg]
-    [com.fulcrologic.fulcro.algorithms.normalized-state :as norm]
-    [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
-    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-    [com.fulcrologic.fulcro.data-fetch :as df]
-    [com.fulcrologic.fulcro.dom :as dom]
-    [com.fulcrologic.fulcro.dom.events :as evt]
-    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
-    [com.fulcrologic.fulcro.react.hooks :as hooks]
-    [com.fulcrologic.guardrails.core :refer [>defn >defn- =>]]
-    [decide.models.process :as process]
-    [decide.models.process.mutations :as process.mutations]
-    [decide.models.proposal :as proposal]
-    [decide.utils.breakpoint :as breakpoint]
-    [mui.data-display :as dd]
-    [mui.data-display.list :as list]
-    [mui.feedback.dialog :as dialog]
-    [mui.inputs :as inputs]
-    [mui.inputs.form :as form]
-    [mui.layout :as layout]
-    [mui.layout.grid :as grid]
-    [mui.navigation.stepper :as stepper]
-    ["@mui/icons-material/Add" :default Add]
-    ["@mui/icons-material/Close" :default Close]
-    ["@mui/icons-material/FileCopyOutlined" :default FileCopy]
-    ["@mui/icons-material/KeyboardReturn" :default KeyboardReturn]
-    ["@mui/icons-material/MergeType" :default MergeType]))
+   [cljs.spec.alpha :as s]
+   [clojure.string :as str]
+   [com.fulcrologic.fulcro-i18n.i18n :as i18n]
+   [com.fulcrologic.fulcro.algorithms.merge :as mrg]
+   [com.fulcrologic.fulcro.algorithms.normalized-state :as norm]
+   [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
+   [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+   [com.fulcrologic.fulcro.data-fetch :as df]
+   [com.fulcrologic.fulcro.dom :as dom]
+   [com.fulcrologic.fulcro.dom.events :as evt]
+   [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+   [com.fulcrologic.fulcro.react.hooks :as hooks]
+   [com.fulcrologic.guardrails.core :refer [=> >defn >defn-]]
+   [decide.models.process :as process]
+   [decide.models.process.mutations :as process.mutations]
+   [decide.models.proposal :as proposal]
+   [decide.proposal :as proposal.new]
+   [decide.utils.breakpoint :as breakpoint]
+   [mui.data-display :as dd]
+   [mui.data-display.list :as list]
+   [mui.feedback.dialog :as dialog]
+   [mui.inputs :as inputs]
+   [mui.inputs.form :as form]
+   [mui.layout :as layout]
+   [mui.layout.grid :as grid]
+   [mui.navigation.stepper :as stepper]
+   ["@mui/icons-material/Add" :default Add]
+   ["@mui/icons-material/Close" :default Close]
+   ["@mui/icons-material/FileCopyOutlined" :default FileCopy]
+   ["@mui/icons-material/KeyboardReturn" :default KeyboardReturn]
+   ["@mui/icons-material/MergeType" :default MergeType]))
 
 
 (declare NewProposalFormDialog)
@@ -341,7 +342,8 @@
                  :value title
                  :onChange change-title
                  :margin "normal"
-                 :inputProps {:required true}})
+                 :inputProps {:required true
+                              :maxLength proposal.new/title-char-limit}})
 
               ;; Body
               (inputs/textfield
