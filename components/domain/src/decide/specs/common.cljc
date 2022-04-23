@@ -33,6 +33,10 @@
 (defn email? [email]
   (boolean (re-matches email-pattern email)))
 
+(defn limited-str [{:keys [max-length]}]
+  (fn [s]
+    (<= (count s) max-length)))
+
 ;;; Specs
 (s/def ::email #?(:clj  (s/with-gen email? email-gen)
                   :cljs (s/and string? email?)))
