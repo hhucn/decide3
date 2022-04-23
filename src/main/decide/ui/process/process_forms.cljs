@@ -43,7 +43,7 @@
     (map ui-participant participants)))
 
 (defsc NewProcessForm [this {:ui/keys [title slug description with-end? public?]} {:keys [onSubmit]}]
-  {:ident (fn [] [:form/id ::NewProcessForm])
+  {:ident (fn [] [:component/id ::NewProcessForm])
    :query [:ui/title
            :ui/slug
            :ui/description

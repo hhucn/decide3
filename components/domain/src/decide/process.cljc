@@ -1,12 +1,14 @@
 (ns decide.process
   (:require
-    [clojure.set :as set]
-    [#?(:default clojure.spec.alpha
-        :cljs    cljs.spec.alpha) :as s]
-    [com.fulcrologic.guardrails.core :refer [>def >defn >defn- => | ? <-]]
-    [decide.specs.common :as common]
-    [decide.user :as user]
-    [decide.utils.slugify :as slugify]))
+   [clojure.set :as set]
+   [#?(:default clojure.spec.alpha
+       :cljs    cljs.spec.alpha) :as s]
+   [com.fulcrologic.guardrails.core :refer [>def >defn >defn- => | ? <-]]
+   [decide.specs.common :as common]
+   [decide.user :as user]
+   [decide.utils.slugify :as slugify]))
+
+(def title-char-limit 100)
 
 (def features
   #{;;Participants may only approve to a single proposal.
