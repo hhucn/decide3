@@ -178,7 +178,7 @@
 (def ui-parent-step (comp/computed-factory ParentStep))
 ;; endregion
 
-(defmutation show [{:keys [title body parents]
+(defmutation show [{:keys [title body parents step]
                     :or {title "" body "" parents []}}]
   (action [{:keys [app state]}]
     (when-let [ident (get @state :ui/current-process)]
@@ -190,7 +190,11 @@
       :ui/title title
       :ui/body body
       :parents parents
-      :ui/step (if (empty? parents) 0 1))))
+      :ui/step (or step
+                 (case (count parents)
+                   0 0
+                   1 1
+                   2)))))
 
 
 (defsc Parent [this {::proposal/keys [id title]}]

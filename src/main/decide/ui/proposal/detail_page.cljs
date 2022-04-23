@@ -288,7 +288,8 @@
                                   (comp/transact! this
                                     [(new-proposal/show
                                        {:slug slug
-                                        :parents (apply vector (comp/get-ident this) idents)})]))
+                                        :parents (apply vector (comp/get-ident this) idents)
+                                        :step 2})]))
                                 [slug])]
     (layout/container {:maxWidth :xl :disableGutters (breakpoint/<=? "sm")}
       (surfaces/paper {:sx {:mt 2 :p 2}}
