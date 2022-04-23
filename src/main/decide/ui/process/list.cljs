@@ -1,24 +1,23 @@
 (ns decide.ui.process.list
   (:require
-    [com.fulcrologic.fulcro-i18n.i18n :as i18n]
-    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-    [com.fulcrologic.fulcro.data-fetch :as df]
-    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
-    [com.fulcrologic.fulcro.react.hooks :as hooks]
-    [decide.models.process :as process]
-    [decide.models.process.mutations :as process.mutations]
-    [decide.routes :as routes]
-    [decide.ui.process.process-forms :as process-forms]
-    [mui.data-display :as dd]
-    [mui.feedback.dialog :as dialog]
-    [mui.inputs :as inputs]
-    [mui.feedback.skeleton :refer [skeleton]]
-    [mui.layout :as layout]
-    [mui.layout.grid :as grid]
-    [mui.surfaces :as surfaces]
-    [mui.surfaces.card :as card]
-    ["@mui/icons-material/EmojiObjectsOutlined" :default EmojiObjectsOutlinedIcon]
-    ["@mui/icons-material/Group" :default GroupIcon]))
+   [com.fulcrologic.fulcro-i18n.i18n :as i18n]
+   [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+   [com.fulcrologic.fulcro.data-fetch :as df]
+   [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+   [com.fulcrologic.fulcro.react.hooks :as hooks]
+   [decide.models.process :as process]
+   [decide.models.process.mutations :as process.mutations]
+   [decide.routes :as routes]
+   [decide.ui.process.process-forms :as process-forms]
+   [mui.data-display :as dd]
+   [mui.feedback.dialog :as dialog]
+   [mui.feedback.skeleton :refer [skeleton]]
+   [mui.inputs :as inputs]
+   [mui.layout :as layout]
+   [mui.layout.grid :as grid]
+   [mui.surfaces.card :as card]
+   ["@mui/icons-material/EmojiObjectsOutlined" :default EmojiObjectsOutlinedIcon]
+   ["@mui/icons-material/Group" :default GroupIcon]))
 
 (def page-ident [:PAGE :processes-list-page])
 
@@ -93,42 +92,35 @@
                                               :participant-emails participant-emails})])
                      #_(close))}))))
 
-(defsc ProcessesPage [this {:keys [all-processes-list root/current-session
+(defsc ProcessesPage [this {:keys [all-processes-list
                                    ui/new-process-dialog-open?
 
                                    new-process-form]}]
   {:query [{:all-processes-list (comp/get-query AllProcessesList)}
            :ui/new-process-dialog-open?
-           {:new-process-form (comp/get-query process-forms/NewProcessForm)}
-           [:root/current-session '_]]
+           {:new-process-form (comp/get-query process-forms/NewProcessForm)}]
    :ident (fn [] page-ident)
    :initial-state (fn [_] {:all-processes-list (comp/get-initial-state AllProcessesList)
                            :ui/new-process-dialog-open? false
                            :new-process-form (comp/get-initial-state process-forms/NewProcessForm)})
    :route-segment (routes/segment ::routes/process-list)}
-  (let [logged-in? (get current-session :session/valid? false)]
+  (let [logged-in?         (comp/shared this :logged-in?)
+        new-process-button (inputs/button {:variant :contained
+                                           :color :primary
+                                           :disabled (not logged-in?)
+                                           :fullWidth true
+                                           :size :large
+                                           :sx {:my 2}
+                                           :onClick #(m/toggle! this :ui/new-process-dialog-open?)}
+                             (i18n/tr "Create new decision-process"))]
     (layout/container {}
       (dd/typography {:component :h1 :variant :h2} (i18n/tr "Active decision-processes"))
 
-      (inputs/button {:variant :contained
-                      :color :primary
-                      :disabled (not logged-in?)
-                      :fullWidth true
-                      :size :large
-                      :sx {:my 2}
-                      :onClick #(m/toggle! this :ui/new-process-dialog-open?)}
-        (i18n/tr "Create new decision-process"))
+      new-process-button
 
       (ui-all-process-list all-processes-list)
 
-      (inputs/button {:variant :text
-                      :color :primary
-                      :disabled (not logged-in?)
-                      :fullWidth true
-                      :size :large
-                      :sx {:my 2}
-                      :onClick #(m/toggle! this :ui/new-process-dialog-open?)}
-        (i18n/tr "Create new decision-process"))
+      new-process-button
 
       (new-process-dialog this {:close #(m/set-value! this :ui/new-process-dialog-open? false)
                                 :new-process-dialog-open? new-process-dialog-open?
