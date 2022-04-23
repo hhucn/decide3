@@ -1,8 +1,8 @@
 (ns decide.ui.components.dialog
   (:require
-    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
-    [mui.feedback.dialog :as dialog]))
+   [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+   [com.fulcrologic.fulcro.mutations :refer [defmutation]]
+   [mui.feedback.dialog :as dialog]))
 
 (defmutation open [{:keys [id]}]
   (action [{:keys [state]}]
@@ -14,8 +14,7 @@
 
 (defn close! [this id]
   (comp/transact! this [(close {:id id})]
-    {:compressible? true
-     :only-refresh [[:dialog/id id]]}))
+    {:compressible? true}))
 
 (defmutation toggle [{:keys [id]}]
   (action [{:keys [state]}]
@@ -23,8 +22,7 @@
 
 (defn toggle! [this id]
   (comp/transact! this [(toggle {:id id})]
-    {:compressible? true
-     :only-refresh [[:dialog/id id]]}))
+    {:compressible? true}))
 
 (defsc Dialog [this
                {:keys [dialog/id ui/open?]}
