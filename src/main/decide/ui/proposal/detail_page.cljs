@@ -172,8 +172,9 @@
 
            {:other-proposal (comp/get-query SimilarProposal)}
            :other-uniques]}
-  (let [others-total (+ common-uniques other-uniques)
-        own-total (+ own-uniques common-uniques)]
+  (let [logged-in?   (comp/shared this :logged-in?)
+        others-total (+ common-uniques other-uniques)
+        own-total    (+ own-uniques common-uniques)]
     (card/card {:variant :outlined :style {:flexGrow 1}}
       (card/action-area {:href (str (::proposal/id other-proposal))}
         (card/header {:title (ui-similar-proposal other-proposal)})
@@ -194,6 +195,7 @@
         (card/actions {}
           (inputs/button
             {:color :secondary
+             :disabled (not logged-in?)
              :onClick #(show-add-dialog (comp/get-ident SimilarProposal other-proposal))}
             (i18n/trc "Encourage to form a coalition" "Form coalition")))))))
 
