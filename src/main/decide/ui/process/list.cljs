@@ -39,7 +39,7 @@
    :use-hooks? true}
   (grid/item {:xs 12}
     (card/card {}
-      (card/action-area {:href (str "/decision/" slug "/home")}
+      (card/action-area {:href (routes/href ::routes/process-home {:process/slug slug})}
         (card/header {:title title})
         (card/content {} description))
 
