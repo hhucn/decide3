@@ -31,7 +31,7 @@
         io.replikativ/datahike {:mvn/version "0.4.1491"}
         com.github.mrebbinghaus/fulcro-material-ui-wrapper
         {:git/url "https://github.com/MrEbbinghaus/fulcro-material-ui-wrapper"
-         :sha "841bd024bd336363091dd6c49c6f003f29c44788"}
+         :sha "7c53478ca57bf4576e73ebb21194c0c1a3bed08d"}
 
         ring/ring-core {:mvn/version "1.9.5"}
         ring/ring-defaults {:mvn/version "0.3.3"}

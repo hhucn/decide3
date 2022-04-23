@@ -1,30 +1,30 @@
 (ns decide.ui.root
   (:require
-    [com.fulcrologic.fulcro-i18n.i18n :as i18n]
-    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-    [com.fulcrologic.fulcro.dom :as dom]
-    [com.fulcrologic.fulcro.mutations :refer [defmutation]]
-    [com.fulcrologic.fulcro.react.hooks :as hooks]
-    [com.fulcrologic.fulcro.routing.dynamic-routing :refer [defrouter]]
-    [decide.models.authorization :as auth]
-    [decide.ui.components.appbar :as appbar]
-    [decide.ui.components.nav-drawer :as nav-drawer]
-    [decide.ui.components.snackbar :as snackbar]
-    [decide.ui.login :as login]
-    [decide.ui.meta :as meta]
-    [decide.ui.pages.help :as help]
-    [decide.ui.pages.settings :as settings]
-    [decide.ui.pages.splash :as splash]
-    [decide.ui.process.core :as process-page]
-    [decide.ui.process.list :as process.list]
-    [decide.ui.storage :as storage]
-    [decide.ui.theming.dark-mode :as dark-mode]
-    [decide.ui.theming.themes :as themes]
-    [mui.styles :as styles]
-    [mui.utils :as m.utils]
-    [mui.x.date-pickers :as date-pickers]
-    [taoensso.timbre :as log]
-    ["@mui/lab/AdapterDateFns" :default DateAdapter]))
+   [com.fulcrologic.fulcro-i18n.i18n :as i18n]
+   [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+   [com.fulcrologic.fulcro.dom :as dom]
+   [com.fulcrologic.fulcro.mutations :refer [defmutation]]
+   [com.fulcrologic.fulcro.react.hooks :as hooks]
+   [com.fulcrologic.fulcro.routing.dynamic-routing :refer [defrouter]]
+   [decide.models.authorization :as auth]
+   [decide.ui.components.appbar :as appbar]
+   [decide.ui.components.nav-drawer :as nav-drawer]
+   [decide.ui.components.snackbar :as snackbar]
+   [decide.ui.login :as login]
+   [decide.ui.meta :as meta]
+   [decide.ui.pages.help :as help]
+   [decide.ui.pages.settings :as settings]
+   [decide.ui.pages.splash :as splash]
+   [decide.ui.process.core :as process-page]
+   [decide.ui.process.list :as process.list]
+   [decide.ui.storage :as storage]
+   [decide.ui.theming.dark-mode :as dark-mode]
+   [decide.ui.theming.themes :as themes]
+   [mui.styles :as styles]
+   [mui.utils :as m.utils]
+   [mui.x.date-pickers :as date-pickers]
+   [taoensso.timbre :as log]
+   ["@mui/x-date-pickers/AdapterDateFns" :refer [AdapterDateFns]]))
 
 (defrouter RootRouter [_this {:keys [current-state]}]
   {:router-targets [process.list/ProcessesPage
@@ -79,7 +79,7 @@
           #(let [new-theme (if (.-matches %) :dark :light)]
              (comp/transact! (comp/any->app this)
                [(set-theme {:theme new-theme})])))))
-    (date-pickers/localization-provider #js {:dateAdapter DateAdapter}
+    (date-pickers/localization-provider #js {:dateAdapter AdapterDateFns}
       (styles/theme-provider {:theme (themes/get-mui-theme (if (= :auto manual-theme) theme manual-theme))}
         (meta/ui-meta (get props meta/root-key))
         (storage/ui-localstorage localstorage)

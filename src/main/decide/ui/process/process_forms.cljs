@@ -1,25 +1,27 @@
 (ns decide.ui.process.process-forms
   (:require
-    [clojure.string :as str]
-    [com.fulcrologic.fulcro-i18n.i18n :as i18n]
-    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-    [com.fulcrologic.fulcro.dom :as dom]
-    [com.fulcrologic.fulcro.dom.events :as evt]
-    [com.fulcrologic.fulcro.react.hooks :as hooks]
-    [decide.models.process :as model.process]
-    [decide.models.user :as user]
-    [decide.utils.slugify]
-    [mui.data-display :as dd]
-    [mui.data-display.list :as list]
-    [mui.inputs :as inputs]
-    [mui.inputs.form :as form]
-    [mui.inputs.input :as input]
-    [mui.layout :as layout]
-    [mui.layout.grid :as grid]
-    [mui.surfaces :as surfaces]
-    [mui.transitions :as transitions]
-    [mui.x.date-pickers :as date-pickers]
-    [taoensso.timbre :as log]))
+   [clojure.string :as str]
+   [com.fulcrologic.fulcro-i18n.i18n :as i18n]
+   [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+   [com.fulcrologic.fulcro.dom :as dom]
+   [com.fulcrologic.fulcro.dom.events :as evt]
+   [com.fulcrologic.fulcro.mutations :as m]
+   [com.fulcrologic.fulcro.react.hooks :as hooks]
+   [decide.models.process :as model.process]
+   [decide.models.user :as user]
+   [decide.process :as process]
+   [decide.utils.slugify :as slugify]
+   [mui.data-display :as dd]
+   [mui.data-display.list :as list]
+   [mui.inputs :as inputs]
+   [mui.inputs.form :as form]
+   [mui.inputs.input :as input]
+   [mui.layout :as layout]
+   [mui.layout.grid :as grid]
+   [mui.surfaces :as surfaces]
+   [mui.transitions :as transitions]
+   [mui.x.date-pickers :as date-pickers]
+   [taoensso.timbre :as log]))
 
 
 (def default-input-props
@@ -34,34 +36,42 @@
   (list/item {}
     (list/item-text {} display-name)))
 
-(def ui-participant (comp/computed-factory Participant))
+(def ui-participant (comp/computed-factory Participant {:keyfn ::user/id}))
 
 (defn participant-list [{:keys [participants]}]
   (list/list {}
     (map ui-participant participants)))
 
-(defsc NewProcessForm [_ {:keys []} {:keys [onSubmit]}]
-  {:query []
-   :initial-state {}
+(defsc NewProcessForm [this {:ui/keys [title slug description with-end? public?]} {:keys [onSubmit]}]
+  {:ident (fn [] [:form/id ::NewProcessForm])
+   :query [:ui/title
+           :ui/slug
+           :ui/description
+           :ui/with-end?
+           :ui/public?]
+   :initial-state {:ui/title ""
+                   :ui/slug ""
+                   :ui/description ""
+                   :ui/with-end? false
+                   :ui/public? true}
    :use-hooks? true}
-  (let [[title change-title] (hooks/use-state "")
-        title-max-length 100
-        [description change-description] (hooks/use-state "")
-        [auto-slug? set-auto-slug] (hooks/use-state true)
-        [slug change-slug] (hooks/use-state "")
-        [with-end? set-with-end?] (hooks/use-state false)
+  (let [title-max-length process/title-char-limit
         [end-time set-end-time] (hooks/use-state nil)
-        [public? set-public?] (hooks/use-state true)
         [participants set-participants] (hooks/use-state #{})
         [participants-field-text set-participants-field] (hooks/use-state "")
-        update-title (hooks/use-callback (fn [e] (let [value (evt/target-value e)]
-                                                   (change-title value)
-                                                   (set-auto-slug true))))]
+        update-title     (hooks/use-callback
+                           (fn [e] (let [value (evt/target-value e)]
+                                     (comp/transact!! this
+                                       [(m/set-props {:ui/title value
+                                                      :ui/slug (if (str/blank? value)
+                                                                 value
+                                                                 (slugify/slugify value))})]
+                                       {:compressible? true}))))]
     (layout/box {:component :form
                  :onSubmit (fn [e]
                              (evt/prevent-default! e)
                              (onSubmit {::model.process/title title
-                                        ::model.process/slug (slugify/slugify (if auto-slug? title slug))
+                                        ::model.process/slug slug
                                         ::model.process/description description
                                         ::model.process/end-time (when with-end? end-time)
                                         ::model.process/type (if public? ::model.process/type.public ::model.process/type.private)
@@ -74,8 +84,8 @@
              :required true
              :value title
              :onChange update-title
-             :error close-to-max?
-             :helperText (str length "/" title-max-length)
+             :helperText (when close-to-max?
+                           (str length "/" title-max-length))
              :autoFocus true
              :inputProps {:maxLength title-max-length}})))
 
@@ -83,11 +93,14 @@
         (merge default-input-props
           {:label (i18n/trc "URL of a process" "URL")
            :helperText (i18n/tr "Allowed are: lower case letters (a-z), numbers and hyphens")
-           :value (if auto-slug? (slugify/slugify title) slug)
-           :onChange (fn [e]
-                       (let [value (evt/target-value e)]
-                         (set-auto-slug false)
-                         (change-slug (slugify/slugify value))))
+           :value slug
+           :onChange
+           (fn [e]
+             (let [value (evt/target-value e)]
+               (m/set-string!! this :ui/slug :value
+                 (if (str/blank? value)
+                   value
+                   (slugify/slugify value)))))
            :inputProps {:maxLength title-max-length}
            :InputProps {:startAdornment (input/adornment {:position :start} (str (-> js/document .-location .-host) "/decision/"))}}))
 
@@ -97,7 +110,7 @@
            :multiline true
            :rows 7
            :value description
-           :onChange #(change-description (evt/target-value %))}))
+           :onChange #(m/set-string!! this :ui/description :event %)}))
 
       (dom/div {}
         (form/group {:row true}
@@ -105,7 +118,7 @@
             {:label (i18n/tr "Does the process end?")
              :color "textSecondary"
              :checked with-end?
-             :onChange #(set-with-end? (not with-end?))
+             :onChange #(m/toggle!! this :ui/with-end?)
              :control (inputs/switch {})}))
 
         (transitions/collapse {:in with-end?}
@@ -122,7 +135,7 @@
             {:label (i18n/tr "Is the process public?")
              :color "textSecondary"
              :checked public?
-             :onChange #(set-public? (not public?))
+             :onChange #(m/toggle!! this :ui/public?)
              :control (inputs/switch {})}))
 
         (when (seq participants)
