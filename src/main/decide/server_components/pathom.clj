@@ -1,25 +1,26 @@
 (ns decide.server-components.pathom
   (:require
-    [clojure.spec.alpha :as s]
-    [clojure.string :as str]
-    [com.fulcrologic.rad.pathom :as rad-pathom]
-    [com.wsscode.pathom.connect :as pc]
-    [com.wsscode.pathom.core :as p]
-    [datahike.api :as d]
-    [decide.models.argumentation.api :as argumentation.api]
-    [decide.models.authorization :as auth]
-    [decide.models.opinion.api :as opinion.api]
-    [decide.models.process.resolver :as process.api]
-    [decide.models.proposal.api :as proposal.api]
-    [decide.models.user :as user]
-    [decide.models.user.api :as user.api]
-    [decide.server-components.access-checker :as access-checker]
-    [me.ebbinghaus.pathom2-access-plugin.core :as access-plugin]
-    [decide.server-components.config :refer [config]]
-    [decide.server-components.database :refer [conn]]
-    [decide.ui.translations.load :as translation]
-    [mount.core :refer [defstate]]
-    [taoensso.timbre :as log]))
+   [clojure.spec.alpha :as s]
+   [clojure.string :as str]
+   [com.fulcrologic.rad.pathom :as rad-pathom]
+   [com.wsscode.pathom.connect :as pc]
+   [com.wsscode.pathom.core :as p]
+   [datahike.api :as d]
+   [decide.models.argumentation.api :as argumentation.api]
+   [decide.models.authorization :as auth]
+   [decide.models.opinion.api :as opinion.api]
+   [decide.models.process.resolver :as process.api]
+   [decide.models.proposal.api :as proposal.api]
+   [decide.models.user :as user]
+   [decide.models.user.api :as user.api]
+   [decide.server-components.access-checker :as access-checker]
+   [decide.server-components.config :refer [config]]
+   [decide.server-components.database :refer [conn]]
+   [decide.ui.translations.load :as translation]
+   [me.ebbinghaus.pathom2-access-plugin.core :as access-plugin]
+   [mount.core :refer [defstate]]
+   [taoensso.timbre :as log]
+   [taoensso.tufte :as t]))
 
 (defn- remove-keys-from-map-values [m & ks]
   (->> m
@@ -59,6 +60,24 @@
              (throw (ex-info "Failed validation!" (s/explain-data spec params)))))
          (mutate env sym params))))})
 
+(t/add-basic-println-handler! {})
+
+(def tufte-plugin
+  {::p/wrap-parser
+   (fn [parser]
+     (fn [env tx]
+       (t/profile {:id :parser, :dynamic? true} (parser env tx))))
+
+   ::pc/wrap-resolve
+   (fn [resolve]
+     (fn [env input]
+       (t/p (get-in env [::pc/resolver-data ::pc/sym]) (resolve env input))))
+
+   ::p/wrap-mutate
+   (fn [mutate]
+     (fn [env sym params]
+       (t/p sym (mutate env sym params))))})
+
 ;;;
 ;;; This is borrowed from com.fulcrologic.rad.pathom
 ;;;
@@ -67,7 +86,7 @@
   "If there were any exceptions in the parser that cause complete failure we
   respond with a well-known message that the client can handle."
   [env err]
-  (let [msg (.getMessage err)
+  (let [msg  (.getMessage err)
         data (or (ex-data err) {})]
     (log/error err "Parser Error:" msg #_data)
     {::rad-pathom/errors {:message msg
@@ -86,6 +105,7 @@
                        [(pc/connect-plugin {::pc/register resolvers})]
                        plugins
                        [spec-plugin
+                        (when trace? tufte-plugin)
                         (access-plugin/access-plugin {:check-fn access-checker/check-access!})
                         (p/env-plugin {::p/process-error process-error})
                         (when log-requests? (p/pre-process-parser-plugin rad-pathom/log-request!))
