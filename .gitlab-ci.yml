@@ -58,21 +58,39 @@ build_latest_images:
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
+
+.setup_ssh: &setup_ssh
+  - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
+  - eval $(ssh-agent -s)
+  - echo "$SSH_STAGING_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
+  - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
+  - chmod 644 ~/.ssh/known_hosts
+
 deploy_staging:
+  needs: [ "build_latest_images" ]
   image: ubuntu
   stage: deploy
-  before_script:
-    - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
-    - eval $(ssh-agent -s)
-    - echo "$SSH_STAGING_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-    - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
-    - chmod 644 ~/.ssh/known_hosts
+  before_script: *setup_ssh
   script:
     - ssh $DEPLOY_TARGET 'cd decide-staging ; ./deploy_staging.sh'
   environment:
     name: staging
     url: https://staging.decide.ebbinghaus.me
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+deploy_production:
+  needs: [ "build_latest_images" ]
+  image: ubuntu
+  stage: deploy
+  when: manual
+  environment:
+    name: production
+    url: https://decide.ebbinghaus.me
+  before_script: *setup_ssh
+  script:
+    - ssh $DEPLOY_TARGET 'cd decide ; ./deploy.sh'
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
