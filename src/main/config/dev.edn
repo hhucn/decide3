@@ -1,19 +1,18 @@
 {:dev? true
  :taoensso.timbre/logging-config {:min-level [[#{"datahike.*"} :info] [#{"*"} :debug]]}
  :cookie-store-secret-key "abcdefghijklmnop"
- :ring.middleware/defaults-config {:security {:anti-forgery true
+ :ring.middleware/defaults-config {:security {:anti-forgery false
                                               :hsts true
                                               :ssl-redirect false
                                               :frame-options :sameorigin
                                               :xss-protection {:enable? false
                                                                :mode :block}}
                                    :session {:cookie-attrs {:secure false}}}
- :com.fulcrologic.rad.pathom/config {:sensitive-keys #{:decide.models.user/password}
-                                     :trace? true
+ :com.fulcrologic.rad.pathom/config {:trace? true
                                      :log-requests? true
                                      :log-responses? true}
 
  :db {:name "dev-db"
       :db/reset? false
       :store {:backend :file
-              :path "/Users/bjebb/Development/decide3/dev-db/_data"}}}
+              :path "/Users/bjebb/Development/decide3/dev-db/mock-test-1/"}}}

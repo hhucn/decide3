@@ -11,7 +11,7 @@
  :db {:store {:backend :file
               :path "/var/lib/decide"}
       :db/reset? false}
- :com.fulcrologic.rad.pathom/config {:sensitive-keys #{:decide.models.user/password}
+ :com.fulcrologic.rad.pathom/config {:sensitive-keys #{:decide.models.user/password :decide.user/password}
                                      :trace? false
                                      :log-requests? false
                                      :log-responses? false}

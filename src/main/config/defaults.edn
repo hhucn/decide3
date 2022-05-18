@@ -38,7 +38,7 @@
              :frame-options :sameorigin
              :xss-protection {:enable? true
                               :mode :block}}}
- :com.fulcrologic.rad.pathom/config {:sensitive-keys #{:decide.models.user/password}}
+ :com.fulcrologic.rad.pathom/config {:sensitive-keys #{:decide.models.user/password :decide.user/password}}
  :db {:store {:backend :file
               :path "/tmp/example"}}
  :postal/email-config
