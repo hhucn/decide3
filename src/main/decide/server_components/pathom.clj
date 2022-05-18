@@ -5,7 +5,7 @@
    [com.fulcrologic.rad.pathom :as rad-pathom]
    [com.wsscode.pathom.connect :as pc]
    [com.wsscode.pathom.core :as p]
-   [datahike.api :as d]
+   [decide.database.interface :as db]
    [decide.models.argumentation.api :as argumentation.api]
    [decide.models.authorization :as auth]
    [decide.models.opinion.api :as opinion.api]
@@ -157,18 +157,9 @@
        (fn db-wrapper [env]
          (assoc env
            :conn conn
-           :db (d/db conn))))]
+           :db (db/db conn))))]
     all-resolvers))
 
 (defstate parser
   :start
-  (new-parser config
-    [(p/env-plugin {:config config})
-     (p/env-wrap-plugin auth/session-wrapper)
-     (p/env-wrap-plugin
-       (fn db-wrapper [env]
-         (merge
-           {:conn conn
-            :db (d/db conn)}
-           env)))]
-    all-resolvers))
+  (build-parser config conn))

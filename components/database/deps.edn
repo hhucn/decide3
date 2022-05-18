@@ -1,0 +1,5 @@
+{:src "src"
+ :deps {dev.weavejester/ragtime.core {:mvn/version "0.9.1"}
+        io.replikativ/datahike {:mvn/version "0.4.1491"}
+        com.taoensso/encore {:mvn/version "3.21.0"}
+        com.taoensso/timbre {:mvn/version "5.2.1"}}}

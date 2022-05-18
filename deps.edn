@@ -4,6 +4,7 @@
         org.clojure/core.async {:mvn/version "1.5.648"}
 
         decide/domain {:local/root "components/domain"}
+        decide/database {:local/root "components/database"}
         me.ebbinghaus/pathom2-access-plugin {:local/root "components/pathom2-access-plugin"}
 
         bk/ring-gzip {:mvn/version "0.3.0"}
