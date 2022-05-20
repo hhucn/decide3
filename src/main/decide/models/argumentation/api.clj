@@ -1,12 +1,14 @@
 (ns decide.models.argumentation.api
   (:require
-    [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
-    [com.wsscode.pathom.core :as p]
-    [datahike.api :as d]
-    [decide.models.argumentation :as argumentation]
-    [decide.models.proposal :as-alias proposal]
-    [decide.models.proposal.database :as proposal.db]
-    [decide.models.user :as user]))
+   [com.wsscode.pathom.connect :as pc :refer [defmutation defresolver]]
+   [com.wsscode.pathom.core :as p]
+   [datahike.api :as d]
+   [decide.models.argumentation :as argumentation]
+   [decide.models.argumentation.database :as argumentation.db]
+   [decide.models.proposal :as-alias proposal]
+   [decide.models.proposal.database :as proposal.db]
+   [decide.models.user :as user]
+   [decide.server-components.eql-api.transformer :as transformer]))
 
 (defresolver resolve-argument [{:keys [db]} {:argument/keys [id]}]
   {::pc/output [:argument/id
@@ -61,40 +63,41 @@
    (proposal.db/get-no-of-sub-arguments db {:argument/id id})})
 
 
+;;; region Mutations
+
 (defmutation add-argument-to-statement
-  [{:keys [AUTH/user-id conn] :as env}
-   {:keys [conclusion]
-    {temp-argument-id :argument/id
-     argument-type :argument/type
-     {temp-premise-id :statement/id
-      statement-content :statement/content} :argument/premise}
-    :argument}]
-  {::pc/output [:argument/id]
+  [{:keys [AUTH/user-id db] :as env}
+   {:keys [argument conclusion]}]
+  {::pc/params #{:argument :conclusion}
+   ::pc/output [:argument/id]
    ::pc/transform transformer/needs-login}
-  (when user-id
-    (let [{real-premise-id :statement/id :as new-statement}
-          (-> {:statement/content statement-content}
-            argumentation/make-statement
-            (assoc :author [::user/id user-id]))
+  (let [author-ident    [::user/id user-id]
+        argument-tempid (:argument/id argument)
 
 
-          ; Make sole argument
-          {real-argument-id :argument/id :as new-argument}
-          (-> (if argument-type {:argument/type argument-type} {})
-            argumentation/make-argument
-            (assoc :author [::user/id user-id]))
+        premise         (:argument/premise argument)
+        premise-tempid  (:statement/id premise)
+
+        new-premise     (-> premise
+                          (select-keys [:statement/content])
+                          argumentation/make-statement
+                          (assoc :author author-ident))
 
 
-          tx-report
-          (d/transact conn
-            [(-> new-argument
-               (assoc :argument/premise new-statement)
-               (assoc :argument/conclusion (find conclusion :statement/id)))
-             [:db/add "datomic.tx" :tx/by [::user/id user-id]]])]
-      {:tempids {temp-argument-id real-argument-id
-                 temp-premise-id real-premise-id}
-       ::p/env (assoc env :db (:db-after tx-report))
-       :argument/id real-argument-id})))
+        new-argument    (-> argument
+                          (select-keys [:argument/type])
+                          argumentation/make-argument
+                          (assoc
+                            :author author-ident
+                            :argument/premise new-premise))
+        argument-id     (:argument/id new-argument)]
+    (if-let [conclusion (argumentation.db/find-statement-by-id db (:statement/id conclusion))]
+      (let [tx-report (argumentation.db/add-argument-to-statement! env conclusion new-argument)]
+        {:tempids {argument-tempid (:argument/id new-argument)
+                   premise-tempid (:statement/id new-premise)}
+         ::p/env (assoc env :db (:db-after tx-report))
+         :argument/id argument-id})
+      (throw (ex-info "Conclusion not found" {:conclusion conclusion})))))
 
 (defmutation add-argument-to-proposal
   [{:keys [AUTH/user-id conn] :as env}
@@ -128,7 +131,7 @@
                temp-premise-id real-premise-id}
      ::p/env (assoc env :db (:db-after tx-report))
      :argument/id real-argument-id}))
-
+; endregion
 
 (def full-api
   [add-argument-to-statement
