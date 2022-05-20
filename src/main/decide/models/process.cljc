@@ -174,3 +174,11 @@
 
 (defn current [state]
   (norm-state/get-in-graph state [:ui/current-process]))
+
+#?(:clj
+   (defn participant? [process user]
+     (contains? (map :db/id (::participants process)) (:db/id user))))
+
+(defn private? [process]
+  (= ::type.private (::type process)))
+
