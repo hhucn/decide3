@@ -69,7 +69,8 @@
      {temp-premise-id :statement/id
       statement-content :statement/content} :argument/premise}
     :argument}]
-  {::pc/output [:argument/id]}
+  {::pc/output [:argument/id]
+   ::pc/transform transformer/needs-login}
   (when user-id
     (let [{real-premise-id :statement/id :as new-statement}
           (-> {:statement/content statement-content}
@@ -103,7 +104,8 @@
      {temp-premise-id :statement/id
       statement-content :statement/content} :argument/premise}
     :argument}]
-  {::pc/output [:argument/id]}
+  {::pc/output [:argument/id]
+   ::pc/transform transformer/needs-login}
   (let [{real-premise-id :statement/id :as new-statement}
         (-> {:statement/content statement-content}
           argumentation/make-statement
