@@ -1,9 +1,10 @@
 (ns decide.models.argumentation.database
   (:require
-    [com.fulcrologic.guardrails.core :refer [>defn =>]]
-    [datahike.api :as d]
-    [datahike.core :as d.core]
-    [decide.models.process :as process]))
+   [com.fulcrologic.guardrails.core :refer [=>]]
+   [datahike.api :as d]
+   [datahike.core :as d.core]
+   [decide.models.argumentation :as argumentation]
+   [decide.models.process :as process]))
 
 (def argumentation-rules
   '[[(sub-argument ?argument ?sub-argument)
@@ -72,4 +73,26 @@
       (:db/id process)
       (:db/id argument))))
 
+(defn find-statement-by-id [db statement-id]
+  (d/entity db [:statement/id statement-id]))
 
+(defn add-argument-to-statement! [{:keys [conn AUTH/user]} statement argument]
+  (throw (ex-info "bäm" (assoc argument
+                          :argument/conclusion (:db/id statement))))
+  (let [parent-argument (:argument/_premise statement)
+        process         (::process/_proposals (argumentation/proposal parent-argument))]
+    (cond
+      (and (some? process) (process/running? process))
+      (throw (ex-info "Process is not running" {:process (select-keys process [::process/slug ::process/start-time ::process/end-time])}))
+
+      (and (process/private? process) (not (process/participant? process user)))
+      (throw (ex-info "User has to be participant of process." {:process (select-keys process [::process/slug ::process/type])}))
+
+      :else
+      (d/transact conn
+        {:tx-data
+         [(assoc argument
+            :db/id "new-argument"
+            :decide.argument/ancestors (conj (map :db/id (:decide.argument/ancestors parent-argument)) "new-argument")
+            :argument/conclusion (:db/id statement))
+          [:db/add "datomic.tx" :tx/by (:db/id user)]]}))))
