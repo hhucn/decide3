@@ -1,15 +1,16 @@
 (ns decide.models.argumentation
   (:require
-    #?@(:clj  [[clojure.spec.alpha :as s]
-               [clojure.spec.gen.alpha :as gen]
-               [datahike.core :as d.core]]
-        :cljs [[cljs.spec.alpha :as s]
-               [cljs.spec.gen.alpha :as gen]])
-    [com.fulcrologic.guardrails.core :refer [>def >defn => | <- ?]]
-    [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
-    [decide.argument :as-alias argument]
-    [decide.argumentation]
-    [decide.statement :as-alias statement]))
+   #?@(:clj  [[clojure.spec.alpha :as s]
+              [clojure.spec.gen.alpha :as gen]
+              [datahike.core :as d.core]]
+       :cljs [[cljs.spec.alpha :as s]
+              [cljs.spec.gen.alpha :as gen]])
+   [com.fulcrologic.guardrails.core :refer [>def >defn =>]]
+   [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
+   [decide.argument :as-alias argument]
+   [decide.argumentation]
+   [decide.models.proposal :as-alias proposal]
+   [decide.statement :as-alias statement]))
 
 (def schema
   [{:db/ident :author
@@ -37,7 +38,12 @@
     :db/cardinality :db.cardinality/one}
    {:db/ident :argument/type
     :db/valueType :db.type/keyword
-    :db/cardinality :db.cardinality/one}])
+    :db/cardinality :db.cardinality/one}
+
+   {:db/ident ::argument/ancestors
+    :db/doc "All ancestors of an argument up to the root argument(s). This enables improved query performance."
+    :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/many}])
 
 ;;; TODO Move the whole id stuff to a util ns
 (>def ::tempid/tempid
@@ -78,6 +84,10 @@
   [(s/keys :req [:statement/content]) => (s/keys :req [:argument/id :argument/premise])]
   (-> (make-argument)
     (assoc :argument/premise (make-statement statement))))
+
+(defn proposal [argument]
+  (let [ancestors (::argument/ancestors argument)]
+    (some ::proposal/_arguments ancestors)))
 
 
 
