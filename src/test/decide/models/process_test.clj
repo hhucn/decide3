@@ -1,15 +1,15 @@
 (ns decide.models.process-test
   (:require
-    [clojure.test :refer [deftest is use-fixtures testing are]]
-    [decide.models.process :as process]
-    [decide.models.process.mutations :as process.mutations]
-    [decide.models.user :as user]
-    [decide.server-components.pathom :as pathom]
-    [decide.test-utils.common :refer [db-fixture *conn*]]
-    [fulcro-spec.check :as _]
-    [fulcro-spec.core :refer [specification provided behavior assertions component provided! => =fn=> =check=>]]))
+   [clojure.test :refer [deftest use-fixtures]]
+   [decide.models.process :as process]
+   [decide.models.process.mutations :as process.mutations]
+   [decide.models.user :as user]
+   [decide.server-components.pathom :as pathom]
+   [decide.test-utils.common :refer [*conn* test-db-fixture]]
+   [fulcro-spec.check :as _]
+   [fulcro-spec.core :refer [=> =check=> assertions behavior component specification]]))
 
-(use-fixtures :each db-fixture)
+(use-fixtures :each test-db-fixture)
 
 (deftest unauthorized-user-integration-test
   (let [parser (pathom/build-parser {} *conn*)]

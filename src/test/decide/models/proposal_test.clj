@@ -1,17 +1,17 @@
 (ns decide.models.proposal-test
   (:require
-    [clojure.spec.alpha :as s]
-    [clojure.test :refer :all]
-    [decide.models.process :as process]
-    [decide.models.process.mutations :as process.api]
-    [decide.models.proposal :as proposal]
-    [decide.server-components.pathom :as pathom]
-    [decide.test-utils.common :refer [db-fixture *conn*]]
-    [fulcro-spec.check :as _]
-    [fulcro-spec.core :refer [specification provided behavior assertions component provided! => =fn=> =check=>]])
+   [clojure.spec.alpha :as s]
+   [clojure.test :refer :all]
+   [decide.models.process :as process]
+   [decide.models.process.mutations :as process.api]
+   [decide.models.proposal :as proposal]
+   [decide.server-components.pathom :as pathom]
+   [decide.test-utils.common :refer [*conn* test-db-fixture]]
+   [fulcro-spec.check :as _]
+   [fulcro-spec.core :refer [=check=> assertions behavior]])
   (:import (java.util UUID)))
 
-(use-fixtures :each db-fixture)
+(use-fixtures :each test-db-fixture)
 
 (deftest proposal-integration-test
   (let [parser (pathom/build-parser {} *conn*)]

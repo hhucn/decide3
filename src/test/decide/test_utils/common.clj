@@ -1,12 +1,12 @@
 (ns decide.test-utils.common
   (:require
-    [datahike.api :as d]
-    [decide.models.opinion :as-alias opinion]
-    [decide.models.process :as-alias process]
-    [decide.models.proposal :as proposal]
-    [decide.models.user :as user]
-    [decide.server-components.database :as database]
-    [taoensso.timbre :as log]))
+   [datahike.api :as d]
+   [decide.models.opinion :as-alias opinion]
+   [decide.models.process :as-alias process]
+   [decide.models.proposal :as proposal]
+   [decide.models.user :as user]
+   [decide.server-components.database :as database]
+   [taoensso.timbre :as log]))
 
 
 (def ^:dynamic *conn* nil)
@@ -125,11 +125,17 @@
                {:db/id (str proposal "+" user)
                 ::opinion/value 1}])))))))
 
-(defn db-fixture [f]
-  (binding [*conn* (log/with-level :info (database/test-database test-db))]
-    (try
-      (f)
-      (catch Exception e (throw e))
-      (finally
-        (d/release *conn*)
-        (d/delete-database)))))
+
+
+(defn db-fixture [initial-db]
+  (fn [f]
+    (binding [*conn* (log/with-level :info (database/test-database initial-db))]
+      (try
+        (f)
+        (catch Exception e (throw e))
+        (finally
+          (d/release *conn*)
+          (d/delete-database))))))
+
+(def test-db-fixture (db-fixture test-db))
+
