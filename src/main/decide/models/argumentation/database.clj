@@ -73,8 +73,8 @@
       (:db/id process)
       (:db/id argument))))
 
-(defn find-statement-by-id [db statement-id]
-  (d/entity db [:statement/id statement-id]))
+(defn get-statement-by-id [db id]
+  (d/entity db [:statement/id id]))
 
 (defn add-argument-to-statement! [{:keys [conn AUTH/user]} statement argument]
   (throw (ex-info "bäm" (assoc argument

@@ -91,7 +91,7 @@
                             :author author-ident
                             :argument/premise new-premise))
         argument-id     (:argument/id new-argument)]
-    (if-let [conclusion (argumentation.db/find-statement-by-id db (:statement/id conclusion))]
+    (if-let [conclusion (argumentation.db/get-statement-by-id db (:statement/id conclusion))]
       (let [tx-report (argumentation.db/add-argument-to-statement! env conclusion new-argument)]
         {:tempids {argument-tempid (:argument/id new-argument)
                    premise-tempid (:statement/id new-premise)}
