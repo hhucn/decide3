@@ -3,6 +3,11 @@ image: clojure:tools-deps
 services:
   - docker:dind
 
+stages:
+  - test
+  - package
+  - deploy
+
 cache: &global_cache
   key: ${CI_JOB_NAME}
   paths:
@@ -49,6 +54,7 @@ clj-test:
 
 build_latest_images:
   needs: [ "clj-test", "cljs-test" ]
+  stage: package
   image: docker
   interruptible: true
   before_script:
@@ -86,7 +92,6 @@ deploy_production:
   needs: [ "build_latest_images" ]
   image: ubuntu
   stage: deploy
-  when: manual
   environment:
     name: production
     url: https://decide.ebbinghaus.me
