@@ -1,12 +1,13 @@
 (ns decide.server-components.db.schema
   (:require
-    [datahike.api :as d]
-    [decide.models.argumentation :as argumentation]
-    [decide.models.opinion :as opinion]
-    [decide.models.process :as process]
-    [decide.models.proposal :as proposal]
-    [decide.models.user :as user]
-    [decide.server-components.db.migrate :as migrate]))
+   [datahike.api :as d]
+   [decide.models.argumentation :as argumentation]
+   [decide.models.argumentation.migrations :as argumentation.migrations]
+   [decide.models.opinion :as opinion]
+   [decide.models.process :as process]
+   [decide.models.proposal :as proposal]
+   [decide.models.user :as user]
+   [decide.server-components.db.migrate :as migrate]))
 
 (def schema
   (into [] cat
@@ -22,4 +23,6 @@
     :up
     (fn [db]
       (for [[tx user] (d/q '[:find ?e ?user :where [?e :db/txUser ?user]] db)]
-        [:db/add tx :tx/by user]))}])
+        [:db/add tx :tx/by user]))}
+   {:id "Populate :decide.argument/ancestors"
+    :up argumentation.migrations/add-ancestors}])
