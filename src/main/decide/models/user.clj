@@ -193,4 +193,4 @@
         ::id nil}))})
 
 
-(def resolvers [sign-up sign-in sign-out change-password current-session-resolver])
+(def resolvers [sign-up sign-in sign-out #_change-password current-session-resolver])

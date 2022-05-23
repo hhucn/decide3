@@ -237,5 +237,5 @@
             (cond
               user-information (ui-user-panel user-information)
               (df/loading? user-information-marker) (skeleton {:variant "rect" :height "401px"})))
-          (grid/item {:xs 12}
+          #_(grid/item {:xs 12}
             (ui-new-password-form new-password-form)))))))
