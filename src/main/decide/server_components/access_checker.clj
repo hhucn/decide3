@@ -1,18 +1,18 @@
 (ns decide.server-components.access-checker
   (:require
-    [decide.models.process.database :as process.db]
-    [decide.models.proposal.core :as proposal.core]
-    [decide.models.proposal.database :as proposal.db]
-    [me.ebbinghaus.pathom2-access-plugin.core :as access]
-    [taoensso.timbre :as log]))
+   [decide.models.process.database :as process.db]
+   [decide.models.proposal.core :as proposal.core]
+   [decide.models.proposal.database :as proposal.db]
+   [me.ebbinghaus.pathom2-access-plugin.core :as access]
+   [taoensso.timbre :as log]))
 
 (defmulti *check-access! (fn [_env [k v]] k))
 (defmethod *check-access! :decide.models.proposal/id
-  [{:keys [db AUTH/user] :as env} input]
-  (when-let [proposal (proposal.db/get-entity db input)]
+  [{:keys [db AUTH/user] :as env} [_ id]]
+  (when-let [proposal (proposal.db/get-by-id db id)]
     (let [allowed? (proposal.core/has-access? proposal user)]
       (when allowed?
-        (access/allow! env input))
+        (access/allow! env [:decide.models.proposal/id id]))
       allowed?)))
 
 

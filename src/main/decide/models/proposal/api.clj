@@ -1,13 +1,12 @@
 (ns decide.models.proposal.api
   (:require
-    [clojure.set :as set]
-    [com.fulcrologic.guardrails.core :refer [>defn => | <-]]
-    [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
-    [datahike.api :as d]
-    [decide.models.process :as process]
-    [decide.models.proposal :as proposal]
-    [decide.models.proposal.database :as proposal.db]
-    [decide.models.user :as user]))
+   [clojure.set :as set]
+   [com.wsscode.pathom.connect :as pc :refer [defresolver]]
+   [datahike.api :as d]
+   [decide.models.process :as process]
+   [decide.models.proposal :as proposal]
+   [decide.models.proposal.database :as proposal.db]
+   [decide.models.user :as user]))
 
 (defresolver resolve-proposal [{:keys [db]} input]
   {::pc/input #{::proposal/id}
@@ -79,17 +78,17 @@
                            {:other-proposal [::proposal/id]}
                            :other-uniques
                            :sum-uniques]}]}
-  (let [proposal (proposal.db/get-entity db id)
-        process (get proposal ::process/_proposals)
-        own-approvers (proposal.db/get-pro-voting-users db [::proposal/id id])]
+  (let [proposal      (proposal.db/get-by-id db id)
+        process       (get proposal ::process/_proposals)
+        own-approvers (proposal.db/get-pro-voting-users db (:db/id proposal))]
     {:similar
      (if (process/single-approve? process)
        []
-       (for [other-proposal-id (proposal.db/get-proposals-with-shared-opinion db [::proposal/id id])
+       (for [other-proposal-id (proposal.db/get-proposals-with-shared-opinion db (:db/id proposal))
              :let [other-approvers (proposal.db/get-pro-voting-users db [::proposal/id other-proposal-id])
-                   own-uniques (count (set/difference own-approvers other-approvers))
-                   common-uniques (count (set/intersection own-approvers other-approvers))
-                   other-uniques (count (set/difference other-approvers own-approvers))]]
+                   own-uniques     (count (set/difference own-approvers other-approvers))
+                   common-uniques  (count (set/intersection own-approvers other-approvers))
+                   other-uniques   (count (set/difference other-approvers own-approvers))]]
          {:own-proposal {::proposal/id id}
           :own-uniques own-uniques
           :common-uniques common-uniques

@@ -1,17 +1,16 @@
 (ns decide.models.proposal.database
   (:require
-    [clojure.set :as set]
-    [clojure.spec.alpha :as s]
-    [com.fulcrologic.guardrails.core :refer [>defn => | <-]]
-    [datahike.api :as d]
-    [datahike.core :as d.core]
-    [decide.models.argumentation.database :as argumentation.db]
-    [decide.models.process :as process]
-    [decide.models.proposal :as proposal]
-    [decide.models.user :as user]
-    [decide.schema :as schema]
-    [decide.utils.validation :as utils.validation]
-    [taoensso.timbre :as log])
+   [clojure.set :as set]
+   [clojure.spec.alpha :as s]
+   [com.fulcrologic.guardrails.core :refer [=> >defn]]
+   [datahike.api :as d]
+   [datahike.core :as d.core]
+   [decide.models.argumentation.database :as argumentation.db]
+   [decide.models.process :as process]
+   [decide.models.proposal :as proposal]
+   [decide.models.user :as user]
+   [decide.schema :as schema]
+   [decide.utils.validation :as utils.validation])
   (:import (java.util Date)))
 
 (>defn get-children [db proposal-ident]
@@ -183,13 +182,12 @@
   (utils.validation/validate ::proposal/body body "Body not valid")
 
   (let [created (or created (Date.))
-        id (or id (d.core/squuid (inst-ms created)))]
-    #::proposal{:db/id (str id) ; tempid
+        id      (or id (d.core/squuid (inst-ms created)))]
+    #::proposal{:db/id (str id)                             ; tempid
                 :id (or id (d.core/squuid (inst-ms created)))
                 :title title
                 :body body
                 :created created}))
 
-(defn get-entity [db proposal-id-or-ref]
-  (d/entity db
-    (cond->> proposal-id-or-ref (not (vector? proposal-id-or-ref)) (vector ::proposal/id))))
+(defn get-by-id [db id]
+  (d/entity db [::proposal/id id]))
