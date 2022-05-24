@@ -42,4 +42,9 @@
                   :cljs (s/and string? email?)))
 (s/def ::non-blank-string (s/and string? (complement str/blank?)))
 
-(s/def :db/id pos-int?)
+(s/def :db/id
+  (s/or
+    :real pos-int?
+    :tempid (s/or
+              :neg neg-int?
+              :string ::non-blank-string)))
