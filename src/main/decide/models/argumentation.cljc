@@ -66,24 +66,22 @@
   (when-not (s/valid? spec x)
     (throw (ex-info msg (s/explain-data spec x)))))
 
-(>defn make-statement [{:statement/keys [id content] :as statement}]
+(>defn make-statement [{:statement/keys [id content]
+                        :or {id #?(:clj  (d.core/squuid)
+                                   :cljs (tempid/tempid))}}]
   [(s/keys :req [:statement/content] :opt [:statement/id]) => (s/keys :req [:statement/id :statement/content])]
-  (validate (s/keys :req [:statement/content]) statement "Statement invalid")
-  {:statement/id (or id #?(:clj (d.core/squuid) :cljs (tempid/tempid)))
-   :statement/content content})
+  #:statement{:id id
+              :content content})
 
 (>defn make-argument
   ([] [=> (s/keys :req [:argument/id])] (make-argument {}))
-  ([{:argument/keys [id type]}]
+  ([{:argument/keys [id type]
+     :or {id #?(:clj  (d.core/squuid)
+                :cljs (tempid/tempid))}}]
    [(s/keys :opt [:argument/id :argument/type]) => (s/keys :req [:argument/id])]
    (merge
-     {:argument/id (or id #?(:clj (d.core/squuid) :cljs (tempid/tempid)))}
+     {:argument/id id}
      (when type {:argument/type type}))))
-
-(>defn make-argument-with-premise [statement]
-  [(s/keys :req [:statement/content]) => (s/keys :req [:argument/id :argument/premise])]
-  (-> (make-argument)
-    (assoc :argument/premise (make-statement statement))))
 
 (defn proposal [argument]
   (let [ancestors (::argument/ancestors argument)]
