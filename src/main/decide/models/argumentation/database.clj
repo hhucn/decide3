@@ -4,7 +4,9 @@
    [datahike.api :as d]
    [datahike.core :as d.core]
    [decide.models.argumentation :as argumentation]
-   [decide.models.process :as process]))
+   [decide.models.process :as process]
+   [decide.models.process.database :as process.db]
+   [decide.server-components.database :as db]))
 
 (def argumentation-rules
   '[[(sub-argument ?argument ?sub-argument)
@@ -57,9 +59,15 @@
      (super-argument-root-path ?proposal ?super-argument ?super-argument-path)
      [(clojure.core/conj ?super-argument-path ?argument) ?argument-path]]])
 
+
+(defn get-argument-by-id [db id]
+  (d/entity db [:argument/id id]))
+
+
 (defn exists? [db argument-id]
   [d.core/db? :argument/id => boolean?]
-  (some? (d/q '[:find ?e . :in $ ?argument-id :where [?e :argument/id ?argument-id]] db argument-id)))
+  (some? (get-argument-by-id db argument-id)))
+
 
 (defn belongs-to-process? [db process argument]
   (some?
@@ -76,23 +84,51 @@
 (defn get-statement-by-id [db id]
   (d/entity db [:statement/id id]))
 
+
+(defn is-premise-of
+  "Returns the argument of which the statement is a premise of."
+  [statement]
+  (first (:argument/_premise statement)))
+
+
+(defn ->add-argument-to-statement [argument statement]
+  (let [id (:db/id argument)]
+    (into [[:db/add id :argument/conclusion (:db/id statement)]]
+      (for [ancestor (:decide.argument/ancestors (is-premise-of statement) [])]
+        [:db/add id :decide.argument/ancestors (:db/id ancestor)]))))
+
+
+(defn ->add-argument-to-proposal [argument proposal]
+  [[:db/add (:db/id proposal) :decide.models.proposal/arguments (:db/id argument)]])
+
+
+(defn ->add-argument [argument]
+  [(merge
+     (select-keys argument [:db/id :argument/id :argument/type :author :argument/premise])
+     {:decide.argument/ancestors [(:db/id argument)]})])
+
+
 (defn add-argument-to-statement! [{:keys [conn AUTH/user]} statement argument]
-  (throw (ex-info "bäm" (assoc argument
-                          :argument/conclusion (:db/id statement))))
-  (let [parent-argument (:argument/_premise statement)
-        process         (::process/_proposals (argumentation/proposal parent-argument))]
-    (cond
-      (and (some? process) (process/running? process))
-      (throw (ex-info "Process is not running" {:process (select-keys process [::process/slug ::process/start-time ::process/end-time])}))
+  (let [process (-> statement is-premise-of argumentation/proposal ::process/_proposals first)]
+    (process/must-be-running! process)
+    (process/must-have-access! process user)
+    (db/transact-as conn user
+      {:tx-data
+       (let [argument (db/with-tempid :argument/id argument)]
+         (concat
+           (->add-argument argument)
+           (->add-argument-to-statement argument statement)
+           (process.db/->add-participant process user)))})))
 
-      (and (process/private? process) (not (process/participant? process user)))
-      (throw (ex-info "User has to be participant of process." {:process (select-keys process [::process/slug ::process/type])}))
 
-      :else
-      (d/transact conn
-        {:tx-data
-         [(assoc argument
-            :db/id "new-argument"
-            :decide.argument/ancestors (conj (map :db/id (:decide.argument/ancestors parent-argument)) "new-argument")
-            :argument/conclusion (:db/id statement))
-          [:db/add "datomic.tx" :tx/by (:db/id user)]]}))))
+(defn add-argument-to-proposal! [{:keys [conn AUTH/user]} proposal argument]
+  (let [process (-> proposal ::process/_proposals first)]
+    (process/must-be-running! process)
+    (process/must-have-access! process user)
+    (db/transact-as conn user
+      {:tx-data
+       (let [argument (db/with-tempid :argument/id argument)]
+         (concat
+           (->add-argument argument)
+           (->add-argument-to-proposal argument proposal)
+           (process.db/->add-participant process user)))})))
