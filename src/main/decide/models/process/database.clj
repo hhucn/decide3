@@ -1,16 +1,16 @@
 (ns decide.models.process.database
   "A collection of all"
   (:require
-    [clojure.set :as set]
-    [clojure.spec.alpha :as s]
-    [com.fulcrologic.guardrails.core :refer [>defn => | <- ?]]
-    [datahike.api :as d]
-    [datahike.core :as d.core]
-    [decide.models.opinion :as opinion]
-    [decide.models.process :as process]
-    [decide.models.proposal :as-alias proposal]
-    [decide.models.user :as user]
-    [decide.server-components.database :as db]))
+   [clojure.set :as set]
+   [clojure.spec.alpha :as s]
+   [com.fulcrologic.guardrails.core :refer [=> >defn ?]]
+   [datahike.api :as d]
+   [datahike.core :as d.core]
+   [decide.models.opinion :as opinion]
+   [decide.models.process :as process]
+   [decide.models.proposal :as-alias proposal]
+   [decide.models.user :as user]
+   [decide.server-components.database :as db]))
 
 (def process-pattern
   [:db/id
@@ -148,16 +148,12 @@
      (get-public-processes db)
      (get-private-processes db user-lookup))))
 
-(defn get-latest-nice-id [db slug]
+(defn latest-nice-id [process]
   [d.core/db? ::process/slug => ::proposal/nice-id]
-  (or
-    (d/q '[:find (max ?nice-id) .
-           :in $ ?process
-           :where
-           [?process ::process/proposals ?proposal]
-           [?proposal ::proposal/nice-id ?nice-id]]
-      db [::process/slug slug])
-    0))
+  (transduce (map ::proposal/nice-id) max 0 (::process/proposals process)))
+
+(defn new-nice-id [process]
+  (inc (latest-nice-id process)))
 
 ;; TODO Make a transaction function out of this.
 (>defn new-nice-id! [conn slug]
