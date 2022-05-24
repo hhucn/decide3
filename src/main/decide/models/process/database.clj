@@ -155,13 +155,6 @@
 (defn new-nice-id [process]
   (inc (latest-nice-id process)))
 
-;; TODO Make a transaction function out of this.
-(>defn new-nice-id! [conn slug]
-  [d.core/conn? ::process/slug => ::proposal/nice-id]
-  (let [latest-id (get-latest-nice-id @conn slug)]
-    (d/transact conn [[:db/add [::process/slug slug] ::process/latest-id (inc latest-id)]])
-    (inc latest-id)))
-
 (>defn get-number-of-participants [db slug]
   [d.core/db? ::process/slug => nat-int?]
   (or (d/q '[:find (count ?e) .
