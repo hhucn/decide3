@@ -4,7 +4,7 @@
    [com.fulcrologic.guardrails.core :refer [=> >defn]]
    [datahike.api :as d]
    [datahike.core :as d.core]
-   [decide.models.user :as user]
+   [decide.models.user :as-alias user]
    [decide.server-components.config :refer [config]]
    [decide.server-components.db.migrate :as migrate]
    [decide.server-components.db.schema :as schema]
@@ -25,8 +25,8 @@
          (uuid? user-or-id)
          [::user/id user-or-id]
 
-         (contains? user-or-id :decide.models.user/id)
-         [::user/id (:decide.models.user/id user-or-id)])])))
+         (contains? user-or-id ::user/id)
+         (find user-or-id ::user/id))])))
 
 (defn with-tempid [k entity]
   (let [v (get entity k)]

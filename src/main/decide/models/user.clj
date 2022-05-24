@@ -7,6 +7,7 @@
    [com.wsscode.pathom.core :as p]
    [datahike.api :as d]
    [datahike.core :as d.core]
+   [decide.server-components.database :as db]
    [decide.user :as user]))
 
 
@@ -44,11 +45,6 @@
    {:db/ident ::roles
     :db/valueType :db.type/keyword
     :db/cardinality :db.cardinality/many}
-
-   #_{:db/ident :db/txUser
-      :db/doc "DEPRECATED: Ref to user who authored the transaction. Useful for audits."
-      :db/valueType :db.type/ref
-      :db/cardinality :db.cardinality/one}
 
    {:db/ident :tx/by
     :db/doc "Ref tu user who authored the transaction. Useful for audits."
@@ -168,13 +164,13 @@
   {::pc/output [:session/valid?]}
   (wrap-session env {:session/valid? false ::id nil}))
 
-(defmutation change-password [{:keys [conn AUTH/user-id AUTH/user]} {:keys [old-password new-password]}]
+(defmutation change-password [{:keys [conn AUTH/user]} {:keys [old-password new-password]}]
   {::pc/params [:old-password :new-password]
    ::pc/output [:errors]}
   (if (user/password-valid? (::password user) old-password)
-    (do (d/transact conn [{:db/id [::id user-id]
-                           ::password new-password}
-                          [:db/add "datomic.tx" :tx/by [::id user-id]]])
+    (do (db/transact-as conn user
+          [{:db/id (:db/id user)
+            ::password (user/hash-password new-password)}])
         {})
     {:errors #{:invalid-credentials}}))
 
@@ -193,4 +189,4 @@
         ::id nil}))})
 
 
-(def resolvers [sign-up sign-in sign-out #_change-password current-session-resolver])
+(def resolvers [sign-up sign-in sign-out change-password current-session-resolver])

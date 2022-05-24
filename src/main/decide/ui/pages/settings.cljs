@@ -1,24 +1,24 @@
 (ns decide.ui.pages.settings
   (:require
-    [clojure.set :as set]
-    [com.fulcrologic.fulcro-i18n.i18n :as i18n]
-    [com.fulcrologic.fulcro.algorithms.form-state :as fs]
-    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-    [com.fulcrologic.fulcro.data-fetch :as df]
-    [com.fulcrologic.fulcro.dom.events :as evt]
-    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
-    [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
-    [decide.models.user :as user]
-    [decide.models.user.api :as user.api]
-    [decide.routes :as routes]
-    [decide.ui.components.snackbar :as snackbar]
-    [decide.ui.user :as user.ui]
-    [mui.feedback :as feedback]
-    [mui.feedback.skeleton :refer [skeleton]]
-    [mui.inputs :as inputs]
-    [mui.layout :as layout]
-    [mui.layout.grid :as grid]
-    [mui.surfaces.card :as card]))
+   [clojure.set :as set]
+   [com.fulcrologic.fulcro-i18n.i18n :as i18n]
+   [com.fulcrologic.fulcro.algorithms.form-state :as fs]
+   [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+   [com.fulcrologic.fulcro.data-fetch :as df]
+   [com.fulcrologic.fulcro.dom.events :as evt]
+   [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+   [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
+   [decide.models.user :as user]
+   [decide.models.user.api :as user.api]
+   [decide.routes :as routes]
+   [decide.ui.components.snackbar :as snackbar]
+   [decide.ui.user :as user.ui]
+   [mui.feedback :as feedback]
+   [mui.feedback.skeleton :refer [skeleton]]
+   [mui.inputs :as inputs]
+   [mui.layout :as layout]
+   [mui.layout.grid :as grid]
+   [mui.surfaces.card :as card]))
 
 (def settings-page-ident [:SCREEN ::settings])
 
@@ -237,5 +237,5 @@
             (cond
               user-information (ui-user-panel user-information)
               (df/loading? user-information-marker) (skeleton {:variant "rect" :height "401px"})))
-          #_(grid/item {:xs 12}
+          (grid/item {:xs 12}
             (ui-new-password-form new-password-form)))))))
