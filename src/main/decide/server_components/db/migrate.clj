@@ -1,10 +1,10 @@
 (ns decide.server-components.db.migrate
   (:require
-    [clojure.data :refer [diff]]
-    [datahike.api :as d]
-    [ragtime.core :as ragtime]
-    [ragtime.protocols :as protocols]
-    [taoensso.timbre :as log]))
+   [clojure.data :refer [diff]]
+   [datahike.api :as d]
+   [ragtime.core :as ragtime]
+   [ragtime.protocols :as protocols]
+   [taoensso.timbre :as log]))
 
 ;;; Schema migration
 (defn- index-by-ident [schema]
@@ -50,12 +50,15 @@
 (defrecord DatahikeStore [conn]
   protocols/DataStore
   (add-migration-id [_ id]
-    (d/transact conn {:tx-data [{:db/id "migrations"
-                                 :db/ident ::applied-migrations}
-                                [:db/add "migrations" ::migrations id]]}))
+    (d/transact conn {:tx-data [[:db/add ::applied-migrations ::migrations id]]}))
   (remove-migration-id [_ _id] (throw (UnsupportedOperationException. "You shall not make breaking changes!")))
   (applied-migration-ids [_]
-    (-> conn d/db (d/pull [::migrations] ::applied-migrations) ::migrations)))
+    (->> @conn
+      (d/q '[:find ?migration ?tx
+             :where
+             [::applied-migrations ::migrations ?migration ?tx]])
+      (sort-by second)
+      (map first))))
 
 (defn make-migration [{:keys [id up]}]
   (reify protocols/Migration
@@ -66,8 +69,8 @@
     (run-down! [_ _] (throw (UnsupportedOperationException. "Run-down! is not supported!")))))
 
 (defn migrate-data! [conn migrations]
-  (let [store (DatahikeStore. conn)
+  (let [store      (DatahikeStore. conn)
         migrations (map make-migration migrations)
-        index (ragtime/into-index migrations)]
+        index      (ragtime/into-index migrations)]
     (ragtime/migrate-all store index migrations
       {:reporter (fn [_ _ id] (log/infof "Apply migration: %s" (str id)))})))
