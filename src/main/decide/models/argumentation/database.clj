@@ -3,36 +3,40 @@
    [com.fulcrologic.guardrails.core :refer [=>]]
    [datahike.api :as d]
    [datahike.core :as d.core]
+   [decide.argument :as-alias argument]
    [decide.models.argumentation :as argumentation]
    [decide.models.process :as process]
    [decide.models.process.database :as process.db]
+   [decide.models.proposal :as-alias proposal]
    [decide.server-components.database :as db]))
 
-(def argumentation-rules
+(def rules
   '[[(sub-argument ?argument ?sub-argument)
      [?argument :argument/premise ?premise]
      [?sub-argument :argument/conclusion ?premise]]
 
+    [(argument-member-of-proposal ?proposal ?argument)
+     [?proposal ::proposal/arguments ?first-level-argument]
+     (or
+       [(ground ?first-level-argument) ?argument]
+       (argument-member ?first-level-argument ?argument))]
+
+    [(argument-member ?argument ?flat-sub-arguments)
+     [?flat-sub-arguments ::argument/ancestors ?argument]]
+
 
     [(no-of-arguments ?proposal ?no-of-arguments)
-     [?proposal :decide.models.proposal/positions ?argument]
-     (no-of-arguments ?argument ?no-of-sub-arguments)
-     [(sum ?no-of-sub-arguments) ?no-of-arguments]]
+     (argument-member-of-proposal ?proposal ?argument)
+     [(sum? ?argument) ?no-of-arguments]]
 
     [(no-of-arguments ?argument ?no-of-arguments)
-     [(ground 1) ?no-of-arguments]
-     (not [?argument :argument/premise])]
-
-    [(no-of-arguments ?argument ?no-of-this+subarguments)
-     (sub-argument ?argument ?sub-arguments)
-     (no-of-arguments ?sub-arguments ?no-of-arguments)
-     [(sum ?no-of-arguments) ?sum-arguments]
-     [(inc ?sum-arguments) ?no-of-this+subarguments]]
+     [?flat-sub-arguments ::argument/ancestors ?argument]
+     [(sum? ?flat-sub-arguments) ?no-of-arguments]]
 
 
     ;; Non-recursive rule for top-level arguments directly beneath a `?proposal`.
     [(belongs-to-proposal-1 ?argument ?proposal)
-     [?proposal :decide.models.proposal/arguments ?argument]]
+     [?proposal ::proposal/arguments ?argument]]
 
 
     ;; Recursive rule for if an argument is connected to a proposal transitively.
@@ -77,7 +81,7 @@
            [?process ::process/proposals ?proposal]
            (belongs-to-proposal ?proposal ?argument)]
       db
-      argumentation-rules
+      rules
       (:db/id process)
       (:db/id argument))))
 
@@ -94,8 +98,8 @@
 (defn ->add-argument-to-statement [argument statement]
   (let [id (:db/id argument)]
     (into [[:db/add id :argument/conclusion (:db/id statement)]]
-      (for [ancestor (:decide.argument/ancestors (is-premise-of statement) [])]
-        [:db/add id :decide.argument/ancestors (:db/id ancestor)]))))
+      (for [ancestor (::argument/ancestors (is-premise-of statement) [])]
+        [:db/add id ::argument/ancestors (:db/id ancestor)]))))
 
 
 (defn ->add-argument-to-proposal [argument proposal]
@@ -105,7 +109,7 @@
 (defn ->add-argument [argument]
   [(merge
      (select-keys argument [:db/id :argument/id :argument/type :author :argument/premise])
-     {:decide.argument/ancestors [(:db/id argument)]})])
+     {::argument/ancestors [(:db/id argument)]})])
 
 
 (defn add-argument-to-statement! [{:keys [conn AUTH/user]} statement argument]

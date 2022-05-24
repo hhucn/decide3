@@ -1,15 +1,15 @@
 (ns decide.features.notifications.collect
   (:require
-    [clojure.spec.alpha :as s]
-    [com.fulcrologic.guardrails.core :refer [>defn => ? | <-]]
-    [datahike.api :as d]
-    [datahike.core :as d.core]
-    [decide.models.argumentation.database :as argumentation.db]
-    [decide.models.process :as-alias process]
-    [decide.models.proposal :as-alias proposal])
+   [clojure.spec.alpha :as s]
+   [com.fulcrologic.guardrails.core :refer [=> >defn]]
+   [datahike.api :as d]
+   [datahike.core :as d.core]
+   [decide.models.argumentation.database :as argumentation.db]
+   [decide.models.process :as-alias process]
+   [decide.models.proposal :as-alias proposal])
   (:import (java.time Instant)
-           (java.util Date)
-           (java.time.temporal ChronoUnit)))
+           (java.time.temporal ChronoUnit)
+           (java.util Date)))
 
 (s/def ::eid pos-int?)
 (s/def :event/what #{:event.type/new-proposal :event.type/new-argument})
@@ -69,7 +69,7 @@
       (belongs-to-proposal ?e ?proposal)
       [?process ::process/proposals ?proposal]
       (super-argument-root-path ?proposal ?e ?argument-path)]
-    db (d/since db time-point) argumentation.db/argumentation-rules))
+    db (d/since db time-point) argumentation.db/rules))
 
 
 (>defn get-new-proposal-events [db time-point]
