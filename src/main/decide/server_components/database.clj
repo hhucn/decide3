@@ -1,23 +1,32 @@
 (ns decide.server-components.database
   (:require
-    [clojure.string :as str]
-    [datahike.api :as d]
-    [decide.models.user :as user]
-    [decide.server-components.config :refer [config]]
-    [com.fulcrologic.guardrails.core :refer [>defn =>]]
-    [mount.core :refer [defstate args]]
-    [taoensso.timbre :as log]
-    [datahike.core :as d.core]
-    [decide.server-components.db.migrate :as migrate]
-    [decide.server-components.db.schema :as schema]))
+   [clojure.string :as str]
+   [com.fulcrologic.guardrails.core :refer [=> >defn]]
+   [datahike.api :as d]
+   [datahike.core :as d.core]
+   [decide.models.user :as user]
+   [decide.server-components.config :refer [config]]
+   [decide.server-components.db.migrate :as migrate]
+   [decide.server-components.db.schema :as schema]
+   [mount.core :refer [defstate]]
+   [taoensso.timbre :as log]))
 
 
 (defn transact-as
   [conn user-or-id arg-map]
   [d.core/conn? any? map?]
-  (let [user-id (if (uuid? user-or-id) user-or-id (:decide.models.user/id user-or-id))]
-    (d/transact conn
-      (update arg-map :tx-data conj [:db/add "datomic.tx" :tx/by [::user/id user-id]]))))
+  (d/transact conn
+    (update arg-map :tx-data conj
+      [:db/add "datomic.tx" :tx/by
+       (cond
+         (contains? user-or-id :db/id)
+         (:db/id user-or-id)
+
+         (uuid? user-or-id)
+         [::user/id user-or-id]
+
+         (contains? user-or-id :decide.models.user/id)
+         [::user/id (:decide.models.user/id user-or-id)])])))
 
 (defn- empty-or-nil-field? [[_ v]]
   (or
