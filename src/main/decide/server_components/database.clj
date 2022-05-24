@@ -28,6 +28,10 @@
          (contains? user-or-id :decide.models.user/id)
          [::user/id (:decide.models.user/id user-or-id)])])))
 
+(defn with-tempid [k entity]
+  (let [v (get entity k)]
+    (assoc entity :db/id (str "tempid-" v))))
+
 (defn- empty-or-nil-field? [[_ v]]
   (or
     (nil? v)
