@@ -66,13 +66,11 @@
 ;;; region Mutations
 
 (defmutation add-argument-to-statement
-  [{:keys [AUTH/user-id db] :as env}
-   {:keys [argument conclusion]}]
+  [{:keys [AUTH/user db] :as env} {:keys [argument conclusion]}]
   {::pc/params #{:argument :conclusion}
    ::pc/output [:argument/id]
    ::pc/transform transformer/needs-login}
-  (let [author-ident    [::user/id user-id]
-        argument-tempid (:argument/id argument)
+  (let [argument-tempid (:argument/id argument)
 
 
         premise         (:argument/premise argument)
@@ -81,14 +79,14 @@
         new-premise     (-> premise
                           (select-keys [:statement/content])
                           argumentation/make-statement
-                          (assoc :author author-ident))
+                          (assoc :author (:db/id user)))
 
 
         new-argument    (-> argument
                           (select-keys [:argument/type])
                           argumentation/make-argument
                           (assoc
-                            :author author-ident
+                            :author (:db/id user)
                             :argument/premise new-premise))
         argument-id     (:argument/id new-argument)]
     (if-let [conclusion (argumentation.db/get-statement-by-id db (:statement/id conclusion))]
@@ -100,37 +98,37 @@
       (throw (ex-info "Conclusion not found" {:conclusion conclusion})))))
 
 (defmutation add-argument-to-proposal
-  [{:keys [AUTH/user-id conn] :as env}
-   {:keys [proposal]
-    {temp-argument-id :argument/id
-     argument-type :argument/type
-     {temp-premise-id :statement/id
-      statement-content :statement/content} :argument/premise}
-    :argument}]
-  {::pc/output [:argument/id]
+  [{:keys [AUTH/user db] :as env} {:keys [proposal argument]}]
+  {::pc/params #{:argument :proposal}
+   ::pc/output [:argument/id]
    ::pc/transform transformer/needs-login}
-  (let [{real-premise-id :statement/id :as new-statement}
-        (-> {:statement/content statement-content}
+  (let [argument-tempid (:argument/id argument)
+
+        premise         (:argument/premise argument)
+        premise-tempid  (:statement/id premise)
+
+        {real-premise-id :statement/id :as new-premise}
+        (-> premise
+          (select-keys [:statement/content])
           argumentation/make-statement
-          (assoc :author [::user/id user-id]))
+          (assoc :author (:db/id user)))
 
         ; Make sole argument
         {real-argument-id :argument/id :as new-argument}
-        (-> (if argument-type {:argument/type argument-type} {})
+        (-> argument
+          (select-keys [:argument/type])
           argumentation/make-argument
-          (assoc :author [::user/id user-id]))
+          (assoc
+            :author (:db/id user)
+            :argument/premise new-premise))]
 
-        tx-report
-        (d/transact conn
-          [(-> new-argument
-             (assoc :argument/premise new-statement)
-             (assoc :db/id "new-argument"))
-           [:db/add (find proposal ::proposal/id) ::proposal/arguments "new-argument"]
-           [:db/add "datomic.tx" :tx/by [::user/id user-id]]])]
-    {:tempids {temp-argument-id real-argument-id
-               temp-premise-id real-premise-id}
-     ::p/env (assoc env :db (:db-after tx-report))
-     :argument/id real-argument-id}))
+    (if-let [proposal-entity (proposal.db/get-by-id db (::proposal/id proposal))]
+      (let [tx-report (argumentation.db/add-argument-to-proposal! env proposal-entity new-argument)]
+        {:tempids {argument-tempid real-argument-id
+                   premise-tempid real-premise-id}
+         ::p/env (assoc env :db (:db-after tx-report))
+         :argument/id real-argument-id})
+      (throw (ex-info "Proposal not found" {:proposal proposal})))))
 ; endregion
 
 (def full-api
