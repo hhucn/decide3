@@ -182,3 +182,21 @@
 (defn private? [process]
   (= ::type.private (::type process)))
 
+(defn public? [process] (not (private? process)))
+
+(defn user-can-access-process? [user process]
+  (or
+    (public? process)
+    (participant? process user)))
+
+(defn must-be-running!
+  "Throws if `process` is not running."
+  [process]
+  (when-not (running? process)
+    (throw (ex-info "Process is not running" {:process (select-keys process [::slug ::start-time ::end-time])}))))
+
+(defn must-have-access!
+  "Throws if `user` hasn't access to `process`"
+  [process user]
+  (when-not (user-can-access-process? user process)
+    (throw (ex-info "User has no access to process." {:process (select-keys process [::slug ::type])}))))
