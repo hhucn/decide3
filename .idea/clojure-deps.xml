@@ -19,7 +19,7 @@
     <option name="projectFiles">
       <set>
         <option value="file://$PROJECT_DIR$/components/domain/deps.edn" />
-        <option value="file://$PROJECT_DIR$/components/pathom2-access-plugin/deps.edn" />
+        <option value="file://$PROJECT_DIR$/components/pathom-access-plugin/deps.edn" />
         <option value="file://$PROJECT_DIR$/deps.edn" />
       </set>
     </option>
