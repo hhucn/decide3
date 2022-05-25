@@ -20,6 +20,7 @@ include:
   - template: Security/License-Scanning.gitlab-ci.yml
   - template: Security/SAST.gitlab-ci.yml
   - template: Security/Secret-Detection.gitlab-ci.yml
+  - template: Verify/Browser-Performance.gitlab-ci.yml
 
 variables:
   DS_EXCLUDED_ANALYZERS: "retire.js"
@@ -66,6 +67,7 @@ build_latest_images:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 
+
 .setup_ssh: &setup_ssh
   - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
   - eval $(ssh-agent -s)
@@ -87,6 +89,10 @@ deploy_staging:
     - ssh $DEPLOY_TARGET 'cd decide-staging ; ./deploy_staging.sh'
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+browser_performance:
+  variables:
+    URL: https://staging.decide.ebbinghaus.me
 
 deploy_production:
   needs: [ "build_latest_images" ]
