@@ -79,12 +79,12 @@ deploy_staging:
   needs: [ "build_latest_images" ]
   image: ubuntu
   stage: deploy
-  before_script: *setup_ssh
-  script:
-    - ssh $DEPLOY_TARGET 'cd decide-staging ; ./deploy_staging.sh'
   environment:
     name: staging
     url: https://staging.decide.ebbinghaus.me
+  before_script: *setup_ssh
+  script:
+    - ssh $DEPLOY_TARGET 'cd decide-staging ; ./deploy_staging.sh'
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
@@ -92,6 +92,7 @@ deploy_production:
   needs: [ "build_latest_images" ]
   image: ubuntu
   stage: deploy
+  when: manual
   environment:
     name: production
     url: https://decide.ebbinghaus.me
