@@ -1,16 +1,16 @@
 (ns decide.models.process.resolver
   (:require
-    [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
-    [com.wsscode.pathom.core :as p]
-    [datahike.api :as d]
-    [decide.features.recommendations.api :as recommendations.api]
-    [decide.models.opinion.database :as opinion.db]
-    [decide.models.process :as process]
-    [decide.models.process.database :as process.db]
-    [decide.models.process.mutations :as process.mutations]
-    [decide.models.proposal :as-alias proposal]
-    [decide.models.user :as user]
-    [me.ebbinghaus.pathom2-access-plugin.core :as access]))
+   [com.wsscode.pathom.connect :as pc :refer [defresolver]]
+   [com.wsscode.pathom.core :as p]
+   [datahike.api :as d]
+   [decide.features.recommendations.api :as recommendations.api]
+   [decide.models.opinion.database :as opinion.db]
+   [decide.models.process :as process]
+   [decide.models.process.database :as process.db]
+   [decide.models.process.mutations :as process.mutations]
+   [decide.models.proposal :as-alias proposal]
+   [decide.models.user :as user]
+   [me.ebbinghaus.pathom-access-plugin.api :as access]))
 
 (defn get-process-entity [{:keys [db] :as env} slug]
   (let [process-ident [::process/slug slug]]

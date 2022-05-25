@@ -17,7 +17,7 @@
    [decide.server-components.config :refer [config]]
    [decide.server-components.database :refer [conn]]
    [decide.ui.translations.load :as translation]
-   [me.ebbinghaus.pathom2-access-plugin.core :as access-plugin]
+   [me.ebbinghaus.pathom-access-plugin.pathom2 :as access-plugin]
    [mount.core :refer [defstate]]
    [taoensso.timbre :as log]
    [taoensso.tufte :as t]))

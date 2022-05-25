@@ -4,7 +4,7 @@
         org.clojure/core.async {:mvn/version "1.5.648"}
 
         decide/domain {:local/root "components/domain"}
-        me.ebbinghaus/pathom2-access-plugin {:local/root "components/pathom2-access-plugin"}
+        me.ebbinghaus/pathom-access-plugin {:local/root "components/pathom-access-plugin"}
 
         bk/ring-gzip {:mvn/version "0.3.0"}
         com.taoensso/timbre {:mvn/version "5.2.1"}
