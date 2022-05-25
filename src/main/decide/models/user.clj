@@ -7,7 +7,6 @@
    [com.wsscode.pathom.core :as p]
    [datahike.api :as d]
    [datahike.core :as d.core]
-   [decide.server-components.database :as db]
    [decide.user :as user]))
 
 
@@ -168,9 +167,11 @@
   {::pc/params [:old-password :new-password]
    ::pc/output [:errors]}
   (if (user/password-valid? (::password user) old-password)
-    (do (db/transact-as conn user
-          [{:db/id (:db/id user)
-            ::password (user/hash-password new-password)}])
+    (do (d/transact conn
+          {:tx-data
+           [{:db/id (:db/id user)
+            ::password (user/hash-password new-password)}
+            [:db/add "datomic.tx" :tx/by (:db/id user)]]})
         {})
     {:errors #{:invalid-credentials}}))
 
