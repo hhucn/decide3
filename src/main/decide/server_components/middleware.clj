@@ -1,29 +1,30 @@
 (ns decide.server-components.middleware
   (:require
-    [com.fulcrologic.fulcro-i18n.i18n :as i18n]
-    [com.fulcrologic.fulcro.algorithms.denormalize :as dn]
-    [com.fulcrologic.fulcro.algorithms.server-render :as ssr]
-    [com.fulcrologic.fulcro.components :as comp]
-    [com.fulcrologic.fulcro.dom-server :as dom]
-    [com.fulcrologic.fulcro.server.api-middleware :refer [handle-api-request
-                                                          wrap-transit-params
-                                                          wrap-transit-response]]
-    [decide.models.authorization :as auth]
-    [decide.server-components.database :refer [conn]]
-    [decide.server-components.config :refer [config]]
-    [decide.server-components.pathom :refer [parser]]
-    [decide.ui.pages.splash :as splash]
-    [decide.ui.theming.styles :as styles]
-    [decide.utils.header :as utils.header]
-    [garden.core :as garden]
-    [hiccup.page :refer [html5 include-js include-css]]
-    [mount.core :refer [defstate]]
-    [ring.middleware.defaults :refer [wrap-defaults]]
-    [ring.middleware.gzip :refer [wrap-gzip]]
-    [ring.middleware.resource :refer [wrap-resource]]
-    [ring.middleware.session.cookie :refer [cookie-store]]
-    [ring.util.response :as resp :refer [response file-response resource-response]]
-    [taoensso.timbre :as log]))
+   [com.fulcrologic.fulcro-i18n.i18n :as i18n]
+   [com.fulcrologic.fulcro.algorithms.denormalize :as dn]
+   [com.fulcrologic.fulcro.algorithms.server-render :as ssr]
+   [com.fulcrologic.fulcro.components :as comp]
+   [com.fulcrologic.fulcro.dom-server :as dom]
+   [com.fulcrologic.fulcro.server.api-middleware :refer [handle-api-request
+                                                         wrap-transit-params
+                                                         wrap-transit-response]]
+   [com.wsscode.pathom3.connect.operation.transit :as pcot]
+   [decide.models.authorization :as auth]
+   [decide.server-components.config :refer [config]]
+   [decide.server-components.database :refer [conn]]
+   [decide.server-components.pathom3 :as component.pathom3]
+   [decide.ui.pages.splash :as splash]
+   [decide.ui.theming.styles :as styles]
+   [decide.utils.header :as utils.header]
+   [garden.core :as garden]
+   [hiccup.page :refer [html5 include-js]]
+   [mount.core :refer [defstate]]
+   [ring.middleware.defaults :refer [wrap-defaults]]
+   [ring.middleware.gzip :refer [wrap-gzip]]
+   [ring.middleware.resource :refer [wrap-resource]]
+   [ring.middleware.session.cookie :refer [cookie-store]]
+   [ring.util.response :as resp]
+   [taoensso.timbre :as log]))
 
 
 (def ^:private not-found-handler
@@ -39,17 +40,9 @@
       (handle-api-request
         (:transit-params request)
         (fn request-handler [tx]
-          (parser {:ring/request request} tx)))
+          (component.pathom3/processor {:ring/request request} tx)))
       (handler request))))
 
-#_(defn wrap-api2 [handler uri]
-    (fn [request]
-      (if (= uri (:uri request))
-        (handle-api-request
-          (:transit-params request)
-          (fn request-handler [tx]
-            (eql-api/interface {:ring/request request} tx)))
-        (handler request))))
 
 (defmacro link-to-icon [size]
   (let [url (str "/assets/icons/icon-" size "x" size ".png")
@@ -183,11 +176,8 @@
         legal-origins (get config :legal-origins #{"localhost"})]
     (-> not-found-handler
       (wrap-api "/api")
-      #_(wrap-api2 "/api2")
-      wrap-transit-params
-      wrap-transit-response
-      #_(wrap-transit-response {:opts {:handlers eql-api/write-handlers
-                                       :transform t/write-meta}})
+      (wrap-transit-params {:opts {:handler pcot/read-handlers}})
+      (wrap-transit-response {:opts {:handlers pcot/write-handlers}})
       (wrap-html-routes (:script-manifest config))
       ;; If you want to set something like session store, you'd do it against
       ;; the defaults-config here (which comes from an EDN file, so it can't have
