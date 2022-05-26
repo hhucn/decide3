@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ClojureProjectResolveSettings">
+    <item key="com.wsscode.pathom3.plugin/defplugin" resolves-as="clojure.core/def" />
     <item key="com.fulcrologic.guardrails.core/&gt;def" resolves-as="clojure.spec.alpha/def" />
     <item key="com.fulcrologic.fulcro.routing.legacy-ui-routers/defsc-router" resolves-as="clojure.core/defn" />
     <item key="com.fulcrologic.rad.attributes/defattr" resolves-as="clojure.core/def" />

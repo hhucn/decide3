@@ -2,6 +2,7 @@
 
  :deps {org.clojure/clojure {:mvn/version "1.11.1"}
         org.clojure/core.async {:mvn/version "1.5.648"}
+        org.clojure/test.check {:mvn/version "1.1.1"}
 
         decide/domain {:local/root "components/domain"}
         me.ebbinghaus/pathom-access-plugin {:local/root "components/pathom-access-plugin"}
@@ -10,6 +11,9 @@
         com.taoensso/timbre {:mvn/version "5.2.1"}
         com.taoensso/tufte {:mvn/version "2.2.0"}
         com.wsscode/pathom {:mvn/version "2.4.0"}
+        com.wsscode/pathom3 {:mvn/version "2022.05.19-alpha"}
+        com.wsscode/pathom-viz-connector {:mvn/version "2022.02.14"}
+
         com.fulcrologic/fulcro {:mvn/version "3.5.18"}
         com.fulcrologic/fulcro-garden-css {:mvn/version "3.0.9"}
         com.fulcrologic/fulcro-i18n {:mvn/version "0.0.5-alpha"}
