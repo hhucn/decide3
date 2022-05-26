@@ -20,7 +20,7 @@
 (defresolver resolve-all-processes [{:root/keys [public-processes private-processes]}]
   {::pc/output [{:root/all-processes [::process/slug ::process/type]}]}
   {:root/all-processes
-   (concat public-processes private-processes)})
+   (vec (concat public-processes private-processes))})
 
 (defresolver resolve-public-processes [{:keys [db] :as env} _]
   {::pc/output [{:root/public-processes [::process/slug ::process/type]}]}
@@ -63,7 +63,7 @@
   {::pc/output [{::process/participants [::user/id ::user/display-name]}]}
   (let [process (get-process-entity env slug)]
     {::process/participants
-     (map
+     (mapv
        #(select-keys % [::user/id ::user/display-name])
        (::process/participants process))}))
 
@@ -76,8 +76,8 @@
   (if-let [{::process/keys [proposals]} (d/pull db [{::process/proposals [::proposal/id]}] [::process/slug slug])]
     (do
       (access/allow-many! env (map #(find % ::proposal/id) proposals))
-      {::process/proposals (map #(assoc % ::process/slug slug
-                                          ::proposal/process {::process/slug slug})
+      {::process/proposals (mapv #(assoc % ::process/slug slug
+                                           ::proposal/process {::process/slug slug})
                              proposals)
        ::process/no-of-proposals (count proposals)})
     {::process/proposals []
@@ -145,7 +145,6 @@
    resolve-private-processes
 
    resolve-process
-   (pc/alias-resolver2 :process/features :process/features)
    resolve-process-moderators
    resolve-participants
    resolve-no-of-participants
