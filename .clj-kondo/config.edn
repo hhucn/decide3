@@ -1,35 +1,35 @@
-{:config-paths ["com.wsscode/pathom" "com.wsscode/async" "com.fulcrologic/fulcro" "com.fulcrologic/guardrails"]
- :lint-as {clojure.test.check.clojure-test/defspec                    clojure.core/def
-           clojure.test.check.properties/for-all                      clojure.core/let
-           com.fulcrologic.fulcro.routing.dynamic-routing/defrouter   clojure.core/defn
-           mount.core/defstate                                        clojure.core/def
-           nubank.workspaces.core/defcard                             clojure.core/def
+{:config-paths ["com.wsscode/pathom" "com.wsscode/pathom3" "com.wsscode/async" "com.fulcrologic/fulcro" "com.fulcrologic/guardrails"]
+ :lint-as {clojure.test.check.clojure-test/defspec clojure.core/def
+           clojure.test.check.properties/for-all clojure.core/let
+           com.fulcrologic.fulcro.routing.dynamic-routing/defrouter clojure.core/defn
+           mount.core/defstate clojure.core/def
+           nubank.workspaces.core/defcard clojure.core/def
            com.fulcrologic.fulcro.algorithms.normalized-state/swap!-> clojure.core/->
            failjure.core/attempt-all clojure.core/let
            failjure.core/when-failed clojure.core/fn}
  :linters {:misplaced-docstring {:level :error}
-           :not-empty?          {:level :off}
-           :unresolved-symbol   {:exclude
-                                 [(fulcro-spec.core/provided!)]}
-           :unused-binding      {:level :off}
+           :not-empty? {:level :off}
+           :unresolved-symbol {:exclude
+                               [(fulcro-spec.core/provided!)]}
+           :unused-binding {:level :off}
            :unused-referred-var {:level :off}
-           :single-key-in       {:level :warning}
+           :single-key-in {:level :warning}
            :unsorted-required-namespaces {:level :warning}
-           :consistent-alias    {;; warn when alias for clojure.string is
-                                 ;; different from str
-                                 :aliases {clojure.string                                 str
-                                           clojure.set                                    set
-                                           com.fulcrologic.fulcro.components              comp
-                                           com.fulcrologic.fulcro.raw.components          rc
-                                           com.fulcrologic.fulcro.mutations               m
-                                           clojure.spec.alpha                             s
-                                           cljs.spec.alpha                                s
-                                           taoensso.timbre                                log
-                                           com.fulcrologic.fulcro.routing.dynamic-routing dr
-                                           com.fulcrologic.fulcro.algorithms.tempid       tempid
-                                           com.fulcrologic.fulcro.algorithms.merge        mrg
-                                           com.fulcrologic.fulcro.dom                     dom
-                                           com.fulcrologic.fulcro-css.css                 css
-                                           com.fulcrologic.fulcro.dom.events              evt
-                                           com.fulcrologic.fulcro.algorithms.form-state   fs
-                                           datahike.api                                   d}}}}
+           :consistent-alias {;; warn when alias for clojure.string is
+                              ;; different from str
+                              :aliases {clojure.string str
+                                        clojure.set set
+                                        com.fulcrologic.fulcro.components comp
+                                        com.fulcrologic.fulcro.raw.components rc
+                                        com.fulcrologic.fulcro.mutations m
+                                        clojure.spec.alpha s
+                                        cljs.spec.alpha s
+                                        taoensso.timbre log
+                                        com.fulcrologic.fulcro.routing.dynamic-routing dr
+                                        com.fulcrologic.fulcro.algorithms.tempid tempid
+                                        com.fulcrologic.fulcro.algorithms.merge mrg
+                                        com.fulcrologic.fulcro.dom dom
+                                        com.fulcrologic.fulcro-css.css css
+                                        com.fulcrologic.fulcro.dom.events evt
+                                        com.fulcrologic.fulcro.algorithms.form-state fs
+                                        datahike.api d}}}}
