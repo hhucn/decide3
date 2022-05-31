@@ -5,7 +5,7 @@
    [decide.models.process :as process]
    [decide.models.process.mutations :as process.api]
    [decide.models.proposal :as proposal]
-   [decide.server-components.pathom :as pathom]
+   [decide.server-components.pathom3 :as pathom3]
    [decide.test-utils.common :refer [*conn* test-db-fixture]]
    [fulcro-spec.check :as _]
    [fulcro-spec.core :refer [=check=> assertions behavior]])
@@ -14,7 +14,7 @@
 (use-fixtures :each test-db-fixture)
 
 (deftest proposal-integration-test
-  (let [parser (pathom/build-parser {} *conn*)]
+  (let [parser (pathom3/make-processor {} *conn*)]
     (behavior "Someone logged in"
       (let [parser-existing-user (partial parser {:ring/request {:session {:id #uuid"0000fb5e-a9d0-44b6-b293-bb3c506fc0cb"}}})]
         (assertions

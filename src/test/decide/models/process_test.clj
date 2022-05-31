@@ -4,7 +4,7 @@
    [decide.models.process :as process]
    [decide.models.process.mutations :as process.mutations]
    [decide.models.user :as user]
-   [decide.server-components.pathom :as pathom]
+   [decide.server-components.pathom3 :as pathom3]
    [decide.test-utils.common :refer [*conn* test-db-fixture]]
    [fulcro-spec.check :as _]
    [fulcro-spec.core :refer [=> =check=> assertions behavior component specification]]))
@@ -12,7 +12,7 @@
 (use-fixtures :each test-db-fixture)
 
 (deftest unauthorized-user-integration-test
-  (let [parser (pathom/build-parser {} *conn*)]
+  (let [parser (pathom3/make-processor {} *conn*)]
     (component "Someone not authorized"
       (let [parser-without-session #(parser {:ring/request {}} %)]
         (assertions
@@ -52,7 +52,7 @@
              :data {}}}})))))
 
 (deftest parser-integration-test
-  (let [parser (pathom/build-parser {} *conn*)]
+  (let [parser (pathom3/make-processor {} *conn*)]
     (behavior "An authorized user"
       (let [parser-existing-user (partial parser {:ring/request {:session {:id #uuid"0000fb5e-a9d0-44b6-b293-bb3c506fc0cb"}}})]
         (assertions
@@ -206,7 +206,7 @@
                         ::process/slug "test"}}}})))))))
 
 (specification "Malformed add-process parameters"
-  (let [parser (pathom/build-parser {} *conn*)
+  (let [parser               (pathom3/make-processor {} *conn*)
         parser-existing-user (partial parser {:ring/request {:session {:id #uuid"0000fb5e-a9d0-44b6-b293-bb3c506fc0cb"}}})]
     (behavior "process can not be added with"
       (assertions
@@ -276,8 +276,8 @@
            {:com.fulcrologic.rad.pathom/errors
             {:message "Slug already in use"}}})))))
 
-(specification "Moderator priviliges"
-  (let [parser (pathom/build-parser {} *conn*)
+(specification "Moderator privileges"
+  (let [parser                   (pathom3/make-processor {} *conn*)
         parser-with-alex-session (partial parser {:ring/request {:session {:id #uuid"000aa0e2-e4d6-463d-ae7c-46765e13a31b"}}})]
     (behavior "Only a moderator can"
       (behavior "add new moderators"
@@ -293,7 +293,7 @@
               {:message "Need moderation role for this operation"}}}))))))
 
 (specification "Private processes"
-  (let [parser (pathom/build-parser {} *conn*)
+  (let [parser                   (pathom3/make-processor {} *conn*)
         parser-with-alex-session (partial parser {:ring/request {:session {:id #uuid"000aa0e2-e4d6-463d-ae7c-46765e13a31b"}}})]
     (behavior "A private process"
       (behavior "can not be queried by everyone"
