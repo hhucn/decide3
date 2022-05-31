@@ -2,37 +2,37 @@
   (:require
    [clojure.set :as set]
    [com.wsscode.pathom.connect :as pc :refer [defresolver]]
+   [com.wsscode.pathom3.connect.operation :as pco]
+   [com.wsscode.pathom3.connect.planner :as-alias pcp]
    [datahike.api :as d]
    [decide.models.process :as process]
    [decide.models.proposal :as proposal]
    [decide.models.proposal.database :as proposal.db]
    [decide.models.user :as user]))
 
-(defresolver resolve-proposal [{:keys [db]} input]
-  {::pc/input #{::proposal/id}
-   ::pc/output [::proposal/id
-                ::proposal/nice-id
-                ::proposal/title ::proposal/body ::proposal/created
-                {::proposal/original-author [::user/id ::user/display-name]}]
-   ::pc/batch? true}
-  (let [batch? (sequential? input)]
-    (cond->> input
-      (not batch?) vector
-      :always (map #(find % ::proposal/id))
-      :always (d/pull-many db [::proposal/id
-                               ::proposal/nice-id
-                               ::proposal/title ::proposal/body ::proposal/created
-                               {::proposal/original-author [::user/id ::user/display-name]}])
-      (not batch?) first)))
 
-(defresolver resolve-parents [{:keys [db]} {::proposal/keys [id]}]
-  {::pc/input #{::proposal/id}
-   ::pc/output [{::proposal/parents [::proposal/id]}
-                ::proposal/no-of-parents]}
+(pco/defresolver resolve-proposal [{:keys [db]} {::proposal/keys [id]}]
+  {::pco/input [::proposal/id]
+   ::pco/output [::proposal/id
+                 ::proposal/nice-id
+                 ::proposal/title ::proposal/body ::proposal/created
+                 {::proposal/original-author [::user/id ::user/display-name]}]}
+  (d/pull db
+    [::proposal/id
+     ::proposal/nice-id
+     ::proposal/title ::proposal/body ::proposal/created
+     {::proposal/original-author [::user/id ::user/display-name]}]
+    [::proposal/id id]))
+
+(pco/defresolver resolve-parents [{:keys [db]} {::proposal/keys [id]}]
+  {::pco/input [::proposal/id]
+   ::pco/output [{::proposal/parents [::proposal/id]}
+                 ::proposal/no-of-parents]}
   (let [proposal (or (d/pull db [{::proposal/parents [::proposal/id]}] [::proposal/id id]) {::proposal/parents []})]
     (assoc proposal ::proposal/no-of-parents (count (::proposal/parents proposal)))))
 
-(defresolver resolve-no-of-parents [{:keys [db]} {::proposal/keys [id]}]
+(pco/defresolver resolve-no-of-parents [{:keys [db]} {::proposal/keys [id]}]
+  {::pco/priority 2}
   {::proposal/no-of-parents
    (d/q '[:find (count ?e) .
           :in $ ?proposal
@@ -98,8 +98,8 @@
 
 (def full-api [resolve-proposal
                resolve-generation
-               resolve-no-of-parents
                resolve-parents
+               resolve-no-of-parents
                resolve-children
 
                resolve-child-relations
