@@ -160,6 +160,7 @@
     <orderEntry type="library" name="Deps: org.slf4j/slf4j-api:1.7.30" level="project" />
     <orderEntry type="library" name="Deps: org.jboss.xnio/xnio-api:3.8.0.Final" level="project" />
     <orderEntry type="library" name="Deps: com.google.javascript/closure-compiler-unshaded:v20220502" level="project" />
+    <orderEntry type="library" name="Deps: org.clojure/test.check:1.1.1" level="project" />
     <orderEntry type="library" name="Deps: metosin/reitit-frontend:0.5.18" level="project" />
     <orderEntry type="library" name="Deps: metosin/reitit-spec:0.5.18" level="project" />
     <orderEntry type="library" name="Deps: com.sun.activation/jakarta.activation:1.2.1" level="project" />
