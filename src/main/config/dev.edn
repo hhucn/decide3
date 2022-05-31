@@ -15,4 +15,4 @@
  :db {:name "dev-db"
       :db/reset? false
       :store {:backend :file
-              :path "/Users/bjebb/Development/decide3/dev-db/mock-test-1/"}}}
+              :path "/Users/bjebb/Development/decide3/dev-db/prod-db/_data"}}}

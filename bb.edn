@@ -33,7 +33,7 @@
   {:task (clojure "-M:dev -m \"shadow.cljs.devtools.cli\" watch :test")}
 
   test:watch-clj
-  {:task (shell "clj -M:dev:clj-tests --watch")}
+  {:task (clojure "-M:dev:clj-tests :unit --watch")}
 
   ;; Release jobs
   release:js
