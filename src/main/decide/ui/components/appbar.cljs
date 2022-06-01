@@ -1,32 +1,33 @@
 (ns decide.ui.components.appbar
   (:require
-    [clojure.string :as str]
-    [com.fulcrologic.fulcro-i18n.i18n :as i18n]
-    [com.fulcrologic.fulcro.algorithms.form-state :as fs]
-    [com.fulcrologic.fulcro.algorithms.normalized-state :as norm-state]
-    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-    [com.fulcrologic.fulcro.data-fetch :as df]
-    [com.fulcrologic.fulcro.dom :as dom]
-    [com.fulcrologic.fulcro.dom.events :as evt]
-    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
-    [com.fulcrologic.fulcro.raw.components :as rc]
-    [com.fulcrologic.fulcro.react.hooks :as hooks]
-    [decide.models.user :as user]
-    [decide.models.user.api :as user.api]
-    [decide.ui.components.snackbar :as snackbar]
-    [decide.ui.login :as login]
-    [mui.data-display :as dd]
-    [mui.feedback.dialog :as dialog]
-    [mui.inputs :as inputs]
-    [mui.inputs.form :as form]
-    [mui.layout :as layout]
-    [mui.navigation :as navigation]
-    [mui.surfaces :as surfaces]
-    [mui.transitions :as transitions]
-    ["@mui/icons-material/AccountCircle" :default AccountCircleIcon]
-    ["@mui/icons-material/HelpOutline" :default HelpIcon]
-    ["@mui/icons-material/Menu" :default Menu]
-    ["@mui/icons-material/Notifications" :default Notifications]))
+   [clojure.string :as str]
+   [com.fulcrologic.fulcro-i18n.i18n :as i18n]
+   [com.fulcrologic.fulcro.algorithms.form-state :as fs]
+   [com.fulcrologic.fulcro.algorithms.normalized-state :as norm-state]
+   [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+   [com.fulcrologic.fulcro.data-fetch :as df]
+   [com.fulcrologic.fulcro.dom :as dom]
+   [com.fulcrologic.fulcro.dom.events :as evt]
+   [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+   [com.fulcrologic.fulcro.raw.components :as rc]
+   [com.fulcrologic.fulcro.react.hooks :as hooks]
+   [decide.models.user :as user]
+   [decide.models.user.api :as user.api]
+   [decide.ui.components.snackbar :as snackbar]
+   [decide.ui.login :as login]
+   [decide.ui.user :as user.ui]
+   [mui.data-display :as dd]
+   [mui.feedback.dialog :as dialog]
+   [mui.inputs :as inputs]
+   [mui.inputs.form :as form]
+   [mui.layout :as layout]
+   [mui.navigation :as navigation]
+   [mui.surfaces :as surfaces]
+   [mui.transitions :as transitions]
+   ["@mui/icons-material/AccountCircle" :default AccountCircleIcon]
+   ["@mui/icons-material/HelpOutline" :default HelpIcon]
+   ["@mui/icons-material/Menu" :default Menu]
+   ["@mui/icons-material/Notifications" :default Notifications]))
 
 (defmutation open-dialog [{:keys [id]}]
   (action [{:keys [state]}]
@@ -79,18 +80,19 @@
 (def ui-account-menu-button (comp/computed-factory AccountMenuButton))
 
 (defsc AccountDisplay [this {:keys [ui/account-menu] :as props}]
-  {:query [{[:root/current-session :user] (comp/get-query AccountMenuButton)}
+  {:query [{[:root/current-session :user] (comp/get-query user.ui/Avatar)}
            {:ui/account-menu (comp/get-query AccountMenu)}]
    :initial-state {:ui/account-menu {:id ::account-menu}}
    :use-hooks? true}
   (let [menu-ref (hooks/use-ref)
         menu-id (:menu/id account-menu)]
     (comp/fragment
-      (ui-account-menu-button (get props [:root/current-session :user])
-        {:ref menu-ref
-         :onClick #(comp/transact! this [(toggle-menu {:menu/id menu-id})]
-                     {:compressible? true
-                      :only-refresh [(comp/get-ident AccountMenu account-menu)]})})
+      (inputs/icon-button {:ref menu-ref
+                           :onClick #(comp/transact! this [(toggle-menu {:menu/id menu-id})]
+                                       {:compressible? true
+                                        :only-refresh [(comp/get-ident AccountMenu account-menu)]})}
+        (user.ui/ui-avatar (merge (get props [:root/current-session :user])
+                             {:avatar-props {:size :small}})))
       (ui-account-menu account-menu {:ref menu-ref}))))
 
 (def ui-account-display (comp/factory AccountDisplay))
@@ -236,7 +238,8 @@
 
         ; Spacer
         (layout/stack {:direction :row
-                       :ml :auto}
+                       :ml :auto
+                       :sx {:alignItems :center}}
 
           (inputs/icon-button {:color :inherit
                                :component :a
