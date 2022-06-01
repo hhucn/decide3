@@ -268,6 +268,11 @@
   resolved "https://registry.npmjs.org/@js-joda/timezone/-/timezone-2.12.0.tgz"
   integrity sha512-1bpkGU3bh80wqR1TCpMXpgpwVs7RpIkYmq75JIGl+NRFIKEhE3qHYBtS4EFSAkVxCTZSj6b9dolr8ijq36GJEQ==
 
+"@material/material-color-utilities@^0.1.2":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@material/material-color-utilities/-/material-color-utilities-0.1.2.tgz#2b85caaa3ab17408ddb7e586d6ae339e1f140175"
+  integrity sha512-uKkkx7Xo1AZJR0eMjH902rAb0vEjDbb3tgXt0cC3SHbpDGkPNhkuDKtxnw147axOM6uKuI7vywHRQlDrjDGhCA==
+
 "@mui/base@5.0.0-alpha.89":
   version "5.0.0-alpha.89"
   resolved "https://registry.yarnpkg.com/@mui/base/-/base-5.0.0-alpha.89.tgz#d72681fa20e05297b426e113c47a0912b59c8b44"

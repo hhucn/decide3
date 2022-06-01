@@ -27,7 +27,9 @@
    ["@mui/icons-material/AccountCircle" :default AccountCircleIcon]
    ["@mui/icons-material/HelpOutline" :default HelpIcon]
    ["@mui/icons-material/Menu" :default Menu]
-   ["@mui/icons-material/Notifications" :default Notifications]))
+   ["@mui/icons-material/Notifications" :default Notifications]
+   ["@mui/material/useScrollTrigger" :default useScrollTrigger]
+   ["react" :as react]))
 
 (defmutation open-dialog [{:keys [id]}]
   (action [{:keys [state]}]
@@ -222,10 +224,12 @@
      {:ui/add-email-dialog (comp/get-initial-state AddEmailButton)
       :ui/account-display (comp/get-initial-state AccountDisplay)})
    :use-hooks? true}
-  (let [logged-in? (comp/shared this :logged-in?)]
+  (let [logged-in? (comp/shared this :logged-in?)
+        scrolled?  (useScrollTrigger {:disableHysteresis true
+                                      :threshold 0})]
     (surfaces/app-bar
       {:position "sticky"
-       :color "primary"}
+       :variant (if scrolled? "on-scroll" "flat")}
       (surfaces/toolbar {}
         (when menu-onClick
           (inputs/icon-button

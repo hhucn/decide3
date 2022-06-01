@@ -1,36 +1,36 @@
 (ns decide.ui.proposal.main-proposal-list
   (:require
-    [com.fulcrologic.fulcro-i18n.i18n :as i18n]
-    [com.fulcrologic.fulcro.algorithms.merge :as mrg]
-    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-    [com.fulcrologic.fulcro.data-fetch :as df]
-    [com.fulcrologic.fulcro.dom :as dom]
-    [com.fulcrologic.fulcro.dom.events :as evt]
-    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
-    [com.fulcrologic.fulcro.react.error-boundaries :as error-boundaries]
-    [com.fulcrologic.fulcro.react.hooks :as hooks]
-    [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
-    [decide.models.process :as process]
-    [decide.models.proposal :as proposal]
-    [decide.ui.proposal.card :as proposal-card]
-    [decide.ui.proposal.favorite-list :as favorite-list]
-    [decide.ui.proposal.lists.hierarchy :as hierarchy-list]
-    [decide.ui.proposal.plain-list :as plain-list]
-    [decide.utils.breakpoint :as breakpoint]
-    [decide.routes :as routes]
-    [mui.data-display :as dd]
-    [mui.inputs :as inputs]
-    [mui.inputs.toggle-button :as toggle]
-    [mui.layout :as layout]
-    [mui.layout.grid :as grid]
-    [mui.navigation :as navigation]
-    [mui.surfaces :as surfaces]
-    ["@mui/icons-material/Add" :default AddIcon]
-    ["@mui/icons-material/Refresh" :default Refresh]
-    ["@mui/icons-material/ViewList" :default ViewList]
-    ["@mui/icons-material/ViewModule" :default ViewModule]
-    [taoensso.timbre :as log]
-    [decide.ui.proposal.new-proposal :as new-proposal]))
+   [com.fulcrologic.fulcro-i18n.i18n :as i18n]
+   [com.fulcrologic.fulcro.algorithms.merge :as mrg]
+   [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+   [com.fulcrologic.fulcro.data-fetch :as df]
+   [com.fulcrologic.fulcro.dom :as dom]
+   [com.fulcrologic.fulcro.dom.events :as evt]
+   [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+   [com.fulcrologic.fulcro.react.error-boundaries :as error-boundaries]
+   [com.fulcrologic.fulcro.react.hooks :as hooks]
+   [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
+   [decide.models.process :as process]
+   [decide.models.proposal :as proposal]
+   [decide.routes :as routes]
+   [decide.ui.proposal.card :as proposal-card]
+   [decide.ui.proposal.favorite-list :as favorite-list]
+   [decide.ui.proposal.lists.hierarchy :as hierarchy-list]
+   [decide.ui.proposal.new-proposal :as new-proposal]
+   [decide.ui.proposal.plain-list :as plain-list]
+   [decide.utils.breakpoint :as breakpoint]
+   [mui.data-display :as dd]
+   [mui.inputs :as inputs]
+   [mui.inputs.toggle-button :as toggle]
+   [mui.layout :as layout]
+   [mui.layout.grid :as grid]
+   [mui.navigation :as navigation]
+   ["@mui/icons-material/Add" :default AddIcon]
+   ["@mui/icons-material/Refresh" :default Refresh]
+   ["@mui/icons-material/ViewList" :default ViewList]
+   ["@mui/icons-material/ViewModule" :default ViewModule]
+   [mui.surfaces :as surfaces]
+   [taoensso.timbre :as log]))
 
 (declare MainProposalList)
 
@@ -39,7 +39,7 @@
     (merge
       {:aria-label (i18n/tr "New proposal")
        :title (i18n/tr "New proposal")
-       :color :secondary
+       :color :tertiary
        :variant :extended
        :sx {:position :fixed
             :bottom "16px"
