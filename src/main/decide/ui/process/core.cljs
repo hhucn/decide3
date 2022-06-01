@@ -1,35 +1,34 @@
 (ns decide.ui.process.core
   (:require
-    [com.fulcrologic.fulcro-i18n.i18n :as i18n]
-    [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
-    [com.fulcrologic.fulcro.algorithms.merge :as mrg]
-    [com.fulcrologic.fulcro.application :as app]
-    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-    [com.fulcrologic.fulcro.data-fetch :as df]
-    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
-    [com.fulcrologic.fulcro.react.hooks :as hooks]
-    [com.fulcrologic.fulcro.routing.dynamic-routing :as dr :refer [defrouter]]
-    [decide.models.authorization :as auth]
-    [decide.models.process :as process]
-    [decide.routes :as routes]
-    [decide.ui.process.header :as process.header]
-    [decide.ui.process.home :as process.home]
-    [decide.ui.process.moderator-tab :as process.moderator]
-    [decide.ui.process.personal-dashboard :as process.dashboard]
-    [decide.ui.proposal.detail-page :as proposal.detail-page]
-    [decide.ui.proposal.main-proposal-list :as proposal.main-list]
-    [decide.ui.proposal.new-proposal :as new-proposal]
-    [mui.layout :as layout]
-    [mui.navigation.tabs :as tabs]
-    [mui.surfaces :as surfaces]))
+   [com.fulcrologic.fulcro-i18n.i18n :as i18n]
+   [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
+   [com.fulcrologic.fulcro.algorithms.merge :as mrg]
+   [com.fulcrologic.fulcro.application :as app]
+   [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+   [com.fulcrologic.fulcro.data-fetch :as df]
+   [com.fulcrologic.fulcro.mutations :refer [defmutation]]
+   [com.fulcrologic.fulcro.react.hooks :as hooks]
+   [com.fulcrologic.fulcro.routing.dynamic-routing :as dr :refer [defrouter]]
+   [decide.models.authorization :as auth]
+   [decide.models.process :as process]
+   [decide.routes :as routes]
+   [decide.ui.process.header :as process.header]
+   [decide.ui.process.home :as process.home]
+   [decide.ui.process.moderator-tab :as process.moderator]
+   [decide.ui.process.personal-dashboard :as process.dashboard]
+   [decide.ui.proposal.detail-page :as proposal.detail-page]
+   [decide.ui.proposal.main-proposal-list :as proposal.main-list]
+   [decide.ui.proposal.new-proposal :as new-proposal]
+   [mui.layout :as layout]
+   [mui.navigation.tabs :as tabs]))
 
 (defrouter ProcessRouter [_this _]
-  {:router-targets
-   [process.home/ProcessOverviewScreen
-    proposal.main-list/AllProposalsScreen
-    proposal.detail-page/ProposalPage
-    process.moderator/ProcessModeratorTab
-    process.dashboard/PersonalProcessDashboard]})
+ {:router-targets
+  [process.home/ProcessOverviewScreen
+   proposal.main-list/AllProposalsScreen
+   proposal.detail-page/ProposalPage
+   process.moderator/ProcessModeratorTab
+   process.dashboard/PersonalProcessDashboard]})
 
 (defn current-target [c]
   (-> (dr/route-target ProcessRouter (dr/current-route c ProcessRouter))
@@ -95,9 +94,7 @@
   (= ident (get state :ui/current-process)))
 
 (defn header-container [& children]
-  (surfaces/paper
-    {:square true}
-    (apply layout/container {:maxWidth :xl :disableGutters true} children)))
+  (apply layout/container {:maxWidth :xl :disableGutters true} children))
 
 (declare ProcessContext)
 

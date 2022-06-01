@@ -270,6 +270,11 @@
   resolved "https://registry.yarnpkg.com/@js-joda/timezone/-/timezone-2.12.2.tgz#6182edde24fd6f6c8f5331a52157bb1ba7e2441e"
   integrity sha512-sKuM0MISl0IBinHbhR7PToykPmw2NniEwIPXrhP1EsEgyWL3IJ0MglzqU5i4XLH4asaZ/tKjA4UqbpZLEWKTmA==
 
+"@material/material-color-utilities@^0.1.2":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@material/material-color-utilities/-/material-color-utilities-0.1.2.tgz#2b85caaa3ab17408ddb7e586d6ae339e1f140175"
+  integrity sha512-uKkkx7Xo1AZJR0eMjH902rAb0vEjDbb3tgXt0cC3SHbpDGkPNhkuDKtxnw147axOM6uKuI7vywHRQlDrjDGhCA==
+
 "@mui/base@5.0.0-alpha.94":
   version "5.0.0-alpha.94"
   resolved "https://registry.yarnpkg.com/@mui/base/-/base-5.0.0-alpha.94.tgz#8835dfb41fab8ee0dfafacd89178f877ea24bcbf"
