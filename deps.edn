@@ -11,16 +11,16 @@
         com.taoensso/timbre {:mvn/version "5.2.1"}
         com.taoensso/tufte {:mvn/version "2.2.0"}
         com.wsscode/pathom {:mvn/version "2.4.0"}
-        com.fulcrologic/fulcro {:mvn/version "3.5.21"}
+        com.fulcrologic/fulcro {:mvn/version "3.5.22"}
         com.fulcrologic/fulcro-garden-css {:mvn/version "3.0.9"}
         com.fulcrologic/fulcro-i18n {:mvn/version "0.0.5-alpha"}
         com.fulcrologic/fulcro-rad
         {:git/url "https://github.com/fulcrologic/fulcro-rad"
-         :sha "87c0af00dfad0caa407148c5b6758d9e869bd265"}
+         :sha "96ea726063ea45ccd365bbfc6b170fcdcd45a897"}
         com.fulcrologic/guardrails {:mvn/version "1.1.11"}
         garden/garden {:mvn/version "1.3.10"}
         hiccup/hiccup {:mvn/version "1.0.5"}
-        http-kit/http-kit {:mvn/version "2.5.3"}
+        http-kit/http-kit {:mvn/version "2.6.0"}
         mount/mount {:mvn/version "0.1.16"}
 
         metosin/reitit-core {:mvn/version "0.5.18"}
@@ -52,13 +52,13 @@
            ;; See https://github.com/clojure-emacs/cider-nrepl/blob/master/deps.edn for Emacs support
            :dev {:extra-paths ["src/test" "src/dev" "src/workspaces"]
                  :jvm-opts ["-XX:-OmitStackTraceInFastThrow"]
-                 :extra-deps {org.clojure/clojurescript {:mvn/version "1.11.54"}
-                              thheller/shadow-cljs {:mvn/version "2.19.0"}
+                 :extra-deps {org.clojure/clojurescript {:mvn/version "1.11.57"}
+                              thheller/shadow-cljs {:mvn/version "2.19.3"}
                               expound/expound {:mvn/version "0.9.0"}
                               fulcrologic/fulcro-spec {:mvn/version "3.1.12"}
                               binaryage/devtools {:mvn/version "1.0.6"}
                               com.github.awkay/workspaces {:mvn/version "1.0.3"}
                               org.clojure/tools.namespace {:mvn/version "1.3.0"}}}
 
-           :build {:deps {io.github.clojure/tools.build {:git/tag "v0.8.1" :git/sha "7d40500"}}
+           :build {:deps {io.github.clojure/tools.build {:git/tag "v0.8.2" :git/sha "ba1a2bf"}}
                    :ns-default build}}}

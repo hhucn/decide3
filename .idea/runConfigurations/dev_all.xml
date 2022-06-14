@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="dev:all" type="CompoundRunConfigurationType">
-    <toRun name="dev:watch-cljs" type="ShConfigurationType" />
     <toRun name="CLJ:dev" type="ClojureREPL" />
+    <toRun name="dev:watch-cljs" type="ShConfigurationType" />
     <method v="2" />
   </configuration>
 </component>
