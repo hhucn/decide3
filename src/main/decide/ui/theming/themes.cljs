@@ -115,6 +115,11 @@
         {:minWidth "80px"
          :height "56px"}}}
 
+      :MuiInputBase
+      {:styleOverrides
+       {:root
+        {:height "56px"}}}
+
       :MuiDialog
       {:styleOverrides
        {:paper
@@ -178,7 +183,8 @@
          :style {:backgroundColor (:primaryContainer scheme)
                  :color (:onPrimaryContainer scheme)}}]
        :styleOverrides
-       {:elevated {:backgroundImage (str "linear-gradient(" (:primary scheme) "0d , " (:primary scheme) "0d)")}
+       {:rounded {:borderRadius "16px"}
+        :elevated {:backgroundImage (str "linear-gradient(" (:primary scheme) "0d , " (:primary scheme) "0d)")}
         :elevation1 {:backgroundImage (str "linear-gradient(" (:primary scheme) "0d , " (:primary scheme) "0d)")} ; alpha = 0.05
         :elevation2 {:backgroundImage (str "linear-gradient(" (:primary scheme) "14 , " (:primary scheme) "14)")} ; alpha = 0.08
         :elevation3 {:backgroundImage (str "linear-gradient(" (:primary scheme) "1C , " (:primary scheme) "1C)")} ; alpha = 0.11
