@@ -1,34 +1,34 @@
 (ns decide.ui.argumentation
   (:require
-    [com.fulcrologic.fulcro-i18n.i18n :as i18n]
-    [com.fulcrologic.fulcro.algorithms.merge :as mrg]
-    [com.fulcrologic.fulcro.application :as app]
-    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-    [com.fulcrologic.fulcro.data-fetch :as df]
-    [com.fulcrologic.fulcro.dom :as dom]
-    [com.fulcrologic.fulcro.dom.events :as evt]
-    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
-    [com.fulcrologic.fulcro.react.hooks :as hooks]
-    [decide.models.argumentation :as argumentation]
-    [decide.models.argumentation.api :as argumentation.api]
-    [decide.models.proposal :as proposal]
-    [decide.models.user :as user]
-    [decide.ui.user :as user.ui]
-    [mui.data-display :as dd]
-    [mui.feedback.skeleton :refer [skeleton]]
-    [mui.inputs :as inputs]
-    [mui.inputs.toggle-button :as toggle]
-    [mui.layout :as layout]
-    [mui.layout.grid :as grid]
-    [mui.surfaces :as surfaces]
-    [mui.surfaces.card :as card]
-    [mui.transitions :as transitions]
-    ["@mui/icons-material/AddCircleOutline" :default AddCircleOutline]
-    ["@mui/icons-material/AddComment" :default AddComment]
-    ["@mui/icons-material/Comment" :default Comment]
-    ["@mui/icons-material/ExpandLess" :default ExpandLess]
-    ["@mui/icons-material/ExpandMore" :default ExpandMore]
-    ["@mui/icons-material/Send" :default Send]))
+   [com.fulcrologic.fulcro-i18n.i18n :as i18n]
+   [com.fulcrologic.fulcro.algorithms.merge :as mrg]
+   [com.fulcrologic.fulcro.application :as app]
+   [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+   [com.fulcrologic.fulcro.data-fetch :as df]
+   [com.fulcrologic.fulcro.dom :as dom]
+   [com.fulcrologic.fulcro.dom.events :as evt]
+   [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
+   [com.fulcrologic.fulcro.react.hooks :as hooks]
+   [decide.models.argumentation :as argumentation]
+   [decide.models.argumentation.api :as argumentation.api]
+   [decide.models.proposal :as proposal]
+   [decide.models.user :as user]
+   [decide.ui.user :as user.ui]
+   [mui.data-display :as dd]
+   [mui.feedback.skeleton :refer [skeleton]]
+   [mui.inputs :as inputs]
+   [mui.inputs.toggle-button :as toggle]
+   [mui.layout :as layout]
+   [mui.layout.grid :as grid]
+   [mui.surfaces :as surfaces]
+   [mui.surfaces.card :as card]
+   [mui.transitions :as transitions]
+   ["@mui/icons-material/AddCircleOutline" :default AddCircleOutline]
+   ["@mui/icons-material/AddComment" :default AddComment]
+   ["@mui/icons-material/Comment" :default Comment]
+   ["@mui/icons-material/ExpandLess" :default ExpandLess]
+   ["@mui/icons-material/ExpandMore" :default ExpandMore]
+   ["@mui/icons-material/Send" :default Send]))
 
 (defn ui-argument-placeholder [_]
   (layout/box {:mx 4 :my 1}
@@ -256,15 +256,18 @@
 (defsc ArgumentList [this {::proposal/keys [id positions]
                            :keys [ui/new-argument-form]
                            :as props}]
-  {:query [::proposal/id
+  {:ident ::proposal/id
+   :query [::proposal/id
            {::proposal/positions (comp/get-query Argument)}
            {:ui/new-argument-form (comp/get-query NewArgumentFormCard)}
            [df/marker-table '_]]
-   :ident ::proposal/id
+   :initial-state (fn [{id ::proposal/id}]
+                    {::proposal/id id
+                     ::proposal/positions []})
    :use-hooks? true}
-  (let [loading? (df/loading? (get-in props [df/marker-table [:load-argument-section (comp/get-ident this)]]))
+  (let [loading?           (df/loading? (get-in props [df/marker-table [:load-argument-section (comp/get-ident this)]]))
         empty-and-loading? (and (empty? positions) loading?)
-        type-feature? true
+        type-feature?      true                             ; types are pro/contra/neutral
         [new-argument-open? set-new-argument-open!] (hooks/use-state false)]
     (grid/container
       {:spacing 1}
