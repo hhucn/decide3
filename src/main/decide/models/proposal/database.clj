@@ -6,9 +6,10 @@
    [datahike.api :as d]
    [datahike.core :as d.core]
    [decide.models.argumentation.database :as argumentation.db]
+   [decide.models.opinion :as opinion]
    [decide.models.process :as process]
    [decide.models.proposal :as proposal]
-   [decide.models.user :as user]
+   [decide.models.user :as-alias user]
    [decide.schema :as schema]
    [decide.utils.validation :as utils.validation])
   (:import (java.util Date)))
@@ -174,3 +175,10 @@
 
 (defn get-by-id [db id]
   (d/entity db [::proposal/id id]))
+
+(defn approvers
+  "Returns a set of all users who approved the `proposal`."
+  [proposal]
+  (let [opinions           (::proposal/opinions proposal)
+        approving-opinions (filter opinion/approval? opinions)]
+    (into #{} (map ::user/_opinions) approving-opinions)))
