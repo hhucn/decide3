@@ -173,12 +173,37 @@
                 :body body
                 :created created}))
 
-(defn get-by-id [db id]
+
+(defn get-by-id
+  "Gets a proposal entity from the `db` by its `id`."
+  [db id]
   (d/entity db [::proposal/id id]))
 
+
 (defn approvers
-  "Returns a set of all users who approved the `proposal`."
+  "Returns a set of all users who approve the `proposal`."
   [proposal]
   (let [opinions           (::proposal/opinions proposal)
         approving-opinions (filter opinion/approval? opinions)]
     (into #{} (map ::user/_opinions) approving-opinions)))
+
+
+(defn other-proposals
+  "Given a `proposal`, returns a seq of all other proposals in the same process."
+  [proposal]
+  (let [process (::process/_proposals proposal)]
+    (remove #{proposal} (::process/proposals process))))
+
+
+(defn superseded-by
+  "Returns a seq of all proposals that supersede the `proposal` by approvals."
+  [proposal]
+  (let [approvers (approvers proposal)]
+    (->> (other-proposals proposal)
+      (filter
+        (fn [other-proposal]
+          (let [other-approvers (approvers other-proposal)]
+            (and
+              (not= approvers other-approvers)
+              (set/subset? approvers (approvers other-proposal)))))))))
+
