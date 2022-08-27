@@ -11,7 +11,7 @@
     "@emotion/styled": "11.10.4",
     "@js-joda/core": "5.3.1",
     "@js-joda/timezone": "2.12.2",
-    "@material/material-color-utilities": "^0.1.2",
+    "@material/material-color-utilities": "^0.2.0",
     "@mui/icons-material": "5.10.3",
     "@mui/lab": "5.0.0-alpha.99",
     "@mui/material": "5.10.5",
