@@ -1,14 +1,26 @@
 (ns decide.ui.theming.themes
   (:require
-    ["@mui/material/styles" :refer [responsiveFontSizes createTheme]]
-    ["@mui/utils" :refer [deepmerge]]
-    [decide.ui.theming.styles :as styles]))
+   ["@mui/material/styles" :refer [responsiveFontSizes createTheme]]
+   ["@mui/utils" :refer [deepmerge]]
+   [decide.ui.theming.styles :as styles]))
 
 (def shared
-  {:palette {:gold {:main "#ffd700"}}
+  {:typography {:fontFamily "'Roboto Flex', 'Helvetica', 'Arial', sans-serif"}
+
+   :palette {:gold {:main "#ffd700"}}
 
    :components
-   {:MuiTooltip
+   {:MuiCssBaseline
+    {:styleOverrides
+     "@font-face {
+       font-family: 'Roboto Flex';
+       font-weight: 100 1000;
+       font-stretch: 25% 151%;
+       font-display: swap;
+       src: url('/assets/fonts/RobotoFlex-VariableFont_GRAD,XTRA,YOPQ,YTAS,YTDE,YTFI,YTLC,YTUC,opsz,slnt,wdth,wght.ttf') format('truetype');
+      }"}
+
+    :MuiTooltip
     {:defaultProps
      {:arrow true}}
     :MuiCard
