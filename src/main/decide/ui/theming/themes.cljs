@@ -118,7 +118,7 @@
       :MuiInputBase
       {:styleOverrides
        {:root
-        {:height "56px"}}}
+        {:min-height "56px"}}}
 
       :MuiDialog
       {:styleOverrides
