@@ -23,6 +23,8 @@
       <excludeFolder url="file://$MODULE_DIR$/resources/public/js" />
       <excludeFolder url="file://$MODULE_DIR$/.clj-kondo/.cache" />
       <excludeFolder url="file://$MODULE_DIR$/resources/public/workspaces/js" />
+      <excludeFolder url="file://$MODULE_DIR$/.github" />
+      <excludeFolder url="file://$MODULE_DIR$/.clj-kondo" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
@@ -37,7 +39,7 @@
     <orderEntry type="library" name="Deps: io.lambdaforge/datalog-parser:0.1.11" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/tools.analyzer:1.1.0" level="project" />
     <orderEntry type="library" name="Deps: com.bhauman/cljs-test-display:0.1.1" level="project" />
-    <orderEntry type="library" name="Deps: com.fulcrologic/fulcro-rad:d6dded" level="project" />
+    <orderEntry type="library" name="Deps: com.fulcrologic/fulcro-rad:a67c36" level="project" />
     <orderEntry type="library" name="Deps: com.fulcrologic/guardrails:1.1.11" level="project" />
     <orderEntry type="library" name="Deps: com.wsscode/async:2021.01.14" level="project" />
     <orderEntry type="library" name="Deps: com.google.errorprone/error_prone_annotations:2.7.1" level="project" />
@@ -76,10 +78,10 @@
     <orderEntry type="library" name="Deps: org.iq80.snappy/snappy:0.4" level="project" />
     <orderEntry type="library" name="Deps: ring/ring-defaults:0.3.3" level="project" />
     <orderEntry type="library" name="Deps: mvxcvi/clj-cbor:1.1.0" level="project" />
-    <orderEntry type="library" name="Deps: com.cognitect/transit-cljs:0.8.269" level="project" />
+    <orderEntry type="library" name="Deps: com.cognitect/transit-cljs:0.8.280" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/google-closure-library:0.0-20211011-0726fdeb" level="project" />
     <orderEntry type="library" name="Deps: io.aviso/pretty:1.1.1" level="project" />
-    <orderEntry type="library" name="Deps: thheller/shadow-cljs:2.19.5" level="project" />
+    <orderEntry type="library" name="Deps: thheller/shadow-cljs:2.19.9" level="project" />
     <orderEntry type="library" name="Deps: dev.weavejester/ragtime.core:0.9.2" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/clojurescript:1.11.60" level="project" />
     <orderEntry type="library" name="Deps: fress:0.3.1" level="project" />
@@ -110,7 +112,7 @@
     <orderEntry type="library" name="Deps: com.taoensso/truss:1.6.0" level="project" />
     <orderEntry type="library" name="Deps: ring/ring-headers:0.3.0" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/google-closure-library-third-party:0.0-20211011-0726fdeb" level="project" />
-    <orderEntry type="library" name="Deps: com.fulcrologic/fulcro:3.5.22" level="project" />
+    <orderEntry type="library" name="Deps: com.fulcrologic/fulcro:3.5.24" level="project" />
     <orderEntry type="library" name="Deps: org.clojars.mmb90/cljs-cache:0.1.4" level="project" />
     <orderEntry type="library" name="Deps: com.fasterxml.jackson.core/jackson-annotations:2.12.4" level="project" />
     <orderEntry type="library" name="Deps: hiccup:1.0.5" level="project" />
@@ -160,12 +162,12 @@
     <orderEntry type="library" name="Deps: javax.servlet/javax.servlet-api:3.1.0" level="project" />
     <orderEntry type="library" name="Deps: io.replikativ/datahike:0.4.1491" level="project" />
     <orderEntry type="library" name="Deps: potemkin:0.4.5" level="project" />
-    <orderEntry type="library" name="Deps: nrepl:0.9.0" level="project" />
+    <orderEntry type="library" name="Deps: nrepl:1.0.0" level="project" />
     <orderEntry type="library" name="Deps: mount:0.1.16" level="project" />
     <orderEntry type="library" name="Deps: com.fulcrologic/fulcro-garden-css:3.0.9" level="project" />
     <orderEntry type="library" name="Deps: org.slf4j/slf4j-api:1.7.30" level="project" />
     <orderEntry type="library" name="Deps: org.jboss.xnio/xnio-api:3.8.0.Final" level="project" />
-    <orderEntry type="library" name="Deps: com.google.javascript/closure-compiler-unshaded:v20220601" level="project" />
+    <orderEntry type="library" name="Deps: com.google.javascript/closure-compiler-unshaded:v20220803" level="project" />
     <orderEntry type="library" name="Deps: org.clojure/test.check:1.1.1" level="project" />
     <orderEntry type="library" name="Deps: metosin/reitit-frontend:0.5.18" level="project" />
     <orderEntry type="library" name="Deps: metosin/reitit-spec:0.5.18" level="project" />
@@ -176,7 +178,7 @@
     <orderEntry type="library" name="Deps: bk/ring-gzip:0.3.0" level="project" />
     <orderEntry type="library" name="Deps: cider/piggieback:0.5.3" level="project" />
     <orderEntry type="library" name="Deps: crisptrutski/boot-cljs-test:0.2.2-20160402.204547-3" level="project" />
-    <orderEntry type="library" name="Deps: thheller/shadow-undertow:0.2.1" level="project" />
+    <orderEntry type="library" name="Deps: thheller/shadow-undertow:0.3.0" level="project" />
     <orderEntry type="library" name="Deps: com.sun.mail/jakarta.mail:1.6.5" level="project" />
     <orderEntry type="library" name="Deps: com.google.code.findbugs/jsr305:3.0.2" level="project" />
     <orderEntry type="library" name="Deps: ring/ring-core:1.9.5" level="project" />
