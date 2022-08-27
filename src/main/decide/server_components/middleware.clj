@@ -84,7 +84,6 @@
 
        (ssr/initial-state->script-tag initial-db)
 
-       [:link {:href "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" :rel "stylesheet"}]
        [:script (str "var fulcro_network_csrf_token = '" csrf-token "';")]
        [:style (garden/css styles/body styles/splashscreen styles/sizing styles/address)]]
       [:body
