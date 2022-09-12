@@ -9,7 +9,7 @@
 
         bk/ring-gzip {:mvn/version "0.3.0"}
         com.taoensso/timbre {:mvn/version "5.2.1"}
-        com.taoensso/tufte {:mvn/version "2.2.0"}
+        com.taoensso/tufte {:mvn/version "2.3.0"}
         com.wsscode/pathom {:mvn/version "2.4.0"}
         com.fulcrologic/fulcro {:mvn/version "3.5.24"}
         com.fulcrologic/fulcro-garden-css {:mvn/version "3.0.9"}
@@ -34,7 +34,7 @@
         {:git/url "https://github.com/MrEbbinghaus/fulcro-material-ui-wrapper"
          :sha "7c53478ca57bf4576e73ebb21194c0c1a3bed08d"}
 
-        ring/ring-core {:mvn/version "1.9.5"}
+        ring/ring-core {:mvn/version "1.9.6"}
         ring/ring-defaults {:mvn/version "0.3.3"}
 
         com.draines/postal {:mvn/version "2.0.5"}
@@ -53,7 +53,7 @@
            :dev {:extra-paths ["src/test" "src/dev" "src/workspaces"]
                  :jvm-opts ["-XX:-OmitStackTraceInFastThrow"]
                  :extra-deps {org.clojure/clojurescript {:mvn/version "1.11.60"}
-                              thheller/shadow-cljs {:mvn/version "2.19.9"}
+                              thheller/shadow-cljs {:mvn/version "2.20.1"}
                               expound/expound {:mvn/version "0.9.0"}
                               fulcrologic/fulcro-spec {:mvn/version "3.1.12"}
                               binaryage/devtools {:mvn/version "1.0.6"}
