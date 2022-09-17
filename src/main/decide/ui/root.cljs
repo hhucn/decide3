@@ -70,7 +70,7 @@
             meta/root-key (comp/get-initial-state meta/Meta {:title "decide"})})
    :use-hooks? true}
   (let [localstorage (storage/localstorage-key props)
-        manual-theme (keyword (:theme localstorage))]
+        manual-theme (or (keyword (:theme localstorage)) :light)]
     (hooks/use-lifecycle
       (fn []
         (comp/transact! this [(meta/set-meta {:lang (name (get-in props [::i18n/current-locale ::i18n/locale]))})])
@@ -80,8 +80,11 @@
              (comp/transact! (comp/any->app this)
                [(set-theme {:theme new-theme})])))))
     (date-pickers/localization-provider #js {:dateAdapter AdapterDateFns}
-      (styles/theme-provider {:theme (themes/get-mui-theme {:mode (if (= :auto manual-theme) theme manual-theme)
-                                                            :source-color "#0061A7"})}
+      (styles/theme-provider
+        {:theme
+         (themes/get-mui-theme
+           {:mode (if (= :auto manual-theme) theme manual-theme)
+            :source-color "#0061A7"})}
         (meta/ui-meta (get props meta/root-key))
         (storage/ui-localstorage localstorage)
         (m.utils/css-baseline {})

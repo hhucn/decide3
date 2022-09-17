@@ -4,7 +4,7 @@
    [clojure.string :as str]))
 
 
-(def hex->argb hexFromArgb)
+(def hex->argb argbFromHex)
 (def argb->hex hexFromArgb)
 
 (defn make-custom-color [name source blend?]
