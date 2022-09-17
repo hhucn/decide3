@@ -1,22 +1,19 @@
 (ns decide.ui.proposal.favorite-list
   (:require
-    [com.fulcrologic.fulcro-i18n.i18n :as i18n]
-    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-    [com.fulcrologic.fulcro.react.hooks :as hooks]
-    [decide.models.process :as process]
-    [decide.models.proposal :as proposal]
-    [decide.ui.proposal.card :as proposal-card]
-    [decide.ui.proposal.new-proposal :as new-proposal]
-    [decide.ui.proposal.plain-list :as plain-list]
-    [decide.utils.breakpoint :as breakpoint]
-    [mui.data-display :as dd]
-    [mui.feedback.alert :as alert]
-    [mui.inputs :as inputs]
-    [mui.layout :as layout]
-    [mui.layout.grid :as grid]
-    [mui.transitions :as transitions]
-    [decide.ui.components.flip-move :as flip-move]
-    [com.fulcrologic.fulcro.dom :as dom]))
+   [com.fulcrologic.fulcro-i18n.i18n :as i18n]
+   [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+   [com.fulcrologic.fulcro.react.hooks :as hooks]
+   [decide.models.process :as process]
+   [decide.models.proposal :as proposal]
+   [decide.ui.proposal.card :as proposal-card]
+   [decide.ui.proposal.new-proposal :as new-proposal]
+   [decide.ui.proposal.plain-list :as plain-list]
+   [mui.data-display :as dd]
+   [mui.feedback.alert :as alert]
+   [mui.inputs :as inputs]
+   [mui.layout :as layout]
+   [mui.layout.grid :as grid]
+   [mui.transitions :as transitions]))
 
 (defn line-divider [{:keys [label]}]
   (grid/item {:xs 12}
@@ -85,6 +82,7 @@
       (let [proposal-cards
             (mapv
               #(proposal-card/ui-proposal-card % {::process/slug slug
+                                                  :card-props {:variant :elevated}
                                                   :process-over? process-over?})
               rest-proposals)]
         (plain-list/plain-list {}
