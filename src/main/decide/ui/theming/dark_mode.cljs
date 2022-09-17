@@ -9,7 +9,7 @@
   (when dark-mode-matcher
     (.addListener dark-mode-matcher f)))
 
-(defn dark-mode?
+(defn enabled?
   "Checks for prefers-color-scheme: dark. (clj always returns false)"
   []
   (and dark-mode-matcher (.-matches dark-mode-matcher)))

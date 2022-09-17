@@ -59,7 +59,7 @@
    :initial-state
    (fn [_] {:root/root-router (comp/get-initial-state RootRouter)
             :ui/login-dialog (comp/get-initial-state login/LoginDialog)
-            :ui/theme (if (dark-mode/dark-mode?) :dark :light)
+            :ui/theme (if (dark-mode/enabled?) :dark :light)
             :root/app-bar (comp/get-initial-state appbar/AppBar)
             :root/snackbar-container (comp/get-initial-state snackbar/SnackbarContainer)
             :root/navdrawer (comp/get-initial-state nav-drawer/NavDrawer)
