@@ -80,7 +80,8 @@
              (comp/transact! (comp/any->app this)
                [(set-theme {:theme new-theme})])))))
     (date-pickers/localization-provider #js {:dateAdapter AdapterDateFns}
-      (styles/theme-provider {:theme (themes/get-mui-theme (if (= :auto manual-theme) theme manual-theme))}
+      (styles/theme-provider {:theme (themes/get-mui-theme {:mode (if (= :auto manual-theme) theme manual-theme)
+                                                            :source-color "#0061A7"})}
         (meta/ui-meta (get props meta/root-key))
         (storage/ui-localstorage localstorage)
         (m.utils/css-baseline {})

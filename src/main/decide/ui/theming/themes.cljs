@@ -1,54 +1,16 @@
 (ns decide.ui.theming.themes
   (:require
    ["@mui/material/styles" :refer [responsiveFontSizes createTheme]]
-   ["@mui/utils" :refer [deepmerge]]
-   ["@material/material-color-utilities" :refer [themeFromSourceColor argbFromHex hexFromArgb applyTheme]]))
-
-(defn make-custom-color [name source blend?]
-  {:name name
-   :value (argbFromHex source)
-   :blend blend?})
-
-(defn make-md3-theme
-  ([source-color]
-   (make-md3-theme source-color []))
-  ([source-color custom-colors]
-   (-> source-color
-     argbFromHex
-     (themeFromSourceColor (clj->js custom-colors))
-     (js->clj {:keywordize-keys true}))))
-
-
-(defn scheme [theme key]
-  (let [custom-colors (:customColors theme)])
-  (-> theme
-    (get-in [:schemes key])
-    .toJSON
-    (js->clj {:keywordize-keys true})
-    (update-vals #(hexFromArgb %))))
-
-
-(defn md3-scheme->mui-palette [scheme]
-  (merge scheme
-    (update-vals scheme #(array-map :main %))
-    {:background {:default (:background scheme)
-                  :paper (:surface scheme)}}))
+   [decide.ui.theming.md3 :as md3]
+   ["@material/material-color-utilities" :refer [argbFromHex hexFromArgb]]))
 
 
 (def custom-colors
-  [(make-custom-color "success" "#008127" true)
-   (make-custom-color "warning" "#ffc56f" true)
-   (make-custom-color "info" "#0288d1" true)])
+  [(md3/make-custom-color "success" "#00cc3d" true)
+   (md3/make-custom-color "warning" "#ffc266" true)
+   (md3/make-custom-color "info" "#0288d1" true)
+   (md3/make-custom-color "gold" "#ffd700" false)])
 
-(defn custom-colors->palette [theme theme-key]
-  (letfn [(palette-entry [color]
-            {(get-in color [:color :name])
-             {:main (hexFromArgb (get-in color [theme-key :color]))}})]
-    (into {} (map palette-entry) (:customColors theme))))
-
-
-(custom-colors->palette (make-md3-theme "#0061A7" custom-colors) :light)
-(scheme (make-md3-theme "#0061A7" custom-colors) :light)
 
 (defn- overlay [props]
   {"&:after"
@@ -91,20 +53,44 @@
      :transition "opacity 0.2s cubic-bezier(0.4, 0.0, 0.2, 1)"}))
 
 
-(defn md3->mui-theme [theme theme-key]
-  (let [scheme (scheme theme theme-key)]
-    {:palette (merge
-                (md3-scheme->mui-palette scheme)
-                (custom-colors->palette theme theme-key)
-                {:mode (name theme-key)})
+(defn design-tokens [theme mode]
+  (let [palette   (md3/mui-palette theme mode)
+        color-map (fn color [color-key]
+                    {:background (get-in palette [color-key :main])
+                     :color (get-in palette [color-key :contrastText])})
+        primary   (get-in palette [:primary :main])]
+    {:palette palette
+
+     :typography
+     {:fontFamily "'Roboto Flex', 'Helvetica', 'Arial', sans-serif"
+
+      :button
+      {:lineHeight "16px"
+       :textTransform :none}}
+
      :components
-     {:MuiFab
+     {:MuiCssBaseline
+      {:styleOverrides
+       "@font-face {
+         font-family: 'Roboto Flex';
+         font-weight: 100 1000;
+         font-stretch: 25% 151%;
+         font-display: swap;
+         src: url('/assets/fonts/RobotoFlex-VariableFont_GRAD,XTRA,YOPQ,YTAS,YTDE,YTFI,YTLC,YTUC,opsz,slnt,wdth,wght.ttf') format('truetype');
+        }"}
+
+      :MuiTooltip
+      {:defaultProps
+       {:arrow true}}
+
+      :MuiFab
       {:variants
        [{:props {:color :tertiary}
-         :style {:background (:tertiaryContainer scheme)
-                 :color (:onTertiaryContainer scheme)
-                 "&:hover" {:background (:tertiaryContainer scheme)}
-                 "&:after" {:background (:onTertiaryContainer scheme)}}}]
+         :style
+         (merge
+           (color-map :tertiaryContainer)
+           {"&:hover" {:background (get-in palette [:tertiaryContainer :main])}
+            "&:after" {:background (get-in palette [:tertiaryContainer :contrastText])}})}]
        :styleOverrides
        {:root
         (merge
@@ -124,12 +110,12 @@
       {:styleOverrides
        {:paper
         (with-elevation
-          {:borderRadius "24px"
-           :backgroundColor (:surface scheme)
-           :color (:onSurface scheme)
-           :paddingTop "8px"
-           :paddingBottom "8px"}
-          (:primary scheme)
+          (merge
+            (color-map :surface)
+            {:borderRadius "24px"
+             :paddingTop "8px"
+             :paddingBottom "8px"})
+          primary
           4)}}
 
       :MuiDialogActions
@@ -142,19 +128,18 @@
       :MuiButton
       {:styleOverrides
        {:root
-        {:borderWidth "1px"
+        {:minHeight "40px"
+         :borderWidth "1px"
          :borderRadius "50rem"
          :paddingRight "24px"
-         :paddingLeft "24px"
-         :textTransform "none"}
+         :paddingLeft "24px"}
         :startIcon {:marginLeft "-8px"}
         :endIcon {:marginRight "-8px"}}}
 
       :MuiAlert
       {:styleOverrides
        {:standardWarning
-        {:backgroundColor (:tertiaryContainer scheme)
-         :color (:onTertiaryContainer scheme)}}}
+        (color-map :warningContainer)}}
 
       :MuiToggleButtonGroup
       {:styleOverrides
@@ -168,87 +153,59 @@
       :MuiAppBar
       {:variants
        [{:props {:variant "flat"}
-         :style {:backgroundColor (:surface scheme)
-                 :color (:onSurface scheme)}}
+         :style (color-map :surface)}
         {:props {:variant "on-scroll"}
          :style (with-elevation
-                  {:backgroundColor (:surface scheme)
-                   :color (:onSurface scheme)}
-                  (:primary scheme)
+                  (color-map :surface)
+                  primary
                   3)}]}
 
       :MuiPaper
       {:variants
        [{:props {:variant "filled"}
-         :style {:backgroundColor (:primaryContainer scheme)
-                 :color (:onPrimaryContainer scheme)}}]
+         :style (color-map :primaryContainer)}]
        :styleOverrides
        {:rounded {:borderRadius "16px"}
-        :elevated {:backgroundImage (str "linear-gradient(" (:primary scheme) "0d , " (:primary scheme) "0d)")}
-        :elevation1 {:backgroundImage (str "linear-gradient(" (:primary scheme) "0d , " (:primary scheme) "0d)")} ; alpha = 0.05
-        :elevation2 {:backgroundImage (str "linear-gradient(" (:primary scheme) "14 , " (:primary scheme) "14)")} ; alpha = 0.08
-        :elevation3 {:backgroundImage (str "linear-gradient(" (:primary scheme) "1C , " (:primary scheme) "1C)")} ; alpha = 0.11
-        :elevation4 {:backgroundImage (str "linear-gradient(" (:primary scheme) "1D , " (:primary scheme) "1D)")} ; alpha = 0.12
-        :elevation5 {:backgroundImage (str "linear-gradient(" (:primary scheme) "1F , " (:primary scheme) "1F)")}}} ; alpha = 0.14
+        :elevated {:backgroundImage (str "linear-gradient(" primary "0d , " primary "0d)")}
+        :elevation1 {:backgroundImage (str "linear-gradient(" primary "0d , " primary "0d)")} ; alpha = 0.05
+        :elevation2 {:backgroundImage (str "linear-gradient(" primary "14 , " primary "14)")} ; alpha = 0.08
+        :elevation3 {:backgroundImage (str "linear-gradient(" primary "1C , " primary "1C)")} ; alpha = 0.11
+        :elevation4 {:backgroundImage (str "linear-gradient(" primary "1D , " primary "1D)")} ; alpha = 0.12
+        :elevation5 {:backgroundImage (str "linear-gradient(" primary "1F , " primary "1F)")}}} ; alpha = 0.14
 
       :MuiCard
       {:variants
        [{:props {:variant "filled"}
-         :style {:backgroundColor (:surfaceVariant scheme)
-                 :color (:onSurfaceVariant scheme)
-                 :boxShadow "none"
-                 :border "none"}}
+         :style
+         (merge
+           (color-map :surfaceVariant)
+           {:boxShadow "none"
+            :border "none"})}
         {:props {:variant "elevated"}
          :defaultProps {:raised true}
          :style {:boxShadow "0px 1px 2px rgba(0, 0, 0, 0.3),
                              0px 1px 3px 1px rgba(0, 0, 0, 0.15);"}}
         {:props {:variant "outlined"}
-         :style {:borderColor (:outline scheme)}}]
+         :style {:borderColor (get-in palette [:outline :main])}}]
 
        :styleOverrides
        {:root
         {:borderRadius 12}}}}}))
 
 
-(def shared
-  {:typography {:fontFamily "'Roboto Flex', 'Helvetica', 'Arial', sans-serif"}
-
-   :palette {:gold {:main "#ffd700"}}
-
-   :components
-   {:MuiCssBaseline
-    {:styleOverrides
-     "@font-face {
-       font-family: 'Roboto Flex';
-       font-weight: 100 1000;
-       font-stretch: 25% 151%;
-       font-display: swap;
-       src: url('/assets/fonts/RobotoFlex-VariableFont_GRAD,XTRA,YOPQ,YTAS,YTDE,YTFI,YTLC,YTUC,opsz,slnt,wdth,wght.ttf') format('truetype');
-      }"}
-
-    :MuiTooltip
-    {:defaultProps
-     {:arrow true}}}})
-
-
 (def get-mui-theme
-  #_(memoize)
-  (fn
-    ([theme-key] (get-mui-theme theme-key {}))
-    ([theme-key {:keys [source-color]
-                 :or {source-color
-                      "#3a8a3a"
-                      #_"#0061A7"
-                      #_"#ffc0cb"}}]
-     (let [theme-key (or theme-key :light)]
+  (memoize
+    (fn
+      ([] (get-mui-theme {:mode :light}))
+      ([{:keys [source-color mode]
+         :or {mode :light
+              source-color
+              "#0061A7"
+              #_"#009e2d"
+              #_"#ffc0cb"}}]
        (responsiveFontSizes
          (createTheme
-           (deepmerge
-             (clj->js shared)
-             (deepmerge
-               (-> source-color
-                 (make-md3-theme custom-colors)
-                 (md3->mui-theme theme-key)
-                 clj->js)))))))))
-
-(get-mui-theme :light)
+           (-> source-color
+             (md3/make-theme custom-colors)
+             (design-tokens mode)
+             clj->js)))))))
