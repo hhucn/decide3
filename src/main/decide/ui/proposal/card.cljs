@@ -1,36 +1,40 @@
 (ns decide.ui.proposal.card
   (:require
-    [com.fulcrologic.fulcro-i18n.i18n :as i18n]
-    [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
-    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-    [com.fulcrologic.fulcro.dom :as dom]
-    [com.fulcrologic.fulcro.react.hooks :as hooks]
-    [decide.models.opinion :as opinion.legacy]
-    [decide.models.opinion.api :as opinion.api]
-    [decide.models.process :as process]
-    [decide.models.proposal :as proposal]
-    [decide.models.user :as user]
-    [decide.opinion :as opinion]
-    [decide.routes :as routes]
-    [decide.ui.proposal.new-proposal :as new-proposal]
-    [decide.ui.user :as user.ui]
-    [decide.utils.time :as time]
-    [mui.data-display :as dd]
-    [mui.data-display.list :as list]
-    [mui.feedback :as feedback]
-    [mui.feedback.dialog :as dialog]
-    [mui.inputs :as inputs]
-    [mui.layout :as layout]
-    [mui.layout.grid :as grid]
-    [mui.surfaces.card :as card]
-    [reitit.frontend.easy :as rfe]
-    ["@mui/icons-material/CheckCircleOutlineRounded" :default CheckCircleOutline]
-    ["@mui/icons-material/CheckCircleRounded" :default CheckCircle]
-    ["@mui/icons-material/Comment" :default Comment]
-    ["@mui/icons-material/StarOutlineRounded" :default StarOutline]
-    ["@mui/icons-material/StarRounded" :default Star]
-    ["@mui/icons-material/ThumbDownOutlined" :default ThumbDownOutlined]
-    ["@mui/icons-material/ThumbDown" :default ThumbDown]))
+   [clojure.string :as str]
+   [com.fulcrologic.fulcro-i18n.i18n :as i18n]
+   [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
+   [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+   [com.fulcrologic.fulcro.dom :as dom]
+   [com.fulcrologic.fulcro.react.hooks :as hooks]
+   [decide.models.opinion :as opinion.legacy]
+   [decide.models.opinion.api :as opinion.api]
+   [decide.models.process :as process]
+   [decide.models.proposal :as proposal]
+   [decide.models.user :as user]
+   [decide.opinion :as opinion]
+   [decide.routes :as routes]
+   [decide.ui.proposal.new-proposal :as new-proposal]
+   [decide.ui.user :as user.ui]
+   [decide.utils.time :as time]
+   [mui.data-display :as dd]
+   [mui.data-display.list :as list]
+   [mui.feedback :as feedback]
+   [mui.feedback.dialog :as dialog]
+   [mui.inputs :as inputs]
+   [mui.layout :as layout]
+   [mui.layout.grid :as grid]
+   [mui.surfaces.card :as card]
+   ["@mui/icons-material/CheckCircleOutlineRounded" :default CheckCircleOutline]
+   ["@mui/icons-material/CheckCircleRounded" :default CheckCircle]
+   ["@mui/icons-material/Comment" :default Comment]
+   ["@mui/icons-material/StarOutlineRounded" :default StarOutline]
+   ["@mui/icons-material/StarRounded" :default Star]
+   ["@mui/icons-material/ThumbDownOutlined" :default ThumbDownOutlined]
+   ["@mui/icons-material/ThumbDown" :default ThumbDown]
+   [reitit.frontend.easy :as rfe]))
+
+
+;; region Subheader
 
 (defn- id-part [nice-id]
   (dom/data {:className "proposal-id"
@@ -97,6 +101,8 @@
 
 (def ui-subheader (comp/computed-factory Subheader (:keyfn ::proposal/id)))
 
+;; endregion
+
 (defn reject-dialog [this {:keys [slug id open? onClose parents]}]
   (dialog/dialog {:open open? :onClose onClose}
     (dialog/title {} "WHHHHYYYY???")
@@ -135,42 +141,36 @@
     (dialog/actions {}
       (inputs/button {:onClick onClose} (i18n/tr "Cancel")))))
 
-(defn toggle-button [{:keys [icon] :as props}]
+(defn icon-toggle-button [{:keys [icon] :as props}]
   (inputs/icon-button
     (dissoc props :icon)
     (dom/create-element icon #js {"fontSize" "small"})))
+
+(defn toggle-button
+  [{:keys [title]
+    :as props}
+   & body]
+  (let [button-props (dissoc props :title)]
+    (dd/tooltip {:title title}
+      (dom/span {}                                          ; A disabled button would disable the tooltip as well
+        (inputs/button button-props
+          (dd/typography {:color :text.primary, :fontSize :inherit, :variant :button}
+            (str/join body)))))))
 
 (defn reject-toggle
   [{:keys [toggled?
            onClick
            disabled?]}]
   (toggle-button
-    {:aria-label
+    {:title
      (if toggled?
        (i18n/trc "Proposal has been rejected by you" "Rejected")
        (i18n/trc "Reject a proposal" "Reject"))
      :color (if toggled? :error :default)
      :disabled disabled?
      :onClick onClick
-     :icon (if toggled? ThumbDown ThumbDownOutlined)}))
+     :startIcon (if toggled? ThumbDown ThumbDownOutlined)}))
 
-(defsc ApproveToggle [_ {:keys [approved? disabled? votes]} {:keys [onToggle]}]
-  (dd/tooltip
-    {:title (str
-              (if approved?
-                (i18n/trc "Proposal has been approved" "Approved") ; Always show that you have approved.
-                (when-not disabled?                         ; Hide that you can approve, when you can not approve.
-                  (i18n/trc "Approve a proposal" "Approve")))
-              " [" (i18n/trf "{votes} approved" {:votes votes}) "]")}
-    (dom/span {}                                            ; A disabled button would disable the tooltip as well
-      (inputs/button
-        {:onClick onToggle
-         :disabled disabled?
-         :color (if (and approved? (not disabled?)) :success :inherit)
-         :startIcon (dom/create-element (if approved? CheckCircle CheckCircleOutline))}
-        (dd/typography {:color :text.primary, :fontSize :inherit, :variant :button} votes)))))
-
-(def ui-approve-toggle (comp/computed-factory ApproveToggle))
 
 (defsc TotalVotesProcess [_ _]
   {:query [::process/slug ::process/no-of-participants]
@@ -234,23 +234,35 @@
        :spacing 0.5
        :divider (dd/divider {:orientation :vertical, :flexItem true})}
 
-      (ui-approve-toggle
-        {:approved? approved?
-         :disabled? disabled?
-         :votes pro-votes}
-        {:onToggle #(comp/transact! this [(opinion.api/add {::proposal/id id
-                                                            :opinion (if approved? 0 1)})])})
-
-      (inputs/button
-        {:startIcon (if favorite?
-                      (dom/create-element Star)
-                      (dom/create-element StarOutline))
-         :disabled disabled?
-         :color :gold
+      (toggle-button
+        {:title (str
+                  (if approved?
+                    (i18n/trc "Proposal has been approved" "Approved") ; Always show that you have approved.
+                    (when-not disabled?                     ; Hide that you can approve, when you can not approve.
+                      (i18n/trc "Approve a proposal" "Approve")))
+                  " [" (i18n/trf "{votes} approved" {:votes pro-votes}) "]")
          :onClick #(comp/transact! this [(opinion.api/add {::proposal/id id
-                                                           :opinion (if favorite? 1 2)})])}
-        (dd/typography {:color :text.primary, :fontSize :inherit, :variant :button}
-          (or favorite-votes 0)))
+                                                           :opinion (if approved? 0 1)})])
+         :disabled disabled?
+         :color (if (and approved? (not disabled?)) :success :inherit)
+         :startIcon (dom/create-element (if approved? CheckCircle CheckCircleOutline))}
+        pro-votes)
+
+      (toggle-button
+        {:title (str
+                  (if favorite?
+                    (i18n/trc "Proposal has been marked as favorit" "Approved") ; Always show that you have approved.
+                    (when-not disabled?                     ; Hide that you can approve, when you can not approve.
+                      (i18n/trc "Favorite a proposal" "Mark as favorite")))
+                  " [" (i18n/trf "{votes} favorites" {:votes favorite-votes}) "]")
+         :onClick #(comp/transact! this [(opinion.api/add {::proposal/id id
+                                                           :opinion (if favorite?
+                                                                      opinion/approval
+                                                                      opinion/favorite)})])
+         :disabled disabled?
+         :color (if disabled? :inherit :gold)
+         :startIcon (dom/create-element (if favorite? Star StarOutline))}
+        favorite-votes)
 
       (when (process/allows-rejects? process)
         (comp/fragment
