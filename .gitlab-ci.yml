@@ -1,8 +1,5 @@
 image: clojure:tools-deps
 
-services:
-  - docker:dind
-
 stages:
   - test
   - package
@@ -56,6 +53,8 @@ build_latest_images:
   needs: [ "clj-test", "cljs-test" ]
   stage: package
   image: docker
+  services:
+    - docker:dind
   interruptible: true
   before_script:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
