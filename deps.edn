@@ -1,17 +1,17 @@
 {:paths ["src/main" "resources"]
 
  :deps {org.clojure/clojure {:mvn/version "1.11.1"}
-        org.clojure/core.async {:mvn/version "1.5.648"}
+        org.clojure/core.async {:mvn/version "1.6.673"}
         org.clojure/test.check {:mvn/version "1.1.1"}
 
         decide/domain {:local/root "components/domain"}
         me.ebbinghaus/pathom-access-plugin {:local/root "components/pathom-access-plugin"}
 
         bk/ring-gzip {:mvn/version "0.3.0"}
-        com.taoensso/timbre {:mvn/version "5.2.1"}
-        com.taoensso/tufte {:mvn/version "2.3.0"}
+        com.taoensso/timbre {:mvn/version "6.0.1"}
+        com.taoensso/tufte {:mvn/version "2.4.5"}
         com.wsscode/pathom {:mvn/version "2.4.0"}
-        com.fulcrologic/fulcro {:mvn/version "3.5.25"}
+        com.fulcrologic/fulcro {:mvn/version "3.5.29"}
         com.fulcrologic/fulcro-garden-css {:mvn/version "3.0.9"}
         com.fulcrologic/fulcro-i18n {:mvn/version "0.0.5-alpha"}
         com.fulcrologic/fulcro-rad
@@ -35,7 +35,7 @@
          :sha "7c53478ca57bf4576e73ebb21194c0c1a3bed08d"}
 
         ring/ring-core {:mvn/version "1.9.6"}
-        ring/ring-defaults {:mvn/version "0.3.3"}
+        ring/ring-defaults {:mvn/version "0.3.4"}
 
         com.draines/postal {:mvn/version "2.0.5"}
         jarohen/chime {:mvn/version "0.3.3"}
@@ -45,7 +45,7 @@
  :aliases {:clj-tests {:extra-paths ["src/test"]
                        :main-opts ["-m" "kaocha.runner"]
                        :jvm-opts ["-Dguardrails.enabled=true"]
-                       :extra-deps {lambdaisland/kaocha {:mvn/version "1.69.1069"}
+                       :extra-deps {lambdaisland/kaocha {:mvn/version "1.71.1119"}
                                     lambdaisland/kaocha-junit-xml {:mvn/version "1.16.98"}
                                     orchestra/orchestra {:mvn/version "2021.01.01-1"}}}
 
@@ -53,7 +53,7 @@
            :dev {:extra-paths ["src/test" "src/dev" "src/workspaces"]
                  :jvm-opts ["-XX:-OmitStackTraceInFastThrow"]
                  :extra-deps {org.clojure/clojurescript {:mvn/version "1.11.60"}
-                              thheller/shadow-cljs {:mvn/version "2.20.2"}
+                              thheller/shadow-cljs {:mvn/version "2.20.7"}
                               expound/expound {:mvn/version "0.9.0"}
                               fulcrologic/fulcro-spec {:mvn/version "3.1.12"}
                               binaryage/devtools {:mvn/version "1.0.6"}
