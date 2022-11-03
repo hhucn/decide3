@@ -210,8 +210,9 @@
 
 (defsc VotingArea [this {::proposal/keys [id pro-votes my-opinion-value my-opinion opinions favorite-votes]
                          {::process/keys [no-of-participants]} ::proposal/process}
-                   {:keys [process show-ratio?]
-                    :or {show-ratio? false}}]
+                   {:keys [process show-ratio? show-favorite?]
+                    :or {show-ratio? false
+                         show-favorite? false}}]
   {:query [::proposal/id
            ::proposal/pro-votes
            ::proposal/favorite-votes
@@ -223,10 +224,9 @@
    :ident ::proposal/id
    :use-hooks? true}
   (let [logged-in? (comp/shared this :logged-in?)
-        disabled? (or (not logged-in?) (not (process/running? process)))
+        disabled?  (or (not logged-in?) (not (process/running? process)))
         [reject-open? set-reject-dialog-open] (hooks/use-state false)
-        [approved? rejected?] ((juxt pos? neg?) my-opinion-value)
-        favorite? (or (opinion/favorite-value? my-opinion-value) (opinion.legacy/favorite? my-opinion))]
+        [approved? favorite? rejected?] ((juxt opinion/approval-value? opinion/favorite-value? opinion/reject-value?) my-opinion-value)]
     (layout/stack
       {:direction :row
        :alignItems :center
@@ -248,21 +248,22 @@
          :startIcon (dom/create-element (if approved? CheckCircle CheckCircleOutline))}
         pro-votes)
 
-      (toggle-button
-        {:title (str
-                  (if favorite?
-                    (i18n/trc "Proposal has been marked as favorit" "Approved") ; Always show that you have approved.
-                    (when-not disabled?                     ; Hide that you can approve, when you can not approve.
-                      (i18n/trc "Favorite a proposal" "Mark as favorite")))
-                  " [" (i18n/trf "{votes} favorites" {:votes favorite-votes}) "]")
-         :onClick #(comp/transact! this [(opinion.api/add {::proposal/id id
-                                                           :opinion (if favorite?
-                                                                      opinion/approval
-                                                                      opinion/favorite)})])
-         :disabled disabled?
-         :color (if disabled? :inherit :gold)
-         :startIcon (dom/create-element (if favorite? Star StarOutline))}
-        favorite-votes)
+      (when show-favorite?
+        (toggle-button
+          {:title (str
+                    (if favorite?
+                      (i18n/trc "Proposal has been marked as favorit" "Approved") ; Always show that you have approved.
+                      (when-not disabled?                   ; Hide that you can approve, when you can not approve.
+                        (i18n/trc "Favorite a proposal" "Mark as favorite")))
+                    " [" (i18n/trf "{votes} favorites" {:votes favorite-votes}) "]")
+           :onClick #(comp/transact! this [(opinion.api/add {::proposal/id id
+                                                             :opinion (if favorite?
+                                                                        opinion/approval
+                                                                        opinion/favorite)})])
+           :disabled disabled?
+           :color (if disabled? :inherit :gold)
+           :startIcon (dom/create-element (if favorite? Star StarOutline))}
+          favorite-votes))
 
       (when (process/allows-rejects? process)
         (comp/fragment
@@ -356,7 +357,8 @@
          :spacing 1}
         (grid/item {:xs :auto}
           (ui-voting-area voting-area {:process current-process
-                                       :show-ratio? true}))
+                                       :show-ratio? true
+                                       :show-favorite? false}))
 
         (grid/item {:xs :auto}
           (layout/stack {:direction :row}
