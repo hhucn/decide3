@@ -87,7 +87,7 @@
 (defn new-process-dialog [comp {:keys [close new-process-dialog-open? new-process-form]}]
   (dialog/dialog
     {:open new-process-dialog-open?
-     :onClose #(m/set-value! comp :ui/new-process-dialog-open? false)}
+     :onClose close}
     (dialog/title {} (i18n/tr "New decision-process"))
     (dialog/content {}
       (process-forms/ui-new-process-form new-process-form
@@ -99,7 +99,7 @@
                                               ::process/end-time end-time
                                               ::process/type type
                                               :participant-emails participant-emails})])
-                     #_(close))}))))
+                     (close))}))))
 
 (defsc ProcessesPage [this {:keys [all-processes-list
                                    ui/new-process-dialog-open?
@@ -120,8 +120,7 @@
                        (df/load! app :root/all-processes ProcessListEntry {:marker :all-processes})
                        (dr/target-ready! app target)))))}
   (let [logged-in?         (comp/shared this :logged-in?)
-        new-process-button (inputs/button {:variant :contained
-                                           :color :primary
+        new-process-button (inputs/button {:variant :tonal
                                            :disabled (not logged-in?)
                                            :fullWidth true
                                            :size :large

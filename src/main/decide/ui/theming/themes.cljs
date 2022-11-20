@@ -134,7 +134,10 @@
          :paddingRight "24px"
          :paddingLeft "24px"}
         :startIcon {:marginLeft "-8px"}
-        :endIcon {:marginRight "-8px"}}}
+        :endIcon {:marginRight "-8px"}}
+       :variants
+       [{:props {:variant "tonal"}
+         :style (color-map :secondaryContainer)}]}
 
       :MuiAlert
       {:styleOverrides
