@@ -110,10 +110,10 @@
    & body]
   (let [button-props (dissoc props :title)]
     (dd/tooltip {:title title}
-      (dom/span {}                                          ; A disabled button would disable the tooltip as well
-        (inputs/button button-props
-          (dd/typography {:color :text.primary, :fontSize :inherit, :variant :button}
-            (str/join body)))))))
+      #_(dom/span {})                                       ; A disabled button would disable the tooltip as well
+      (inputs/button button-props
+        (dd/typography {:color :text.primary, :fontSize :inherit, :variant :button}
+          (str/join body))))))
 
 
 (defsc TotalVotesProcess [_ _]
@@ -174,24 +174,24 @@
       {:direction :row
        :alignItems :center
        :className "voting-area"
-       :spacing 0.5
-       :divider (dd/divider {:orientation :vertical, :flexItem true})}
+       :spacing 0.5}
 
-      (toggle-button
-        {:title (str
-                  (if approved?
-                    (i18n/trc "Proposal has been approved" "Approved") ; Always show that you have approved.
-                    (when-not disabled?                     ; Hide that you can approve, when you can not approve.
-                      (i18n/trc "Approve a proposal" "Approve")))
-                  " [" (i18n/trf "{votes} approved" {:votes pro-votes}) "]")
-         :onClick #(comp/transact! this [(opinion.api/add {::proposal/id id
-                                                           :opinion (if approved? 0 1)})])
-         :disabled disabled?
-         :color (if (and approved? (not disabled?)) :success :inherit)
-         :startIcon (dom/create-element (if approved? CheckCircle CheckCircleOutline))}
-        pro-votes)
+      (inputs/button-group {:color :secondary}
+        (toggle-button
+          {:title (str
+                    (if approved?
+                      (i18n/trc "Proposal has been approved" "Approved") ; Always show that you have approved.
+                      (when-not disabled?                   ; Hide that you can approve, when you can not approve.
+                        (i18n/trc "Approve a proposal" "Approve")))
+                    " [" (i18n/trf "{votes} approved" {:votes pro-votes}) "]")
+           :onClick #(comp/transact! this [(opinion.api/add {::proposal/id id
+                                                             :opinion (if approved? 0 1)})])
+           :disabled disabled?
+           :startIcon (dom/create-element (if approved? CheckCircle CheckCircleOutline)
+                        #js {:color (if (and approved? (not disabled?)) "success" "inherit")})}
+          pro-votes)
 
-        (when-not show-favorite?
+        (when show-favorite?
           (toggle-button
             {:title (str
                       (if favorite?
@@ -205,9 +205,7 @@
                                                                           opinion/favorite)})])
              :disabled disabled?
              :startIcon (dom/create-element (if favorite? Star StarOutline)
-                          #js {:color (if disabled? "inherit" "gold")})
-             :color (if disabled? :inherit :gold)
-             :startIcon (dom/create-element (if favorite? Star StarOutline))}
+                          #js {:color (if disabled? "inherit" "gold")})}
             favorite-votes)))
 
       (when (and show-ratio? no-of-participants)
@@ -217,7 +215,7 @@
 
       (when (process/public-voting? process)
         (->> opinions
-          (filter #(pos? (::opinion.legacy/value %)))
+          (filter #(opinion/approval-value? (::opinion.legacy/value %)))
           (map ::opinion.legacy/user)
           (user.ui/avatar-group {:max 5 :sx {:px 1}}))))))
 
@@ -257,22 +255,22 @@
                  :flexDirection "column"}}
         card-props)
 
-    (card/action-area {:href (rfe/href ::routes/proposal-detail-page {:process/slug slug
-                                                                      :proposal/id id})
-                       :sx {:flexGrow 1}}
-      (card/header
-        {:title title
-         :titleTypographyProps {:component "h3"}
-         :subheader (ui-subheader subheader {:type? true :gen? true :created? true :author? false})})
+      (card/action-area {:href (rfe/href ::routes/proposal-detail-page {:process/slug slug
+                                                                        :proposal/id id})
+                         :sx {:flexGrow 1}}
+        (card/header
+          {:title title
+           :titleTypographyProps {:component "h3"}
+           :subheader (ui-subheader subheader {:type? true :gen? true :created? true :author? false})})
 
-      (card/content {:sx {:maxHeight max-height
-                          :overflow "hidden"}}
-        (dd/typography
-          {:component "p"
-           :variant "body2"
-           :color "textSecondary"
-           :style {:whiteSpace "pre-line"}}
-          body)))
+        (card/content {:sx {:maxHeight max-height
+                            :overflow "hidden"}}
+          (dd/typography
+            {:component "p"
+             :variant "body2"
+             :color "textSecondary"
+             :style {:whiteSpace "pre-line"}}
+            body)))
 
       (card/actions {:sx {:px 1.5}}
         (grid/container
