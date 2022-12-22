@@ -20,6 +20,7 @@
    [decide.ui.storage :as storage]
    [decide.ui.theming.dark-mode :as dark-mode]
    [decide.ui.theming.themes :as themes]
+   [mui.layout :as layout]
    [mui.styles :as styles]
    [mui.utils :as m.utils]
    [mui.x.date-pickers :as date-pickers]
@@ -88,10 +89,17 @@
         (meta/ui-meta (get props meta/root-key))
         (storage/ui-localstorage localstorage)
         (m.utils/css-baseline {})
-        (appbar/ui-appbar app-bar {:menu-onClick nav-drawer/toggle-navdrawer!})
+
         (snackbar/ui-snackbar-container snackbar-container)
 
         (nav-drawer/ui-navdrawer navdrawer)
         (login/ui-login-modal login-dialog)
 
-        (ui-root-router root-router)))))
+        (layout/stack
+          {:direction :column
+           :sx {:height "100vh"}}
+          (appbar/ui-appbar app-bar {:menu-onClick nav-drawer/toggle-navdrawer!})
+          (layout/box
+            {:sx {:overflow-x :clip
+                  :overflow-y :auto}}
+            (ui-root-router root-router)))))))
