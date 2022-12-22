@@ -210,9 +210,10 @@
 
 (defsc VotingArea [this {::proposal/keys [id pro-votes my-opinion-value my-opinion opinions favorite-votes]
                          {::process/keys [no-of-participants]} ::proposal/process}
-                   {:keys [process show-ratio? show-favorite?]
+                   {:keys [process show-ratio? show-favorite? disabled?]
                     :or {show-ratio? false
-                         show-favorite? false}}]
+                         show-favorite? false
+                         disabled? false}}]
   {:query [::proposal/id
            ::proposal/pro-votes
            ::proposal/favorite-votes
@@ -223,10 +224,8 @@
                                  {::opinion.legacy/user (comp/get-query user.ui/Avatar)}]}]
    :ident ::proposal/id
    :use-hooks? true}
-  (let [logged-in? (comp/shared this :logged-in?)
-        disabled?  (or (not logged-in?) (not (process/running? process)))
-        [reject-open? set-reject-dialog-open] (hooks/use-state false)
-        [approved? favorite? rejected?] ((juxt opinion/approval-value? opinion/favorite-value? opinion/reject-value?) my-opinion-value)]
+  (let [disabled? true
+        [approved? favorite? _] ((juxt opinion/approval-value? opinion/favorite-value? opinion/reject-value?) my-opinion-value)]
     (layout/stack
       {:direction :row
        :alignItems :center
@@ -323,13 +322,15 @@
                     {::proposal/id id
                      ::proposal/title title
                      ::proposal/body body})}
-  (card/card
-    (merge
-      {:component :article
-       :style {:height "100%"
-               :display :flex
-               :flexDirection "column"}}
-      card-props)
+  (let [logged-in? (comp/shared this :logged-in?)
+        disabled?  (or (not logged-in?) (not (process/running? current-process)))]
+    (card/card
+      (merge
+        {:component :article
+         :style {:height "100%"
+                 :display :flex
+                 :flexDirection "column"}}
+        card-props)
 
     (card/action-area {:href (rfe/href ::routes/proposal-detail-page {:process/slug slug
                                                                       :proposal/id id})
@@ -348,17 +349,17 @@
            :style {:whiteSpace "pre-line"}}
           body)))
 
-    (dd/divider {:variant :middle})
-    (card/actions {:sx {:px 1.5}}
-      (grid/container
-        {:alignItems :center
-         :justifyContent :space-between
-         :direction :row
-         :spacing 1}
-        (grid/item {:xs :auto}
-          (ui-voting-area voting-area {:process current-process
-                                       :show-ratio? true
-                                       :show-favorite? false}))
+      (card/actions {:sx {:px 1.5}}
+        (grid/container
+          {:alignItems :center
+           :justifyContent :space-between
+           :direction :row
+           :spacing 1}
+          (grid/item {:xs :auto}
+            (ui-voting-area voting-area {:process current-process
+                                         :show-ratio? true
+                                         :show-favorite? false
+                                         :disabled? disabled?}))
 
         (grid/item {:xs :auto}
           (layout/stack {:direction :row}

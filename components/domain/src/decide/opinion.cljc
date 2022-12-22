@@ -1,6 +1,11 @@
 (ns decide.opinion
   (:require
-    [com.fulcrologic.guardrails.core :refer [>def]]))
+   [com.fulcrologic.guardrails.core :refer [>def]]))
+
+(def reject -1)
+(def neutral 0)
+(def approval +1)
+(def favorite +2)
 
 (>def ::value #{-1 0 +1 +2})
 
