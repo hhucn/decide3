@@ -5,7 +5,6 @@
    [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
    [com.fulcrologic.fulcro.dom :as dom]
-   [com.fulcrologic.fulcro.react.hooks :as hooks]
    [decide.models.opinion :as opinion.legacy]
    [decide.models.opinion.api :as opinion.api]
    [decide.models.process :as process]
@@ -13,13 +12,10 @@
    [decide.models.user :as user]
    [decide.opinion :as opinion]
    [decide.routes :as routes]
-   [decide.ui.proposal.new-proposal :as new-proposal]
    [decide.ui.user :as user.ui]
    [decide.utils.time :as time]
    [mui.data-display :as dd]
-   [mui.data-display.list :as list]
    [mui.feedback :as feedback]
-   [mui.feedback.dialog :as dialog]
    [mui.inputs :as inputs]
    [mui.layout :as layout]
    [mui.layout.grid :as grid]
@@ -103,44 +99,6 @@
 
 ;; endregion
 
-(defn reject-dialog [this {:keys [slug id open? onClose parents]}]
-  (dialog/dialog {:open open? :onClose onClose}
-    (dialog/title {} "WHHHHYYYY???")
-    (list/list {}
-      (list/item
-        {:button true
-         :onClick (fn []
-                    (comp/transact! this
-                      [(new-proposal/show
-                         {:slug slug
-                          :parents [[::proposal/id id]]})
-                       (opinion.api/add {::proposal/id id
-                                         :opinion -1})])
-                    (onClose))}
-        (list/item-text {:primary "I nearly like it"
-                         :secondary (i18n/tr "Propose an improvement")}))
-      (list/item {:button true
-                  :onClick (fn []
-                             (comp/transact! this
-                               [(new-proposal/show
-                                  {:slug slug
-                                   :parents (mapv #(find % ::proposal/id) parents)})
-                                (opinion.api/add {::proposal/id id
-                                                  :opinion -1})])
-                             (onClose))}
-        (list/item-text {:primary "I hate it"
-                         :secondary (i18n/tr "Propose an alternative")}))
-      (list/item {:button true
-                  :onClick (fn []
-                             (comp/transact! this
-                               [(opinion.api/add {::proposal/id id
-                                                  :opinion -1})])
-                             (onClose))}
-        (list/item-text {:primary "Just reject it"
-                         :secondary "Hate it and don't be constructive. :-("})))
-    (dialog/actions {}
-      (inputs/button {:onClick onClose} (i18n/tr "Cancel")))))
-
 (defn icon-toggle-button [{:keys [icon] :as props}]
   (inputs/icon-button
     (dissoc props :icon)
@@ -156,20 +114,6 @@
         (inputs/button button-props
           (dd/typography {:color :text.primary, :fontSize :inherit, :variant :button}
             (str/join body)))))))
-
-(defn reject-toggle
-  [{:keys [toggled?
-           onClick
-           disabled?]}]
-  (toggle-button
-    {:title
-     (if toggled?
-       (i18n/trc "Proposal has been rejected by you" "Rejected")
-       (i18n/trc "Reject a proposal" "Reject"))
-     :color (if toggled? :error :default)
-     :disabled disabled?
-     :onClick onClick
-     :startIcon (if toggled? ThumbDown ThumbDownOutlined)}))
 
 
 (defsc TotalVotesProcess [_ _]
@@ -247,43 +191,24 @@
          :startIcon (dom/create-element (if approved? CheckCircle CheckCircleOutline))}
         pro-votes)
 
-      (when show-favorite?
-        (toggle-button
-          {:title (str
-                    (if favorite?
-                      (i18n/trc "Proposal has been marked as favorit" "Approved") ; Always show that you have approved.
-                      (when-not disabled?                   ; Hide that you can approve, when you can not approve.
-                        (i18n/trc "Favorite a proposal" "Mark as favorite")))
-                    " [" (i18n/trf "{votes} favorites" {:votes favorite-votes}) "]")
-           :onClick #(comp/transact! this [(opinion.api/add {::proposal/id id
-                                                             :opinion (if favorite?
-                                                                        opinion/approval
-                                                                        opinion/favorite)})])
-           :disabled disabled?
-           :color (if disabled? :inherit :gold)
-           :startIcon (dom/create-element (if favorite? Star StarOutline))}
-          favorite-votes))
-
-      (when (process/allows-rejects? process)
-        (comp/fragment
-          (when (process/show-reject-dialog? process)
-            (reject-dialog
-              this
-              {:open? reject-open?
-               :id id
-               :slug (::process/slug process)
-               :parents parents
-               :onClose #(set-reject-dialog-open false)}))
-
-          (reject-toggle
-            {:toggled? rejected?
-             :disabled? disabled?
-             :onClick
-             (fn [_e]
-               (if (and (process/show-reject-dialog? process) (not rejected?))
-                 (set-reject-dialog-open true)              ; only
-                 (comp/transact! this [(opinion.api/add {::proposal/id id
-                                                         :opinion (if rejected? 0 -1)})])))})))
+        (when-not show-favorite?
+          (toggle-button
+            {:title (str
+                      (if favorite?
+                        (i18n/trc "Proposal has been marked as favorit" "Approved") ; Always show that you have approved.
+                        (when-not disabled?                 ; Hide that you can approve, when you can not approve.
+                          (i18n/trc "Favorite a proposal" "Mark as favorite")))
+                      " [" (i18n/trf "{votes} favorites" {:votes favorite-votes}) "]")
+             :onClick #(comp/transact! this [(opinion.api/add {::proposal/id id
+                                                               :opinion (if favorite?
+                                                                          opinion/approval
+                                                                          opinion/favorite)})])
+             :disabled disabled?
+             :startIcon (dom/create-element (if favorite? Star StarOutline)
+                          #js {:color (if disabled? "inherit" "gold")})
+             :color (if disabled? :inherit :gold)
+             :startIcon (dom/create-element (if favorite? Star StarOutline))}
+            favorite-votes)))
 
       (when (and show-ratio? no-of-participants)
         (pro-vote-participant-ratio
