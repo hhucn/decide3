@@ -286,13 +286,14 @@
                                          :show-favorite? false
                                          :disabled? disabled?}))
 
-        (grid/item {:xs :auto}
-          (layout/stack {:direction :row}
-            (dd/tooltip {:title (i18n/trf "{noOf, plural, =1 {# argument} other {# arguments}}" {:noOf no-of-arguments})}
-              (inputs/button
-                {:startIcon (dom/create-element Comment)
-                 :variant :label
-                 :href (rfe/href ::routes/proposal-detail-page {:process/slug slug :proposal/id id})}
-                (str no-of-arguments)))))))))
+          (grid/item {:xs :auto}
+            (layout/stack {:direction :row}
+              (dd/tooltip {:title (i18n/trf "{noOf, plural, =1 {# argument} other {# arguments}}" {:noOf no-of-arguments})}
+                (inputs/button
+                  {:startIcon (dom/create-element Comment)
+                   :color :secondary
+                   :variant :outlined
+                   :href (rfe/href ::routes/proposal-detail-page {:process/slug slug :proposal/id id})}
+                  (str no-of-arguments))))))))))
 
 (def ui-proposal-card (comp/computed-factory ProposalCard {:keyfn ::proposal/id}))
