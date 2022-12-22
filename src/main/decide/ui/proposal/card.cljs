@@ -168,8 +168,7 @@
                                  {::opinion.legacy/user (comp/get-query user.ui/Avatar)}]}]
    :ident ::proposal/id
    :use-hooks? true}
-  (let [disabled? true
-        [approved? favorite? _] ((juxt opinion/approval-value? opinion/favorite-value? opinion/reject-value?) my-opinion-value)]
+  (let [[approved? favorite? _] ((juxt opinion/approval-value? opinion/favorite-value? opinion/reject-value?) my-opinion-value)]
     (layout/stack
       {:direction :row
        :alignItems :center
