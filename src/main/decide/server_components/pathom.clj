@@ -11,6 +11,7 @@
    [decide.models.opinion.api :as opinion.api]
    [decide.models.process.resolver :as process.api]
    [decide.models.proposal.api :as proposal.api]
+   [decide.models.proposal.list-api :as proposal-list.api]
    [decide.models.user :as user]
    [decide.models.user.api :as user.api]
    [decide.server-components.access-checker :as access-checker]
@@ -142,6 +143,7 @@
    user/resolvers
    process.api/all-resolvers
    proposal.api/full-api
+   proposal-list.api/all-resolvers
    opinion.api/resolvers
 
    translation/locale-resolver

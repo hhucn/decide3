@@ -179,6 +179,9 @@
 
            {::process/proposals (comp/get-query proposal-card/ProposalCard)}
            ::process/end-time
+           {::process/proposal-list [{:decide.proposal-list/entries
+                                      [:decide.proposal-list-entry/position
+                                       {:decide.proposal-list-entry/proposal (comp/get-query proposal-card/ProposalCard)}]}]}
 
            {:>/favorite-list (comp/get-query favorite-list/FavoriteList)}
            {:>/hierarchy-list (comp/get-query hierarchy-list/HierarchyList)}
