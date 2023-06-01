@@ -29,10 +29,24 @@ jobs:
           java-version: '17'
 
       - name: Install clojure tools
-        uses: DeLaGuardo/setup-clojure@8.0
+        uses: DeLaGuardo/setup-clojure@111.0
         with:
           cli: latest
           bb: latest
+
+      - name: Cache clojure dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.m2/repository
+            ~/.gitlibs
+            ~/.deps.clj
+          # List all files containing dependencies:
+          key: cljdeps-${{ hashFiles('deps.edn') }}
+          # key: cljdeps-${{ hashFiles('deps.edn', 'bb.edn') }}
+          # key: cljdeps-${{ hashFiles('project.clj') }}
+          # key: cljdeps-${{ hashFiles('build.boot') }}
+          restore-keys: cljdeps-
 
       - name: Run tests
         run: bb test:clj
